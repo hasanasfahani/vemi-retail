@@ -1,26 +1,338 @@
 @import "tailwindcss";
 
+/* ============================================================
+   VEMI — PRODUCT-LED DESIGN SYSTEM
+   Restraint + one accent + credible data. No gradients, no glows.
+   ============================================================ */
+@theme {
+  /* neutrals — cool paper, real 4-step ink ramp */
+  --color-paper: #ffffff;
+  --color-canvas: #f6f7f9;
+  --color-ink-900: #14151a;
+  --color-ink-700: #3d3f47;
+  --color-ink-500: #6b6e78;
+  --color-ink-400: #9a9ca5;
+  --color-line: #e7e8ec;
+  --color-line-strong: #d8dae0;
+
+  /* accent — used sparingly */
+  --color-violet: #6748fd;
+  --color-violet-ink: #4b30e0;
+  --color-violet-050: #f1eeff;
+  --color-violet-100: #e3ddff;
+
+  /* status (reserved — never used as decoration) */
+  --color-good: #0ca30c;
+  --color-warn: #fab219;
+  --color-serious: #ec835a;
+  --color-critical: #d03b3b;
+
+  /* chart neutrals for recessive competitor series */
+  --color-comp-1: #b9bdc7;
+  --color-comp-2: #cdd0d8;
+  --color-comp-3: #e0e2e8;
+
+  --font-display: var(--font-space-grotesk);
+  --font-body: var(--font-inter);
+
+  --radius-card: 14px;
+  --radius-surface: 18px;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --shadow-surface: 0 1px 2px rgba(20, 21, 26, 0.05),
+    0 24px 60px -24px rgba(20, 21, 26, 0.22);
+  --shadow-card: 0 1px 2px rgba(20, 21, 26, 0.04);
+  --shadow-pop: 0 12px 32px -8px rgba(20, 21, 26, 0.18);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-paper);
+  color: var(--color-ink-700);
+  font-family: var(--font-body), "Inter", system-ui, sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.011em;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--color-violet-100);
+}
+
+/* ============================================================
+   TYPOGRAPHY
+   ============================================================ */
+.font-display {
+  font-family: var(--font-display), "Space Grotesk", system-ui, sans-serif;
+}
+
+.t-display {
+  font-family: var(--font-display), "Space Grotesk", sans-serif;
+  font-size: clamp(42px, 6.4vw, 84px);
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+  font-weight: 700;
+  color: var(--color-ink-900);
+}
+
+.t-h2 {
+  font-family: var(--font-display), "Space Grotesk", sans-serif;
+  font-size: clamp(30px, 4vw, 52px);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  font-weight: 700;
+  color: var(--color-ink-900);
+}
+
+.t-h3 {
+  font-family: var(--font-display), "Space Grotesk", sans-serif;
+  font-size: 19px;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+  color: var(--color-ink-900);
+}
+
+.t-eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--color-ink-400);
+}
+
+.t-lead {
+  font-size: clamp(16px, 1.4vw, 19px);
+  line-height: 1.55;
+  color: var(--color-ink-500);
+}
+
+.tnum {
+  font-family: var(--font-display), "Space Grotesk", sans-serif;
+  font-feature-settings: "tnum";
+  letter-spacing: -0.03em;
+  font-weight: 700;
+  color: var(--color-ink-900);
+}
+
+.mono {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+.container-vemi {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.section {
+  padding: 104px 0;
+  position: relative;
+}
+.section-tight {
+  padding: 72px 0;
+}
+
+@media (max-width: 768px) {
+  .section {
+    padding: 68px 0;
+  }
+}
+
+.hairline {
+  border-top: 1px solid var(--color-line);
+}
+
+/* ============================================================
+   BUTTONS — tool-like, 10px radius
+   ============================================================ */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--color-violet);
+  color: #fff;
+  border-radius: 10px;
+  padding: 12px 20px;
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  transition: background 160ms ease, transform 160ms ease;
+}
+.btn-primary:hover {
+  background: var(--color-violet-ink);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #fff;
+  color: var(--color-ink-900);
+  border: 1px solid var(--color-line-strong);
+  border-radius: 10px;
+  padding: 12px 20px;
+  font-weight: 600;
+  font-size: 15px;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+.btn-secondary:hover {
+  border-color: var(--color-ink-400);
+  background: var(--color-canvas);
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-violet-ink);
+  font-weight: 600;
+  font-size: 15px;
+}
+.btn-ghost:hover {
+  color: var(--color-violet);
+}
+
+/* ============================================================
+   SURFACES
+   ============================================================ */
+.card {
+  background: #fff;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  padding: 24px;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+.card-hover:hover {
+  border-color: var(--color-line-strong);
+  box-shadow: var(--shadow-card);
+}
+
+.surface {
+  background: #fff;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-surface);
+  box-shadow: var(--shadow-surface);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--color-line-strong);
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-ink-500);
+  background: #fff;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.pill-good {
+  background: color-mix(in srgb, var(--color-good) 12%, #fff);
+  color: #0a7a0a;
+}
+.pill-critical {
+  background: color-mix(in srgb, var(--color-critical) 12%, #fff);
+  color: #b52d2d;
+}
+.pill-warn {
+  background: color-mix(in srgb, var(--color-warn) 18%, #fff);
+  color: #8a6a00;
+}
+
+.dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+}
+
+/* status dot with soft ring */
+@keyframes ping-soft {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-critical) 55%, transparent);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 6px transparent;
+  }
+}
+.dot-live {
+  animation: ping-soft 2s ease-out infinite;
+}
+
+/* sparkline / chart helpers */
+.grid-line {
+  stroke: var(--color-line);
+  stroke-width: 1;
+}
+
+@keyframes mapPing {
+  0% {
+    opacity: 0.55;
+    transform: scale(0.5);
+  }
+  70% {
+    opacity: 0;
+    transform: scale(2.1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.1);
+  }
+}
+.map-ping {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: mapPing 2s ease-out infinite;
+}
+
+@keyframes panelIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.panel-in {
+  animation: panelIn 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dot-live,
+  .panel-in,
+  .map-ping {
+    animation: none;
+  }
+  html {
+    scroll-behavior: auto;
+  }
 }
