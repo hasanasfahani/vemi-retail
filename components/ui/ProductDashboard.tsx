@@ -115,7 +115,7 @@ function Dropdown({ label, value, options, onSelect }: { label: string; value: s
 }
 
 /* ---------- module panels ---------- */
-function ModuleTitle({ children, aside }: { children: string; aside?: React.ReactNode }) {
+function ModuleTitle({ children, aside }: { children: React.ReactNode; aside?: React.ReactNode }) {
   return (
     <div className="mb-3 flex items-center justify-between">
       <span className="t-h3 !text-[15px]">{children}</span>
