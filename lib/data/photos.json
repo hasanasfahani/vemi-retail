@@ -1,0 +1,73 @@
+{
+  "meta": {
+    "city": "Erbil",
+    "category": "Carbonated Beverages",
+    "snapshots": [
+      {
+        "id": "2026-07-15",
+        "label": "15 Jul 2026",
+        "current": false
+      },
+      {
+        "id": "2026-08-12",
+        "label": "12 Aug 2026",
+        "current": true
+      }
+    ],
+    "currentSnapshot": "2026-08-12",
+    "previousSnapshot": "2026-07-15",
+    "posCount": 100,
+    "skuCount": 20
+  },
+  "rows": [
+    {
+      "id": "erb-204-1",
+      "file": "/audit/a_22137918_prg_1725137_q_2556239_i_21.jpg",
+      "posId": "erb-204",
+      "capturedAt": "2026-08-12T15:10:22+03:00",
+      "auditRef": "22137918"
+    },
+    {
+      "id": "erb-204-2",
+      "file": "/audit/a_22137918_prg_1725137_q_2556239_i_22.jpg",
+      "posId": "erb-204",
+      "capturedAt": "2026-08-12T15:10:22+03:00",
+      "auditRef": "22137918"
+    },
+    {
+      "id": "erb-204-3",
+      "file": "/audit/a_22137918_prg_1725137_q_2556239_i_23.jpg",
+      "posId": "erb-204",
+      "capturedAt": "2026-08-12T15:10:22+03:00",
+      "auditRef": "22137918"
+    },
+    {
+      "id": "erb-204-4",
+      "file": "/audit/a_22137918_prg_1725137_q_2556239_i_24.jpg",
+      "posId": "erb-204",
+      "capturedAt": "2026-08-12T15:10:22+03:00",
+      "auditRef": "22137918"
+    },
+    {
+      "id": "erb-204-5",
+      "file": "/audit/a_22137918_prg_1725137_q_2556239_i_25.jpg",
+      "posId": "erb-204",
+      "capturedAt": "2026-08-12T15:10:22+03:00",
+      "auditRef": "22137918"
+    },
+    {
+      "id": "erb-204-6",
+      "file": "/audit/a_22137918_prg_1725137_q_2556239_i_26.jpg",
+      "posId": "erb-204",
+      "capturedAt": "2026-08-12T15:10:22+03:00",
+      "auditRef": "22137918"
+    },
+    {
+      "id": "erb-204-7",
+      "file": "/audit/a_22137918_prg_1725137_q_2556239_i_27.jpg",
+      "posId": "erb-204",
+      "capturedAt": "2026-08-12T15:10:22+03:00",
+      "auditRef": "22137918"
+    }
+  ]
+}

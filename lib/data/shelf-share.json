@@ -1,0 +1,124 @@
+{
+  "meta": {
+    "city": "Erbil",
+    "category": "Carbonated Beverages",
+    "snapshots": [
+      {
+        "id": "2026-07-15",
+        "label": "15 Jul 2026",
+        "current": false
+      },
+      {
+        "id": "2026-08-12",
+        "label": "12 Aug 2026",
+        "current": true
+      }
+    ],
+    "currentSnapshot": "2026-08-12",
+    "previousSnapshot": "2026-07-15",
+    "posCount": 100,
+    "skuCount": 20
+  },
+  "current": [
+    {
+      "brandId": "pepsi",
+      "facings": 1099,
+      "share": 27.3,
+      "coolerFacings": 582,
+      "ambientFacings": 517
+    },
+    {
+      "brandId": "coca-cola",
+      "facings": 1012,
+      "share": 25.1,
+      "coolerFacings": 503,
+      "ambientFacings": 509
+    },
+    {
+      "brandId": "7up",
+      "facings": 605,
+      "share": 15,
+      "coolerFacings": 223,
+      "ambientFacings": 382
+    },
+    {
+      "brandId": "mirinda",
+      "facings": 576,
+      "share": 14.3,
+      "coolerFacings": 188,
+      "ambientFacings": 388
+    },
+    {
+      "brandId": "fanta",
+      "facings": 335,
+      "share": 8.3,
+      "coolerFacings": 167,
+      "ambientFacings": 168
+    },
+    {
+      "brandId": "sprite",
+      "facings": 280,
+      "share": 6.9,
+      "coolerFacings": 136,
+      "ambientFacings": 144
+    },
+    {
+      "brandId": "zamzam",
+      "facings": 125,
+      "share": 3.1,
+      "coolerFacings": 58,
+      "ambientFacings": 67
+    }
+  ],
+  "previous": [
+    {
+      "brandId": "pepsi",
+      "facings": 1220,
+      "share": 29.4,
+      "coolerFacings": 671,
+      "ambientFacings": 549
+    },
+    {
+      "brandId": "coca-cola",
+      "facings": 969,
+      "share": 23.3,
+      "coolerFacings": 512,
+      "ambientFacings": 457
+    },
+    {
+      "brandId": "7up",
+      "facings": 612,
+      "share": 14.7,
+      "coolerFacings": 194,
+      "ambientFacings": 418
+    },
+    {
+      "brandId": "mirinda",
+      "facings": 617,
+      "share": 14.9,
+      "coolerFacings": 222,
+      "ambientFacings": 395
+    },
+    {
+      "brandId": "fanta",
+      "facings": 325,
+      "share": 7.8,
+      "coolerFacings": 157,
+      "ambientFacings": 168
+    },
+    {
+      "brandId": "sprite",
+      "facings": 265,
+      "share": 6.4,
+      "coolerFacings": 133,
+      "ambientFacings": 132
+    },
+    {
+      "brandId": "zamzam",
+      "facings": 143,
+      "share": 3.4,
+      "coolerFacings": 63,
+      "ambientFacings": 80
+    }
+  ]
+}

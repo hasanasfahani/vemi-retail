@@ -1,0 +1,1774 @@
+{
+  "meta": {
+    "city": "Erbil",
+    "category": "Carbonated Beverages",
+    "snapshots": [
+      {
+        "id": "2026-07-15",
+        "label": "15 Jul 2026",
+        "current": false
+      },
+      {
+        "id": "2026-08-12",
+        "label": "12 Aug 2026",
+        "current": true
+      }
+    ],
+    "currentSnapshot": "2026-08-12",
+    "previousSnapshot": "2026-07-15",
+    "posCount": 100,
+    "skuCount": 20
+  },
+  "current": {
+    "bySku": [
+      {
+        "skuId": "pepsi-can-330",
+        "brandId": "pepsi",
+        "distribution": 77,
+        "availability": 66,
+        "onShelfAvailability": 85.7
+      },
+      {
+        "skuId": "pepsi-pet-500",
+        "brandId": "pepsi",
+        "distribution": 78,
+        "availability": 69,
+        "onShelfAvailability": 88.5
+      },
+      {
+        "skuId": "pepsi-pet-1000",
+        "brandId": "pepsi",
+        "distribution": 84,
+        "availability": 71,
+        "onShelfAvailability": 84.5
+      },
+      {
+        "skuId": "pepsi-pet-2250",
+        "brandId": "pepsi",
+        "distribution": 61,
+        "availability": 52,
+        "onShelfAvailability": 85.2
+      },
+      {
+        "skuId": "coca-cola-can-330",
+        "brandId": "coca-cola",
+        "distribution": 83,
+        "availability": 62,
+        "onShelfAvailability": 74.7
+      },
+      {
+        "skuId": "coca-cola-pet-500",
+        "brandId": "coca-cola",
+        "distribution": 71,
+        "availability": 63,
+        "onShelfAvailability": 88.7
+      },
+      {
+        "skuId": "coca-cola-pet-1000",
+        "brandId": "coca-cola",
+        "distribution": 74,
+        "availability": 63,
+        "onShelfAvailability": 85.1
+      },
+      {
+        "skuId": "coca-cola-pet-2250",
+        "brandId": "coca-cola",
+        "distribution": 64,
+        "availability": 60,
+        "onShelfAvailability": 93.8
+      },
+      {
+        "skuId": "7up-can-330",
+        "brandId": "7up",
+        "distribution": 72,
+        "availability": 57,
+        "onShelfAvailability": 79.2
+      },
+      {
+        "skuId": "7up-pet-1000",
+        "brandId": "7up",
+        "distribution": 65,
+        "availability": 58,
+        "onShelfAvailability": 89.2
+      },
+      {
+        "skuId": "7up-pet-2250",
+        "brandId": "7up",
+        "distribution": 58,
+        "availability": 48,
+        "onShelfAvailability": 82.8
+      },
+      {
+        "skuId": "mirinda-can-330",
+        "brandId": "mirinda",
+        "distribution": 66,
+        "availability": 52,
+        "onShelfAvailability": 78.8
+      },
+      {
+        "skuId": "mirinda-pet-1000",
+        "brandId": "mirinda",
+        "distribution": 59,
+        "availability": 53,
+        "onShelfAvailability": 89.8
+      },
+      {
+        "skuId": "mirinda-pet-2250",
+        "brandId": "mirinda",
+        "distribution": 65,
+        "availability": 56,
+        "onShelfAvailability": 86.2
+      },
+      {
+        "skuId": "fanta-can-330",
+        "brandId": "fanta",
+        "distribution": 68,
+        "availability": 53,
+        "onShelfAvailability": 77.9
+      },
+      {
+        "skuId": "fanta-pet-1000",
+        "brandId": "fanta",
+        "distribution": 62,
+        "availability": 53,
+        "onShelfAvailability": 85.5
+      },
+      {
+        "skuId": "sprite-can-330",
+        "brandId": "sprite",
+        "distribution": 57,
+        "availability": 46,
+        "onShelfAvailability": 80.7
+      },
+      {
+        "skuId": "sprite-pet-1000",
+        "brandId": "sprite",
+        "distribution": 53,
+        "availability": 49,
+        "onShelfAvailability": 92.5
+      },
+      {
+        "skuId": "zamzam-glass-300",
+        "brandId": "zamzam",
+        "distribution": 32,
+        "availability": 26,
+        "onShelfAvailability": 81.3
+      },
+      {
+        "skuId": "zamzam-pet-1500",
+        "brandId": "zamzam",
+        "distribution": 33,
+        "availability": 31,
+        "onShelfAvailability": 93.9
+      }
+    ],
+    "byPos": [
+      {
+        "posId": "erb-101",
+        "skusListed": 17,
+        "skusInStock": 15,
+        "availability": 88.2,
+        "clientAvailability": 75
+      },
+      {
+        "posId": "erb-102",
+        "skusListed": 17,
+        "skusInStock": 17,
+        "availability": 100,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-103",
+        "skusListed": 16,
+        "skusInStock": 16,
+        "availability": 100,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-104",
+        "skusListed": 11,
+        "skusInStock": 10,
+        "availability": 90.9,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-105",
+        "skusListed": 16,
+        "skusInStock": 9,
+        "availability": 56.3,
+        "clientAvailability": 75
+      },
+      {
+        "posId": "erb-106",
+        "skusListed": 11,
+        "skusInStock": 8,
+        "availability": 72.7,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-107",
+        "skusListed": 12,
+        "skusInStock": 12,
+        "availability": 100,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-201",
+        "skusListed": 12,
+        "skusInStock": 11,
+        "availability": 91.7,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-202",
+        "skusListed": 13,
+        "skusInStock": 11,
+        "availability": 84.6,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-203",
+        "skusListed": 13,
+        "skusInStock": 10,
+        "availability": 76.9,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-204",
+        "skusListed": 13,
+        "skusInStock": 11,
+        "availability": 84.6,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-205",
+        "skusListed": 12,
+        "skusInStock": 8,
+        "availability": 66.7,
+        "clientAvailability": 66.7
+      },
+      {
+        "posId": "erb-206",
+        "skusListed": 14,
+        "skusInStock": 13,
+        "availability": 92.9,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-207",
+        "skusListed": 9,
+        "skusInStock": 9,
+        "availability": 100,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-208",
+        "skusListed": 15,
+        "skusInStock": 11,
+        "availability": 73.3,
+        "clientAvailability": 50
+      },
+      {
+        "posId": "erb-301",
+        "skusListed": 13,
+        "skusInStock": 11,
+        "availability": 84.6,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-302",
+        "skusListed": 14,
+        "skusInStock": 7,
+        "availability": 50,
+        "clientAvailability": 0
+      },
+      {
+        "posId": "erb-303",
+        "skusListed": 10,
+        "skusInStock": 8,
+        "availability": 80,
+        "clientAvailability": 66.7
+      },
+      {
+        "posId": "erb-304",
+        "skusListed": 14,
+        "skusInStock": 12,
+        "availability": 85.7,
+        "clientAvailability": 75
+      },
+      {
+        "posId": "erb-305",
+        "skusListed": 11,
+        "skusInStock": 10,
+        "availability": 90.9,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-401",
+        "skusListed": 15,
+        "skusInStock": 14,
+        "availability": 93.3,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-402",
+        "skusListed": 13,
+        "skusInStock": 12,
+        "availability": 92.3,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-403",
+        "skusListed": 14,
+        "skusInStock": 11,
+        "availability": 78.6,
+        "clientAvailability": 66.7
+      },
+      {
+        "posId": "erb-404",
+        "skusListed": 11,
+        "skusInStock": 8,
+        "availability": 72.7,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-405",
+        "skusListed": 11,
+        "skusInStock": 10,
+        "availability": 90.9,
+        "clientAvailability": 66.7
+      },
+      {
+        "posId": "erb-501",
+        "skusListed": 13,
+        "skusInStock": 13,
+        "availability": 100,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-502",
+        "skusListed": 15,
+        "skusInStock": 14,
+        "availability": 93.3,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-503",
+        "skusListed": 10,
+        "skusInStock": 10,
+        "availability": 100,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-504",
+        "skusListed": 12,
+        "skusInStock": 10,
+        "availability": 83.3,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-505",
+        "skusListed": 13,
+        "skusInStock": 10,
+        "availability": 76.9,
+        "clientAvailability": 50
+      },
+      {
+        "posId": "erb-506",
+        "skusListed": 12,
+        "skusInStock": 8,
+        "availability": 66.7,
+        "clientAvailability": 66.7
+      },
+      {
+        "posId": "erb-601",
+        "skusListed": 14,
+        "skusInStock": 12,
+        "availability": 85.7,
+        "clientAvailability": 66.7
+      },
+      {
+        "posId": "erb-602",
+        "skusListed": 11,
+        "skusInStock": 8,
+        "availability": 72.7,
+        "clientAvailability": 66.7
+      },
+      {
+        "posId": "erb-603",
+        "skusListed": 16,
+        "skusInStock": 15,
+        "availability": 93.8,
+        "clientAvailability": 66.7
+      },
+      {
+        "posId": "erb-604",
+        "skusListed": 13,
+        "skusInStock": 10,
+        "availability": 76.9,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-605",
+        "skusListed": 12,
+        "skusInStock": 8,
+        "availability": 66.7,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-606",
+        "skusListed": 13,
+        "skusInStock": 12,
+        "availability": 92.3,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-701",
+        "skusListed": 13,
+        "skusInStock": 11,
+        "availability": 84.6,
+        "clientAvailability": 75
+      },
+      {
+        "posId": "erb-702",
+        "skusListed": 13,
+        "skusInStock": 13,
+        "availability": 100,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-703",
+        "skusListed": 12,
+        "skusInStock": 12,
+        "availability": 100,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-704",
+        "skusListed": 12,
+        "skusInStock": 8,
+        "availability": 66.7,
+        "clientAvailability": 50
+      },
+      {
+        "posId": "erb-705",
+        "skusListed": 11,
+        "skusInStock": 9,
+        "availability": 81.8,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-801",
+        "skusListed": 15,
+        "skusInStock": 13,
+        "availability": 86.7,
+        "clientAvailability": 75
+      },
+      {
+        "posId": "erb-802",
+        "skusListed": 14,
+        "skusInStock": 14,
+        "availability": 100,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-803",
+        "skusListed": 11,
+        "skusInStock": 8,
+        "availability": 72.7,
+        "clientAvailability": 75
+      },
+      {
+        "posId": "erb-804",
+        "skusListed": 15,
+        "skusInStock": 12,
+        "availability": 80,
+        "clientAvailability": 75
+      },
+      {
+        "posId": "erb-805",
+        "skusListed": 9,
+        "skusInStock": 8,
+        "availability": 88.9,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-901",
+        "skusListed": 16,
+        "skusInStock": 14,
+        "availability": 87.5,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-902",
+        "skusListed": 15,
+        "skusInStock": 15,
+        "availability": 100,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-903",
+        "skusListed": 11,
+        "skusInStock": 7,
+        "availability": 63.6,
+        "clientAvailability": 50
+      },
+      {
+        "posId": "erb-904",
+        "skusListed": 13,
+        "skusInStock": 12,
+        "availability": 92.3,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-905",
+        "skusListed": 13,
+        "skusInStock": 12,
+        "availability": 92.3,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1001",
+        "skusListed": 15,
+        "skusInStock": 13,
+        "availability": 86.7,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1002",
+        "skusListed": 10,
+        "skusInStock": 7,
+        "availability": 70,
+        "clientAvailability": 0
+      },
+      {
+        "posId": "erb-1003",
+        "skusListed": 15,
+        "skusInStock": 13,
+        "availability": 86.7,
+        "clientAvailability": 66.7
+      },
+      {
+        "posId": "erb-1004",
+        "skusListed": 14,
+        "skusInStock": 12,
+        "availability": 85.7,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1005",
+        "skusListed": 11,
+        "skusInStock": 10,
+        "availability": 90.9,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1006",
+        "skusListed": 12,
+        "skusInStock": 11,
+        "availability": 91.7,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1101",
+        "skusListed": 17,
+        "skusInStock": 15,
+        "availability": 88.2,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1102",
+        "skusListed": 12,
+        "skusInStock": 11,
+        "availability": 91.7,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1103",
+        "skusListed": 11,
+        "skusInStock": 8,
+        "availability": 72.7,
+        "clientAvailability": 75
+      },
+      {
+        "posId": "erb-1104",
+        "skusListed": 12,
+        "skusInStock": 9,
+        "availability": 75,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1105",
+        "skusListed": 10,
+        "skusInStock": 5,
+        "availability": 50,
+        "clientAvailability": 50
+      },
+      {
+        "posId": "erb-1201",
+        "skusListed": 15,
+        "skusInStock": 15,
+        "availability": 100,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1202",
+        "skusListed": 17,
+        "skusInStock": 14,
+        "availability": 82.4,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1203",
+        "skusListed": 15,
+        "skusInStock": 14,
+        "availability": 93.3,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1204",
+        "skusListed": 15,
+        "skusInStock": 11,
+        "availability": 73.3,
+        "clientAvailability": 75
+      },
+      {
+        "posId": "erb-1205",
+        "skusListed": 12,
+        "skusInStock": 8,
+        "availability": 66.7,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1206",
+        "skusListed": 14,
+        "skusInStock": 12,
+        "availability": 85.7,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1301",
+        "skusListed": 9,
+        "skusInStock": 9,
+        "availability": 100,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1302",
+        "skusListed": 14,
+        "skusInStock": 14,
+        "availability": 100,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1303",
+        "skusListed": 11,
+        "skusInStock": 8,
+        "availability": 72.7,
+        "clientAvailability": 50
+      },
+      {
+        "posId": "erb-1304",
+        "skusListed": 9,
+        "skusInStock": 7,
+        "availability": 77.8,
+        "clientAvailability": 66.7
+      },
+      {
+        "posId": "erb-1305",
+        "skusListed": 11,
+        "skusInStock": 11,
+        "availability": 100,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1401",
+        "skusListed": 15,
+        "skusInStock": 13,
+        "availability": 86.7,
+        "clientAvailability": 75
+      },
+      {
+        "posId": "erb-1402",
+        "skusListed": 14,
+        "skusInStock": 13,
+        "availability": 92.9,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1403",
+        "skusListed": 13,
+        "skusInStock": 8,
+        "availability": 61.5,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1404",
+        "skusListed": 13,
+        "skusInStock": 9,
+        "availability": 69.2,
+        "clientAvailability": 50
+      },
+      {
+        "posId": "erb-1405",
+        "skusListed": 12,
+        "skusInStock": 11,
+        "availability": 91.7,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1501",
+        "skusListed": 17,
+        "skusInStock": 14,
+        "availability": 82.4,
+        "clientAvailability": 75
+      },
+      {
+        "posId": "erb-1502",
+        "skusListed": 12,
+        "skusInStock": 11,
+        "availability": 91.7,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1503",
+        "skusListed": 12,
+        "skusInStock": 10,
+        "availability": 83.3,
+        "clientAvailability": 75
+      },
+      {
+        "posId": "erb-1504",
+        "skusListed": 12,
+        "skusInStock": 10,
+        "availability": 83.3,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1505",
+        "skusListed": 10,
+        "skusInStock": 7,
+        "availability": 70,
+        "clientAvailability": 33.3
+      },
+      {
+        "posId": "erb-1601",
+        "skusListed": 15,
+        "skusInStock": 13,
+        "availability": 86.7,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1602",
+        "skusListed": 13,
+        "skusInStock": 12,
+        "availability": 92.3,
+        "clientAvailability": 75
+      },
+      {
+        "posId": "erb-1603",
+        "skusListed": 13,
+        "skusInStock": 12,
+        "availability": 92.3,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1604",
+        "skusListed": 11,
+        "skusInStock": 10,
+        "availability": 90.9,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1605",
+        "skusListed": 11,
+        "skusInStock": 10,
+        "availability": 90.9,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1606",
+        "skusListed": 11,
+        "skusInStock": 8,
+        "availability": 72.7,
+        "clientAvailability": 66.7
+      },
+      {
+        "posId": "erb-1701",
+        "skusListed": 8,
+        "skusInStock": 6,
+        "availability": 75,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1702",
+        "skusListed": 16,
+        "skusInStock": 16,
+        "availability": 100,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1703",
+        "skusListed": 10,
+        "skusInStock": 10,
+        "availability": 100,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1704",
+        "skusListed": 7,
+        "skusInStock": 5,
+        "availability": 71.4,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1705",
+        "skusListed": 9,
+        "skusInStock": 8,
+        "availability": 88.9,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1801",
+        "skusListed": 16,
+        "skusInStock": 16,
+        "availability": 100,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1802",
+        "skusListed": 15,
+        "skusInStock": 14,
+        "availability": 93.3,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1803",
+        "skusListed": 15,
+        "skusInStock": 12,
+        "availability": 80,
+        "clientAvailability": 66.7
+      },
+      {
+        "posId": "erb-1804",
+        "skusListed": 13,
+        "skusInStock": 10,
+        "availability": 76.9,
+        "clientAvailability": 75
+      },
+      {
+        "posId": "erb-1805",
+        "skusListed": 14,
+        "skusInStock": 11,
+        "availability": 78.6,
+        "clientAvailability": 100
+      }
+    ],
+    "byBrand": [
+      {
+        "brandId": "pepsi",
+        "availability": 86
+      },
+      {
+        "brandId": "coca-cola",
+        "availability": 84.9
+      },
+      {
+        "brandId": "7up",
+        "availability": 83.6
+      },
+      {
+        "brandId": "mirinda",
+        "availability": 84.7
+      },
+      {
+        "brandId": "fanta",
+        "availability": 81.5
+      },
+      {
+        "brandId": "sprite",
+        "availability": 86.4
+      },
+      {
+        "brandId": "zamzam",
+        "availability": 87.7
+      }
+    ]
+  },
+  "previous": {
+    "bySku": [
+      {
+        "skuId": "pepsi-can-330",
+        "brandId": "pepsi",
+        "distribution": 88,
+        "availability": 79,
+        "onShelfAvailability": 89.8
+      },
+      {
+        "skuId": "pepsi-pet-500",
+        "brandId": "pepsi",
+        "distribution": 86,
+        "availability": 73,
+        "onShelfAvailability": 84.9
+      },
+      {
+        "skuId": "pepsi-pet-1000",
+        "brandId": "pepsi",
+        "distribution": 80,
+        "availability": 71,
+        "onShelfAvailability": 88.8
+      },
+      {
+        "skuId": "pepsi-pet-2250",
+        "brandId": "pepsi",
+        "distribution": 70,
+        "availability": 59,
+        "onShelfAvailability": 84.3
+      },
+      {
+        "skuId": "coca-cola-can-330",
+        "brandId": "coca-cola",
+        "distribution": 71,
+        "availability": 62,
+        "onShelfAvailability": 87.3
+      },
+      {
+        "skuId": "coca-cola-pet-500",
+        "brandId": "coca-cola",
+        "distribution": 74,
+        "availability": 67,
+        "onShelfAvailability": 90.5
+      },
+      {
+        "skuId": "coca-cola-pet-1000",
+        "brandId": "coca-cola",
+        "distribution": 75,
+        "availability": 63,
+        "onShelfAvailability": 84
+      },
+      {
+        "skuId": "coca-cola-pet-2250",
+        "brandId": "coca-cola",
+        "distribution": 60,
+        "availability": 49,
+        "onShelfAvailability": 81.7
+      },
+      {
+        "skuId": "7up-can-330",
+        "brandId": "7up",
+        "distribution": 69,
+        "availability": 55,
+        "onShelfAvailability": 79.7
+      },
+      {
+        "skuId": "7up-pet-1000",
+        "brandId": "7up",
+        "distribution": 72,
+        "availability": 66,
+        "onShelfAvailability": 91.7
+      },
+      {
+        "skuId": "7up-pet-2250",
+        "brandId": "7up",
+        "distribution": 57,
+        "availability": 46,
+        "onShelfAvailability": 80.7
+      },
+      {
+        "skuId": "mirinda-can-330",
+        "brandId": "mirinda",
+        "distribution": 71,
+        "availability": 60,
+        "onShelfAvailability": 84.5
+      },
+      {
+        "skuId": "mirinda-pet-1000",
+        "brandId": "mirinda",
+        "distribution": 65,
+        "availability": 57,
+        "onShelfAvailability": 87.7
+      },
+      {
+        "skuId": "mirinda-pet-2250",
+        "brandId": "mirinda",
+        "distribution": 55,
+        "availability": 51,
+        "onShelfAvailability": 92.7
+      },
+      {
+        "skuId": "fanta-can-330",
+        "brandId": "fanta",
+        "distribution": 64,
+        "availability": 49,
+        "onShelfAvailability": 76.6
+      },
+      {
+        "skuId": "fanta-pet-1000",
+        "brandId": "fanta",
+        "distribution": 54,
+        "availability": 50,
+        "onShelfAvailability": 92.6
+      },
+      {
+        "skuId": "sprite-can-330",
+        "brandId": "sprite",
+        "distribution": 53,
+        "availability": 45,
+        "onShelfAvailability": 84.9
+      },
+      {
+        "skuId": "sprite-pet-1000",
+        "brandId": "sprite",
+        "distribution": 52,
+        "availability": 45,
+        "onShelfAvailability": 86.5
+      },
+      {
+        "skuId": "zamzam-glass-300",
+        "brandId": "zamzam",
+        "distribution": 30,
+        "availability": 30,
+        "onShelfAvailability": 100
+      },
+      {
+        "skuId": "zamzam-pet-1500",
+        "brandId": "zamzam",
+        "distribution": 38,
+        "availability": 34,
+        "onShelfAvailability": 89.5
+      }
+    ],
+    "byPos": [
+      {
+        "posId": "erb-101",
+        "skusListed": 18,
+        "skusInStock": 18,
+        "availability": 100,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-102",
+        "skusListed": 14,
+        "skusInStock": 14,
+        "availability": 100,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-103",
+        "skusListed": 16,
+        "skusInStock": 16,
+        "availability": 100,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-104",
+        "skusListed": 16,
+        "skusInStock": 13,
+        "availability": 81.3,
+        "clientAvailability": 66.7
+      },
+      {
+        "posId": "erb-105",
+        "skusListed": 13,
+        "skusInStock": 11,
+        "availability": 84.6,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-106",
+        "skusListed": 12,
+        "skusInStock": 11,
+        "availability": 91.7,
+        "clientAvailability": 75
+      },
+      {
+        "posId": "erb-107",
+        "skusListed": 11,
+        "skusInStock": 10,
+        "availability": 90.9,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-201",
+        "skusListed": 13,
+        "skusInStock": 13,
+        "availability": 100,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-202",
+        "skusListed": 12,
+        "skusInStock": 11,
+        "availability": 91.7,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-203",
+        "skusListed": 12,
+        "skusInStock": 12,
+        "availability": 100,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-204",
+        "skusListed": 11,
+        "skusInStock": 7,
+        "availability": 63.6,
+        "clientAvailability": 66.7
+      },
+      {
+        "posId": "erb-205",
+        "skusListed": 11,
+        "skusInStock": 8,
+        "availability": 72.7,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-206",
+        "skusListed": 10,
+        "skusInStock": 8,
+        "availability": 80,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-207",
+        "skusListed": 10,
+        "skusInStock": 8,
+        "availability": 80,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-208",
+        "skusListed": 16,
+        "skusInStock": 13,
+        "availability": 81.3,
+        "clientAvailability": 75
+      },
+      {
+        "posId": "erb-301",
+        "skusListed": 15,
+        "skusInStock": 15,
+        "availability": 100,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-302",
+        "skusListed": 9,
+        "skusInStock": 9,
+        "availability": 100,
+        "clientAvailability": 0
+      },
+      {
+        "posId": "erb-303",
+        "skusListed": 14,
+        "skusInStock": 14,
+        "availability": 100,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-304",
+        "skusListed": 16,
+        "skusInStock": 14,
+        "availability": 87.5,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-305",
+        "skusListed": 12,
+        "skusInStock": 10,
+        "availability": 83.3,
+        "clientAvailability": 50
+      },
+      {
+        "posId": "erb-401",
+        "skusListed": 12,
+        "skusInStock": 12,
+        "availability": 100,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-402",
+        "skusListed": 14,
+        "skusInStock": 13,
+        "availability": 92.9,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-403",
+        "skusListed": 15,
+        "skusInStock": 14,
+        "availability": 93.3,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-404",
+        "skusListed": 12,
+        "skusInStock": 11,
+        "availability": 91.7,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-405",
+        "skusListed": 10,
+        "skusInStock": 8,
+        "availability": 80,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-501",
+        "skusListed": 13,
+        "skusInStock": 13,
+        "availability": 100,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-502",
+        "skusListed": 12,
+        "skusInStock": 9,
+        "availability": 75,
+        "clientAvailability": 75
+      },
+      {
+        "posId": "erb-503",
+        "skusListed": 13,
+        "skusInStock": 12,
+        "availability": 92.3,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-504",
+        "skusListed": 13,
+        "skusInStock": 11,
+        "availability": 84.6,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-505",
+        "skusListed": 16,
+        "skusInStock": 13,
+        "availability": 81.3,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-506",
+        "skusListed": 15,
+        "skusInStock": 14,
+        "availability": 93.3,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-601",
+        "skusListed": 17,
+        "skusInStock": 14,
+        "availability": 82.4,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-602",
+        "skusListed": 15,
+        "skusInStock": 10,
+        "availability": 66.7,
+        "clientAvailability": 33.3
+      },
+      {
+        "posId": "erb-603",
+        "skusListed": 14,
+        "skusInStock": 12,
+        "availability": 85.7,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-604",
+        "skusListed": 9,
+        "skusInStock": 8,
+        "availability": 88.9,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-605",
+        "skusListed": 11,
+        "skusInStock": 9,
+        "availability": 81.8,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-606",
+        "skusListed": 14,
+        "skusInStock": 12,
+        "availability": 85.7,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-701",
+        "skusListed": 12,
+        "skusInStock": 6,
+        "availability": 50,
+        "clientAvailability": 50
+      },
+      {
+        "posId": "erb-702",
+        "skusListed": 11,
+        "skusInStock": 9,
+        "availability": 81.8,
+        "clientAvailability": 75
+      },
+      {
+        "posId": "erb-703",
+        "skusListed": 12,
+        "skusInStock": 10,
+        "availability": 83.3,
+        "clientAvailability": 50
+      },
+      {
+        "posId": "erb-704",
+        "skusListed": 12,
+        "skusInStock": 11,
+        "availability": 91.7,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-705",
+        "skusListed": 10,
+        "skusInStock": 8,
+        "availability": 80,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-801",
+        "skusListed": 13,
+        "skusInStock": 10,
+        "availability": 76.9,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-802",
+        "skusListed": 13,
+        "skusInStock": 11,
+        "availability": 84.6,
+        "clientAvailability": 66.7
+      },
+      {
+        "posId": "erb-803",
+        "skusListed": 12,
+        "skusInStock": 11,
+        "availability": 91.7,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-804",
+        "skusListed": 15,
+        "skusInStock": 14,
+        "availability": 93.3,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-805",
+        "skusListed": 11,
+        "skusInStock": 8,
+        "availability": 72.7,
+        "clientAvailability": 75
+      },
+      {
+        "posId": "erb-901",
+        "skusListed": 12,
+        "skusInStock": 12,
+        "availability": 100,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-902",
+        "skusListed": 12,
+        "skusInStock": 9,
+        "availability": 75,
+        "clientAvailability": 75
+      },
+      {
+        "posId": "erb-903",
+        "skusListed": 11,
+        "skusInStock": 9,
+        "availability": 81.8,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-904",
+        "skusListed": 11,
+        "skusInStock": 11,
+        "availability": 100,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-905",
+        "skusListed": 9,
+        "skusInStock": 9,
+        "availability": 100,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1001",
+        "skusListed": 19,
+        "skusInStock": 16,
+        "availability": 84.2,
+        "clientAvailability": 75
+      },
+      {
+        "posId": "erb-1002",
+        "skusListed": 13,
+        "skusInStock": 9,
+        "availability": 69.2,
+        "clientAvailability": 50
+      },
+      {
+        "posId": "erb-1003",
+        "skusListed": 13,
+        "skusInStock": 10,
+        "availability": 76.9,
+        "clientAvailability": 75
+      },
+      {
+        "posId": "erb-1004",
+        "skusListed": 12,
+        "skusInStock": 9,
+        "availability": 75,
+        "clientAvailability": 75
+      },
+      {
+        "posId": "erb-1005",
+        "skusListed": 10,
+        "skusInStock": 10,
+        "availability": 100,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1006",
+        "skusListed": 13,
+        "skusInStock": 11,
+        "availability": 84.6,
+        "clientAvailability": 0
+      },
+      {
+        "posId": "erb-1101",
+        "skusListed": 13,
+        "skusInStock": 11,
+        "availability": 84.6,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1102",
+        "skusListed": 11,
+        "skusInStock": 9,
+        "availability": 81.8,
+        "clientAvailability": 66.7
+      },
+      {
+        "posId": "erb-1103",
+        "skusListed": 10,
+        "skusInStock": 8,
+        "availability": 80,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1104",
+        "skusListed": 13,
+        "skusInStock": 11,
+        "availability": 84.6,
+        "clientAvailability": 66.7
+      },
+      {
+        "posId": "erb-1105",
+        "skusListed": 14,
+        "skusInStock": 11,
+        "availability": 78.6,
+        "clientAvailability": 66.7
+      },
+      {
+        "posId": "erb-1201",
+        "skusListed": 13,
+        "skusInStock": 13,
+        "availability": 100,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1202",
+        "skusListed": 13,
+        "skusInStock": 10,
+        "availability": 76.9,
+        "clientAvailability": 75
+      },
+      {
+        "posId": "erb-1203",
+        "skusListed": 9,
+        "skusInStock": 7,
+        "availability": 77.8,
+        "clientAvailability": 66.7
+      },
+      {
+        "posId": "erb-1204",
+        "skusListed": 12,
+        "skusInStock": 10,
+        "availability": 83.3,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1205",
+        "skusListed": 11,
+        "skusInStock": 10,
+        "availability": 90.9,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1206",
+        "skusListed": 14,
+        "skusInStock": 13,
+        "availability": 92.9,
+        "clientAvailability": 66.7
+      },
+      {
+        "posId": "erb-1301",
+        "skusListed": 14,
+        "skusInStock": 11,
+        "availability": 78.6,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1302",
+        "skusListed": 11,
+        "skusInStock": 10,
+        "availability": 90.9,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1303",
+        "skusListed": 11,
+        "skusInStock": 8,
+        "availability": 72.7,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1304",
+        "skusListed": 14,
+        "skusInStock": 13,
+        "availability": 92.9,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1305",
+        "skusListed": 12,
+        "skusInStock": 11,
+        "availability": 91.7,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1401",
+        "skusListed": 18,
+        "skusInStock": 16,
+        "availability": 88.9,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1402",
+        "skusListed": 15,
+        "skusInStock": 15,
+        "availability": 100,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1403",
+        "skusListed": 11,
+        "skusInStock": 9,
+        "availability": 81.8,
+        "clientAvailability": 66.7
+      },
+      {
+        "posId": "erb-1404",
+        "skusListed": 10,
+        "skusInStock": 9,
+        "availability": 90,
+        "clientAvailability": 75
+      },
+      {
+        "posId": "erb-1405",
+        "skusListed": 14,
+        "skusInStock": 11,
+        "availability": 78.6,
+        "clientAvailability": 75
+      },
+      {
+        "posId": "erb-1501",
+        "skusListed": 15,
+        "skusInStock": 13,
+        "availability": 86.7,
+        "clientAvailability": 75
+      },
+      {
+        "posId": "erb-1502",
+        "skusListed": 12,
+        "skusInStock": 10,
+        "availability": 83.3,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1503",
+        "skusListed": 17,
+        "skusInStock": 14,
+        "availability": 82.4,
+        "clientAvailability": 75
+      },
+      {
+        "posId": "erb-1504",
+        "skusListed": 14,
+        "skusInStock": 12,
+        "availability": 85.7,
+        "clientAvailability": 66.7
+      },
+      {
+        "posId": "erb-1505",
+        "skusListed": 12,
+        "skusInStock": 10,
+        "availability": 83.3,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1601",
+        "skusListed": 18,
+        "skusInStock": 18,
+        "availability": 100,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1602",
+        "skusListed": 13,
+        "skusInStock": 10,
+        "availability": 76.9,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1603",
+        "skusListed": 10,
+        "skusInStock": 8,
+        "availability": 80,
+        "clientAvailability": 50
+      },
+      {
+        "posId": "erb-1604",
+        "skusListed": 12,
+        "skusInStock": 11,
+        "availability": 91.7,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1605",
+        "skusListed": 12,
+        "skusInStock": 10,
+        "availability": 83.3,
+        "clientAvailability": 66.7
+      },
+      {
+        "posId": "erb-1606",
+        "skusListed": 7,
+        "skusInStock": 6,
+        "availability": 85.7,
+        "clientAvailability": 66.7
+      },
+      {
+        "posId": "erb-1701",
+        "skusListed": 13,
+        "skusInStock": 12,
+        "availability": 92.3,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1702",
+        "skusListed": 12,
+        "skusInStock": 10,
+        "availability": 83.3,
+        "clientAvailability": 66.7
+      },
+      {
+        "posId": "erb-1703",
+        "skusListed": 15,
+        "skusInStock": 14,
+        "availability": 93.3,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1704",
+        "skusListed": 12,
+        "skusInStock": 12,
+        "availability": 100,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1705",
+        "skusListed": 13,
+        "skusInStock": 12,
+        "availability": 92.3,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1801",
+        "skusListed": 14,
+        "skusInStock": 13,
+        "availability": 92.9,
+        "clientAvailability": 100
+      },
+      {
+        "posId": "erb-1802",
+        "skusListed": 19,
+        "skusInStock": 16,
+        "availability": 84.2,
+        "clientAvailability": 50
+      },
+      {
+        "posId": "erb-1803",
+        "skusListed": 15,
+        "skusInStock": 12,
+        "availability": 80,
+        "clientAvailability": 75
+      },
+      {
+        "posId": "erb-1804",
+        "skusListed": 12,
+        "skusInStock": 9,
+        "availability": 75,
+        "clientAvailability": 50
+      },
+      {
+        "posId": "erb-1805",
+        "skusListed": 12,
+        "skusInStock": 10,
+        "availability": 83.3,
+        "clientAvailability": 100
+      }
+    ],
+    "byBrand": [
+      {
+        "brandId": "pepsi",
+        "availability": 87
+      },
+      {
+        "brandId": "coca-cola",
+        "availability": 86.1
+      },
+      {
+        "brandId": "7up",
+        "availability": 84.3
+      },
+      {
+        "brandId": "mirinda",
+        "availability": 88
+      },
+      {
+        "brandId": "fanta",
+        "availability": 83.9
+      },
+      {
+        "brandId": "sprite",
+        "availability": 85.7
+      },
+      {
+        "brandId": "zamzam",
+        "availability": 94.1
+      }
+    ]
+  }
+}

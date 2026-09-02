@@ -11,7 +11,7 @@ export default function FinalCta() {
             <p className="t-lead mx-auto mt-5 max-w-xl">{finalCta.subhead}</p>
 
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <a href={finalCta.primaryCta.href} className="btn-primary">
+              <a href={finalCta.primaryCta.href} data-demo-cta className="btn-primary">
                 {finalCta.primaryCta.label}
               </a>
               <a href="#packages" className="btn-secondary">

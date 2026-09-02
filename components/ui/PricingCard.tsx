@@ -33,6 +33,7 @@ export default function PricingCard({ tier }: { tier: Tier }) {
 
       <a
         href={tier.cta.href}
+        {...(tier.cta.href === "#final-cta" ? { "data-demo-cta": true } : {})}
         className={`mt-6 ${featured ? "btn-primary" : "btn-secondary"} w-full`}
       >
         {tier.cta.label}

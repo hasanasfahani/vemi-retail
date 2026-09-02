@@ -1,0 +1,95 @@
+{
+  "meta": {
+    "city": "Erbil",
+    "category": "Carbonated Beverages",
+    "snapshots": [
+      {
+        "id": "2026-07-15",
+        "label": "15 Jul 2026",
+        "current": false
+      },
+      {
+        "id": "2026-08-12",
+        "label": "12 Aug 2026",
+        "current": true
+      }
+    ],
+    "currentSnapshot": "2026-08-12",
+    "previousSnapshot": "2026-07-15",
+    "posCount": 100,
+    "skuCount": 20
+  },
+  "clientBrandId": "pepsi",
+  "rows": [
+    {
+      "brandId": "pepsi",
+      "isClient": true,
+      "share": 27.3,
+      "shareDelta": -2.1,
+      "availability": 86,
+      "availabilityDelta": -1,
+      "activeOos": 42,
+      "skuCount": 4
+    },
+    {
+      "brandId": "coca-cola",
+      "isClient": false,
+      "share": 25.1,
+      "shareDelta": 1.8,
+      "availability": 84.9,
+      "availabilityDelta": -1.2,
+      "activeOos": 44,
+      "skuCount": 4
+    },
+    {
+      "brandId": "7up",
+      "isClient": false,
+      "share": 15,
+      "shareDelta": 0.3,
+      "availability": 83.6,
+      "availabilityDelta": -0.7,
+      "activeOos": 32,
+      "skuCount": 3
+    },
+    {
+      "brandId": "mirinda",
+      "isClient": false,
+      "share": 14.3,
+      "shareDelta": -0.6,
+      "availability": 84.7,
+      "availabilityDelta": -3.3,
+      "activeOos": 29,
+      "skuCount": 3
+    },
+    {
+      "brandId": "fanta",
+      "isClient": false,
+      "share": 8.3,
+      "shareDelta": 0.5,
+      "availability": 81.5,
+      "availabilityDelta": -2.4,
+      "activeOos": 24,
+      "skuCount": 2
+    },
+    {
+      "brandId": "sprite",
+      "isClient": false,
+      "share": 6.9,
+      "shareDelta": 0.5,
+      "availability": 86.4,
+      "availabilityDelta": 0.7,
+      "activeOos": 15,
+      "skuCount": 2
+    },
+    {
+      "brandId": "zamzam",
+      "isClient": false,
+      "share": 3.1,
+      "shareDelta": -0.3,
+      "availability": 87.7,
+      "availabilityDelta": -6.4,
+      "activeOos": 8,
+      "skuCount": 2
+    }
+  ]
+}
