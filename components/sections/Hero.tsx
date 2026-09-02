@@ -27,7 +27,7 @@ export default function Hero() {
           <p className="t-lead mx-auto mt-5 max-w-xl">{hero.subhead}</p>
 
           <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <a href={hero.primaryCta.href} className="btn-primary w-full sm:w-auto">
+            <a href={hero.primaryCta.href} data-demo-cta className="btn-primary w-full sm:w-auto">
               {hero.primaryCta.label}
             </a>
             <a href={hero.secondaryCta.href} className="btn-secondary w-full sm:w-auto">

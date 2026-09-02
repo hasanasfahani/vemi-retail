@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "data:build": "node scripts/build-portal-data.mjs",
+    "data:check": "node scripts/check-portal-data.mjs"
   },
   "dependencies": {
     "framer-motion": "^12.42.2",

@@ -278,7 +278,8 @@ export const finalCta = {
   headline: "The Shelf Doesn't Lie. Neither Does Vemi.",
   subhead:
     "Join the FMCG brands replacing guesswork with ground truth. Your market share depends on what happens at the shelf — make sure you see it.",
-  primaryCta: { label: "Contact Sales", href: `mailto:${placeholders.email}` },
+  // Opens the access request — the mailto stays as the no-JS fallback.
+  primaryCta: { label: "Request a Demo", href: `mailto:${placeholders.email}` },
   secondaryLinks: [
     "Request a Pilot Audit",
     "Schedule a Demo Call",

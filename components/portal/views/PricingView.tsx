@@ -1,0 +1,242 @@
+"use client";
+
+import { useMemo } from "react";
+import PageHeader from "@/components/portal/PageHeader";
+import FilterBar, {
+  useFilters,
+  useVisitData,
+} from "@/components/portal/FilterBar";
+import StatTile from "@/components/portal/charts/StatTile";
+import PriceBand from "@/components/portal/charts/PriceBand";
+import { OutletButton } from "@/components/portal/OutletDrawer";
+import { scope } from "@/lib/portal";
+import { applyFilters } from "@/lib/portalFilters";
+import { clientBrand, brandName, skuName, skuOf, posOf } from "@/lib/portalData";
+
+const iqd = (n: number) => `${n.toLocaleString()} IQD`;
+const round1 = (n: number) => Math.round(n * 10) / 10;
+
+export default function PricingView() {
+  const [filters, setFilters] = useFilters();
+  const { data: visitData, loading } = useVisitData(filters.visit);
+  const view = useMemo(
+    () => applyFilters(filters, visitData),
+    [filters, visitData]
+  );
+
+  /* Bands rebuilt from the filtered observations, so filtering to a
+     channel really does show that channel's spread. */
+  const bands = useMemo(() => {
+    const grouped = new Map<string, number[]>();
+    for (const o of view.priceRows) {
+      grouped.set(o.skuId, [...(grouped.get(o.skuId) ?? []), o.price]);
+    }
+    return [...grouped.entries()]
+      .map(([skuId, prices]) => {
+        const sku = skuOf(skuId)!;
+        return {
+          id: skuId,
+          label: sku.name,
+          meta: brandName(sku.brandId),
+          min: Math.min(...prices),
+          max: Math.max(...prices),
+          avg: Math.round(prices.reduce((s, p) => s + p, 0) / prices.length),
+          rrp: sku.rrp,
+          emphasis: sku.brandId === clientBrand.id,
+          compliance: round1(
+            (prices.filter((p) => Math.abs(p - sku.rrp) / sku.rrp <= 0.05).length /
+              prices.length) *
+              100
+          ),
+          observations: prices.length,
+        };
+      })
+      .sort((a, b) => a.compliance - b.compliance);
+  }, [view]);
+
+  const outliers = useMemo(
+    () =>
+      view.priceRows
+        .filter((o) => o.outlier)
+        .sort((a, b) => Math.abs(b.variance) - Math.abs(a.variance)),
+    [view]
+  );
+
+  const categoryCompliance = bands.length
+    ? round1(bands.reduce((s, b) => s + b.compliance, 0) / bands.length)
+    : 0;
+
+  const clientBands = bands.filter(
+    (b) => skuOf(b.id)?.brandId === clientBrand.id
+  );
+  const clientCompliance = clientBands.length
+    ? round1(clientBands.reduce((s, b) => s + b.compliance, 0) / clientBands.length)
+    : 0;
+  const avgOver = clientBands.length
+    ? round1(
+        clientBands.reduce((s, b) => s + ((b.avg - b.rrp) / b.rrp) * 100, 0) /
+          clientBands.length
+      )
+    : 0;
+
+  const outletsFlagged = new Set(outliers.map((o) => o.posId));
+
+  return (
+    <div
+      className="transition-opacity duration-200"
+      style={{ opacity: loading ? 0.55 : 1 }}
+      aria-busy={loading}
+    >
+      <PageHeader
+        title="Price Intelligence"
+        lead="Shelf pricing and compliance by SKU"
+        posCount={view.posCount}
+      />
+
+      <FilterBar
+        filters={filters}
+        onChange={setFilters}
+        resultLabel={`${view.priceRows.length.toLocaleString()} shelf prices recorded across ${view.posCount} outlets`}
+      />
+
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <StatTile
+          label={`${clientBrand.name} compliance`}
+          value={`${clientCompliance}%`}
+          footnote="Within RRP ±5%"
+        />
+        <StatTile
+          label="Category compliance"
+          value={`${categoryCompliance}%`}
+          footnote="All brands in selection"
+        />
+        <StatTile
+          label="Average vs RRP"
+          value={`${avgOver > 0 ? "+" : ""}${avgOver}%`}
+          footnote={`${clientBrand.name} shelf price against list`}
+        />
+        <StatTile
+          label="Outlets breaching"
+          value={`${outletsFlagged.size}`}
+          goodDirection="down"
+          footnote={`${outliers.length} readings over 10% off RRP`}
+        />
+      </div>
+
+      <section className="mt-4 rounded-[18px] border border-line bg-white p-5 sm:p-6">
+        <h2 className="t-h3">Observed price range by SKU</h2>
+        <p className="mt-1 mb-5 text-sm text-ink-500">
+          Every shelf price recorded on {scope.dataAsOf}, against recommended
+          retail. A wide band means the same pack sells at very different prices
+          across the city.
+        </p>
+        {bands.length ? <PriceBand rows={bands} /> : <Empty />}
+      </section>
+
+      <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
+        <section className="overflow-hidden rounded-[18px] border border-line bg-white">
+          <div className="border-b border-line p-5 sm:p-6">
+            <h2 className="t-h3">Outliers</h2>
+            <p className="mt-1 text-sm text-ink-500">
+              Readings more than 10% away from RRP, worst first. Open an outlet
+              to see everything it is mispricing.
+            </p>
+          </div>
+          <div className="max-h-[460px] overflow-y-auto">
+            {outliers.length ? (
+              <table className="w-full text-sm">
+                <thead className="sticky top-0 z-10 bg-white">
+                  <tr className="border-b border-line text-[12px] uppercase tracking-wide text-ink-400">
+                    <th className="px-5 py-2.5 text-left font-semibold">SKU</th>
+                    <th className="px-5 py-2.5 text-left font-semibold">Outlet</th>
+                    <th className="px-5 py-2.5 text-right font-semibold">Shelf</th>
+                    <th className="px-5 py-2.5 text-right font-semibold">vs RRP</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {outliers.map((o) => {
+                    const outlet = posOf(o.posId)!;
+                    return (
+                      <tr key={`${o.posId}-${o.skuId}`} className="border-b border-line last:border-0">
+                        <td className="px-5 py-2.5 text-ink-700">{skuName(o.skuId)}</td>
+                        <td className="px-5 py-2.5">
+                          <OutletButton posId={o.posId} className="!text-[13px]" />
+                          <span className="block text-[12px] text-ink-400">
+                            {outlet.area} · {outlet.channel}
+                          </span>
+                        </td>
+                        <td className="mono px-5 py-2.5 text-right text-ink-900">
+                          {iqd(o.price)}
+                        </td>
+                        <td className="mono px-5 py-2.5 text-right">
+                          <span
+                            className="font-semibold"
+                            style={{
+                              color: o.variance > 0 ? "var(--color-serious)" : "var(--color-good)",
+                            }}
+                          >
+                            {o.variance > 0 ? "+" : "−"}
+                            {Math.abs(o.variance)}%
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            ) : (
+              <p className="p-8 text-center text-sm text-ink-400">
+                No outliers in this selection.
+              </p>
+            )}
+          </div>
+        </section>
+
+        <section className="rounded-[18px] border border-line bg-white p-5 sm:p-6">
+          <h2 className="t-h3">Compliance by SKU</h2>
+          <p className="mt-1 mb-4 text-sm text-ink-500">
+            Share of outlets pricing within ±5% of RRP.
+          </p>
+          <div className="space-y-2.5">
+            {bands.slice(0, 12).map((b) => (
+              <div key={b.id}>
+                <div className="flex items-baseline justify-between gap-2">
+                  <span
+                    className={`truncate text-[13px] ${
+                      b.emphasis ? "font-semibold text-ink-900" : "text-ink-700"
+                    }`}
+                  >
+                    {b.label}
+                  </span>
+                  <span className="mono shrink-0 text-[13px] font-semibold text-ink-900">
+                    {b.compliance}%
+                  </span>
+                </div>
+                <div className="mt-1 h-[6px] rounded-full bg-canvas">
+                  <div
+                    className="h-full rounded-full"
+                    style={{
+                      width: `${b.compliance}%`,
+                      background: b.emphasis
+                        ? "var(--color-violet)"
+                        : "var(--color-chart-context)",
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
+            {!bands.length && <Empty />}
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function Empty() {
+  return (
+    <p className="py-8 text-center text-sm text-ink-400">
+      Nothing matches the current filters.
+    </p>
+  );
+}

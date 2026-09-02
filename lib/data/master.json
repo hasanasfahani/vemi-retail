@@ -1,0 +1,826 @@
+{
+  "meta": {
+    "city": "Erbil",
+    "category": "Carbonated Beverages",
+    "snapshots": [
+      {
+        "id": "2026-07-15",
+        "label": "15 Jul 2026",
+        "current": false
+      },
+      {
+        "id": "2026-08-12",
+        "label": "12 Aug 2026",
+        "current": true
+      }
+    ],
+    "currentSnapshot": "2026-08-12",
+    "previousSnapshot": "2026-07-15",
+    "posCount": 100,
+    "skuCount": 20
+  },
+  "brands": [
+    {
+      "id": "pepsi",
+      "name": "Pepsi",
+      "owner": "Baghdad Soft Drinks",
+      "client": true,
+      "strength": 0.93
+    },
+    {
+      "id": "coca-cola",
+      "name": "Coca-Cola",
+      "owner": "Coca-Cola Iraq",
+      "client": false,
+      "strength": 0.87
+    },
+    {
+      "id": "7up",
+      "name": "7UP",
+      "owner": "Baghdad Soft Drinks",
+      "client": false,
+      "strength": 0.79
+    },
+    {
+      "id": "mirinda",
+      "name": "Mirinda",
+      "owner": "Baghdad Soft Drinks",
+      "client": false,
+      "strength": 0.75
+    },
+    {
+      "id": "fanta",
+      "name": "Fanta",
+      "owner": "Coca-Cola Iraq",
+      "client": false,
+      "strength": 0.71
+    },
+    {
+      "id": "sprite",
+      "name": "Sprite",
+      "owner": "Coca-Cola Iraq",
+      "client": false,
+      "strength": 0.63
+    },
+    {
+      "id": "zamzam",
+      "name": "Zam Zam Cola",
+      "owner": "Zam Zam Group",
+      "client": false,
+      "strength": 0.47
+    }
+  ],
+  "skus": [
+    {
+      "id": "pepsi-can-330",
+      "brandId": "pepsi",
+      "pack": "can-330",
+      "name": "Pepsi 330ml Can",
+      "rrp": 1000
+    },
+    {
+      "id": "pepsi-pet-500",
+      "brandId": "pepsi",
+      "pack": "pet-500",
+      "name": "Pepsi 500ml PET",
+      "rrp": 1000
+    },
+    {
+      "id": "pepsi-pet-1000",
+      "brandId": "pepsi",
+      "pack": "pet-1000",
+      "name": "Pepsi 1L PET",
+      "rrp": 1500
+    },
+    {
+      "id": "pepsi-pet-2250",
+      "brandId": "pepsi",
+      "pack": "pet-2250",
+      "name": "Pepsi 2.25L PET",
+      "rrp": 2500
+    },
+    {
+      "id": "coca-cola-can-330",
+      "brandId": "coca-cola",
+      "pack": "can-330",
+      "name": "Coca-Cola 330ml Can",
+      "rrp": 1000
+    },
+    {
+      "id": "coca-cola-pet-500",
+      "brandId": "coca-cola",
+      "pack": "pet-500",
+      "name": "Coca-Cola 500ml PET",
+      "rrp": 1000
+    },
+    {
+      "id": "coca-cola-pet-1000",
+      "brandId": "coca-cola",
+      "pack": "pet-1000",
+      "name": "Coca-Cola 1L PET",
+      "rrp": 1500
+    },
+    {
+      "id": "coca-cola-pet-2250",
+      "brandId": "coca-cola",
+      "pack": "pet-2250",
+      "name": "Coca-Cola 2.25L PET",
+      "rrp": 2500
+    },
+    {
+      "id": "7up-can-330",
+      "brandId": "7up",
+      "pack": "can-330",
+      "name": "7UP 330ml Can",
+      "rrp": 1000
+    },
+    {
+      "id": "7up-pet-1000",
+      "brandId": "7up",
+      "pack": "pet-1000",
+      "name": "7UP 1L PET",
+      "rrp": 1500
+    },
+    {
+      "id": "7up-pet-2250",
+      "brandId": "7up",
+      "pack": "pet-2250",
+      "name": "7UP 2.25L PET",
+      "rrp": 2500
+    },
+    {
+      "id": "mirinda-can-330",
+      "brandId": "mirinda",
+      "pack": "can-330",
+      "name": "Mirinda Orange 330ml Can",
+      "rrp": 1000
+    },
+    {
+      "id": "mirinda-pet-1000",
+      "brandId": "mirinda",
+      "pack": "pet-1000",
+      "name": "Mirinda Orange 1L PET",
+      "rrp": 1500
+    },
+    {
+      "id": "mirinda-pet-2250",
+      "brandId": "mirinda",
+      "pack": "pet-2250",
+      "name": "Mirinda Orange 2.25L PET",
+      "rrp": 2500
+    },
+    {
+      "id": "fanta-can-330",
+      "brandId": "fanta",
+      "pack": "can-330",
+      "name": "Fanta Orange 330ml Can",
+      "rrp": 1000
+    },
+    {
+      "id": "fanta-pet-1000",
+      "brandId": "fanta",
+      "pack": "pet-1000",
+      "name": "Fanta Orange 1L PET",
+      "rrp": 1500
+    },
+    {
+      "id": "sprite-can-330",
+      "brandId": "sprite",
+      "pack": "can-330",
+      "name": "Sprite 330ml Can",
+      "rrp": 1000
+    },
+    {
+      "id": "sprite-pet-1000",
+      "brandId": "sprite",
+      "pack": "pet-1000",
+      "name": "Sprite 1L PET",
+      "rrp": 1500
+    },
+    {
+      "id": "zamzam-glass-300",
+      "brandId": "zamzam",
+      "pack": "glass-300",
+      "name": "Zam Zam Cola 300ml Glass",
+      "rrp": 750
+    },
+    {
+      "id": "zamzam-pet-1500",
+      "brandId": "zamzam",
+      "pack": "pet-1500",
+      "name": "Zam Zam Cola 1.5L PET",
+      "rrp": 2000
+    }
+  ],
+  "pos": [
+    {
+      "id": "erb-101",
+      "code": "ERB-101",
+      "area": "Ankawa",
+      "channel": "Hypermarket"
+    },
+    {
+      "id": "erb-102",
+      "code": "ERB-102",
+      "area": "Ankawa",
+      "channel": "Supermarket"
+    },
+    {
+      "id": "erb-103",
+      "code": "ERB-103",
+      "area": "Ankawa",
+      "channel": "Supermarket"
+    },
+    {
+      "id": "erb-104",
+      "code": "ERB-104",
+      "area": "Ankawa",
+      "channel": "Mini-market"
+    },
+    {
+      "id": "erb-105",
+      "code": "ERB-105",
+      "area": "Ankawa",
+      "channel": "Mini-market",
+      "priceBias": 1.12
+    },
+    {
+      "id": "erb-106",
+      "code": "ERB-106",
+      "area": "Ankawa",
+      "channel": "Grocery"
+    },
+    {
+      "id": "erb-107",
+      "code": "ERB-107",
+      "area": "Ankawa",
+      "channel": "Grocery"
+    },
+    {
+      "id": "erb-201",
+      "code": "ERB-201",
+      "area": "Downtown / Qaysari",
+      "channel": "Supermarket"
+    },
+    {
+      "id": "erb-202",
+      "code": "ERB-202",
+      "area": "Downtown / Qaysari",
+      "channel": "Supermarket"
+    },
+    {
+      "id": "erb-203",
+      "code": "ERB-203",
+      "area": "Downtown / Qaysari",
+      "channel": "Mini-market",
+      "priceBias": 1.09
+    },
+    {
+      "id": "erb-204",
+      "code": "ERB-204",
+      "area": "Downtown / Qaysari",
+      "channel": "Mini-market",
+      "name": "Dur Nassrawey Center"
+    },
+    {
+      "id": "erb-205",
+      "code": "ERB-205",
+      "area": "Downtown / Qaysari",
+      "channel": "Mini-market"
+    },
+    {
+      "id": "erb-206",
+      "code": "ERB-206",
+      "area": "Downtown / Qaysari",
+      "channel": "Grocery"
+    },
+    {
+      "id": "erb-207",
+      "code": "ERB-207",
+      "area": "Downtown / Qaysari",
+      "channel": "Grocery"
+    },
+    {
+      "id": "erb-208",
+      "code": "ERB-208",
+      "area": "Downtown / Qaysari",
+      "channel": "Grocery"
+    },
+    {
+      "id": "erb-301",
+      "code": "ERB-301",
+      "area": "Iskan",
+      "channel": "Supermarket"
+    },
+    {
+      "id": "erb-302",
+      "code": "ERB-302",
+      "area": "Iskan",
+      "channel": "Mini-market"
+    },
+    {
+      "id": "erb-303",
+      "code": "ERB-303",
+      "area": "Iskan",
+      "channel": "Mini-market"
+    },
+    {
+      "id": "erb-304",
+      "code": "ERB-304",
+      "area": "Iskan",
+      "channel": "Grocery"
+    },
+    {
+      "id": "erb-305",
+      "code": "ERB-305",
+      "area": "Iskan",
+      "channel": "Grocery"
+    },
+    {
+      "id": "erb-401",
+      "code": "ERB-401",
+      "area": "Dream City",
+      "channel": "Hypermarket"
+    },
+    {
+      "id": "erb-402",
+      "code": "ERB-402",
+      "area": "Dream City",
+      "channel": "Supermarket"
+    },
+    {
+      "id": "erb-403",
+      "code": "ERB-403",
+      "area": "Dream City",
+      "channel": "Supermarket",
+      "priceBias": 1.11
+    },
+    {
+      "id": "erb-404",
+      "code": "ERB-404",
+      "area": "Dream City",
+      "channel": "Mini-market"
+    },
+    {
+      "id": "erb-405",
+      "code": "ERB-405",
+      "area": "Dream City",
+      "channel": "Mini-market"
+    },
+    {
+      "id": "erb-501",
+      "code": "ERB-501",
+      "area": "Minara",
+      "channel": "Supermarket"
+    },
+    {
+      "id": "erb-502",
+      "code": "ERB-502",
+      "area": "Minara",
+      "channel": "Mini-market"
+    },
+    {
+      "id": "erb-503",
+      "code": "ERB-503",
+      "area": "Minara",
+      "channel": "Mini-market"
+    },
+    {
+      "id": "erb-504",
+      "code": "ERB-504",
+      "area": "Minara",
+      "channel": "Grocery"
+    },
+    {
+      "id": "erb-505",
+      "code": "ERB-505",
+      "area": "Minara",
+      "channel": "Grocery"
+    },
+    {
+      "id": "erb-506",
+      "code": "ERB-506",
+      "area": "Minara",
+      "channel": "Grocery"
+    },
+    {
+      "id": "erb-601",
+      "code": "ERB-601",
+      "area": "Shorsh",
+      "channel": "Supermarket"
+    },
+    {
+      "id": "erb-602",
+      "code": "ERB-602",
+      "area": "Shorsh",
+      "channel": "Mini-market"
+    },
+    {
+      "id": "erb-603",
+      "code": "ERB-603",
+      "area": "Shorsh",
+      "channel": "Mini-market"
+    },
+    {
+      "id": "erb-604",
+      "code": "ERB-604",
+      "area": "Shorsh",
+      "channel": "Grocery"
+    },
+    {
+      "id": "erb-605",
+      "code": "ERB-605",
+      "area": "Shorsh",
+      "channel": "Grocery"
+    },
+    {
+      "id": "erb-606",
+      "code": "ERB-606",
+      "area": "Shorsh",
+      "channel": "Grocery"
+    },
+    {
+      "id": "erb-701",
+      "code": "ERB-701",
+      "area": "Setaqan",
+      "channel": "Mini-market"
+    },
+    {
+      "id": "erb-702",
+      "code": "ERB-702",
+      "area": "Setaqan",
+      "channel": "Mini-market",
+      "priceBias": 1.14
+    },
+    {
+      "id": "erb-703",
+      "code": "ERB-703",
+      "area": "Setaqan",
+      "channel": "Grocery"
+    },
+    {
+      "id": "erb-704",
+      "code": "ERB-704",
+      "area": "Setaqan",
+      "channel": "Grocery"
+    },
+    {
+      "id": "erb-705",
+      "code": "ERB-705",
+      "area": "Setaqan",
+      "channel": "Grocery"
+    },
+    {
+      "id": "erb-801",
+      "code": "ERB-801",
+      "area": "Naz City",
+      "channel": "Supermarket"
+    },
+    {
+      "id": "erb-802",
+      "code": "ERB-802",
+      "area": "Naz City",
+      "channel": "Supermarket"
+    },
+    {
+      "id": "erb-803",
+      "code": "ERB-803",
+      "area": "Naz City",
+      "channel": "Mini-market"
+    },
+    {
+      "id": "erb-804",
+      "code": "ERB-804",
+      "area": "Naz City",
+      "channel": "Mini-market"
+    },
+    {
+      "id": "erb-805",
+      "code": "ERB-805",
+      "area": "Naz City",
+      "channel": "Grocery"
+    },
+    {
+      "id": "erb-901",
+      "code": "ERB-901",
+      "area": "Zanko",
+      "channel": "Supermarket"
+    },
+    {
+      "id": "erb-902",
+      "code": "ERB-902",
+      "area": "Zanko",
+      "channel": "Mini-market"
+    },
+    {
+      "id": "erb-903",
+      "code": "ERB-903",
+      "area": "Zanko",
+      "channel": "Mini-market"
+    },
+    {
+      "id": "erb-904",
+      "code": "ERB-904",
+      "area": "Zanko",
+      "channel": "Grocery"
+    },
+    {
+      "id": "erb-905",
+      "code": "ERB-905",
+      "area": "Zanko",
+      "channel": "Grocery"
+    },
+    {
+      "id": "erb-1001",
+      "code": "ERB-1001",
+      "area": "Bakhtiari",
+      "channel": "Supermarket"
+    },
+    {
+      "id": "erb-1002",
+      "code": "ERB-1002",
+      "area": "Bakhtiari",
+      "channel": "Mini-market"
+    },
+    {
+      "id": "erb-1003",
+      "code": "ERB-1003",
+      "area": "Bakhtiari",
+      "channel": "Mini-market"
+    },
+    {
+      "id": "erb-1004",
+      "code": "ERB-1004",
+      "area": "Bakhtiari",
+      "channel": "Grocery"
+    },
+    {
+      "id": "erb-1005",
+      "code": "ERB-1005",
+      "area": "Bakhtiari",
+      "channel": "Grocery",
+      "priceBias": 1.1
+    },
+    {
+      "id": "erb-1006",
+      "code": "ERB-1006",
+      "area": "Bakhtiari",
+      "channel": "Grocery"
+    },
+    {
+      "id": "erb-1101",
+      "code": "ERB-1101",
+      "area": "Brayati",
+      "channel": "Supermarket"
+    },
+    {
+      "id": "erb-1102",
+      "code": "ERB-1102",
+      "area": "Brayati",
+      "channel": "Mini-market"
+    },
+    {
+      "id": "erb-1103",
+      "code": "ERB-1103",
+      "area": "Brayati",
+      "channel": "Mini-market"
+    },
+    {
+      "id": "erb-1104",
+      "code": "ERB-1104",
+      "area": "Brayati",
+      "channel": "Grocery"
+    },
+    {
+      "id": "erb-1105",
+      "code": "ERB-1105",
+      "area": "Brayati",
+      "channel": "Grocery"
+    },
+    {
+      "id": "erb-1201",
+      "code": "ERB-1201",
+      "area": "Havalan",
+      "channel": "Supermarket"
+    },
+    {
+      "id": "erb-1202",
+      "code": "ERB-1202",
+      "area": "Havalan",
+      "channel": "Mini-market"
+    },
+    {
+      "id": "erb-1203",
+      "code": "ERB-1203",
+      "area": "Havalan",
+      "channel": "Mini-market",
+      "priceBias": 1.13
+    },
+    {
+      "id": "erb-1204",
+      "code": "ERB-1204",
+      "area": "Havalan",
+      "channel": "Grocery"
+    },
+    {
+      "id": "erb-1205",
+      "code": "ERB-1205",
+      "area": "Havalan",
+      "channel": "Grocery"
+    },
+    {
+      "id": "erb-1206",
+      "code": "ERB-1206",
+      "area": "Havalan",
+      "channel": "Grocery"
+    },
+    {
+      "id": "erb-1301",
+      "code": "ERB-1301",
+      "area": "Runaki",
+      "channel": "Mini-market"
+    },
+    {
+      "id": "erb-1302",
+      "code": "ERB-1302",
+      "area": "Runaki",
+      "channel": "Mini-market"
+    },
+    {
+      "id": "erb-1303",
+      "code": "ERB-1303",
+      "area": "Runaki",
+      "channel": "Mini-market"
+    },
+    {
+      "id": "erb-1304",
+      "code": "ERB-1304",
+      "area": "Runaki",
+      "channel": "Grocery"
+    },
+    {
+      "id": "erb-1305",
+      "code": "ERB-1305",
+      "area": "Runaki",
+      "channel": "Grocery"
+    },
+    {
+      "id": "erb-1401",
+      "code": "ERB-1401",
+      "area": "Gulan",
+      "channel": "Hypermarket"
+    },
+    {
+      "id": "erb-1402",
+      "code": "ERB-1402",
+      "area": "Gulan",
+      "channel": "Supermarket"
+    },
+    {
+      "id": "erb-1403",
+      "code": "ERB-1403",
+      "area": "Gulan",
+      "channel": "Mini-market"
+    },
+    {
+      "id": "erb-1404",
+      "code": "ERB-1404",
+      "area": "Gulan",
+      "channel": "Mini-market"
+    },
+    {
+      "id": "erb-1405",
+      "code": "ERB-1405",
+      "area": "Gulan",
+      "channel": "Grocery"
+    },
+    {
+      "id": "erb-1501",
+      "code": "ERB-1501",
+      "area": "Baharka",
+      "channel": "Supermarket"
+    },
+    {
+      "id": "erb-1502",
+      "code": "ERB-1502",
+      "area": "Baharka",
+      "channel": "Mini-market"
+    },
+    {
+      "id": "erb-1503",
+      "code": "ERB-1503",
+      "area": "Baharka",
+      "channel": "Grocery",
+      "priceBias": 1.09
+    },
+    {
+      "id": "erb-1504",
+      "code": "ERB-1504",
+      "area": "Baharka",
+      "channel": "Grocery"
+    },
+    {
+      "id": "erb-1505",
+      "code": "ERB-1505",
+      "area": "Baharka",
+      "channel": "Grocery"
+    },
+    {
+      "id": "erb-1601",
+      "code": "ERB-1601",
+      "area": "Kasnazan",
+      "channel": "Supermarket"
+    },
+    {
+      "id": "erb-1602",
+      "code": "ERB-1602",
+      "area": "Kasnazan",
+      "channel": "Mini-market"
+    },
+    {
+      "id": "erb-1603",
+      "code": "ERB-1603",
+      "area": "Kasnazan",
+      "channel": "Mini-market"
+    },
+    {
+      "id": "erb-1604",
+      "code": "ERB-1604",
+      "area": "Kasnazan",
+      "channel": "Grocery"
+    },
+    {
+      "id": "erb-1605",
+      "code": "ERB-1605",
+      "area": "Kasnazan",
+      "channel": "Grocery"
+    },
+    {
+      "id": "erb-1606",
+      "code": "ERB-1606",
+      "area": "Kasnazan",
+      "channel": "Grocery"
+    },
+    {
+      "id": "erb-1701",
+      "code": "ERB-1701",
+      "area": "Daratu",
+      "channel": "Mini-market"
+    },
+    {
+      "id": "erb-1702",
+      "code": "ERB-1702",
+      "area": "Daratu",
+      "channel": "Mini-market"
+    },
+    {
+      "id": "erb-1703",
+      "code": "ERB-1703",
+      "area": "Daratu",
+      "channel": "Grocery"
+    },
+    {
+      "id": "erb-1704",
+      "code": "ERB-1704",
+      "area": "Daratu",
+      "channel": "Grocery",
+      "priceBias": 1.12
+    },
+    {
+      "id": "erb-1705",
+      "code": "ERB-1705",
+      "area": "Daratu",
+      "channel": "Grocery"
+    },
+    {
+      "id": "erb-1801",
+      "code": "ERB-1801",
+      "area": "Kurdistan",
+      "channel": "Supermarket"
+    },
+    {
+      "id": "erb-1802",
+      "code": "ERB-1802",
+      "area": "Kurdistan",
+      "channel": "Supermarket"
+    },
+    {
+      "id": "erb-1803",
+      "code": "ERB-1803",
+      "area": "Kurdistan",
+      "channel": "Mini-market"
+    },
+    {
+      "id": "erb-1804",
+      "code": "ERB-1804",
+      "area": "Kurdistan",
+      "channel": "Mini-market"
+    },
+    {
+      "id": "erb-1805",
+      "code": "ERB-1805",
+      "area": "Kurdistan",
+      "channel": "Grocery"
+    }
+  ]
+}
