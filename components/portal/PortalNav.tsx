@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { portalNav, scope, coverage } from "@/lib/portal";
+import { portalNav, portalNavGroups, scope, coverage } from "@/lib/portal";
 
 /* Left rail on desktop, a scrolling tab strip on phones — several
    buyers open this from LinkedIn on a handset. */
@@ -21,24 +21,31 @@ export default function PortalNav() {
         </Link>
 
         <div className="flex-1 overflow-y-auto px-3 py-4">
-          {portalNav.map((item) => {
-            const active = pathname === item.href;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                aria-current={active ? "page" : undefined}
-                className={`mb-0.5 flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm transition-colors ${
-                  active
-                    ? "bg-violet-050 font-semibold text-violet-ink"
-                    : "font-medium text-ink-500 hover:bg-canvas hover:text-ink-900"
-                }`}
-              >
-                {item.label}
-                {item.locked && <LockGlyph />}
-              </Link>
-            );
-          })}
+          {portalNavGroups.map((group, i) => (
+            <div key={group.label} className={i > 0 ? "mt-4" : undefined}>
+              <div className="px-3 pb-1.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink-400">
+                {group.label}
+              </div>
+              {group.items.map((item) => {
+                const active = pathname === item.href;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    aria-current={active ? "page" : undefined}
+                    className={`mb-0.5 flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm transition-colors ${
+                      active
+                        ? "bg-violet-050 font-semibold text-violet-ink"
+                        : "font-medium text-ink-500 hover:bg-canvas hover:text-ink-900"
+                    }`}
+                  >
+                    {item.label}
+                    {item.locked && <LockGlyph />}
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
         </div>
 
         <div className="border-t border-line p-3">

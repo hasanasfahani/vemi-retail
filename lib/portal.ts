@@ -43,15 +43,32 @@ export type NavItem = {
   locked?: boolean;
 };
 
-export const portalNav: NavItem[] = [
-  { href: "/dashboard/overview", label: "Overview" },
-  { href: "/dashboard/availability", label: "Availability" },
-  { href: "/dashboard/shelf-share", label: "Shelf Share" },
-  { href: "/dashboard/oos-alerts", label: "Out-of-Stock Alerts" },
-  { href: "/dashboard/pricing", label: "Price Intelligence" },
-  { href: "/dashboard/competitors", label: "Competitor Watch" },
-  { href: "/dashboard/visibility", label: "Visibility & POSM", locked: true },
+/* Two groups, not one flat list: Command Center is built for the
+   30-second executive read; everything under Operate is built for
+   the person who spends their week in the numbers. The grouping in
+   the sidebar is the same split made visible in the furniture. */
+export type NavGroup = { label: string; items: NavItem[] };
+
+export const portalNavGroups: NavGroup[] = [
+  {
+    label: "Executive",
+    items: [{ href: "/dashboard/overview", label: "Command Center" }],
+  },
+  {
+    label: "Operate",
+    items: [
+      { href: "/dashboard/shelf", label: "Shelf" },
+      { href: "/dashboard/oos-alerts", label: "Out-of-Stock Alerts" },
+      { href: "/dashboard/pricing", label: "Price Intelligence" },
+      { href: "/dashboard/competitors", label: "Competitor Watch" },
+      { href: "/dashboard/visibility", label: "Visibility & POSM", locked: true },
+    ],
+  },
 ];
+
+/* Flat form for the mobile tab strip, which scrolls horizontally and
+   has no room for group headers. */
+export const portalNav: NavItem[] = portalNavGroups.flatMap((g) => g.items);
 
 /* ------------------------------------------------------------------
    National coverage.
