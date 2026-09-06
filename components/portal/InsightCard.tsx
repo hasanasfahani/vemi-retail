@@ -8,7 +8,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import type { Insight } from "@/lib/insights";
+import { intensityOf, type Insight } from "@/lib/insights";
 
 const SEVERITY_LABEL: Record<Insight["severity"], string> = {
   critical: "Critical",
@@ -67,6 +67,12 @@ export default function InsightCard({
           <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5">
             <span className="mono text-[13px] font-semibold text-ink-900">
               {insight.impact.label}
+            </span>
+            <span
+              className="text-[12px] text-ink-400"
+              title={`Ranked by ${intensityOf(insight).toFixed(0)} ${insight.impact.unit}/outlet — the total divided by scope, not the total alone.`}
+            >
+              at {insight.scope.label}
             </span>
             <Link
               href={insight.evidence.href}

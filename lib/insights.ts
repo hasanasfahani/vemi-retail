@@ -7,10 +7,25 @@
    so a skeptical reader can check the arithmetic by hand.
 
    Presence problems (R1, R2, R3, R4, R6, R7) all convert to the same
-   currency — facing-days at risk, shelf space × time — and rank
-   against each other on that one number. Pricing (R5) stays in its
-   own currency (breaching readings) because forcing a price deviation
-   into a facings number would be a conversion nobody could defend.
+   currency — facing-days at risk, shelf space × time. But raw total
+   facing-days alone would let a diffuse, panel-wide rule (R7 spans
+   every outlet in the city) always outrank a concentrated one (R1 is
+   a single named store), just because the panel is bigger than the
+   store. That is a real difference in urgency, not a rounding error,
+   so the ranked list sorts by INTENSITY — impact ÷ the outlets that
+   finding actually touches — not by raw impact. A problem confirmed
+   at one store and costing 140 facing-days there (intensity 140) is a
+   sharper, more immediately actionable finding than the same total
+   cost smeared across 100 outlets (intensity ~1 each), even though
+   the second number is bigger on paper. `impact.value` itself is
+   never altered by this — the headline number stays the true total;
+   only the sort key divides by scope, and scope is shown on the card,
+   so nothing here is a hidden weighting.
+
+   Pricing (R5) stays in its own currency (breaching readings) because
+   forcing a price deviation into a facings number would be a
+   conversion nobody could defend; its scope is always one outlet, so
+   intensity there is just the raw count — no ranking change.
    Momentum (R8) is a single derived fact, not a ranked list — with
    two visits there is nothing to rank it against.
 
@@ -56,6 +71,10 @@ export type Insight = {
   headline: string;
   detail: string;
   impact: { value: number; unit: "facing-days" | "readings"; label: string };
+  /* How much of the panel this finding actually covers — the
+     denominator the ranked list divides impact by. Shown on the card
+     so the ranking rule is visible, not inferred. */
+  scope: { outlets: number; label: string };
   trend: Trend;
   evidence: { href: string; formula: string; table: EvidenceTable };
   entities: {
@@ -158,6 +177,17 @@ const DAYS_BETWEEN_VISITS = Math.max(
 );
 
 const round1 = (n: number) => Math.round(n * 10) / 10;
+
+/* The ranking key: impact per outlet the finding actually touches.
+   Guarded against a zero-outlet scope (shouldn't occur, but a rule
+   bug here should degrade to "unranked low" rather than throw).
+   Exported so the card can show the reader the same number the sort
+   actually used, rather than a plain total that doesn't match the
+   list's own order. */
+export const intensityOf = (insight: Insight) =>
+  insight.scope.outlets > 0 ? insight.impact.value / insight.scope.outlets : 0;
+const byIntensity = (a: Insight, b: Insight) => intensityOf(b) - intensityOf(a);
+
 const median = (values: number[]) => {
   const sorted = [...values].sort((a, b) => a - b);
   if (!sorted.length) return 0;
@@ -199,6 +229,7 @@ function r1PersistentGaps(view: FilteredView): Insight[] {
         unit: "facing-days",
         label: `${impactValue} facing-days lost`,
       },
+      scope: { outlets: 1, label: outlet.code },
       trend: "worsening",
       evidence: {
         href: `/dashboard/oos-alerts?area=${encodeURIComponent(outlet.area)}`,
@@ -216,7 +247,7 @@ function r1PersistentGaps(view: FilteredView): Insight[] {
       entities: { posId, area: outlet.area, brandId: clientBrand.id },
     });
   }
-  return insights.sort((a, b) => b.impact.value - a.impact.value);
+  return insights.sort(byIntensity);
 }
 
 /* ---------- R2 · district share deficit ---------- */
@@ -230,13 +261,18 @@ function r2DistrictDeficit(view: FilteredView): Insight[] {
   if (!cityTotal) return [];
   const cityShare = (cityClient / cityTotal) * 100;
 
-  const byArea = new Map<string, { total: number; client: number }>();
+  const byArea = new Map<
+    string,
+    { total: number; client: number; outlets: Set<string> }
+  >();
   for (const c of stocked) {
     const area = posOf(c.posId)?.area;
     if (!area) continue;
-    const entry = byArea.get(area) ?? { total: 0, client: 0 };
+    const entry =
+      byArea.get(area) ?? { total: 0, client: 0, outlets: new Set<string>() };
     entry.total += c.facings;
     if (skuOf(c.skuId)?.brandId === clientBrand.id) entry.client += c.facings;
+    entry.outlets.add(c.posId);
     byArea.set(area, entry);
   }
 
@@ -261,6 +297,7 @@ function r2DistrictDeficit(view: FilteredView): Insight[] {
         unit: "facing-days",
         label: `≈${impactValue} facing-days below your own average`,
       },
+      scope: { outlets: e.outlets.size, label: `${area} district (${e.outlets.size} outlets)` },
       trend: "new",
       evidence: {
         href: `/dashboard/shelf?area=${encodeURIComponent(area)}&mode=share`,
@@ -278,7 +315,7 @@ function r2DistrictDeficit(view: FilteredView): Insight[] {
       entities: { area, brandId: clientBrand.id },
     });
   }
-  return insights.sort((a, b) => b.impact.value - a.impact.value);
+  return insights.sort(byIntensity);
 }
 
 /* ---------- R3 · distribution weakness by SKU ---------- */
@@ -327,6 +364,7 @@ function r3DistributionGap(view: FilteredView): Insight[] {
         unit: "facing-days",
         label: `≈${impactValue} facing-days of missed presence`,
       },
+      scope: { outlets: view.posCount, label: `citywide (${view.posCount} outlets)` },
       trend: "new",
       evidence: {
         href: `/dashboard/shelf?brand=${clientBrand.id}&mode=availability`,
@@ -343,7 +381,7 @@ function r3DistributionGap(view: FilteredView): Insight[] {
       entities: { skuId: sku.id, brandId: clientBrand.id },
     });
   }
-  return insights.sort((a, b) => b.impact.value - a.impact.value);
+  return insights.sort(byIntensity);
 }
 
 /* ---------- R4 · rival substitution ---------- */
@@ -386,6 +424,10 @@ function r4RivalSubstitution(view: FilteredView): Insight[] {
         value: impactValue,
         unit: "facing-days",
         label: `${impactValue} facing-days occupied`,
+      },
+      scope: {
+        outlets: outletsAffected.size,
+        label: `${outletsAffected.size} outlets`,
       },
       trend: "new",
       evidence: {
@@ -439,6 +481,7 @@ function r5PriceCluster(view: FilteredView): Insight[] {
         unit: "readings",
         label: `${rows.length} breaching readings`,
       },
+      scope: { outlets: 1, label: outlet.code },
       trend: "new",
       evidence: {
         href: `/dashboard/pricing?area=${encodeURIComponent(outlet.area)}`,
@@ -456,7 +499,10 @@ function r5PriceCluster(view: FilteredView): Insight[] {
       entities: { posId, area: outlet.area },
     });
   }
-  return insights.sort((a, b) => b.impact.value - a.impact.value);
+  /* Scope is always one outlet here, so this is equivalent to sorting
+     by raw breach count — stated via byIntensity for consistency with
+     every other rule rather than as a special case. */
+  return insights.sort(byIntensity);
 }
 
 /* ---------- R6 · channel weakness ---------- */
@@ -486,6 +532,7 @@ function r6ChannelGap(view: FilteredView): Insight[] {
       ? stockedClient.reduce((s, c) => s + c.facings, 0) / stockedClient.length
       : 2;
     const impactValue = Math.round(deficitListings * avgFacings * DAYS_BETWEEN_VISITS);
+    const channelOutlets = new Set(chCells.map((c) => c.posId)).size;
 
     insights.push({
       id: `r6:${channel}`,
@@ -498,6 +545,7 @@ function r6ChannelGap(view: FilteredView): Insight[] {
         unit: "facing-days",
         label: `≈${impactValue} facing-days below your average`,
       },
+      scope: { outlets: channelOutlets, label: `${channel} (${channelOutlets} outlets)` },
       trend: "new",
       evidence: {
         href: `/dashboard/shelf?channel=${encodeURIComponent(channel)}&mode=availability`,
@@ -515,7 +563,7 @@ function r6ChannelGap(view: FilteredView): Insight[] {
       entities: { channel, brandId: clientBrand.id },
     });
   }
-  return insights.sort((a, b) => b.impact.value - a.impact.value);
+  return insights.sort(byIntensity);
 }
 
 /* ---------- R7 · fixture imbalance (bidirectional) ---------- */
@@ -561,6 +609,7 @@ function r7FixtureImbalance(view: FilteredView): Insight[] {
         unit: "facing-days",
         label: `≈${impactValue} facing-days to reach parity`,
       },
+      scope: { outlets: view.posCount, label: `citywide (${view.posCount} outlets)` },
       trend: "new",
       evidence: {
         href: `/dashboard/shelf?mode=share`,
@@ -606,9 +655,9 @@ export function generateInsights(view: FilteredView): InsightReport {
     ...r4RivalSubstitution(view),
     ...r6ChannelGap(view),
     ...r7FixtureImbalance(view),
-  ].sort((a, b) => b.impact.value - a.impact.value);
+  ].sort(byIntensity);
 
-  const pricing = r5PriceCluster(view).sort((a, b) => b.impact.value - a.impact.value);
+  const pricing = r5PriceCluster(view).sort(byIntensity);
 
   return { presence, pricing, momentum: computeMomentum() };
 }
