@@ -1,0 +1,614 @@
+/* ============================================================
+   THE DECISION LAYER — Phase 8 insight engine.
+
+   A pure function: FilteredView in, ranked findings out. No ML, no
+   LLM — every insight is a stated formula over data already in the
+   model, and every insight carries that formula and its source rows
+   so a skeptical reader can check the arithmetic by hand.
+
+   Presence problems (R1, R2, R3, R4, R6, R7) all convert to the same
+   currency — facing-days at risk, shelf space × time — and rank
+   against each other on that one number. Pricing (R5) stays in its
+   own currency (breaching readings) because forcing a price deviation
+   into a facings number would be a conversion nobody could defend.
+   Momentum (R8) is a single derived fact, not a ranked list — with
+   two visits there is nothing to rank it against.
+
+   THRESHOLDS below are calibrated against this dataset's own
+   distributions (see the comment on each), not imported from a
+   market this data doesn't describe. Change them here — nowhere else
+   reads a magic number for these rules.
+   ============================================================ */
+
+import {
+  posOf,
+  skuOf,
+  brandName,
+  skuName,
+  clientBrand,
+  skus,
+  pos as allPos,
+  visits,
+  currentVisit,
+  visitLabel,
+  competitors,
+} from "./portalData";
+import type { FilteredView } from "./portalFilters";
+
+export type Severity = "critical" | "warning" | "watch";
+export type Trend = "worsening" | "new";
+
+export type RuleId =
+  | "r1-persistent-gap"
+  | "r2-district-deficit"
+  | "r3-distribution-gap"
+  | "r4-rival-substitution"
+  | "r5-price-cluster"
+  | "r6-channel-gap"
+  | "r7-fixture-imbalance";
+
+export type EvidenceTable = { columns: string[]; rows: (string | number)[][] };
+
+export type Insight = {
+  id: string;
+  rule: RuleId;
+  severity: Severity;
+  headline: string;
+  detail: string;
+  impact: { value: number; unit: "facing-days" | "readings"; label: string };
+  trend: Trend;
+  evidence: { href: string; formula: string; table: EvidenceTable };
+  entities: {
+    brandId?: string;
+    skuId?: string;
+    posId?: string;
+    area?: string;
+    channel?: string;
+  };
+};
+
+export type Momentum = {
+  conceding: boolean;
+  clientDelta: number;
+  rivalBrandId: string | null;
+  rivalDelta: number | null;
+};
+
+export type InsightReport = {
+  presence: Insight[];
+  pricing: Insight[];
+  momentum: Momentum | null;
+};
+
+/* ------------------------------------------------------------------
+   Every threshold below was set against the real generated dataset
+   (node scripts/build-portal-data.mjs → 100 outlets, 2 visits), not
+   picked round. The comment on each cites what was observed. Rerun
+   the calibration whenever the panel size or category changes —
+   these numbers are shaped by *this* market's variance, not a
+   universal retail-audit standard.
+   ------------------------------------------------------------------ */
+export const THRESHOLDS = {
+  /* Persistent (2-visit-confirmed) client gaps, by outlet.
+     Observed: 3 outlets qualified, 116–140 facing-days each (p50 132).
+     Any persistent gap is already the strongest signal in the data —
+     it gets at least "warning"; the observed cluster clears 120. */
+  r1PersistentGap: { criticalFacingDays: 120 },
+
+  /* District client-share deficit vs citywide share.
+     Observed: 18 districts, worst deficit 5.4pt (Bakhtiari), p75≈3.2,
+     p90≈3.9 — an 8pt bar (a plausible import from a bigger market)
+     would never fire here; 100 outlets across 18 districts just
+     doesn't produce single-digit-plus swings. */
+  r2DistrictDeficit: { criticalPt: 5, warningPt: 3 },
+
+  /* Client SKU distribution vs same-pack-size peer median.
+     Observed: 0 of 4 client SKUs currently behind peers (Pepsi's real
+     weakness in this build is availability, not listing breadth) —
+     these thresholds are sized to the ~10–30pt spread seen across
+     peer groups, ready for when a SKU genuinely lags. */
+  r3DistributionGap: { criticalPt: 25, warningPt: 12 },
+
+  /* Top rival's share of facing-days occupying client out-of-stocks.
+     Observed: Coca-Cola led at 27.9% of 3,818 contested facing-days,
+     with four other rivals splitting the rest — no rival ever
+     approaches 40% in a 5-competitor field this fragmented; 25%
+     dominance is already a real, single-name story. */
+  r4RivalSubstitution: { criticalSharePct: 25, warningSharePct: 15 },
+
+  /* Price-breach cluster, by outlet (>10% off RRP).
+     Observed: 11 of 100 outlets carried ≥1 breach; among the 8 with
+     ≥3 (the reporting floor), counts ran 5–14 (p50 7, p75 10). */
+  r5PriceCluster: { minReadings: 3, criticalCount: 10, warningCount: 5 },
+
+  /* Client availability in one channel vs the client's own overall
+     average (only channels performing worse are flagged).
+     Observed: Mini-market −6.5pt (n=112, the single biggest channel
+     by volume) and Hypermarket −4.2pt (n=11) were the only channels
+     underperforming the 86.0% overall figure. */
+  r6ChannelGap: { criticalPt: 6, warningPt: 3 },
+
+  /* Client share gap between chilled-cooler and ambient-shelf facings
+     (bidirectional — either fixture type can be the weak one).
+     Observed: cooler 31.3% vs ambient 23.8%, a 7.6pt gap — real but a
+     negotiation, not an emergency, hence one tier only. */
+  r7FixtureImbalance: { warningPt: 5 },
+
+  /* Momentum: client losing share while some rival gains ≥1pt.
+     Observed: Pepsi −2.1pt this cycle, Coca-Cola +1.8pt — the rule
+     fires on the real cycle in this dataset. */
+  r8Momentum: { rivalGainPt: 1 },
+} as const;
+
+const COOLER_PACKS = new Set(["can-330", "pet-500", "glass-300"]);
+
+/* The interval the "deficit × time" formulas treat as the exposure
+   window — the literal number of days between the two field visits,
+   read from their ids (which are ISO dates), never hardcoded. */
+const sortedVisits = [...visits].sort((a, b) => a.id.localeCompare(b.id));
+const previousVisitId =
+  sortedVisits.length > 1
+    ? sortedVisits[sortedVisits.length - 2].id
+    : currentVisit;
+const DAYS_BETWEEN_VISITS = Math.max(
+  1,
+  Math.round(
+    (Date.parse(currentVisit) - Date.parse(previousVisitId)) / 86_400_000
+  )
+);
+
+const round1 = (n: number) => Math.round(n * 10) / 10;
+const median = (values: number[]) => {
+  const sorted = [...values].sort((a, b) => a - b);
+  if (!sorted.length) return 0;
+  const mid = Math.floor((sorted.length - 1) / 2);
+  return sorted.length % 2 ? sorted[mid] : (sorted[mid] + sorted[mid + 1]) / 2;
+};
+
+/* ---------- R1 · persistent gap cluster ---------- */
+
+function r1PersistentGaps(view: FilteredView): Insight[] {
+  const byOutlet = new Map<string, FilteredView["oosRows"]>();
+  for (const row of view.oosRows) {
+    if (!row.persistent) continue;
+    if (skuOf(row.skuId)?.brandId !== clientBrand.id) continue;
+    byOutlet.set(row.posId, [...(byOutlet.get(row.posId) ?? []), row]);
+  }
+
+  const insights: Insight[] = [];
+  for (const [posId, rows] of byOutlet) {
+    const outlet = posOf(posId);
+    if (!outlet) continue;
+    const impactValue = Math.round(
+      rows.reduce((s, r) => s + r.lostFacingDays, 0)
+    );
+    const severity: Severity =
+      impactValue >= THRESHOLDS.r1PersistentGap.criticalFacingDays
+        ? "critical"
+        : "warning";
+
+    insights.push({
+      id: `r1:${posId}`,
+      rule: "r1-persistent-gap",
+      severity,
+      headline: `${outlet.code} has ${rows.length} ${clientBrand.name} SKU${rows.length > 1 ? "s" : ""} empty since the last visit`,
+      detail:
+        "Confirmed at both visits — a listing that stopped being replenished, not a one-off stockout.",
+      impact: {
+        value: impactValue,
+        unit: "facing-days",
+        label: `${impactValue} facing-days lost`,
+      },
+      trend: "worsening",
+      evidence: {
+        href: `/dashboard/oos-alerts?area=${encodeURIComponent(outlet.area)}`,
+        formula: `Σ normalFacings × daysOut, for each ${clientBrand.name} SKU out of stock at both ${visitLabel(previousVisitId)} and ${visitLabel(currentVisit)} at ${outlet.code}.`,
+        table: {
+          columns: ["SKU", "Days out", "Normal facings", "Facing-days"],
+          rows: rows.map((r) => [
+            skuName(r.skuId),
+            r.daysOut,
+            r.normalFacings,
+            r.lostFacingDays,
+          ]),
+        },
+      },
+      entities: { posId, area: outlet.area, brandId: clientBrand.id },
+    });
+  }
+  return insights.sort((a, b) => b.impact.value - a.impact.value);
+}
+
+/* ---------- R2 · district share deficit ---------- */
+
+function r2DistrictDeficit(view: FilteredView): Insight[] {
+  const stocked = view.cells.filter((c) => c.state === "in-stock");
+  const cityTotal = stocked.reduce((s, c) => s + c.facings, 0);
+  const cityClient = stocked
+    .filter((c) => skuOf(c.skuId)?.brandId === clientBrand.id)
+    .reduce((s, c) => s + c.facings, 0);
+  if (!cityTotal) return [];
+  const cityShare = (cityClient / cityTotal) * 100;
+
+  const byArea = new Map<string, { total: number; client: number }>();
+  for (const c of stocked) {
+    const area = posOf(c.posId)?.area;
+    if (!area) continue;
+    const entry = byArea.get(area) ?? { total: 0, client: 0 };
+    entry.total += c.facings;
+    if (skuOf(c.skuId)?.brandId === clientBrand.id) entry.client += c.facings;
+    byArea.set(area, entry);
+  }
+
+  const insights: Insight[] = [];
+  for (const [area, e] of byArea) {
+    if (!e.total) continue;
+    const share = (e.client / e.total) * 100;
+    const deficit = cityShare - share;
+    if (deficit < THRESHOLDS.r2DistrictDeficit.warningPt) continue;
+    const severity: Severity =
+      deficit >= THRESHOLDS.r2DistrictDeficit.criticalPt ? "critical" : "warning";
+    const impactValue = Math.round(((deficit / 100) * e.total) * DAYS_BETWEEN_VISITS);
+
+    insights.push({
+      id: `r2:${area}`,
+      rule: "r2-district-deficit",
+      severity,
+      headline: `${area} runs ${round1(deficit)}pt behind your citywide shelf share`,
+      detail: `${clientBrand.name} holds ${round1(share)}% of facings here against ${round1(cityShare)}% across Erbil.`,
+      impact: {
+        value: impactValue,
+        unit: "facing-days",
+        label: `≈${impactValue} facing-days below your own average`,
+      },
+      trend: "new",
+      evidence: {
+        href: `/dashboard/shelf?area=${encodeURIComponent(area)}&mode=share`,
+        formula: `(citywide share ${round1(cityShare)}% − ${area} share ${round1(share)}%) × ${Math.round(e.total)} in-district facings × ${DAYS_BETWEEN_VISITS} days between visits.`,
+        table: {
+          columns: ["Metric", "Value"],
+          rows: [
+            ["District facings", Math.round(e.total)],
+            [`${clientBrand.name} facings`, Math.round(e.client)],
+            ["District share", `${round1(share)}%`],
+            ["Citywide share", `${round1(cityShare)}%`],
+          ],
+        },
+      },
+      entities: { area, brandId: clientBrand.id },
+    });
+  }
+  return insights.sort((a, b) => b.impact.value - a.impact.value);
+}
+
+/* ---------- R3 · distribution weakness by SKU ---------- */
+
+function r3DistributionGap(view: FilteredView): Insight[] {
+  const listedCount = new Map<string, number>();
+  const facingsBySku = new Map<string, number[]>();
+  for (const c of view.cells) {
+    if (c.state !== "not-listed")
+      listedCount.set(c.skuId, (listedCount.get(c.skuId) ?? 0) + 1);
+    if (c.state === "in-stock")
+      facingsBySku.set(c.skuId, [...(facingsBySku.get(c.skuId) ?? []), c.facings]);
+  }
+
+  const byPack = new Map<string, { skuId: string; dist: number }[]>();
+  for (const sku of skus) {
+    const dist = view.posCount ? ((listedCount.get(sku.id) ?? 0) / view.posCount) * 100 : 0;
+    byPack.set(sku.pack, [...(byPack.get(sku.pack) ?? []), { skuId: sku.id, dist }]);
+  }
+
+  const insights: Insight[] = [];
+  for (const sku of skus.filter((s) => s.brandId === clientBrand.id)) {
+    const peers = byPack.get(sku.pack) ?? [];
+    const peerMedian = median(peers.map((p) => p.dist));
+    const own = peers.find((p) => p.skuId === sku.id)?.dist ?? 0;
+    const gap = peerMedian - own;
+    if (gap < THRESHOLDS.r3DistributionGap.warningPt) continue;
+    const severity: Severity =
+      gap >= THRESHOLDS.r3DistributionGap.criticalPt ? "critical" : "warning";
+
+    const missingListings = Math.round((gap / 100) * view.posCount);
+    const facings = facingsBySku.get(sku.id) ?? [];
+    const avgFacings = facings.length
+      ? facings.reduce((a, b) => a + b, 0) / facings.length
+      : 2;
+    const impactValue = Math.round(missingListings * avgFacings * DAYS_BETWEEN_VISITS);
+
+    insights.push({
+      id: `r3:${sku.id}`,
+      rule: "r3-distribution-gap",
+      severity,
+      headline: `${sku.name} is listed in far fewer outlets than comparable packs`,
+      detail: `${Math.round(own)}% distribution against a ${Math.round(peerMedian)}% median for the same pack size — a listing gap, not a stock gap.`,
+      impact: {
+        value: impactValue,
+        unit: "facing-days",
+        label: `≈${impactValue} facing-days of missed presence`,
+      },
+      trend: "new",
+      evidence: {
+        href: `/dashboard/shelf?brand=${clientBrand.id}&mode=availability`,
+        formula: `(peer median ${Math.round(peerMedian)}% − own ${Math.round(own)}%) × ${view.posCount} outlets ≈ ${missingListings} missing listings × ${round1(avgFacings)} average facings × ${DAYS_BETWEEN_VISITS} days.`,
+        table: {
+          columns: ["Same-pack SKU", "Brand", "Distribution"],
+          rows: peers.map((p) => [
+            skuName(p.skuId),
+            brandName(skuOf(p.skuId)!.brandId),
+            `${Math.round(p.dist)}%`,
+          ]),
+        },
+      },
+      entities: { skuId: sku.id, brandId: clientBrand.id },
+    });
+  }
+  return insights.sort((a, b) => b.impact.value - a.impact.value);
+}
+
+/* ---------- R4 · rival substitution ---------- */
+
+function r4RivalSubstitution(view: FilteredView): Insight[] {
+  const clientGaps = view.oosRows.filter(
+    (r) => skuOf(r.skuId)?.brandId === clientBrand.id
+  );
+
+  const tally = new Map<string, number>();
+  const outletsAffected = new Set<string>();
+  let total = 0;
+  for (const row of clientGaps) {
+    if (!row.rivalsInStock.length) continue;
+    outletsAffected.add(row.posId);
+    for (const rival of row.rivalsInStock) {
+      const value = rival.facings * row.daysOut;
+      tally.set(rival.brandId, (tally.get(rival.brandId) ?? 0) + value);
+      total += value;
+    }
+  }
+  if (!total) return [];
+
+  const ranked = [...tally.entries()].sort((a, b) => b[1] - a[1]);
+  const [topBrandId, topValue] = ranked[0];
+  const topShare = (topValue / total) * 100;
+  if (topShare < THRESHOLDS.r4RivalSubstitution.warningSharePct) return [];
+  const severity: Severity =
+    topShare >= THRESHOLDS.r4RivalSubstitution.criticalSharePct ? "critical" : "warning";
+  const impactValue = Math.round(topValue);
+
+  return [
+    {
+      id: `r4:${topBrandId}`,
+      rule: "r4-rival-substitution",
+      severity,
+      headline: `${brandName(topBrandId)} is filling the shelf where ${clientBrand.name} is out of stock`,
+      detail: `Across ${outletsAffected.size} outlets, ${brandName(topBrandId)} holds ${Math.round(topShare)}% of the space contested during your gaps.`,
+      impact: {
+        value: impactValue,
+        unit: "facing-days",
+        label: `${impactValue} facing-days occupied`,
+      },
+      trend: "new",
+      evidence: {
+        href: `/dashboard/oos-alerts`,
+        formula: `Σ (rival facings × days ${clientBrand.name} was out), for every gap where ${brandName(topBrandId)} held the same pack size in stock.`,
+        table: {
+          columns: ["Rival", "Contested facing-days", "Share of contested space"],
+          rows: ranked.map(([bId, val]) => [
+            brandName(bId),
+            Math.round(val),
+            `${Math.round((val / total) * 100)}%`,
+          ]),
+        },
+      },
+      entities: { brandId: topBrandId },
+    },
+  ];
+}
+
+/* ---------- R5 · price breach cluster (own currency: readings) ---------- */
+
+function r5PriceCluster(view: FilteredView): Insight[] {
+  const byOutlet = new Map<string, FilteredView["priceRows"]>();
+  for (const row of view.priceRows) {
+    if (!row.outlier) continue;
+    byOutlet.set(row.posId, [...(byOutlet.get(row.posId) ?? []), row]);
+  }
+
+  const insights: Insight[] = [];
+  for (const [posId, rows] of byOutlet) {
+    if (rows.length < THRESHOLDS.r5PriceCluster.minReadings) continue;
+    const outlet = posOf(posId);
+    if (!outlet) continue;
+    const meanDev = rows.reduce((s, r) => s + Math.abs(r.variance), 0) / rows.length;
+    const severity: Severity =
+      rows.length >= THRESHOLDS.r5PriceCluster.criticalCount
+        ? "critical"
+        : rows.length >= THRESHOLDS.r5PriceCluster.warningCount
+          ? "warning"
+          : "watch";
+    if (severity === "watch") continue;
+
+    insights.push({
+      id: `r5:${posId}`,
+      rule: "r5-price-cluster",
+      severity,
+      headline: `${outlet.code} is pricing ${rows.length} SKUs well off RRP`,
+      detail: `Average deviation ${Math.round(meanDev)}% — one retailer conversation fixes every line at once.`,
+      impact: {
+        value: rows.length,
+        unit: "readings",
+        label: `${rows.length} breaching readings`,
+      },
+      trend: "new",
+      evidence: {
+        href: `/dashboard/pricing?area=${encodeURIComponent(outlet.area)}`,
+        formula: `Count of shelf-price readings at ${outlet.code} more than 10% off each SKU's RRP.`,
+        table: {
+          columns: ["SKU", "Shelf price", "RRP", "Variance"],
+          rows: rows.map((r) => [
+            skuName(r.skuId),
+            r.price,
+            r.rrp,
+            `${r.variance > 0 ? "+" : ""}${r.variance}%`,
+          ]),
+        },
+      },
+      entities: { posId, area: outlet.area },
+    });
+  }
+  return insights.sort((a, b) => b.impact.value - a.impact.value);
+}
+
+/* ---------- R6 · channel weakness ---------- */
+
+function r6ChannelGap(view: FilteredView): Insight[] {
+  const clientListed = view.cells.filter(
+    (c) => skuOf(c.skuId)?.brandId === clientBrand.id && c.state !== "not-listed"
+  );
+  if (!clientListed.length) return [];
+  const overallAvail =
+    (clientListed.filter((c) => c.state === "in-stock").length / clientListed.length) * 100;
+
+  const channels = [...new Set(allPos.map((p) => p.channel))];
+  const insights: Insight[] = [];
+  for (const channel of channels) {
+    const chCells = clientListed.filter((c) => posOf(c.posId)?.channel === channel);
+    if (!chCells.length) continue;
+    const chAvail = (chCells.filter((c) => c.state === "in-stock").length / chCells.length) * 100;
+    const deficit = overallAvail - chAvail;
+    if (deficit < THRESHOLDS.r6ChannelGap.warningPt) continue;
+    const severity: Severity =
+      deficit >= THRESHOLDS.r6ChannelGap.criticalPt ? "critical" : "warning";
+
+    const deficitListings = Math.round((deficit / 100) * chCells.length);
+    const stockedClient = clientListed.filter((c) => c.state === "in-stock");
+    const avgFacings = stockedClient.length
+      ? stockedClient.reduce((s, c) => s + c.facings, 0) / stockedClient.length
+      : 2;
+    const impactValue = Math.round(deficitListings * avgFacings * DAYS_BETWEEN_VISITS);
+
+    insights.push({
+      id: `r6:${channel}`,
+      rule: "r6-channel-gap",
+      severity,
+      headline: `${channel} availability is ${round1(deficit)}pt behind your overall average`,
+      detail: `${chCells.length} of your listings sit in ${channel.toLowerCase()} outlets — a channel-wide fix reaches all of them at once.`,
+      impact: {
+        value: impactValue,
+        unit: "facing-days",
+        label: `≈${impactValue} facing-days below your average`,
+      },
+      trend: "new",
+      evidence: {
+        href: `/dashboard/shelf?channel=${encodeURIComponent(channel)}&mode=availability`,
+        formula: `(overall availability ${round1(overallAvail)}% − ${channel} ${round1(chAvail)}%) × ${chCells.length} listings ≈ ${deficitListings} extra gaps × ${round1(avgFacings)} average facings × ${DAYS_BETWEEN_VISITS} days.`,
+        table: {
+          columns: ["Metric", "Value"],
+          rows: [
+            ["Listings in channel", chCells.length],
+            ["In stock", chCells.filter((c) => c.state === "in-stock").length],
+            [`${channel} availability`, `${round1(chAvail)}%`],
+            ["Overall availability", `${round1(overallAvail)}%`],
+          ],
+        },
+      },
+      entities: { channel, brandId: clientBrand.id },
+    });
+  }
+  return insights.sort((a, b) => b.impact.value - a.impact.value);
+}
+
+/* ---------- R7 · fixture imbalance (bidirectional) ---------- */
+
+function r7FixtureImbalance(view: FilteredView): Insight[] {
+  const stocked = view.cells.filter((c) => c.state === "in-stock");
+  const cooler = stocked.filter((c) => COOLER_PACKS.has(skuOf(c.skuId)!.pack));
+  const ambient = stocked.filter((c) => !COOLER_PACKS.has(skuOf(c.skuId)!.pack));
+  const coolerTotal = cooler.reduce((s, c) => s + c.facings, 0);
+  const ambientTotal = ambient.reduce((s, c) => s + c.facings, 0);
+  if (!coolerTotal || !ambientTotal) return [];
+
+  const coolerClient = cooler
+    .filter((c) => skuOf(c.skuId)!.brandId === clientBrand.id)
+    .reduce((s, c) => s + c.facings, 0);
+  const ambientClient = ambient
+    .filter((c) => skuOf(c.skuId)!.brandId === clientBrand.id)
+    .reduce((s, c) => s + c.facings, 0);
+
+  const coolerShare = (coolerClient / coolerTotal) * 100;
+  const ambientShare = (ambientClient / ambientTotal) * 100;
+  const gap = Math.abs(coolerShare - ambientShare);
+  if (gap < THRESHOLDS.r7FixtureImbalance.warningPt) return [];
+
+  const coolerWeaker = coolerShare < ambientShare;
+  const weakerLabel = coolerWeaker ? "chilled coolers" : "the ambient take-home shelf";
+  const weakerTotal = coolerWeaker ? coolerTotal : ambientTotal;
+  const strongerShare = Math.max(coolerShare, ambientShare);
+  const weakerShare = Math.min(coolerShare, ambientShare);
+  const impactValue = Math.round(
+    ((strongerShare - weakerShare) / 100) * weakerTotal * DAYS_BETWEEN_VISITS
+  );
+
+  return [
+    {
+      id: "r7:fixture-imbalance",
+      rule: "r7-fixture-imbalance",
+      severity: "warning",
+      headline: `${clientBrand.name} is under-represented in ${weakerLabel}`,
+      detail: `Cooler share ${round1(coolerShare)}% vs ambient share ${round1(ambientShare)}% — the two fixture types aren't being negotiated evenly.`,
+      impact: {
+        value: impactValue,
+        unit: "facing-days",
+        label: `≈${impactValue} facing-days to reach parity`,
+      },
+      trend: "new",
+      evidence: {
+        href: `/dashboard/shelf?mode=share`,
+        formula: `(stronger fixture share ${round1(strongerShare)}% − weaker ${round1(weakerShare)}%) × ${Math.round(weakerTotal)} facings in that fixture × ${DAYS_BETWEEN_VISITS} days.`,
+        table: {
+          columns: ["Fixture", "Your facings", "Category facings", "Your share"],
+          rows: [
+            ["Chilled cooler", coolerClient, Math.round(coolerTotal), `${round1(coolerShare)}%`],
+            ["Ambient shelf", ambientClient, Math.round(ambientTotal), `${round1(ambientShare)}%`],
+          ],
+        },
+      },
+      entities: { brandId: clientBrand.id },
+    },
+  ];
+}
+
+/* ---------- R8 · momentum (a single fact, not a ranked list) ---------- */
+
+function computeMomentum(): Momentum | null {
+  const client = competitors.find((c) => c.isClient);
+  if (!client) return null;
+  const rivals = competitors
+    .filter((c) => !c.isClient && c.shareDelta >= THRESHOLDS.r8Momentum.rivalGainPt)
+    .sort((a, b) => b.shareDelta - a.shareDelta);
+  const conceding = client.shareDelta < 0 && rivals.length > 0;
+
+  return {
+    conceding,
+    clientDelta: client.shareDelta,
+    rivalBrandId: conceding ? rivals[0].brandId : null,
+    rivalDelta: conceding ? rivals[0].shareDelta : null,
+  };
+}
+
+/* ---------- entry point ---------- */
+
+export function generateInsights(view: FilteredView): InsightReport {
+  const presence = [
+    ...r1PersistentGaps(view),
+    ...r2DistrictDeficit(view),
+    ...r3DistributionGap(view),
+    ...r4RivalSubstitution(view),
+    ...r6ChannelGap(view),
+    ...r7FixtureImbalance(view),
+  ].sort((a, b) => b.impact.value - a.impact.value);
+
+  const pricing = r5PriceCluster(view).sort((a, b) => b.impact.value - a.impact.value);
+
+  return { presence, pricing, momentum: computeMomentum() };
+}
