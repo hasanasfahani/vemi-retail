@@ -1,78 +1,111 @@
 "use client";
 
-/* The control at the end of a Story Block. Creates one Priorities item
-   for the whole decision — carrying the rule, the scope and the impact
-   the chart already knows — rather than making someone retype it.
+/* The control at the end of a Story Block.
 
-   One decision, one action. The findings underneath it are named in
-   the notes so the person who picks it up knows which stores to hit,
-   but they do not become N separate tasks: that would rebuild the
-   very list this phase exists to collapse. */
+   It used to write on click — owner taken silently from the session,
+   no due date at all, and every finding flattened into a Notes blob.
+   Now it opens the Action Sheet, where those become choices and the
+   findings become line items someone can tick off later.
 
-import { useState, useSyncExternalStore } from "react";
+   One decision still makes one action. The findings underneath it are
+   its checklist, not N separate tasks: splitting them would rebuild
+   the very list the decisions rollup exists to collapse. */
+
+import { useEffect, useState, useSyncExternalStore } from "react";
+import ActionSheet, { type SheetDraft } from "@/components/portal/ActionSheet";
 import { readAccessSnapshot } from "@/lib/demoAccess";
+import type { ActionRecord } from "@/lib/actionsShared";
 
 const noopSubscribe = () => () => {};
 
 type Props = {
-  title: string;
-  rule: string;
-  where: string;
-  notes: string;
+  draft: SheetDraft;
   label?: string;
 };
 
-export default function DecisionAction({
-  title,
-  rule,
-  where,
-  notes,
-  label = "Create action",
-}: Props) {
-  const [state, setState] = useState<"idle" | "saving" | "done" | "error">("idle");
+export default function DecisionAction({ draft, label = "Create action" }: Props) {
+  const [open, setOpen] = useState(false);
+  const [added, setAdded] = useState(false);
+  const [existing, setExisting] = useState<ActionRecord[]>([]);
   const session = useSyncExternalStore(noopSubscribe, readAccessSnapshot, () => null);
 
-  const submit = async () => {
-    if (state === "saving" || state === "done") return;
-    setState("saving");
-    try {
-      const res = await fetch("/api/actions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title,
-          owner: session?.fullName ?? "",
-          rule,
-          where,
-          notes,
-        }),
-      });
-      const data = await res.json().catch(() => null);
-      if (!res.ok || !data?.ok) throw new Error("failed");
-      setState("done");
-    } catch {
-      setState("error");
-    }
+  /* Owners already in the base become the suggestion list, so the
+     roster maintains itself instead of being configured somewhere. The
+     same fetch powers the duplicate check. Loaded when the sheet
+     opens, not on mount — this control sits on every chart, and
+     fetching for all of them on page load would be noise. */
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/actions", { cache: "no-store" });
+        const data = await res.json();
+        if (!cancelled && res.ok && data?.ok) setExisting(data.actions ?? []);
+      } catch {
+        /* Suggestions and the duplicate hint are both nice-to-have —
+           the sheet works without them. */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [open]);
+
+  const ownerSuggestions = [
+    ...new Set(existing.map((a) => a.owner).filter(Boolean)),
+  ].sort();
+
+  /* Warn, never block: a second run at the same finding is sometimes
+     legitimate, and the reader is better placed to judge than a rule. */
+  const clash = existing.find(
+    (a) =>
+      a.status !== "Done" &&
+      ((draft.insightId && a.insightId === draft.insightId) ||
+        a.title === draft.title)
+  );
+  const duplicateWarning = clash
+    ? `“${clash.title}” is already open${clash.owner ? `, owned by ${clash.owner}` : ""}. You can still add this.`
+    : null;
+
+  const submit = async (payload: Parameters<
+    NonNullable<React.ComponentProps<typeof ActionSheet>["onSubmit"]>
+  >[0]) => {
+    const res = await fetch("/api/actions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok || !data?.ok) throw new Error("failed");
+    setAdded(true);
+    setOpen(false);
   };
 
   return (
-    <button
-      type="button"
-      onClick={submit}
-      disabled={state === "saving" || state === "done"}
-      className={`shrink-0 rounded-[8px] px-3.5 py-2 text-[13px] font-semibold transition-colors ${
-        state === "done"
-          ? "bg-canvas text-ink-500"
-          : "bg-violet text-white hover:bg-violet-ink"
-      }`}
-    >
-      {state === "done"
-        ? "Added to Priorities ✓"
-        : state === "saving"
-          ? "Adding…"
-          : state === "error"
-            ? "Couldn't add — retry"
-            : label}
-    </button>
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className={`shrink-0 rounded-[8px] px-3.5 py-2 text-[13px] font-semibold transition-colors ${
+          added
+            ? "bg-canvas text-ink-500"
+            : "bg-violet text-white hover:bg-violet-ink"
+        }`}
+      >
+        {added ? "Added to Priorities ✓" : label}
+      </button>
+
+      {open && (
+        <ActionSheet
+          draft={draft}
+          defaultOwner={session?.fullName ?? ""}
+          ownerSuggestions={ownerSuggestions}
+          duplicateWarning={duplicateWarning}
+          onClose={() => setOpen(false)}
+          onSubmit={submit}
+        />
+      )}
+    </>
   );
 }

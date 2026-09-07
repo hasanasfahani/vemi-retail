@@ -6,6 +6,7 @@ import DivergingBar from "@/components/portal/charts/DivergingBar";
 import RankedBar from "@/components/portal/charts/RankedBar";
 import SegmentedMeter from "@/components/portal/charts/SegmentedMeter";
 import type { Decision } from "@/lib/decisions";
+import { draftFromDecision } from "@/lib/actionDrafts";
 import type { DecisionChart, ChartSpec } from "@/lib/decisionCharts";
 
 /* One decision, rendered as a Story Block: the move as the headline,
@@ -103,15 +104,7 @@ export default function DecisionBlock({
           soWhat={soWhat}
           table={table}
           action={
-            <DecisionAction
-              title={decision.headline}
-              rule={decision.findings[0]?.rule ?? decision.id}
-              where={decision.findings[0]?.scope.label ?? "Erbil"}
-              notes={`${decision.detail}\n\n${decision.findings
-                .slice(0, 12)
-                .map((f) => `• ${f.headline} (${f.impact.label})`)
-                .join("\n")}`}
-            />
+            <DecisionAction draft={draftFromDecision(decision)} />
           }
         >
           {renderChart(chart)}

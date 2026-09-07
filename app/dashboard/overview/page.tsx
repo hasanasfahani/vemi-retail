@@ -13,6 +13,7 @@ import { EMPTY_FILTERS, applyFilters } from "@/lib/portalFilters";
 import { generateInsights } from "@/lib/insights";
 import { buildDecisions } from "@/lib/decisions";
 import { chartFor, districtShares } from "@/lib/decisionCharts";
+import { routeDraft } from "@/lib/actionDrafts";
 import { formatImpact } from "@/lib/economics";
 import {
   headline,
@@ -202,10 +203,7 @@ export default function CommandCenterPage() {
             }}
             action={
               <DecisionAction
-                title={`Route a rep through ${concentration.scope.label}`}
-                rule={concentration.rule}
-                where={concentration.scope.label}
-                notes={concentration.detail}
+                draft={routeDraft(concentration)}
                 label="Plan the route"
               />
             }

@@ -20,6 +20,7 @@ import type { ReactNode } from "react";
 import ChartFrame from "@/components/portal/ChartFrame";
 import DecisionAction from "@/components/portal/DecisionAction";
 import type { Insight } from "@/lib/insights";
+import { draftFromFindings } from "@/lib/actionDrafts";
 
 type Props = {
   title: string;
@@ -66,17 +67,7 @@ export default function ChartStory({
       action={
         top ? (
           <DecisionAction
-            title={top.headline}
-            rule={top.rule}
-            where={top.scope.label}
-            notes={
-              findings.length > 1
-                ? `${top.detail}\n\n${findings
-                    .slice(0, 10)
-                    .map((f) => `• ${f.headline} (${f.impact.label})`)
-                    .join("\n")}`
-                : top.detail
-            }
+            draft={draftFromFindings(findings, title)}
             label={actionLabel}
           />
         ) : undefined

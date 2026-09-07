@@ -23,6 +23,10 @@ type UpdateInput = Partial<{
   owner: string;
   notes: string;
   dueDate: string;
+  /* Which one box changed, and to what. The server reads the record
+     and flips just that item, so two people working the same action
+     cannot overwrite each other's ticks. */
+  toggleItem: { id: string; done: boolean };
 }>;
 
 async function parseOrThrow(res: Response) {

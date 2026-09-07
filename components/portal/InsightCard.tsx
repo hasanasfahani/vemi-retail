@@ -10,6 +10,8 @@ import { useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { intensityOf, type Insight } from "@/lib/insights";
 import { readAccessSnapshot } from "@/lib/demoAccess";
+import ActionSheet from "@/components/portal/ActionSheet";
+import { draftFromInsight } from "@/lib/actionDrafts";
 
 const noopSubscribe = () => () => {};
 
@@ -36,32 +38,9 @@ export default function InsightCard({
   rank?: number;
 }) {
   const [open, setOpen] = useState(false);
-  const [state, setState] = useState<"idle" | "saving" | "done" | "error">("idle");
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [added, setAdded] = useState(false);
   const session = useSyncExternalStore(noopSubscribe, readAccessSnapshot, () => null);
-
-  const addToPriorities = async () => {
-    if (state === "saving" || state === "done") return;
-    setState("saving");
-    try {
-      const res = await fetch("/api/actions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: insight.headline,
-          owner: session?.fullName ?? "",
-          insightId: insight.id,
-          rule: insight.rule,
-          where: insight.scope.label,
-          notes: insight.detail,
-        }),
-      });
-      const data = await res.json().catch(() => null);
-      if (!res.ok || !data?.ok) throw new Error("failed");
-      setState("done");
-    } catch {
-      setState("error");
-    }
-  };
 
   return (
     <li className="border-b border-line py-3.5 last:border-0">
@@ -127,17 +106,11 @@ export default function InsightCard({
             </button>
             <button
               type="button"
-              onClick={addToPriorities}
-              disabled={state === "saving" || state === "done"}
+              onClick={() => setSheetOpen(true)}
+              disabled={added}
               className="text-[12px] font-semibold text-violet-ink hover:underline disabled:no-underline disabled:text-ink-400"
             >
-              {state === "done"
-                ? "Added ✓"
-                : state === "saving"
-                  ? "Adding…"
-                  : state === "error"
-                    ? "Couldn't add — retry"
-                    : "Turn into action"}
+              {added ? "Added ✓" : "Turn into action"}
             </button>
           </div>
 
@@ -174,6 +147,26 @@ export default function InsightCard({
           )}
         </div>
       </div>
+
+      {sheetOpen && (
+        <ActionSheet
+          draft={draftFromInsight(insight)}
+          defaultOwner={session?.fullName ?? ""}
+          ownerSuggestions={[]}
+          onClose={() => setSheetOpen(false)}
+          onSubmit={async (payload) => {
+            const res = await fetch("/api/actions", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            });
+            const data = await res.json().catch(() => null);
+            if (!res.ok || !data?.ok) throw new Error("failed");
+            setAdded(true);
+            setSheetOpen(false);
+          }}
+        />
+      )}
     </li>
   );
 }

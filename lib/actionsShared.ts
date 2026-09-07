@@ -15,7 +15,20 @@ export const ACTIONS_FIELD = {
   status: "Status",
   dueDate: "Due Date",
   notes: "Notes",
+  items: "Items",
+  progress: "Progress",
 } as const;
+
+/* One stop in a piece of work — an outlet to visit, a district to
+   route through, a retailer to call. Actions that are genuinely a
+   single conversation (a fixture negotiation) carry none, and the UI
+   must stay correct when the list is empty. */
+export type ActionItem = {
+  id: string;
+  label: string;
+  where?: string;
+  done: boolean;
+};
 
 export type ActionStatus = "Open" | "In Progress" | "Done";
 export const ACTION_STATUSES: ActionStatus[] = ["Open", "In Progress", "Done"];
@@ -30,6 +43,7 @@ export type ActionRecord = {
   status: ActionStatus;
   dueDate?: string;
   notes?: string;
+  items: ActionItem[];
   /* Airtable's own createdTime — no "Created" field write needed,
      every record carries this metadata regardless of its fields. */
   createdAt: string;
@@ -64,6 +78,52 @@ export function toAction(record: RawAirtableRecord): ActionRecord {
       : "Open",
     dueDate: (f[ACTIONS_FIELD.dueDate] as string) || undefined,
     notes: (f[ACTIONS_FIELD.notes] as string) || undefined,
+    items: parseItems(f[ACTIONS_FIELD.items]),
     createdAt: record.createdTime,
   };
+}
+
+/* ---------- line items ----------
+
+   Items live as JSON in one long-text field. That is a deliberate
+   trade: one field to add, and every change to a checklist is a single
+   atomic write rather than a create-parent-then-create-children dance
+   that can half-succeed — which matters because this queue is
+   fail-loud by design. The cost is that the raw field is opaque inside
+   Airtable, which the sibling `Progress` string exists to offset.
+
+   Parsing is defensive on purpose: this field is hand-editable in
+   Airtable, so malformed content is a question of when, not if. Bad
+   JSON degrades to "no items", which renders as today's plain card,
+   rather than taking the Priorities page down. */
+export function parseItems(raw: unknown): ActionItem[] {
+  if (typeof raw !== "string" || !raw.trim()) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter(
+        (i): i is Record<string, unknown> =>
+          !!i && typeof i === "object" && typeof i.label === "string"
+      )
+      .map((i, index) => ({
+        id: typeof i.id === "string" ? i.id : `item-${index}`,
+        label: i.label as string,
+        where: typeof i.where === "string" ? i.where : undefined,
+        done: i.done === true,
+      }));
+  } catch {
+    return [];
+  }
+}
+
+export function serialiseItems(items: ActionItem[]): string {
+  return items.length ? JSON.stringify(items) : "";
+}
+
+/* The human-readable sibling of the JSON — so anyone working in the
+   base sees where an action stands without parsing anything. */
+export function progressOf(items: ActionItem[]): string {
+  if (!items.length) return "";
+  return `${items.filter((i) => i.done).length}/${items.length}`;
 }
