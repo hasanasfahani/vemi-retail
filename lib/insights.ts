@@ -58,6 +58,7 @@ import {
   visitLabel,
   competitors,
 } from "./portalData";
+import { districtPoints, ERBIL_CITADEL, type DistrictPoint } from "./portal";
 import type { FilteredView } from "./portalFilters";
 
 export type Severity = "critical" | "warning" | "watch";
@@ -73,7 +74,8 @@ export type RuleId =
   | "r7-fixture-imbalance"
   | "r9-dark-outlet"
   | "r10-new-gap-cluster"
-  | "r11-assortment-gap";
+  | "r11-assortment-gap"
+  | "r12-geographic-concentration";
 
 export type EvidenceTable = { columns: string[]; rows: (string | number)[][] };
 
@@ -100,6 +102,17 @@ export type Insight = {
      so the ranking rule is visible, not inferred. */
   scope: { outlets: number; label: string };
   trend: Trend;
+  /* Some findings are natively a two-point comparison — a client share
+     in one fixture against another, this visit against the last. Where
+     that is true the rule states the pair here, so a chart can draw it
+     without parsing prose or re-deriving numbers the rule already
+     computed. Absent on rules whose shape is a ranking, not a pair. */
+  pair?: {
+    aLabel: string;
+    bLabel: string;
+    unit: string;
+    rows: { id: string; label: string; a: number; b: number; emphasis?: boolean }[];
+  };
   evidence: { href: string; formula: string; table: EvidenceTable };
   entities: {
     brandId?: string;
@@ -206,6 +219,23 @@ export const THRESHOLDS = {
      (a Supermarket carrying just 1 of 4 against a median of 4) is 3
      short — the observed ceiling. Warning at 2, critical at 3. */
   r11AssortmentGap: { warningCount: 2, criticalCount: 3 },
+
+  /* Flagged districts that sit next to each other on the map — one
+     route-planning problem rather than N separate district problems.
+
+     "Adjacent" needs a distance, and it is the one judgement number in
+     this phase, so it is calibrated against the real spread rather
+     than picked round. Across all 153 district pairs in the panel the
+     separation runs: min 0.73km, p10 1.89, p25 2.75, median 4.54, max
+     18.63. A 2.5km bar therefore means "closer than roughly the
+     nearest fifth of all district pairs" — tight enough that a rep can
+     work the block in one run, loose enough to survive the centroids
+     being approximate.
+
+     Three is the floor for calling it a concentration: two adjacent
+     districts are a pair, not a pattern, and R2 already names them
+     individually. */
+  r12GeographicConcentration: { adjacentKm: 2.5, minDistricts: 3 },
 } as const;
 
 const COOLER_PACKS = new Set(["can-330", "pet-500", "glass-300"]);
@@ -684,6 +714,23 @@ function r7FixtureImbalance(view: FilteredView): Insight[] {
       },
       scope: { outlets: view.posCount, label: `citywide (${view.posCount} outlets)` },
       trend: "new",
+      /* Natively a pair: the same measure in two fixture types. The gap
+         between the marks IS the finding, which is what the dumbbell
+         draws — no time axis required. */
+      pair: {
+        aLabel: "Ambient shelf",
+        bLabel: "Chilled cooler",
+        unit: "%",
+        rows: [
+          {
+            id: "fixture",
+            label: `${clientBrand.name} share`,
+            a: round1(ambientShare),
+            b: round1(coolerShare),
+            emphasis: true,
+          },
+        ],
+      },
       evidence: {
         href: `/dashboard/shelf?mode=share`,
         formula: `(stronger fixture share ${round1(strongerShare)}% − weaker ${round1(weakerShare)}%) × ${Math.round(weakerTotal)} facings in that fixture × ${DAYS_BETWEEN_VISITS} days.`,
@@ -895,6 +942,137 @@ function r11AssortmentGap(view: FilteredView): Insight[] {
   return insights.sort(byIntensity);
 }
 
+/* ---------- R12 · geographic concentration of district deficits ----------
+
+   The strongest fact this dataset produces, and the one a ranked list
+   of individual districts structurally cannot state: when the districts
+   running behind are also next to each other, that is not four store
+   problems, it is one route. R2 finds the districts; R12 notices they
+   touch.
+
+   Distances are real great-circle kilometres between the district
+   centroids already carried in lib/portal.ts, so this is arithmetic on
+   coordinates, not an editorial reading of a map. */
+
+const EARTH_RADIUS_KM = 6371;
+
+function haversineKm(a: DistrictPoint, b: DistrictPoint) {
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(b.lat - a.lat);
+  const dLng = toRad(b.lng - a.lng);
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng / 2) ** 2;
+  return 2 * EARTH_RADIUS_KM * Math.asin(Math.sqrt(h));
+}
+
+function r12GeographicConcentration(districtInsights: Insight[]): Insight[] {
+  if (districtInsights.length < THRESHOLDS.r12GeographicConcentration.minDistricts)
+    return [];
+
+  /* Only districts we can actually place on the map can be clustered. */
+  const flagged = districtInsights
+    .map((insight) => ({
+      insight,
+      point: districtPoints.find((p) => p.name === insight.entities.area),
+    }))
+    .filter((f): f is { insight: Insight; point: DistrictPoint } => !!f.point);
+
+  /* Single-link clustering: two districts join the same group when they
+     are within the adjacency bar of each other, transitively. */
+  const seen = new Set<string>();
+  const groups: { insight: Insight; point: DistrictPoint }[][] = [];
+  for (const start of flagged) {
+    if (seen.has(start.point.name)) continue;
+    seen.add(start.point.name);
+    const stack = [start];
+    const group: typeof flagged = [];
+    while (stack.length) {
+      const current = stack.pop()!;
+      group.push(current);
+      for (const other of flagged) {
+        if (seen.has(other.point.name)) continue;
+        if (
+          haversineKm(current.point, other.point) <=
+          THRESHOLDS.r12GeographicConcentration.adjacentKm
+        ) {
+          seen.add(other.point.name);
+          stack.push(other);
+        }
+      }
+    }
+    groups.push(group);
+  }
+
+  const insights: Insight[] = [];
+  for (const group of groups) {
+    if (group.length < THRESHOLDS.r12GeographicConcentration.minDistricts) continue;
+
+    const names = group
+      .map((g) => g.point.name)
+      .sort((a, b) => a.localeCompare(b));
+    const outlets = group.reduce((sum, g) => sum + g.insight.scope.outlets, 0);
+    const impactValue = Math.round(
+      group.reduce((sum, g) => sum + g.insight.impact.value, 0)
+    );
+
+    /* How far the whole block sits from the Citadel decides whether it
+       reads as the city core or an outlying pocket — the difference
+       between "work the centre" and "work the ring road". */
+    const meanKm =
+      group.reduce(
+        (sum, g) =>
+          sum +
+          haversineKm(g.point, {
+            name: "citadel",
+            lat: ERBIL_CITADEL.lat,
+            lng: ERBIL_CITADEL.lng,
+          }),
+        0
+      ) / group.length;
+    const where = meanKm <= 3 ? "the old city core" : "one pocket of the city";
+
+    insights.push({
+      id: `r12:${names.join("+")}`,
+      rule: "r12-geographic-concentration",
+      confidence: "estimated",
+      severity: "critical",
+      headline: `Your weakness is concentrated in ${where} — ${group.length} adjacent districts, not ${group.length} separate problems`,
+      detail: `${names.join(", ")} all run behind your citywide share and all sit within ${THRESHOLDS.r12GeographicConcentration.adjacentKm}km of each other. That makes this a route-planning decision rather than ${group.length} store conversations.`,
+      impact: {
+        value: impactValue,
+        unit: "facing-days",
+        label: `≈${impactValue} facing-days across ${outlets} outlets`,
+      },
+      scope: { outlets, label: `${group.length} adjacent districts` },
+      trend: "new",
+      evidence: {
+        href: `/dashboard/shelf?area=${encodeURIComponent(names.join(","))}&mode=share`,
+        formula: `Districts flagged by R2, then grouped where centroids sit within ${THRESHOLDS.r12GeographicConcentration.adjacentKm}km of one another (great-circle). Groups of ${THRESHOLDS.r12GeographicConcentration.minDistricts}+ are reported; impact is the sum of the member districts'.`,
+        table: {
+          columns: ["District", "Outlets", "Behind city by", "km from Citadel"],
+          rows: group
+            .slice()
+            .sort((a, b) => b.insight.impact.value - a.insight.impact.value)
+            .map((g) => [
+              g.point.name,
+              g.insight.scope.outlets,
+              g.insight.headline.match(/([\d.]+pt)/)?.[1] ?? "—",
+              haversineKm(g.point, {
+                name: "citadel",
+                lat: ERBIL_CITADEL.lat,
+                lng: ERBIL_CITADEL.lng,
+              }).toFixed(1),
+            ]),
+        },
+      },
+      entities: { brandId: clientBrand.id },
+    });
+  }
+
+  return insights.sort(byIntensity);
+}
+
 /* ---------- R8 · momentum (a single fact, not a ranked list) ---------- */
 
 function computeMomentum(): Momentum | null {
@@ -916,9 +1094,15 @@ function computeMomentum(): Momentum | null {
 /* ---------- entry point ---------- */
 
 export function generateInsights(view: FilteredView): InsightReport {
+  /* R2's output feeds R12 — the concentration rule reads the district
+     findings rather than recomputing them, so the two can never
+     disagree about which districts are behind. */
+  const districts = r2DistrictDeficit(view);
+
   const presence = [
     ...r1PersistentGaps(view),
-    ...r2DistrictDeficit(view),
+    ...districts,
+    ...r12GeographicConcentration(districts),
     ...r3DistributionGap(view),
     ...r4RivalSubstitution(view),
     ...r6ChannelGap(view),
