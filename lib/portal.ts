@@ -52,7 +52,10 @@ export type NavGroup = { label: string; items: NavItem[] };
 export const portalNavGroups: NavGroup[] = [
   {
     label: "Executive",
-    items: [{ href: "/dashboard/overview", label: "Command Center" }],
+    items: [
+      { href: "/dashboard/overview", label: "Command Center" },
+      { href: "/dashboard/digest", label: "Digest" },
+    ],
   },
   {
     label: "Operate",
