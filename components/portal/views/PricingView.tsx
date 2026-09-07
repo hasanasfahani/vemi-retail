@@ -8,6 +8,7 @@ import FilterBar, {
 } from "@/components/portal/FilterBar";
 import StatTile from "@/components/portal/charts/StatTile";
 import PriceBand from "@/components/portal/charts/PriceBand";
+import RankedBar from "@/components/portal/charts/RankedBar";
 import { OutletButton } from "@/components/portal/OutletDrawer";
 import { scope } from "@/lib/portal";
 import { applyFilters } from "@/lib/portalFilters";
@@ -23,6 +24,72 @@ export default function PricingView() {
     () => applyFilters(filters, visitData),
     [filters, visitData]
   );
+
+  /* Concentration: which SKUs actually drive the compliance figure.
+     Deliberately NOT a Pareto with a cumulative line — that needs a
+     second y-axis, and a dual-axis chart invents a relationship
+     between two scales the reader cannot verify. One axis (count of
+     breaching readings), sorted, with the head of the distribution
+     emphasised and the cumulative share stated in words instead. */
+  const concentration = useMemo(() => {
+    const bySku = new Map<string, number>();
+    const byOutlet = new Map<string, number>();
+    for (const o of view.priceRows) {
+      if (!o.outlier) continue;
+      bySku.set(o.skuId, (bySku.get(o.skuId) ?? 0) + 1);
+      byOutlet.set(o.posId, (byOutlet.get(o.posId) ?? 0) + 1);
+    }
+
+    /* The "head" is the shortest run covering 80% of all breaches. */
+    const head = (counts: Map<string, number>) => {
+      const sorted = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+      const total = sorted.reduce((s, [, n]) => s + n, 0);
+      let running = 0;
+      let n = 0;
+      for (const [, v] of sorted) {
+        if (total && running / total >= 0.8) break;
+        running += v;
+        n += 1;
+      }
+      return {
+        sorted,
+        total,
+        headCount: n,
+        headShare: total ? Math.round((running / total) * 100) : 0,
+      };
+    };
+
+    const outlets = head(byOutlet);
+    const skus = head(bySku);
+
+    /* Which axis the problem actually concentrates on is a question
+       about the data, not a design preference — so it is measured
+       rather than assumed. On this panel breaches are FLAT across SKUs
+       (13 of 20 carry 80%: nearly every pack) but sharply concentrated
+       across outlets (6 of 100 audited carry 83%). That makes this a
+       retailer-compliance problem, not a product-pricing one, and the
+       chart is drawn on the axis where the concentration is real. */
+    const skuIsFlat = skus.sorted.length
+      ? skus.headCount / skus.sorted.length > 0.4
+      : true;
+
+    return {
+      total: outlets.total,
+      outletCount: outlets.sorted.length,
+      headCount: outlets.headCount,
+      headShare: outlets.headShare,
+      skuHeadCount: skus.headCount,
+      skuCount: skus.sorted.length,
+      skuIsFlat,
+      rows: outlets.sorted.map(([posId, n], i) => ({
+        id: posId,
+        label: posOf(posId)?.code ?? posId,
+        meta: posOf(posId)?.area,
+        value: n,
+        emphasis: i < outlets.headCount,
+      })),
+    };
+  }, [view.priceRows]);
 
   /* Bands rebuilt from the filtered observations, so filtering to a
      channel really does show that channel's spread. */
@@ -122,6 +189,57 @@ export default function PricingView() {
           footnote={`${outliers.length} readings over 10% off RRP`}
         />
       </div>
+
+      <section className="mt-4 rounded-[18px] border border-line bg-white p-5 sm:p-6">
+        <h2 className="t-h3">What drives the compliance number</h2>
+        <p className="mt-1 text-sm text-ink-500">
+          {concentration.total ? (
+            <>
+              Breaching readings by outlet, worst first.{" "}
+              <span className="font-semibold text-ink-900">
+                {concentration.headCount} of the {view.posCount} outlets audited
+                carry {concentration.headShare}%
+              </span>{" "}
+              of every breach in this selection.
+              {concentration.skuIsFlat && (
+                <>
+                  {" "}
+                  Across SKUs it is almost flat —{" "}
+                  {concentration.skuHeadCount} of {concentration.skuCount} packs
+                  make up the same 80% — so this is a retailer compliance
+                  problem, not a product pricing one.
+                </>
+              )}
+            </>
+          ) : (
+            "No reading in this selection is more than 10% away from its RRP."
+          )}
+        </p>
+        {concentration.rows.length ? (
+          <div className="mt-5">
+            <RankedBar
+              rows={concentration.rows}
+              unit=""
+              labelWidth={168}
+              topN={6}
+              previousLabel=""
+            />
+            <p className="mt-3 border-t border-line pt-3 text-[12.5px] text-ink-500">
+              <span className="font-semibold text-ink-700">
+                How to read this.{" "}
+              </span>
+              Each bar is one outlet and its length is how many of its shelf
+              prices were more than 10% off RRP. Violet marks the few that carry
+              most of the problem — each one is a single retailer conversation.
+            </p>
+          </div>
+        ) : (
+          <p className="mt-4 flex items-center gap-1.5 text-sm text-ink-400">
+            <span className="dot" style={{ background: "var(--color-good)" }} />
+            Nothing is breaching in this selection.
+          </p>
+        )}
+      </section>
 
       <section className="mt-4 rounded-[18px] border border-line bg-white p-5 sm:p-6">
         <h2 className="t-h3">Observed price range by SKU</h2>
