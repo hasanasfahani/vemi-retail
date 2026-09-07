@@ -1,10 +1,12 @@
 import Link from "next/link";
 import ChartFrame from "@/components/portal/ChartFrame";
 import DecisionAction from "@/components/portal/DecisionAction";
-import Dumbbell, { type DumbbellRow } from "@/components/portal/charts/Dumbbell";
-import DivergingBar, { type DivergingRow } from "@/components/portal/charts/DivergingBar";
-import RankedBar, { type BarRow } from "@/components/portal/charts/RankedBar";
+import Dumbbell from "@/components/portal/charts/Dumbbell";
+import DivergingBar from "@/components/portal/charts/DivergingBar";
+import RankedBar from "@/components/portal/charts/RankedBar";
+import SegmentedMeter from "@/components/portal/charts/SegmentedMeter";
 import type { Decision } from "@/lib/decisions";
+import type { DecisionChart, ChartSpec } from "@/lib/decisionCharts";
 
 /* One decision, rendered as a Story Block: the move as the headline,
    the chart that proves it, how to read that chart, and the control
@@ -15,20 +17,9 @@ import type { Decision } from "@/lib/decisions";
    distance-from-my-own-average gets the diverging bar, and a plain
    "which of these is worst" gets ranked bars. */
 
-export type DecisionChart =
-  | { kind: "diverging"; rows: DivergingRow[]; baselineLabel: string; unit?: string }
-  | { kind: "dumbbell"; rows: DumbbellRow[]; aLabel: string; bLabel: string; unit?: string }
-  | { kind: "ranked"; rows: BarRow[]; unit?: string };
-
-type Props = {
+type Props = ChartSpec & {
   decision: Decision;
   rank: number;
-  chart: DecisionChart;
-  chartTitle: string;
-  chartSubtitle?: string;
-  howToRead: string;
-  soWhat: string;
-  table?: { columns: string[]; rows: (string | number)[][] };
 };
 
 /* One element, not three conditionals — a bare `cond && <X/>` trio
@@ -50,6 +41,14 @@ function renderChart(chart: DecisionChart) {
           aLabel={chart.aLabel}
           bLabel={chart.bLabel}
           unit={chart.unit}
+        />
+      );
+    case "meter":
+      return (
+        <SegmentedMeter
+          rows={chart.rows}
+          unitLabel={chart.unitLabel}
+          benchmarkLabel={chart.benchmarkLabel}
         />
       );
     case "ranked":

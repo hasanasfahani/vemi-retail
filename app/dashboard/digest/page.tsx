@@ -1,11 +1,16 @@
 import Link from "next/link";
 import PageHeader from "@/components/portal/PageHeader";
 import PrintButton from "@/components/portal/PrintButton";
-import InsightCard from "@/components/portal/InsightCard";
 import StatTile from "@/components/portal/charts/StatTile";
+import ChartFrame from "@/components/portal/ChartFrame";
+import DivergingBar from "@/components/portal/charts/DivergingBar";
+import DecisionBlock from "@/components/portal/DecisionBlock";
 import { scope } from "@/lib/portal";
 import { EMPTY_FILTERS, applyFilters } from "@/lib/portalFilters";
 import { generateInsights } from "@/lib/insights";
+import { buildDecisions } from "@/lib/decisions";
+import { chartFor, districtShares } from "@/lib/decisionCharts";
+import { formatImpact } from "@/lib/economics";
 import { headline, clientBrand, brandName, latest } from "@/lib/portalData";
 import { listActions } from "@/lib/actionsServer";
 import type { ActionRecord } from "@/lib/actionsShared";
@@ -14,21 +19,54 @@ export const metadata = {
   title: "Digest",
 };
 
-/* Phase 10 — the executive digest. Same content model as Command
-   Center, condensed to what a reader needs in the 30 seconds before
-   a meeting, plus the one thing Command Center doesn't show: whether
-   anyone followed through on what the last cycle flagged.
+/* The executive digest — Command Center's content, condensed to what a
+   reader needs in the 30 seconds before a meeting, plus the one thing
+   Command Center doesn't show: whether anyone acted on what the last
+   cycle flagged.
 
-   Triggered by the visit cycle, not a clock — this page always
-   reflects currentSnapshot vs previousSnapshot, so a new digest
-   exists the moment a new visit is published, with nothing to
-   schedule. No email yet: the URL itself is the shareable artifact,
-   and the print button turns it into a PDF for whoever needs one
-   in their inbox. */
+   Phase 13 brings it onto the same decisions architecture. It used to
+   render a ranked list of findings, which meant the page a CEO forwards
+   to their board was the one surface still arguing in text — the exact
+   thing this phase set out to fix. Two decisions rather than three,
+   because this is the shorter read, and the charts come from the same
+   `chartFor` the Command Center uses so the two pages can never
+   disagree about which chart proves which decision.
+
+   Triggered by the visit cycle, not a clock: the page always reflects
+   currentSnapshot vs previousSnapshot, so a new digest exists the
+   moment a new visit is published, with nothing to schedule. */
 export default async function DigestPage() {
   const view = applyFilters(EMPTY_FILTERS, latest);
-  const { presence, pricing, momentum } = generateInsights(view);
-  const topPresence = presence[0];
+  const report = generateInsights(view);
+  const { decisions, reprice } = buildDecisions(report);
+  const { momentum } = report;
+  const top = decisions.slice(0, 2);
+
+  const concentration = report.presence.find(
+    (i) => i.rule === "r12-geographic-concentration"
+  );
+  const clustered = new Set(
+    concentration?.evidence.table.rows.map((r) => String(r[0])) ?? []
+  );
+  const flaggedSeverity = new Map(
+    report.presence
+      .filter((i) => i.rule === "r2-district-deficit")
+      .map((f) => [f.entities.area ?? "", f.severity])
+  );
+  const districtRows = districtShares(view).map((d) => ({
+    id: d.area,
+    label: d.area,
+    delta: d.delta,
+    severity:
+      flaggedSeverity.get(d.area) === "critical"
+        ? ("critical" as const)
+        : flaggedSeverity.has(d.area)
+          ? ("warning" as const)
+          : null,
+    meta: clustered.has(d.area)
+      ? `${d.outlets} outlets · in the cluster`
+      : `${d.outlets} outlets`,
+  }));
 
   const actionsResult = await listActions();
   const actions = actionsResult.ok ? actionsResult.actions : [];
@@ -46,22 +84,33 @@ export default async function DigestPage() {
 
       {/* verdict */}
       <section className="mb-4 rounded-[18px] border border-line bg-white p-5 sm:p-6">
-        {topPresence ? (
+        {top.length ? (
           <>
             <div className="flex items-center gap-2">
               <span
                 className="dot"
                 style={{
                   background:
-                    topPresence.severity === "critical"
+                    top[0].severity === "critical"
                       ? "var(--color-critical)"
                       : "var(--color-warn)",
                 }}
               />
-              <span className="t-eyebrow">Biggest issue this cycle</span>
+              <span className="t-eyebrow">Your first move this cycle</span>
             </div>
             <p className="mt-2 t-h3 !text-[19px] leading-snug">
-              {topPresence.headline}
+              {top[0].headline}
+            </p>
+            <p className="mt-1 text-sm text-ink-500">
+              <span className="mono font-semibold text-ink-900">
+                {formatImpact(top[0].impact.value)}
+              </span>
+              {" at stake — "}
+              {decisions.length > 1
+                ? `${decisions.length - 1} more decision${
+                    decisions.length > 2 ? "s" : ""
+                  } this cycle.`
+                : "the only decision flagged this cycle."}
             </p>
           </>
         ) : (
@@ -72,6 +121,10 @@ export default async function DigestPage() {
             </div>
             <p className="mt-2 t-h3 !text-[19px] leading-snug">
               Nothing crossed a threshold this cycle.
+            </p>
+            <p className="mt-1 text-sm text-ink-500">
+              No district, channel, SKU or outlet is currently outside its
+              expected range. We looked — that is the result.
             </p>
           </>
         )}
@@ -114,35 +167,73 @@ export default async function DigestPage() {
         />
       </div>
 
-      <div className="mt-4 grid gap-4 xl:grid-cols-2">
-        {/* needs attention, condensed */}
-        <section className="rounded-[18px] border border-line bg-white p-5 sm:p-6">
-          <h2 className="t-h3">Needs attention</h2>
-          <p className="mt-1 mb-1 text-sm text-ink-500">
-            Top findings this cycle — measured losses first, then by
-            concentration.
-          </p>
-          {presence.length ? (
-            <ul>
-              {presence.slice(0, 3).map((insight, i) => (
-                <InsightCard key={insight.id} insight={insight} rank={i + 1} />
-              ))}
-            </ul>
-          ) : (
-            <p className="py-6 text-center text-sm text-ink-400">
-              No presence issues cleared the reporting threshold.
-            </p>
-          )}
+      {/* market shape — the structural finding, same slot as Command
+          Center so a reader moving between the two isn't relearning
+          the page */}
+      {concentration && (
+        <section className="mt-4">
+          <ChartFrame
+            title={concentration.headline}
+            subtitle={`${clientBrand.name} shelf share by district · ${scope.dataAsOf}`}
+            howToRead="Each row is a district. The centre line is your citywide shelf share; bars to the left fall short of it, and colour marks how far past the reporting threshold each one sits."
+            soWhat={concentration.detail}
+            allClear="No district below threshold this cycle"
+            table={{
+              columns: concentration.evidence.table.columns,
+              rows: concentration.evidence.table.rows,
+            }}
+          >
+            <DivergingBar
+              rows={districtRows}
+              baselineLabel={`your citywide ${clientBrand.name} share`}
+              unit="pt"
+            />
+          </ChartFrame>
+        </section>
+      )}
 
-          <h2 className="mt-5 t-h3">Pricing watch</h2>
-          {pricing.length ? (
-            <ul>
-              {pricing.slice(0, 2).map((insight) => (
-                <InsightCard key={insight.id} insight={insight} />
-              ))}
-            </ul>
+      {/* the decisions — two, because this is the shorter read */}
+      <div className="mt-4 flex flex-col gap-4">
+        {top.map((decision, i) => (
+          <DecisionBlock
+            key={decision.id + i}
+            decision={decision}
+            rank={i + 1}
+            {...chartFor(decision, view.posCount)}
+          />
+        ))}
+      </div>
+
+      <div className="mt-4 grid gap-4 xl:grid-cols-2">
+        {/* pricing — its own currency, kept to a line in the digest */}
+        <section className="rounded-[18px] border border-line bg-white p-5 sm:p-6">
+          <h2 className="t-h3">{reprice ? reprice.headline : "Pricing watch"}</h2>
+          {reprice ? (
+            <>
+              <p className="mt-1 text-sm text-ink-500">{reprice.detail}</p>
+              <p className="mono mt-2 text-[13px] font-semibold text-ink-900">
+                {reprice.impact.label}
+              </p>
+              <ul className="mt-3 flex flex-col gap-1.5 border-t border-line pt-3">
+                {reprice.findings.slice(0, 4).map((f) => (
+                  <li key={f.id} className="text-[13px] leading-snug">
+                    <span className="font-semibold text-ink-900">
+                      {f.scope.label}
+                    </span>
+                    <span className="text-ink-400"> — {f.impact.label}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link
+                href="/dashboard/pricing"
+                className="mt-3 inline-block text-[12px] font-semibold text-violet-ink hover:underline"
+              >
+                Open Price Intelligence →
+              </Link>
+            </>
           ) : (
-            <p className="py-4 text-center text-sm text-ink-400">
+            <p className="mt-3 flex items-center gap-1.5 text-sm text-ink-400">
+              <span className="dot" style={{ background: "var(--color-good)" }} />
               No outlet is clustering price breaches this cycle.
             </p>
           )}
@@ -154,7 +245,7 @@ export default async function DigestPage() {
             <h2 className="t-h3">Follow-through</h2>
             <Link
               href="/dashboard/priorities"
-              className="text-[12px] font-semibold text-violet-ink hover:underline"
+              className="text-[12px] font-semibold text-violet-ink hover:underline print:hidden"
             >
               Open Priorities →
             </Link>
@@ -182,7 +273,12 @@ export default async function DigestPage() {
 
               <div className="mt-4 border-t border-line pt-3">
                 <div className="flex items-center gap-1.5">
-                  <span className="t-eyebrow" style={{ color: summary.overdue.length ? "var(--color-critical)" : undefined }}>
+                  <span
+                    className="t-eyebrow"
+                    style={{
+                      color: summary.overdue.length ? "var(--color-critical)" : undefined,
+                    }}
+                  >
                     {summary.overdue.length
                       ? `${summary.overdue.length} overdue`
                       : "Nothing overdue"}
@@ -214,8 +310,9 @@ export default async function DigestPage() {
       </div>
 
       <p className="mt-4 text-[12px] text-ink-400 print:hidden">
-        Every figure above is generated from a stated formula over this
-        cycle&apos;s audit data — no forecasting, no machine learning.
+        Every decision above is rolled up from findings generated by a stated
+        formula over this cycle&apos;s audit data — no forecasting, no machine
+        learning.
       </p>
     </>
   );
@@ -238,7 +335,7 @@ function CountTile({
           {label}
         </span>
       </div>
-      <div className="mt-1 mono text-[20px] font-bold text-ink-900">{value}</div>
+      <div className="mono mt-1 text-[20px] font-bold text-ink-900">{value}</div>
     </div>
   );
 }
