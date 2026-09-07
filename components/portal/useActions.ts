@@ -89,3 +89,36 @@ export function useActions() {
 
   return { actions, loading, error, refresh, create, update };
 }
+
+/* Nav-badge use only: how many open/in-progress actions are past
+   their due date. Deliberately silent on failure — this is a nice-to-
+   have indicator in the rail, not the Priorities page itself, so a
+   fetch hiccup here just means no badge, never an error banner in
+   navigation chrome. */
+export function useOverdueActionsCount() {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    const id = setTimeout(async () => {
+      try {
+        const res = await fetch("/api/actions", { cache: "no-store" });
+        const data = await res.json();
+        if (cancelled || !res.ok || !data?.ok) return;
+        const today = new Date().toISOString().slice(0, 10);
+        const overdue = (data.actions as ActionRecord[]).filter(
+          (a) => a.status !== "Done" && a.dueDate && a.dueDate < today
+        );
+        setCount(overdue.length);
+      } catch {
+        /* silent — no badge is the correct fallback */
+      }
+    }, 0);
+    return () => {
+      cancelled = true;
+      clearTimeout(id);
+    };
+  }, []);
+
+  return count;
+}

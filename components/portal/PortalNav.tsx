@@ -4,11 +4,13 @@ import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { portalNav, portalNavGroups, scope, coverage } from "@/lib/portal";
+import { useOverdueActionsCount } from "./useActions";
 
 /* Left rail on desktop, a scrolling tab strip on phones — several
    buyers open this from LinkedIn on a handset. */
 export default function PortalNav() {
   const pathname = usePathname();
+  const overdue = useOverdueActionsCount();
 
   return (
     <nav className="hidden w-[232px] shrink-0 flex-col border-r border-line bg-white lg:flex">
@@ -41,6 +43,9 @@ export default function PortalNav() {
                   >
                     {item.label}
                     {item.locked && <LockGlyph />}
+                    {item.href === "/dashboard/priorities" && overdue > 0 && (
+                      <OverdueBadge count={overdue} />
+                    )}
                   </Link>
                 );
               })}
@@ -69,6 +74,7 @@ export default function PortalNav() {
 export function PortalTabs() {
   const pathname = usePathname();
   const strip = useRef<HTMLElement>(null);
+  const overdue = useOverdueActionsCount();
 
   /* Keep the current module in view: on a phone the later tabs sit off
      the right edge, and landing on one with no visible highlight reads
@@ -98,10 +104,25 @@ export function PortalTabs() {
             >
               {item.label}
               {item.locked && <LockGlyph />}
+              {item.href === "/dashboard/priorities" && overdue > 0 && (
+                <OverdueBadge count={overdue} />
+              )}
             </Link>
           );
       })}
     </nav>
+  );
+}
+
+function OverdueBadge({ count }: { count: number }) {
+  return (
+    <span
+      className="mono flex h-4 min-w-4 shrink-0 items-center justify-center rounded-full px-1 text-[10px] font-bold text-white"
+      style={{ background: "var(--color-critical)" }}
+      title={`${count} overdue action${count === 1 ? "" : "s"}`}
+    >
+      {count}
+    </span>
   );
 }
 

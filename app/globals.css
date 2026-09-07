@@ -475,3 +475,22 @@ body {
     scroll-behavior: auto;
   }
 }
+
+/* Digest is the one page meant to leave the screen — printed or saved
+   as a PDF and forwarded. Strip the workspace chrome, keep the
+   content full-width and ink-only. */
+@media print {
+  .portal-shell > nav,
+  .portal-shell header,
+  .portal-shell nav[class*="overflow-x-auto"] {
+    display: none !important;
+  }
+  .portal-shell,
+  .portal-shell main {
+    display: block !important;
+    overflow: visible !important;
+  }
+  body {
+    background: #fff;
+  }
+}

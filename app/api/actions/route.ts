@@ -9,44 +9,26 @@
    ============================================================ */
 
 import { NextResponse } from "next/server";
-import { ACTIONS_FIELD, hasTitle, toAction } from "@/lib/actionsShared";
+import { ACTIONS_FIELD, toAction } from "@/lib/actionsShared";
+import { actionsEnv, listActions } from "@/lib/actionsServer";
 
 const AIRTABLE_API = "https://api.airtable.com/v0";
 
-function env() {
-  const token = process.env.AIRTABLE_TOKEN;
-  const baseId = process.env.AIRTABLE_BASE_ID;
-  const table = process.env.AIRTABLE_ACTIONS_TABLE ?? "Actions";
-  return { token, baseId, table };
-}
+const LIST_ERROR_STATUS = {
+  not_configured: 503,
+  upstream: 502,
+  unreachable: 503,
+} as const;
 
 export async function GET() {
-  const { token, baseId, table } = env();
-  if (!token || !baseId) {
-    console.error("[actions] AIRTABLE_TOKEN / AIRTABLE_BASE_ID missing");
-    return NextResponse.json({ ok: false, error: "not_configured" }, { status: 503 });
-  }
-
-  try {
-    const res = await fetch(
-      `${AIRTABLE_API}/${baseId}/${encodeURIComponent(table)}?pageSize=100`,
-      { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" }
+  const result = await listActions();
+  if (!result.ok) {
+    return NextResponse.json(
+      { ok: false, error: result.error },
+      { status: LIST_ERROR_STATUS[result.error] }
     );
-    if (!res.ok) {
-      const detail = await res.text();
-      console.error("[actions] Airtable rejected list", {
-        status: res.status,
-        detail: detail.slice(0, 500),
-      });
-      return NextResponse.json({ ok: false, error: "upstream" }, { status: 502 });
-    }
-    const data = await res.json();
-    const actions = (data.records ?? []).filter(hasTitle).map(toAction);
-    return NextResponse.json({ ok: true, actions });
-  } catch (err) {
-    console.error("[actions] Airtable unreachable on list", err);
-    return NextResponse.json({ ok: false, error: "unreachable" }, { status: 503 });
   }
+  return NextResponse.json({ ok: true, actions: result.actions });
 }
 
 type CreateBody = {
@@ -87,7 +69,7 @@ export async function POST(request: Request) {
   if (body.notes) fields[ACTIONS_FIELD.notes] = String(body.notes).slice(0, 2000);
   if (body.dueDate) fields[ACTIONS_FIELD.dueDate] = String(body.dueDate).slice(0, 10);
 
-  const { token, baseId, table } = env();
+  const { token, baseId, table } = actionsEnv();
   if (!token || !baseId) {
     console.error("[actions] AIRTABLE_TOKEN / AIRTABLE_BASE_ID missing");
     return NextResponse.json({ ok: false, error: "not_configured" }, { status: 503 });
