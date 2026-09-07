@@ -113,6 +113,10 @@ export type Insight = {
     unit: string;
     rows: { id: string; label: string; a: number; b: number; emphasis?: boolean }[];
   };
+  /* Findings about how much of a countable set is present — "carries 1
+     of your 4 SKUs" — state the counts here so a meter can draw them
+     without re-deriving what the rule already worked out. */
+  meter?: { filled: number; total: number; benchmark?: number; unitLabel: string };
   evidence: { href: string; formula: string; table: EvidenceTable };
   entities: {
     brandId?: string;
@@ -924,6 +928,14 @@ function r11AssortmentGap(view: FilteredView): Insight[] {
       },
       scope: { outlets: 1, label: outlet.code },
       trend: "new",
+      /* Countable and small — four SKUs are four things a reader can
+         count, so the chart shows slots rather than a percentage. */
+      meter: {
+        filled: listed.size,
+        total: clientSkus.length,
+        benchmark: med,
+        unitLabel: `${clientBrand.name} SKUs`,
+      },
       evidence: {
         href: `/dashboard/shelf?area=${encodeURIComponent(outlet.area)}&brand=${clientBrand.id}&mode=availability`,
         formula: `${outlet.channel} median listed SKUs (${med}) − ${outlet.code}'s listed count (${listed.size}) = ${gap} missing from the range × ${round1(avgFacings)} average facings × ${DAYS_BETWEEN_VISITS} days.`,
