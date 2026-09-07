@@ -6,9 +6,12 @@
    rows sit behind a disclosure, closed by default so the ranked list
    stays scannable, open on demand so nothing is a black box. */
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { intensityOf, type Insight } from "@/lib/insights";
+import { readAccessSnapshot } from "@/lib/demoAccess";
+
+const noopSubscribe = () => () => {};
 
 const SEVERITY_LABEL: Record<Insight["severity"], string> = {
   critical: "Critical",
@@ -33,6 +36,32 @@ export default function InsightCard({
   rank?: number;
 }) {
   const [open, setOpen] = useState(false);
+  const [state, setState] = useState<"idle" | "saving" | "done" | "error">("idle");
+  const session = useSyncExternalStore(noopSubscribe, readAccessSnapshot, () => null);
+
+  const addToPriorities = async () => {
+    if (state === "saving" || state === "done") return;
+    setState("saving");
+    try {
+      const res = await fetch("/api/actions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: insight.headline,
+          owner: session?.fullName ?? "",
+          insightId: insight.id,
+          rule: insight.rule,
+          where: insight.scope.label,
+          notes: insight.detail,
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.ok) throw new Error("failed");
+      setState("done");
+    } catch {
+      setState("error");
+    }
+  };
 
   return (
     <li className="border-b border-line py-3.5 last:border-0">
@@ -87,6 +116,20 @@ export default function InsightCard({
               className="text-[12px] font-medium text-ink-400 hover:text-ink-700"
             >
               {open ? "Hide the working" : "Show the working"}
+            </button>
+            <button
+              type="button"
+              onClick={addToPriorities}
+              disabled={state === "saving" || state === "done"}
+              className="text-[12px] font-semibold text-violet-ink hover:underline disabled:no-underline disabled:text-ink-400"
+            >
+              {state === "done"
+                ? "Added ✓"
+                : state === "saving"
+                  ? "Adding…"
+                  : state === "error"
+                    ? "Couldn't add — retry"
+                    : "Turn into action"}
             </button>
           </div>
 
