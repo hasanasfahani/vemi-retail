@@ -19,6 +19,12 @@ import {
 
 const noopSubscribe = () => () => {};
 
+/* What a card can change: its status, or one line item at a time. */
+type UpdatePatch = Partial<{
+  status: ActionStatus;
+  toggleItem: { id: string; done: boolean };
+}>;
+
 const COLUMN_META: Record<
   ActionStatus,
   { label: string; hint: string; dot: string }
@@ -114,7 +120,7 @@ function Column({
 }: {
   status: ActionStatus;
   items: ActionRecord[];
-  onUpdate: (id: string, patch: Partial<{ status: ActionStatus }>) => Promise<void>;
+  onUpdate: (id: string, patch: UpdatePatch) => Promise<void>;
 }) {
   const meta = COLUMN_META[status];
   return (
@@ -145,9 +151,30 @@ function ActionCard({
   onUpdate,
 }: {
   action: ActionRecord;
-  onUpdate: (id: string, patch: Partial<{ status: ActionStatus }>) => Promise<void>;
+  onUpdate: (id: string, patch: UpdatePatch) => Promise<void>;
 }) {
   const [busy, setBusy] = useState(false);
+  const [ticking, setTicking] = useState<string | null>(null);
+  const [tickError, setTickError] = useState<string | null>(null);
+  const [openList, setOpenList] = useState(false);
+
+  const items = action.items;
+  const doneCount = items.filter((i) => i.done).length;
+  const allDone = items.length > 0 && doneCount === items.length;
+
+  const toggle = async (id: string, done: boolean) => {
+    setTicking(id);
+    setTickError(null);
+    try {
+      await onUpdate(action.id, { toggleItem: { id, done } });
+    } catch {
+      /* Fail loud, same as every other write in this queue — a tick
+         that silently didn't save is worse than one that says so. */
+      setTickError("That didn't save. Try again.");
+    } finally {
+      setTicking(null);
+    }
+  };
 
   return (
     <div className="rounded-[12px] border border-line bg-canvas p-3">
@@ -163,6 +190,101 @@ function ActionCard({
         <p className="mt-1.5 text-[12px] leading-snug text-ink-500">
           {action.notes}
         </p>
+      )}
+
+      {/* Progress reads on the collapsed card: a segmented meter and a
+          count, the same form the range chart uses, so the vocabulary
+          is one the reader has already met. Actions with no items —
+          a fixture negotiation is genuinely one conversation — keep
+          exactly the card they had before. */}
+      {items.length > 0 && (
+        <div className="mt-2.5">
+          <div className="flex gap-[2px]">
+            {items.map((i) => (
+              <span
+                key={i.id}
+                className="h-[7px] flex-1 rounded-[2px]"
+                style={{
+                  background: i.done
+                    ? "var(--color-violet)"
+                    : "var(--color-line)",
+                }}
+              />
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={() => setOpenList((v) => !v)}
+            aria-expanded={openList}
+            className="mt-1.5 text-[11.5px] font-medium text-ink-500 hover:text-ink-900"
+          >
+            {doneCount} of {items.length} done
+            <span className="ml-1 text-ink-400">
+              {openList ? "· hide" : "· check them off"}
+            </span>
+          </button>
+
+          {openList && (
+            <div className="mt-1.5 overflow-hidden rounded-[9px] border border-line bg-white">
+              {items.map((item) => (
+                <label
+                  key={item.id}
+                  className="flex cursor-pointer items-center gap-2 border-b border-line px-2.5 py-1.5 text-[12px] last:border-0 hover:bg-canvas"
+                >
+                  <input
+                    type="checkbox"
+                    checked={item.done}
+                    disabled={ticking === item.id}
+                    onChange={(e) => toggle(item.id, e.target.checked)}
+                    className="h-[13px] w-[13px] accent-[var(--color-violet)]"
+                  />
+                  <span
+                    className={
+                      item.done
+                        ? "text-ink-400 line-through"
+                        : "font-semibold text-ink-900"
+                    }
+                  >
+                    {item.label}
+                  </span>
+                  {item.where && (
+                    <span className="truncate text-ink-400">· {item.where}</span>
+                  )}
+                </label>
+              ))}
+            </div>
+          )}
+
+          {tickError && (
+            <p
+              className="mt-1 text-[11.5px] font-medium"
+              style={{ color: "var(--color-critical)" }}
+            >
+              {tickError}
+            </p>
+          )}
+
+          {/* The last tick offers to close the action; it never changes
+              the status by itself. A status that moves on its own is one
+              the owner stops trusting. */}
+          {allDone && action.status !== "Done" && (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={async () => {
+                setBusy(true);
+                try {
+                  await onUpdate(action.id, { status: "Done" });
+                } finally {
+                  setBusy(false);
+                }
+              }}
+              className="mt-2 w-full rounded-[8px] bg-violet px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-violet-ink"
+            >
+              All {items.length} done — mark this action complete?
+            </button>
+          )}
+        </div>
       )}
 
       <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-2">

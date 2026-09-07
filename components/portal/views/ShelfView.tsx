@@ -21,6 +21,7 @@ import AvailabilityHeatmap from "@/components/portal/charts/AvailabilityHeatmap"
 import StoreTable from "@/components/portal/charts/StoreTable";
 import ChartStory from "@/components/portal/ChartStory";
 import { useViewInsights } from "@/components/portal/useViewInsights";
+import WatchButton from "@/components/portal/WatchButton";
 import DistrictMap, {
   type DistrictDatum,
 } from "@/components/portal/charts/DistrictMap";
@@ -311,6 +312,22 @@ export default function ShelfView() {
                     value: categoryAvailability,
                     label: `category average ${categoryAvailability}%`,
                   }}
+                  rowAction={(row) => (
+                    <WatchButton
+                      target={{
+                        metric: "availability",
+                        segmentType: "sku",
+                        segment: row.id,
+                        label: `${row.label} availability`,
+                        currentValue: row.value,
+                        visit: view.visit,
+                        suggestedTarget: {
+                          value: categoryAvailability,
+                          why: `The ${categoryAvailability}% category average.`,
+                        },
+                      }}
+                    />
+                  )}
                 />
               </ChartStory>
             ) : (

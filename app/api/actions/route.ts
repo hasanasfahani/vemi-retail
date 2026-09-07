@@ -9,7 +9,13 @@
    ============================================================ */
 
 import { NextResponse } from "next/server";
-import { ACTIONS_FIELD, toAction } from "@/lib/actionsShared";
+import {
+  ACTIONS_FIELD,
+  progressOf,
+  serialiseItems,
+  toAction,
+  type ActionItem,
+} from "@/lib/actionsShared";
 import { actionsEnv, listActions } from "@/lib/actionsServer";
 
 const AIRTABLE_API = "https://api.airtable.com/v0";
@@ -39,6 +45,7 @@ type CreateBody = {
   where?: string;
   notes?: string;
   dueDate?: string;
+  items?: ActionItem[];
 };
 
 export async function POST(request: Request) {
@@ -68,6 +75,25 @@ export async function POST(request: Request) {
   if (body.where) fields[ACTIONS_FIELD.where] = String(body.where).slice(0, 200);
   if (body.notes) fields[ACTIONS_FIELD.notes] = String(body.notes).slice(0, 2000);
   if (body.dueDate) fields[ACTIONS_FIELD.dueDate] = String(body.dueDate).slice(0, 10);
+
+  /* Line items and their human-readable progress are written together
+     and never separately — a card showing "3/6" beside a checklist of
+     four would be worse than showing neither. */
+  if (Array.isArray(body.items) && body.items.length) {
+    const items: ActionItem[] = body.items
+      .filter((i) => i && typeof i.label === "string")
+      .slice(0, 60)
+      .map((i, index) => ({
+        id: typeof i.id === "string" ? i.id : `item-${index}`,
+        label: String(i.label).slice(0, 160),
+        where: i.where ? String(i.where).slice(0, 120) : undefined,
+        done: i.done === true,
+      }));
+    if (items.length) {
+      fields[ACTIONS_FIELD.items] = serialiseItems(items);
+      fields[ACTIONS_FIELD.progress] = progressOf(items);
+    }
+  }
 
   const { token, baseId, table } = actionsEnv();
   if (!token || !baseId) {

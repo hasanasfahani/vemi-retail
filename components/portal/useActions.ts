@@ -7,6 +7,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import type { ActionRecord, ActionStatus } from "@/lib/actionsShared";
+import { trackStateOf, type MonitorRecord } from "@/lib/monitorsShared";
 
 type CreateInput = {
   title: string;
@@ -23,6 +24,10 @@ type UpdateInput = Partial<{
   owner: string;
   notes: string;
   dueDate: string;
+  /* Which one box changed, and to what. The server reads the record
+     and flips just that item, so two people working the same action
+     cannot overwrite each other's ticks. */
+  toggleItem: { id: string; done: boolean };
 }>;
 
 async function parseOrThrow(res: Response) {
@@ -110,6 +115,38 @@ export function useOverdueActionsCount() {
           (a) => a.status !== "Done" && a.dueDate && a.dueDate < today
         );
         setCount(overdue.length);
+      } catch {
+        /* silent — no badge is the correct fallback */
+      }
+    }, 0);
+    return () => {
+      cancelled = true;
+      clearTimeout(id);
+    };
+  }, []);
+
+  return count;
+}
+
+/* Nav-badge use only: how many monitors are currently off track.
+
+   Same contract as the overdue count above — silent on failure,
+   because a missing badge is the right fallback in navigation chrome,
+   and an error banner there would be worse than no badge at all. */
+export function useOffTrackCount() {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    const id = setTimeout(async () => {
+      try {
+        const res = await fetch("/api/monitors", { cache: "no-store" });
+        const data = await res.json();
+        if (cancelled || !res.ok || !data?.ok) return;
+        const off = (data.monitors as MonitorRecord[]).filter(
+          (m) => m.status === "Watching" && trackStateOf(m) === "off-track"
+        );
+        setCount(off.length);
       } catch {
         /* silent — no badge is the correct fallback */
       }
