@@ -97,9 +97,17 @@ export default function InsightCard({
             <span className="mono text-[13px] font-semibold text-ink-900">
               {insight.impact.label}
             </span>
+            {insight.confidence === "estimated" && (
+              <span
+                className="text-[12px] text-ink-400"
+                title="This figure is a formula's projection over a gap that wasn't itself directly observed as an event — honest arithmetic, not a measurement. Measured findings always rank above estimated ones, regardless of size."
+              >
+                estimated
+              </span>
+            )}
             <span
               className="text-[12px] text-ink-400"
-              title={`Ranked by ${intensityOf(insight).toFixed(0)} ${insight.impact.unit}/outlet — the total divided by scope, not the total alone.`}
+              title={`Ranked by confidence first (measured evidence before estimates), then by ${intensityOf(insight).toFixed(0)} ${insight.impact.unit}/outlet within that tier — the total divided by scope, not the total alone.`}
             >
               at {insight.scope.label}
             </span>
