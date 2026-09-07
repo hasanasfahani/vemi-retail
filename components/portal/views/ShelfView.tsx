@@ -87,6 +87,16 @@ export default function ShelfView() {
     meta: brandName(row.brandId),
   }));
 
+  /* The line the SKU bars are judged against. Without it a 78% bar is
+     a length with no verdict attached — against a 84% category average
+     it is a laggard, against 71% it is a leader. */
+  const categoryAvailability = availabilityRows.length
+    ? Math.round(
+        availabilityRows.reduce((s, r) => s + r.value, 0) /
+          availabilityRows.length
+      )
+    : 0;
+
   /* ---------------- shelf-share-mode derivations ---------------- */
 
   const fixtures = useMemo(() => {
@@ -271,7 +281,16 @@ export default function ShelfView() {
               )}
             </p>
             {availabilityRows.length ? (
-              <RankedBar rows={availabilityRows} max={100} labelWidth={168} />
+              <RankedBar
+                rows={availabilityRows}
+                max={100}
+                labelWidth={168}
+                topN={8}
+                reference={{
+                  value: categoryAvailability,
+                  label: `category average ${categoryAvailability}%`,
+                }}
+              />
             ) : (
               <Empty />
             )}
