@@ -1,14 +1,14 @@
 /* ============================================================
-   THE DECISION LAYER — Phase 8 insight engine.
+   THE DECISION LAYER — insight engine (Phase 8, expanded Phase 11).
 
    A pure function: FilteredView in, ranked findings out. No ML, no
    LLM — every insight is a stated formula over data already in the
    model, and every insight carries that formula and its source rows
    so a skeptical reader can check the arithmetic by hand.
 
-   Presence problems (R1, R2, R3, R4, R6, R7) all convert to the same
-   currency — facing-days at risk, shelf space × time. But raw total
-   facing-days alone would let a diffuse, panel-wide rule (R7 spans
+   Presence problems (R1, R2, R3, R4, R6, R7, R9, R10) all convert to
+   the same currency — facing-days at risk, shelf space × time. But
+   raw total facing-days alone would let a diffuse, panel-wide rule (R7 spans
    every outlet in the city) always outrank a concentrated one (R1 is
    a single named store), just because the panel is bigger than the
    store. That is a real difference in urgency, not a rounding error,
@@ -33,6 +33,12 @@
    distributions (see the comment on each), not imported from a
    market this data doesn't describe. Change them here — nowhere else
    reads a magic number for these rules.
+
+   Phase 11 added R9 (dark outlet: 0% client in-stock, deliberately
+   excluding what R1 already fully explains) and R10 (a new-stockout
+   cluster in one visit — the leading indicator before R1's two-visit
+   confirmation), deepening the engine itself rather than its
+   delivery surfaces.
    ============================================================ */
 
 import {
@@ -60,7 +66,9 @@ export type RuleId =
   | "r4-rival-substitution"
   | "r5-price-cluster"
   | "r6-channel-gap"
-  | "r7-fixture-imbalance";
+  | "r7-fixture-imbalance"
+  | "r9-dark-outlet"
+  | "r10-new-gap-cluster";
 
 export type EvidenceTable = { columns: string[]; rows: (string | number)[][] };
 
@@ -157,6 +165,19 @@ export const THRESHOLDS = {
      Observed: Pepsi −2.1pt this cycle, Coca-Cola +1.8pt — the rule
      fires on the real cycle in this dataset. */
   r8Momentum: { rivalGainPt: 1 },
+
+  /* R9 has no numeric threshold — a "dark" outlet is 0% client
+     in-stock among whatever it does carry, which is a binary fact,
+     not a calibrated cutoff. */
+
+  /* New (non-persistent) client stockouts clustering at one outlet in
+     a single visit — the early-warning signal before R1 confirms a
+     gap on a second visit.
+     Observed: 33 of 100 outlets carried ≥1 new gap this cycle, but
+     only 6 carried ≥2 (max observed: 3). A single new gap is the
+     norm here, not a signal; 2 is already a real cluster, 3 is the
+     ceiling this dataset has produced. */
+  r10NewGapCluster: { warningCount: 2, criticalCount: 3 },
 } as const;
 
 const COOLER_PACKS = new Set(["can-330", "pet-500", "glass-300"]);
@@ -627,6 +648,126 @@ function r7FixtureImbalance(view: FilteredView): Insight[] {
   ];
 }
 
+/* ---------- R9 · dark outlet (total client absence) ---------- */
+
+function r9DarkOutlets(view: FilteredView): Insight[] {
+  const byOutlet = new Map<
+    string,
+    { listed: number; oosRows: FilteredView["oosRows"] }
+  >();
+  for (const c of view.cells) {
+    if (skuOf(c.skuId)?.brandId !== clientBrand.id) continue;
+    if (c.state === "not-listed") continue;
+    const e = byOutlet.get(c.posId) ?? { listed: 0, oosRows: [] };
+    e.listed += 1;
+    byOutlet.set(c.posId, e);
+  }
+  for (const row of view.oosRows) {
+    if (skuOf(row.skuId)?.brandId !== clientBrand.id) continue;
+    byOutlet.get(row.posId)?.oosRows.push(row);
+  }
+
+  const insights: Insight[] = [];
+  for (const [posId, e] of byOutlet) {
+    if (e.listed === 0 || e.oosRows.length < e.listed) continue; // something is in stock
+
+    /* R1 already tells the whole story when every contributing row is
+       persistent — firing here too would be the same fact twice. Only
+       report a dark outlet when at least one row is new this cycle. */
+    if (e.oosRows.every((r) => r.persistent)) continue;
+
+    const outlet = posOf(posId);
+    if (!outlet) continue;
+    const impactValue = Math.round(
+      e.oosRows.reduce((s, r) => s + r.lostFacingDays, 0)
+    );
+
+    insights.push({
+      id: `r9:${posId}`,
+      rule: "r9-dark-outlet",
+      severity: "critical",
+      headline: `${outlet.code} carries ${clientBrand.name} but has none in stock`,
+      detail: `All ${e.listed} listed ${clientBrand.name} SKU${e.listed > 1 ? "s are" : " is"} out of stock at once — a fully absent shelf, not a partial gap.`,
+      impact: {
+        value: impactValue,
+        unit: "facing-days",
+        label: `${impactValue} facing-days lost`,
+      },
+      scope: { outlets: 1, label: outlet.code },
+      trend: e.oosRows.some((r) => r.persistent) ? "worsening" : "new",
+      evidence: {
+        href: `/dashboard/oos-alerts?area=${encodeURIComponent(outlet.area)}`,
+        formula: `Every listed ${clientBrand.name} SKU at ${outlet.code} is currently out of stock (${e.oosRows.length} of ${e.listed}); Σ normalFacings × daysOut across them.`,
+        table: {
+          columns: ["SKU", "Days out", "Confirmed twice", "Facing-days"],
+          rows: e.oosRows.map((r) => [
+            skuName(r.skuId),
+            r.daysOut,
+            r.persistent ? "Yes" : "No",
+            r.lostFacingDays,
+          ]),
+        },
+      },
+      entities: { posId, area: outlet.area, brandId: clientBrand.id },
+    });
+  }
+  return insights.sort(byIntensity);
+}
+
+/* ---------- R10 · new stockout cluster (early warning) ---------- */
+
+function r10NewGapCluster(view: FilteredView): Insight[] {
+  const byOutlet = new Map<string, FilteredView["oosRows"]>();
+  for (const row of view.oosRows) {
+    if (row.persistent) continue; // R1's territory — this rule is the cycle before that
+    if (skuOf(row.skuId)?.brandId !== clientBrand.id) continue;
+    byOutlet.set(row.posId, [...(byOutlet.get(row.posId) ?? []), row]);
+  }
+
+  const insights: Insight[] = [];
+  for (const [posId, rows] of byOutlet) {
+    if (rows.length < THRESHOLDS.r10NewGapCluster.warningCount) continue;
+    const outlet = posOf(posId);
+    if (!outlet) continue;
+    const severity: Severity =
+      rows.length >= THRESHOLDS.r10NewGapCluster.criticalCount
+        ? "critical"
+        : "warning";
+    const impactValue = Math.round(rows.reduce((s, r) => s + r.lostFacingDays, 0));
+
+    insights.push({
+      id: `r10:${posId}`,
+      rule: "r10-new-gap-cluster",
+      severity,
+      headline: `${outlet.code} went out of stock on ${rows.length} ${clientBrand.name} SKUs this visit`,
+      detail:
+        "New this cycle, not yet confirmed twice — worth a check before the next visit turns it into a persistent gap.",
+      impact: {
+        value: impactValue,
+        unit: "facing-days",
+        label: `${impactValue} facing-days lost so far`,
+      },
+      scope: { outlets: 1, label: outlet.code },
+      trend: "new",
+      evidence: {
+        href: `/dashboard/oos-alerts?area=${encodeURIComponent(outlet.area)}`,
+        formula: `${clientBrand.name} SKUs newly out of stock at ${outlet.code} this visit (not yet seen on a prior visit); Σ normalFacings × daysOut.`,
+        table: {
+          columns: ["SKU", "Days out", "Normal facings", "Facing-days"],
+          rows: rows.map((r) => [
+            skuName(r.skuId),
+            r.daysOut,
+            r.normalFacings,
+            r.lostFacingDays,
+          ]),
+        },
+      },
+      entities: { posId, area: outlet.area, brandId: clientBrand.id },
+    });
+  }
+  return insights.sort(byIntensity);
+}
+
 /* ---------- R8 · momentum (a single fact, not a ranked list) ---------- */
 
 function computeMomentum(): Momentum | null {
@@ -655,6 +796,8 @@ export function generateInsights(view: FilteredView): InsightReport {
     ...r4RivalSubstitution(view),
     ...r6ChannelGap(view),
     ...r7FixtureImbalance(view),
+    ...r9DarkOutlets(view),
+    ...r10NewGapCluster(view),
   ].sort(byIntensity);
 
   const pricing = r5PriceCluster(view).sort(byIntensity);
