@@ -57,6 +57,7 @@ export const portalNavGroups: NavGroup[] = [
   {
     label: "Operate",
     items: [
+      { href: "/dashboard/priorities", label: "Priorities" },
       { href: "/dashboard/shelf", label: "Shelf" },
       { href: "/dashboard/oos-alerts", label: "Out-of-Stock Alerts" },
       { href: "/dashboard/pricing", label: "Price Intelligence" },
