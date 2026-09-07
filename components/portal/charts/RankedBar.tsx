@@ -49,6 +49,10 @@ type Props = {
   /* Names the ghost series in the legend — only rendered when at least
      one row carries a `previous`. */
   previousLabel?: string;
+  /* Renders a per-row control — the Watch pin. A row already IS a
+     metric on a segment, which is exactly what a monitor holds, so
+     the affordance belongs here rather than in a builder screen. */
+  rowAction?: (row: BarRow) => React.ReactNode;
 };
 
 export default function RankedBar({
@@ -59,6 +63,7 @@ export default function RankedBar({
   topN,
   reference,
   previousLabel = "previous visit",
+  rowAction,
 }: Props) {
   const [hover, setHover] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(false);
@@ -185,6 +190,12 @@ export default function RankedBar({
                 {row.value}
                 {unit}
               </div>
+
+              {rowAction && (
+                <div className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+                  {rowAction(row)}
+                </div>
+              )}
             </div>
           );
         })}
