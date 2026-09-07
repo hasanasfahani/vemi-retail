@@ -242,7 +242,7 @@ export default function CommandCenterPage() {
 
       <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
         {/* pricing keeps its own currency and its own block */}
-        <section className="rounded-[18px] border border-line bg-white p-5 sm:p-6">
+        <section className="min-w-0 rounded-[18px] border border-line bg-white p-5 sm:p-6">
           <div className="mb-1 flex flex-wrap items-baseline justify-between gap-2">
             <h2 className="t-h3">{reprice ? reprice.headline : "Pricing watch"}</h2>
             <span className="text-[12px] text-ink-400">
@@ -269,7 +269,7 @@ export default function CommandCenterPage() {
         </section>
 
         {/* photography — the trust lever */}
-        <section className="rounded-[18px] border border-line bg-white p-5 sm:p-6">
+        <section className="min-w-0 rounded-[18px] border border-line bg-white p-5 sm:p-6">
           <div className="mb-4">
             <h2 className="t-h3">From the shelf</h2>
             <p className="mt-1 text-sm text-ink-500">

@@ -9,6 +9,8 @@ import FilterBar, {
 import StatTile from "@/components/portal/charts/StatTile";
 import PriceBand from "@/components/portal/charts/PriceBand";
 import RankedBar from "@/components/portal/charts/RankedBar";
+import ChartStory from "@/components/portal/ChartStory";
+import { useViewInsights } from "@/components/portal/useViewInsights";
 import { OutletButton } from "@/components/portal/OutletDrawer";
 import { scope } from "@/lib/portal";
 import { applyFilters } from "@/lib/portalFilters";
@@ -24,6 +26,8 @@ export default function PricingView() {
     () => applyFilters(filters, visitData),
     [filters, visitData]
   );
+
+  const insights = useViewInsights(view);
 
   /* Concentration: which SKUs actually drive the compliance figure.
      Deliberately NOT a Pareto with a cumulative line — that needs a
@@ -190,56 +194,43 @@ export default function PricingView() {
         />
       </div>
 
-      <section className="mt-4 rounded-[18px] border border-line bg-white p-5 sm:p-6">
-        <h2 className="t-h3">What drives the compliance number</h2>
-        <p className="mt-1 text-sm text-ink-500">
-          {concentration.total ? (
-            <>
-              Breaching readings by outlet, worst first.{" "}
-              <span className="font-semibold text-ink-900">
-                {concentration.headCount} of the {view.posCount} outlets audited
-                carry {concentration.headShare}%
-              </span>{" "}
-              of every breach in this selection.
-              {concentration.skuIsFlat && (
-                <>
-                  {" "}
-                  Across SKUs it is almost flat —{" "}
-                  {concentration.skuHeadCount} of {concentration.skuCount} packs
-                  make up the same 80% — so this is a retailer compliance
-                  problem, not a product pricing one.
-                </>
-              )}
-            </>
-          ) : (
-            "No reading in this selection is more than 10% away from its RRP."
-          )}
-        </p>
+      <div className="mt-4">
         {concentration.rows.length ? (
-          <div className="mt-5">
+          <ChartStory
+            title="What drives the compliance number"
+            subtitle={`${concentration.headCount} of the ${view.posCount} outlets audited carry ${concentration.headShare}% of every breach`}
+            howToRead="Each bar is one outlet and its length is how many of its shelf prices were more than 10% off RRP. Violet marks the few that carry most of the problem."
+            findings={insights.forRules("r5-price-cluster")}
+            soWhat={
+              concentration.skuIsFlat
+                ? `Across SKUs breaches are almost flat — ${concentration.skuHeadCount} of ${concentration.skuCount} packs make up the same 80% — so this is a retailer compliance problem, not a product pricing one. Each violet bar is one conversation.`
+                : "A handful of outlets carry most of the breaches — each one is a single retailer conversation."
+            }
+            clean="Pricing is holding across this selection."
+            allClear="No outlet clustering breaches here"
+            actionLabel="Create pricing action"
+            table={{
+              columns: ["Outlet", "District", "Breaching readings"],
+              rows: concentration.rows.map((r) => [r.label, r.meta ?? "\u2014", r.value]),
+            }}
+          >
             <RankedBar
               rows={concentration.rows}
               unit=""
               labelWidth={168}
               topN={6}
-              previousLabel=""
             />
-            <p className="mt-3 border-t border-line pt-3 text-[12.5px] text-ink-500">
-              <span className="font-semibold text-ink-700">
-                How to read this.{" "}
-              </span>
-              Each bar is one outlet and its length is how many of its shelf
-              prices were more than 10% off RRP. Violet marks the few that carry
-              most of the problem — each one is a single retailer conversation.
-            </p>
-          </div>
+          </ChartStory>
         ) : (
-          <p className="mt-4 flex items-center gap-1.5 text-sm text-ink-400">
-            <span className="dot" style={{ background: "var(--color-good)" }} />
-            Nothing is breaching in this selection.
-          </p>
+          <section className="rounded-[18px] border border-line bg-white p-5 sm:p-6">
+            <h2 className="t-h3">What drives the compliance number</h2>
+            <p className="mt-3 flex items-center gap-1.5 text-sm text-ink-400">
+              <span className="dot" style={{ background: "var(--color-good)" }} />
+              No reading in this selection is more than 10% away from its RRP.
+            </p>
+          </section>
         )}
-      </section>
+      </div>
 
       <section className="mt-4 rounded-[18px] border border-line bg-white p-5 sm:p-6">
         <h2 className="t-h3">Observed price range by SKU</h2>

@@ -16,6 +16,8 @@ import FilterBar, {
 } from "@/components/portal/FilterBar";
 import StatTile from "@/components/portal/charts/StatTile";
 import RankedBar from "@/components/portal/charts/RankedBar";
+import ChartStory from "@/components/portal/ChartStory";
+import { useViewInsights } from "@/components/portal/useViewInsights";
 import DistrictMap, {
   type DistrictDatum,
 } from "@/components/portal/charts/DistrictMap";
@@ -43,6 +45,7 @@ export default function OosView() {
     () => applyFilters(filters, visitData),
     [filters, visitData]
   );
+  const insights = useViewInsights(view);
 
   /* One derivation, so the compiler can see the whole chain and the
      three views can never describe different slices. */
@@ -283,20 +286,26 @@ export default function OosView() {
         </section>
 
         <div className="flex flex-col gap-4">
-          <section className="rounded-[18px] border border-line bg-white p-5 sm:p-6">
-            <h2 className="t-h3">Who took the space</h2>
-            <p className="mt-1 mb-4 text-sm text-ink-500">
-              Rival facings sitting in the same pack size, in the same outlets
-              where {clientBrand.name} is absent.
-            </p>
-            {takers.length ? (
+          {takers.length ? (
+            <ChartStory
+              title="Who took the space"
+              subtitle={`Rival facings in the same pack size where ${clientBrand.name} is absent`}
+              howToRead="Each bar is a rival brand and its length is the shelf space it holds in the very outlets where you are out of stock — the substitution a shopper actually makes."
+              findings={insights.forRules("r4-rival-substitution")}
+              clean="No single rival is dominating the space your gaps leave open."
+              allClear="No dominant substitute here"
+              actionLabel="Create defence action"
+            >
               <RankedBar rows={takers} unit="" labelWidth={104} />
-            ) : (
+            </ChartStory>
+          ) : (
+            <section className="rounded-[18px] border border-line bg-white p-5 sm:p-6">
+              <h2 className="t-h3">Who took the space</h2>
               <p className="py-4 text-sm text-ink-400">
                 No competitor packs in the affected outlets.
               </p>
-            )}
-          </section>
+            </section>
+          )}
 
           <section className="rounded-[18px] border border-line bg-white p-5 sm:p-6">
             <h2 className="t-h3">Unresolved since {scope.previousVisit}</h2>

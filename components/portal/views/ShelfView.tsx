@@ -19,6 +19,8 @@ import RankedBar from "@/components/portal/charts/RankedBar";
 import SplitBar from "@/components/portal/charts/SplitBar";
 import AvailabilityHeatmap from "@/components/portal/charts/AvailabilityHeatmap";
 import StoreTable from "@/components/portal/charts/StoreTable";
+import ChartStory from "@/components/portal/ChartStory";
+import { useViewInsights } from "@/components/portal/useViewInsights";
 import DistrictMap, {
   type DistrictDatum,
 } from "@/components/portal/charts/DistrictMap";
@@ -52,6 +54,11 @@ export default function ShelfView() {
     [filters, visitData]
   );
   const skus = useMemo(() => matchingSkus(filters), [filters]);
+
+  /* The engine, rerun against the current slice — so every "what this
+     means" strip on this page describes the filtered view rather than
+     the whole panel. */
+  const insights = useViewInsights(view);
 
   const comparable =
     view.isLatestVisit &&
@@ -270,31 +277,49 @@ export default function ShelfView() {
             />
           </div>
 
-          <section className="mt-4 rounded-[18px] border border-line bg-white p-5 sm:p-6">
-            <h2 className="t-h3">On-shelf availability by SKU</h2>
-            <p className="mt-1 mb-5 text-sm text-ink-500">
-              Share of listing outlets where the SKU was physically on shelf.
-              {worst && (
-                <>
-                  {" "}Weakest first — {skuName(worst.skuId)} is the biggest gap at {worst.onShelfAvailability}%.
-                </>
-              )}
-            </p>
+          <div className="mt-4">
             {availabilityRows.length ? (
-              <RankedBar
-                rows={availabilityRows}
-                max={100}
-                labelWidth={168}
-                topN={8}
-                reference={{
-                  value: categoryAvailability,
-                  label: `category average ${categoryAvailability}%`,
+              <ChartStory
+                title="On-shelf availability by SKU"
+                subtitle={
+                  worst
+                    ? `Weakest first — ${skuName(worst.skuId)} is the biggest gap at ${worst.onShelfAvailability}%`
+                    : "Weakest first"
+                }
+                howToRead={`Each bar is one SKU and its length is the share of listing outlets where it was physically on shelf. The hairline is the ${categoryAvailability}% category average, so bars left of it are below par. Violet is ${clientBrand.name}.`}
+                findings={insights.forRules(
+                  "r3-distribution-gap",
+                  "r6-channel-gap"
+                )}
+                clean={`No SKU is far enough behind its peers to flag — hold the current listing and replenishment pattern.`}
+                allClear="No listing gap in this selection"
+                table={{
+                  columns: ["SKU", "Brand", "On-shelf availability"],
+                  rows: availabilityRows.map((r) => [
+                    r.label,
+                    r.meta ?? "—",
+                    `${r.value}%`,
+                  ]),
                 }}
-              />
+              >
+                <RankedBar
+                  rows={availabilityRows}
+                  max={100}
+                  labelWidth={168}
+                  topN={8}
+                  reference={{
+                    value: categoryAvailability,
+                    label: `category average ${categoryAvailability}%`,
+                  }}
+                />
+              </ChartStory>
             ) : (
-              <Empty />
+              <section className="rounded-[18px] border border-line bg-white p-5 sm:p-6">
+                <h2 className="t-h3">On-shelf availability by SKU</h2>
+                <Empty />
+              </section>
             )}
-          </section>
+          </div>
         </>
       ) : (
         <>
@@ -331,29 +356,53 @@ export default function ShelfView() {
           </div>
 
           <div className="mt-4 grid gap-4 xl:grid-cols-2">
-            <section className="rounded-[18px] border border-line bg-white p-5 sm:p-6">
-              <h2 className="t-h3">Category shelf share</h2>
-              <p className="mt-1 mb-5 text-sm text-ink-500">
-                Share of all carbonated facings across {view.posCount} outlets. {clientBrand.name} highlighted.
-              </p>
-              {shareRows.length ? (
-                <RankedBar rows={shareRows} max={Math.max(...view.byBrand.map((c) => c.share), 1)} />
-              ) : (
+            {shareRows.length ? (
+              <ChartStory
+                title="Category shelf share"
+                subtitle={`Share of all carbonated facings across ${view.posCount} outlets`}
+                howToRead={`Each bar is a brand's share of every facing counted in this selection. Violet is ${clientBrand.name}; grey is the rest of the category.`}
+                findings={insights.forRules(
+                  "r2-district-deficit",
+                  "r12-geographic-concentration"
+                )}
+                clean="No district in this selection is materially behind your citywide share."
+                allClear="No district below threshold here"
+                actionLabel="Create coverage action"
+              >
+                <RankedBar
+                  rows={shareRows}
+                  max={Math.max(...view.byBrand.map((c) => c.share), 1)}
+                />
+              </ChartStory>
+            ) : (
+              <section className="rounded-[18px] border border-line bg-white p-5 sm:p-6">
+                <h2 className="t-h3">Category shelf share</h2>
                 <Empty />
-              )}
-            </section>
+              </section>
+            )}
 
-            <section className="rounded-[18px] border border-line bg-white p-5 sm:p-6">
-              <h2 className="t-h3">Cooler vs ambient</h2>
-              <p className="mt-1 mb-5 text-sm text-ink-500">
-                Where each brand&apos;s facings sit. Chilled space drives impulse purchase; ambient drives take-home.
-              </p>
-              {splitRows.length ? (
-                <SplitBar rows={splitRows} aLabel="Chilled cooler" bLabel="Ambient shelf" />
-              ) : (
+            {splitRows.length ? (
+              <ChartStory
+                title="Cooler vs ambient"
+                subtitle="Chilled space drives impulse purchase; ambient drives take-home"
+                howToRead="Each row is a brand and the bar splits its facings between the two fixture types. A brand leaning right is winning take-home space; leaning left, the cold shelf."
+                findings={insights.forRules("r7-fixture-imbalance")}
+                clean="Your split between chilled and ambient is in line — no space renegotiation needed this cycle."
+                allClear="Fixture split within range"
+                actionLabel="Create space action"
+              >
+                <SplitBar
+                  rows={splitRows}
+                  aLabel="Chilled cooler"
+                  bLabel="Ambient shelf"
+                />
+              </ChartStory>
+            ) : (
+              <section className="rounded-[18px] border border-line bg-white p-5 sm:p-6">
+                <h2 className="t-h3">Cooler vs ambient</h2>
                 <Empty />
-              )}
-            </section>
+              </section>
+            )}
           </div>
         </>
       )}
@@ -381,18 +430,34 @@ export default function ShelfView() {
 
       {mode === "availability" ? (
         <>
-          <section className="mt-4 rounded-[18px] border border-line bg-white p-5 sm:p-6">
-            <h2 className="t-h3">Outlet × SKU</h2>
-            <p className="mt-1 mb-5 text-sm text-ink-500">
-              {(view.posCount * view.skuCount).toLocaleString()} combinations audited on{" "}
-              {scope.dataAsOf}. Depth of colour is facings held.
-            </p>
+          <div className="mt-4">
             {view.posCount && view.skuCount ? (
-              <AvailabilityHeatmap cells={view.cells} outlets={view.outlets} skus={skus} />
+              <ChartStory
+                title="Outlet × SKU"
+                subtitle={`${(view.posCount * view.skuCount).toLocaleString()} combinations audited on ${scope.dataAsOf}`}
+                howToRead="Opens by district: each row is a district, each column a SKU, and the deeper the red the larger the share of that district's listings currently empty. Select a district to drop into its outlets, where colour switches to facings held and red marks a gap."
+                findings={insights.forRules(
+                  "r1-persistent-gap",
+                  "r9-dark-outlet",
+                  "r10-new-gap-cluster"
+                )}
+                clean="Nothing in this selection is empty on a second visit — no replenishment escalation needed."
+                allClear="No confirmed gap in this selection"
+                actionLabel="Create replenishment action"
+              >
+                <AvailabilityHeatmap
+                  cells={view.cells}
+                  outlets={view.outlets}
+                  skus={skus}
+                />
+              </ChartStory>
             ) : (
-              <Empty />
+              <section className="rounded-[18px] border border-line bg-white p-5 sm:p-6">
+                <h2 className="t-h3">Outlet × SKU</h2>
+                <Empty />
+              </section>
             )}
-          </section>
+          </div>
 
           <section className="mt-4 overflow-hidden rounded-[18px] border border-line bg-white">
             <div className="border-b border-line p-5 sm:p-6">

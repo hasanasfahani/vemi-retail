@@ -8,6 +8,8 @@ import FilterBar, {
 } from "@/components/portal/FilterBar";
 import StatTile from "@/components/portal/charts/StatTile";
 import RankedBar from "@/components/portal/charts/RankedBar";
+import ChartStory from "@/components/portal/ChartStory";
+import { useViewInsights } from "@/components/portal/useViewInsights";
 import Delta from "@/components/portal/charts/Delta";
 import { scope } from "@/lib/portal";
 import { applyFilters } from "@/lib/portalFilters";
@@ -20,6 +22,7 @@ export default function CompetitorsView() {
     () => applyFilters(filters, visitData),
     [filters, visitData]
   );
+  const insights = useViewInsights(view);
   const comparable =
     view.isLatestVisit &&
     filters.areas.length + filters.channels.length + filters.brands.length === 0;
@@ -109,28 +112,46 @@ export default function CompetitorsView() {
       </div>
 
       <div className="mt-4 grid gap-4 xl:grid-cols-2">
-        <section className="rounded-[18px] border border-line bg-white p-5 sm:p-6">
-          <h2 className="t-h3">Shelf share</h2>
-          <p className="mt-1 mb-5 text-sm text-ink-500">
-            Share of category facings across {view.posCount} outlets.
-          </p>
-          {shareRows.length ? (
+        {shareRows.length ? (
+          <ChartStory
+            title="Shelf share"
+            subtitle={`Share of category facings across ${view.posCount} outlets`}
+            howToRead={`Each bar is a brand's share of every facing counted here. Violet is ${clientBrand.name}; grey is the rest of the category.`}
+            findings={insights.forRules("r4-rival-substitution")}
+            clean="No rival is systematically taking the space you leave open."
+            allClear="No rival substitution flagged here"
+            actionLabel="Create defence action"
+          >
             <RankedBar
               rows={shareRows}
               max={Math.max(...view.byBrand.map((c) => c.share), 1)}
             />
-          ) : (
+          </ChartStory>
+        ) : (
+          <section className="rounded-[18px] border border-line bg-white p-5 sm:p-6">
+            <h2 className="t-h3">Shelf share</h2>
             <Empty />
-          )}
-        </section>
+          </section>
+        )}
 
-        <section className="rounded-[18px] border border-line bg-white p-5 sm:p-6">
-          <h2 className="t-h3">On-shelf availability</h2>
-          <p className="mt-1 mb-5 text-sm text-ink-500">
-            Share of listing outlets where stock was actually present.
-          </p>
-          {availRows.length ? <RankedBar rows={availRows} max={100} /> : <Empty />}
-        </section>
+        {availRows.length ? (
+          <ChartStory
+            title="On-shelf availability"
+            subtitle="Share of listing outlets where stock was actually present"
+            howToRead="Each bar is a brand and its length is how often its listings were actually on shelf, not just ranged. A short bar means the brand is listed but running empty."
+            findings={insights.forRules("r6-channel-gap")}
+            clean="No trade channel in this selection is materially behind your overall availability."
+            allClear="No channel below threshold here"
+            actionLabel="Create coverage action"
+          >
+            <RankedBar rows={availRows} max={100} />
+          </ChartStory>
+        ) : (
+          <section className="rounded-[18px] border border-line bg-white p-5 sm:p-6">
+            <h2 className="t-h3">On-shelf availability</h2>
+            <Empty />
+          </section>
+        )}
       </div>
 
       <section className="mt-4 overflow-hidden rounded-[18px] border border-line bg-white">

@@ -206,7 +206,7 @@ export default async function DigestPage() {
 
       <div className="mt-4 grid gap-4 xl:grid-cols-2">
         {/* pricing — its own currency, kept to a line in the digest */}
-        <section className="rounded-[18px] border border-line bg-white p-5 sm:p-6">
+        <section className="min-w-0 rounded-[18px] border border-line bg-white p-5 sm:p-6">
           <h2 className="t-h3">{reprice ? reprice.headline : "Pricing watch"}</h2>
           {reprice ? (
             <>
@@ -240,7 +240,7 @@ export default async function DigestPage() {
         </section>
 
         {/* follow-through */}
-        <section className="rounded-[18px] border border-line bg-white p-5 sm:p-6">
+        <section className="min-w-0 rounded-[18px] border border-line bg-white p-5 sm:p-6">
           <div className="flex items-center justify-between gap-3">
             <h2 className="t-h3">Follow-through</h2>
             <Link
