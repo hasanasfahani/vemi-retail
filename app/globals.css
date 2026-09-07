@@ -60,6 +60,21 @@
   --color-stock-2: #9a83fd;
   --color-stock-3: #8064fd;
   --color-stock-4: #6748fd;
+
+  /* Dumbbell "earlier point" marks — the only palette addition in
+     Phase 13, and both ran through the checker before shipping:
+
+       #6748fd / #9a83fd  CVD ΔE 11.6 protan, normal 15.6 — PASS
+       #6b6e78 / #a8adb8  ΔE 20.8, inside the lightness band
+
+     Both carry a sub-3:1 contrast WARN against the surface, which the
+     checker allows only with relief — here the earlier mark is drawn
+     hollow (shape, not just hue), every dumbbell is direct-labelled,
+     and each has a table view. #b7a6fe was the first choice for the
+     violet and failed outright at 2.07:1; #8064fd failed CVD
+     separation at ΔE 4.2. Don't substitute either back in. */
+  --color-chart-prior: #9a83fd;
+  --color-context-prior: #a8adb8;
 }
 
 :root {

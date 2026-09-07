@@ -1,0 +1,150 @@
+import Link from "next/link";
+import ChartFrame from "@/components/portal/ChartFrame";
+import DecisionAction from "@/components/portal/DecisionAction";
+import Dumbbell, { type DumbbellRow } from "@/components/portal/charts/Dumbbell";
+import DivergingBar, { type DivergingRow } from "@/components/portal/charts/DivergingBar";
+import RankedBar, { type BarRow } from "@/components/portal/charts/RankedBar";
+import type { Decision } from "@/lib/decisions";
+
+/* One decision, rendered as a Story Block: the move as the headline,
+   the chart that proves it, how to read that chart, and the control
+   that starts it.
+
+   The chart is chosen by the decision's own shape rather than by
+   variety — a two-point comparison gets the dumbbell, a
+   distance-from-my-own-average gets the diverging bar, and a plain
+   "which of these is worst" gets ranked bars. */
+
+export type DecisionChart =
+  | { kind: "diverging"; rows: DivergingRow[]; baselineLabel: string; unit?: string }
+  | { kind: "dumbbell"; rows: DumbbellRow[]; aLabel: string; bLabel: string; unit?: string }
+  | { kind: "ranked"; rows: BarRow[]; unit?: string };
+
+type Props = {
+  decision: Decision;
+  rank: number;
+  chart: DecisionChart;
+  chartTitle: string;
+  chartSubtitle?: string;
+  howToRead: string;
+  soWhat: string;
+  table?: { columns: string[]; rows: (string | number)[][] };
+};
+
+/* One element, not three conditionals — a bare `cond && <X/>` trio
+   reads to React as an unkeyed list. */
+function renderChart(chart: DecisionChart) {
+  switch (chart.kind) {
+    case "diverging":
+      return (
+        <DivergingBar
+          rows={chart.rows}
+          baselineLabel={chart.baselineLabel}
+          unit={chart.unit}
+        />
+      );
+    case "dumbbell":
+      return (
+        <Dumbbell
+          rows={chart.rows}
+          aLabel={chart.aLabel}
+          bLabel={chart.bLabel}
+          unit={chart.unit}
+        />
+      );
+    case "ranked":
+      return <RankedBar rows={chart.rows} unit={chart.unit} labelWidth={118} />;
+  }
+}
+
+export default function DecisionBlock({
+  decision,
+  rank,
+  chart,
+  chartTitle,
+  chartSubtitle,
+  howToRead,
+  soWhat,
+  table,
+}: Props) {
+  return (
+    <article className="rounded-[18px] border border-line bg-white p-5 sm:p-6">
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <span className="mono text-[12px] text-ink-400">Decision {rank}</span>
+        <span
+          className={`pill ${
+            decision.severity === "critical" ? "pill-critical" : "pill-warn"
+          }`}
+        >
+          {decision.severity === "critical" ? "Critical" : "Warning"}
+        </span>
+        {decision.confidence === "estimated" && (
+          <span className="text-[12px] text-ink-400">estimated</span>
+        )}
+      </div>
+
+      <h2 className="mt-2 t-h3 !text-[19px] leading-snug">{decision.headline}</h2>
+      <p className="mt-1 text-sm text-ink-500">{decision.detail}</p>
+      <p className="mt-1.5 text-[13px]">
+        <span className="mono font-semibold text-ink-900">
+          {decision.impact.label}
+        </span>
+        <span className="ml-2 text-ink-400">
+          across {decision.outlets} outlet{decision.outlets === 1 ? "" : "s"} ·{" "}
+          {decision.findings.length} finding
+          {decision.findings.length === 1 ? "" : "s"} rolled up
+        </span>
+      </p>
+
+      <div className="mt-4">
+        <ChartFrame
+          title={chartTitle}
+          subtitle={chartSubtitle}
+          howToRead={howToRead}
+          soWhat={soWhat}
+          table={table}
+          action={
+            <DecisionAction
+              title={decision.headline}
+              rule={decision.findings[0]?.rule ?? decision.id}
+              where={decision.findings[0]?.scope.label ?? "Erbil"}
+              notes={`${decision.detail}\n\n${decision.findings
+                .slice(0, 12)
+                .map((f) => `• ${f.headline} (${f.impact.label})`)
+                .join("\n")}`}
+            />
+          }
+        >
+          {renderChart(chart)}
+        </ChartFrame>
+      </div>
+
+      <details className="group mt-3">
+        <summary className="cursor-pointer list-none text-[12.5px] font-medium text-ink-400 hover:text-ink-700">
+          <span className="group-open:hidden">
+            Show the {decision.findings.length} finding
+            {decision.findings.length === 1 ? "" : "s"} behind this
+          </span>
+          <span className="hidden group-open:inline">Hide the findings</span>
+        </summary>
+        <ul className="mt-2 flex flex-col gap-2 border-t border-line pt-3">
+          {decision.findings.map((f) => (
+            <li key={f.id} className="text-[13px] leading-snug">
+              <span className="font-semibold text-ink-900">{f.headline}</span>
+              <span className="text-ink-400">
+                {" "}
+                — {f.impact.label} at {f.scope.label}
+              </span>
+              <Link
+                href={f.evidence.href}
+                className="ml-2 text-[12px] font-semibold text-violet-ink hover:underline"
+              >
+                evidence →
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </details>
+    </article>
+  );
+}
