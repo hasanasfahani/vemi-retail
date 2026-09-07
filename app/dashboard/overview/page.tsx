@@ -130,14 +130,16 @@ export default function CommandCenterPage() {
           <div className="mb-1 flex items-center justify-between gap-3">
             <h2 className="t-h3">Needs attention</h2>
             <span className="text-[12px] text-ink-400">
-              Ranked by concentration
+              Measured first, then by concentration
             </span>
           </div>
           <p className="mb-1 text-sm text-ink-500">
             {clientBrand.name}&apos;s biggest presence problems this cycle,
-            each traceable to its own arithmetic — facing-days at risk per
-            outlet the finding touches, so a confirmed failure at one store
-            outranks the same total cost spread thin across the whole city.
+            each traceable to its own arithmetic — directly observed losses
+            rank above formula estimates, and within each tier, facing-days
+            at risk per outlet the finding touches, so a confirmed failure
+            at one store outranks the same total cost spread thin across
+            the whole city.
           </p>
           {presence.length ? (
             <ul>

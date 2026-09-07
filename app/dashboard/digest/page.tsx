@@ -119,7 +119,8 @@ export default async function DigestPage() {
         <section className="rounded-[18px] border border-line bg-white p-5 sm:p-6">
           <h2 className="t-h3">Needs attention</h2>
           <p className="mt-1 mb-1 text-sm text-ink-500">
-            Top findings this cycle, ranked by concentration.
+            Top findings this cycle — measured losses first, then by
+            concentration.
           </p>
           {presence.length ? (
             <ul>

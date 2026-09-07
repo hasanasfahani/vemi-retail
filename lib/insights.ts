@@ -1,13 +1,14 @@
 /* ============================================================
-   THE DECISION LAYER — insight engine (Phase 8, expanded Phase 11).
+   THE DECISION LAYER — insight engine (Phase 8, expanded Phases 11–12).
 
    A pure function: FilteredView in, ranked findings out. No ML, no
    LLM — every insight is a stated formula over data already in the
    model, and every insight carries that formula and its source rows
    so a skeptical reader can check the arithmetic by hand.
 
-   Presence problems (R1, R2, R3, R4, R6, R7, R9, R10) all convert to
-   the same currency — facing-days at risk, shelf space × time. But
+   Presence problems (R1, R2, R3, R4, R6, R7, R9, R10, R11) all
+   convert to the same currency — facing-days at risk, shelf space ×
+   time. But
    raw total facing-days alone would let a diffuse, panel-wide rule (R7 spans
    every outlet in the city) always outrank a concentrated one (R1 is
    a single named store), just because the panel is bigger than the
@@ -37,7 +38,10 @@
    Phase 11 added R9 (dark outlet: 0% client in-stock, deliberately
    excluding what R1 already fully explains) and R10 (a new-stockout
    cluster in one visit — the leading indicator before R1's two-visit
-   confirmation), deepening the engine itself rather than its
+   confirmation). Phase 12 added R11 (assortment gap: an outlet's
+   listed SKU count against its own channel's median — a range-
+   selling problem, distinct from R3's citywide-per-SKU version of
+   the same idea). All three deepen the engine itself rather than its
    delivery surfaces.
    ============================================================ */
 
@@ -68,7 +72,8 @@ export type RuleId =
   | "r6-channel-gap"
   | "r7-fixture-imbalance"
   | "r9-dark-outlet"
-  | "r10-new-gap-cluster";
+  | "r10-new-gap-cluster"
+  | "r11-assortment-gap";
 
 export type EvidenceTable = { columns: string[]; rows: (string | number)[][] };
 
@@ -79,6 +84,17 @@ export type Insight = {
   headline: string;
   detail: string;
   impact: { value: number; unit: "facing-days" | "readings"; label: string };
+  /* "measured": impact.value is summed straight from recorded field
+     observations (real daysOut, real readings). "estimated": impact
+     is a formula's projection over a deficit that was never itself
+     directly observed as an event (e.g. "this district's share gap,
+     multiplied by the days between visits"). Both are honest, stated
+     arithmetic — neither is invented — but they answer different
+     questions, and a projection shouldn't be able to outrank a
+     confirmed observation just because its formula produces a bigger
+     number. The ranked list sorts measured findings first; shown on
+     the card, never a hidden weighting. */
+  confidence: "measured" | "estimated";
   /* How much of the panel this finding actually covers — the
      denominator the ranked list divides impact by. Shown on the card
      so the ranking rule is visible, not inferred. */
@@ -178,6 +194,18 @@ export const THRESHOLDS = {
      norm here, not a signal; 2 is already a real cluster, 3 is the
      ceiling this dataset has produced. */
   r10NewGapCluster: { warningCount: 2, criticalCount: 3 },
+
+  /* Client SKUs listed at an outlet vs that outlet's own channel
+     median — a range-selling gap, not a stock gap (R3 measures the
+     same idea the other way round: one SKU's distribution citywide;
+     this measures one outlet's range against its own format).
+     Observed: 32 of 100 outlets sit below their channel's median
+     listed count, but the gap is 1 SKU for most of them — normal
+     variance, not a signal. 9 outlets are 2+ SKUs short (identical to
+     the flat "≤1 of 4 SKUs listed" count, cross-checked); 1 outlet
+     (a Supermarket carrying just 1 of 4 against a median of 4) is 3
+     short — the observed ceiling. Warning at 2, critical at 3. */
+  r11AssortmentGap: { warningCount: 2, criticalCount: 3 },
 } as const;
 
 const COOLER_PACKS = new Set(["can-330", "pet-500", "glass-300"]);
@@ -207,7 +235,24 @@ const round1 = (n: number) => Math.round(n * 10) / 10;
    list's own order. */
 export const intensityOf = (insight: Insight) =>
   insight.scope.outlets > 0 ? insight.impact.value / insight.scope.outlets : 0;
-const byIntensity = (a: Insight, b: Insight) => intensityOf(b) - intensityOf(a);
+
+/* Confidence tier outranks intensity: every "measured" finding sorts
+   ahead of every "estimated" one, regardless of either number, then
+   each tier sorts by intensity within itself. Added when R11's
+   projected facing-days (a formula over a listing gap that was never
+   itself observed as a stockout) started outranking R1's directly
+   observed, twice-confirmed losses — the same unit name doesn't make
+   the two comparable, so rank doesn't treat them as such. No fudge
+   factor on the number itself: impact.value is untouched, exactly
+   like the scope-based intensity rule above it. */
+const CONFIDENCE_RANK: Record<Insight["confidence"], number> = {
+  measured: 0,
+  estimated: 1,
+};
+const byIntensity = (a: Insight, b: Insight) => {
+  const tier = CONFIDENCE_RANK[a.confidence] - CONFIDENCE_RANK[b.confidence];
+  return tier !== 0 ? tier : intensityOf(b) - intensityOf(a);
+};
 
 const median = (values: number[]) => {
   const sorted = [...values].sort((a, b) => a - b);
@@ -241,6 +286,7 @@ function r1PersistentGaps(view: FilteredView): Insight[] {
     insights.push({
       id: `r1:${posId}`,
       rule: "r1-persistent-gap",
+      confidence: "measured",
       severity,
       headline: `${outlet.code} has ${rows.length} ${clientBrand.name} SKU${rows.length > 1 ? "s" : ""} empty since the last visit`,
       detail:
@@ -310,6 +356,7 @@ function r2DistrictDeficit(view: FilteredView): Insight[] {
     insights.push({
       id: `r2:${area}`,
       rule: "r2-district-deficit",
+      confidence: "estimated",
       severity,
       headline: `${area} runs ${round1(deficit)}pt behind your citywide shelf share`,
       detail: `${clientBrand.name} holds ${round1(share)}% of facings here against ${round1(cityShare)}% across Erbil.`,
@@ -377,6 +424,7 @@ function r3DistributionGap(view: FilteredView): Insight[] {
     insights.push({
       id: `r3:${sku.id}`,
       rule: "r3-distribution-gap",
+      confidence: "estimated",
       severity,
       headline: `${sku.name} is listed in far fewer outlets than comparable packs`,
       detail: `${Math.round(own)}% distribution against a ${Math.round(peerMedian)}% median for the same pack size — a listing gap, not a stock gap.`,
@@ -438,6 +486,7 @@ function r4RivalSubstitution(view: FilteredView): Insight[] {
     {
       id: `r4:${topBrandId}`,
       rule: "r4-rival-substitution",
+      confidence: "measured",
       severity,
       headline: `${brandName(topBrandId)} is filling the shelf where ${clientBrand.name} is out of stock`,
       detail: `Across ${outletsAffected.size} outlets, ${brandName(topBrandId)} holds ${Math.round(topShare)}% of the space contested during your gaps.`,
@@ -494,6 +543,7 @@ function r5PriceCluster(view: FilteredView): Insight[] {
     insights.push({
       id: `r5:${posId}`,
       rule: "r5-price-cluster",
+      confidence: "measured",
       severity,
       headline: `${outlet.code} is pricing ${rows.length} SKUs well off RRP`,
       detail: `Average deviation ${Math.round(meanDev)}% — one retailer conversation fixes every line at once.`,
@@ -558,6 +608,7 @@ function r6ChannelGap(view: FilteredView): Insight[] {
     insights.push({
       id: `r6:${channel}`,
       rule: "r6-channel-gap",
+      confidence: "estimated",
       severity,
       headline: `${channel} availability is ${round1(deficit)}pt behind your overall average`,
       detail: `${chCells.length} of your listings sit in ${channel.toLowerCase()} outlets — a channel-wide fix reaches all of them at once.`,
@@ -622,6 +673,7 @@ function r7FixtureImbalance(view: FilteredView): Insight[] {
     {
       id: "r7:fixture-imbalance",
       rule: "r7-fixture-imbalance",
+      confidence: "estimated",
       severity: "warning",
       headline: `${clientBrand.name} is under-represented in ${weakerLabel}`,
       detail: `Cooler share ${round1(coolerShare)}% vs ambient share ${round1(ambientShare)}% — the two fixture types aren't being negotiated evenly.`,
@@ -685,6 +737,7 @@ function r9DarkOutlets(view: FilteredView): Insight[] {
     insights.push({
       id: `r9:${posId}`,
       rule: "r9-dark-outlet",
+      confidence: "measured",
       severity: "critical",
       headline: `${outlet.code} carries ${clientBrand.name} but has none in stock`,
       detail: `All ${e.listed} listed ${clientBrand.name} SKU${e.listed > 1 ? "s are" : " is"} out of stock at once — a fully absent shelf, not a partial gap.`,
@@ -738,6 +791,7 @@ function r10NewGapCluster(view: FilteredView): Insight[] {
     insights.push({
       id: `r10:${posId}`,
       rule: "r10-new-gap-cluster",
+      confidence: "measured",
       severity,
       headline: `${outlet.code} went out of stock on ${rows.length} ${clientBrand.name} SKUs this visit`,
       detail:
@@ -763,6 +817,79 @@ function r10NewGapCluster(view: FilteredView): Insight[] {
         },
       },
       entities: { posId, area: outlet.area, brandId: clientBrand.id },
+    });
+  }
+  return insights.sort(byIntensity);
+}
+
+/* ---------- R11 · assortment gap (range-selling, not stock) ---------- */
+
+function r11AssortmentGap(view: FilteredView): Insight[] {
+  const clientSkus = skus.filter((s) => s.brandId === clientBrand.id);
+  const clientSkuIds = new Set(clientSkus.map((s) => s.id));
+  if (!clientSkuIds.size) return [];
+
+  const listedIds = new Map<string, Set<string>>(); // posId -> client sku ids listed there
+  for (const c of view.cells) {
+    if (!clientSkuIds.has(c.skuId) || c.state === "not-listed") continue;
+    const set = listedIds.get(c.posId) ?? new Set<string>();
+    set.add(c.skuId);
+    listedIds.set(c.posId, set);
+  }
+
+  const byChannel = new Map<string, number[]>();
+  for (const outlet of view.outlets) {
+    const n = listedIds.get(outlet.id)?.size ?? 0;
+    byChannel.set(outlet.channel, [...(byChannel.get(outlet.channel) ?? []), n]);
+  }
+  const channelMedian = new Map<string, number>();
+  for (const [channel, counts] of byChannel) channelMedian.set(channel, median(counts));
+
+  const clientInStock = view.cells.filter(
+    (c) => clientSkuIds.has(c.skuId) && c.state === "in-stock"
+  );
+  const avgFacings = clientInStock.length
+    ? clientInStock.reduce((s, c) => s + c.facings, 0) / clientInStock.length
+    : 2;
+
+  const insights: Insight[] = [];
+  for (const outlet of view.outlets) {
+    const listed = listedIds.get(outlet.id) ?? new Set<string>();
+    const med = channelMedian.get(outlet.channel) ?? 0;
+    const gap = med - listed.size;
+    if (gap < THRESHOLDS.r11AssortmentGap.warningCount) continue;
+    const severity: Severity =
+      gap >= THRESHOLDS.r11AssortmentGap.criticalCount ? "critical" : "warning";
+    const impactValue = Math.round(gap * avgFacings * DAYS_BETWEEN_VISITS);
+    const missing = clientSkus.filter((s) => !listed.has(s.id));
+
+    insights.push({
+      id: `r11:${outlet.id}`,
+      rule: "r11-assortment-gap",
+      confidence: "estimated",
+      severity,
+      headline: `${outlet.code} carries only ${listed.size} of your ${clientSkus.length} ${clientBrand.name} SKUs`,
+      detail: `${outlet.channel} outlets typically carry ${med} — a listing gap, not a stock gap; ${missing.length} SKU${missing.length > 1 ? "s aren't" : " isn't"} on the range at all.`,
+      impact: {
+        value: impactValue,
+        unit: "facing-days",
+        label: `≈${impactValue} facing-days of missed presence`,
+      },
+      scope: { outlets: 1, label: outlet.code },
+      trend: "new",
+      evidence: {
+        href: `/dashboard/shelf?area=${encodeURIComponent(outlet.area)}&brand=${clientBrand.id}&mode=availability`,
+        formula: `${outlet.channel} median listed SKUs (${med}) − ${outlet.code}'s listed count (${listed.size}) = ${gap} missing from the range × ${round1(avgFacings)} average facings × ${DAYS_BETWEEN_VISITS} days.`,
+        table: {
+          columns: ["SKU", "Pack", "Status"],
+          rows: clientSkus.map((s) => [
+            s.name,
+            s.pack,
+            listed.has(s.id) ? "Listed" : "Not listed",
+          ]),
+        },
+      },
+      entities: { posId: outlet.id, area: outlet.area, brandId: clientBrand.id },
     });
   }
   return insights.sort(byIntensity);
@@ -798,6 +925,7 @@ export function generateInsights(view: FilteredView): InsightReport {
     ...r7FixtureImbalance(view),
     ...r9DarkOutlets(view),
     ...r10NewGapCluster(view),
+    ...r11AssortmentGap(view),
   ].sort(byIntensity);
 
   const pricing = r5PriceCluster(view).sort(byIntensity);
