@@ -38,6 +38,8 @@ type Props = {
      something broader than any single finding does. */
   soWhat?: string;
   actionLabel?: string;
+  /* The visit in view, stamped onto any monitor created from here. */
+  visit?: string;
   table?: { columns: string[]; rows: (string | number)[][] };
   children: ReactNode;
 };
@@ -51,6 +53,7 @@ export default function ChartStory({
   allClear,
   soWhat,
   actionLabel = "Create action",
+  visit = "",
   table,
   children,
 }: Props) {
@@ -67,7 +70,7 @@ export default function ChartStory({
       action={
         top ? (
           <DecisionAction
-            draft={draftFromFindings(findings, title)}
+            draft={draftFromFindings(findings, title, visit)}
             label={actionLabel}
           />
         ) : undefined

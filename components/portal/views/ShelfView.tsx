@@ -21,7 +21,7 @@ import AvailabilityHeatmap from "@/components/portal/charts/AvailabilityHeatmap"
 import StoreTable from "@/components/portal/charts/StoreTable";
 import ChartStory from "@/components/portal/ChartStory";
 import { useViewInsights } from "@/components/portal/useViewInsights";
-import WatchButton from "@/components/portal/WatchButton";
+import { brandShareWatchTarget } from "@/lib/watchTargets";
 import DistrictMap, {
   type DistrictDatum,
 } from "@/components/portal/charts/DistrictMap";
@@ -204,6 +204,44 @@ export default function ShelfView() {
 
   const districts = mode === "availability" ? availabilityDistricts : shareDistricts;
 
+  const skuWatchTargets = useMemo(
+    () =>
+      Object.fromEntries(
+        availabilityRows.map((r) => [
+          r.id,
+          {
+            metric: "availability" as const,
+            segmentType: "sku" as const,
+            segment: r.id,
+            label: `${r.label} availability`,
+            currentValue: r.value,
+            visit: view.visit,
+            suggestedTarget: {
+              value: categoryAvailability,
+              why: `The ${categoryAvailability}% category average.`,
+            },
+          },
+        ])
+      ),
+    [availabilityRows, categoryAvailability, view.visit]
+  );
+
+  const shareWatchTargets = useMemo(
+    () =>
+      Object.fromEntries(
+        shareRows.map((r) => [
+          r.id,
+          brandShareWatchTarget({
+            brandId: r.id,
+            brandLabel: r.label,
+            value: r.value,
+            visit: view.visit,
+          }),
+        ])
+      ),
+    [shareRows, view.visit]
+  );
+
   return (
     <div
       className="transition-opacity duration-200"
@@ -312,22 +350,7 @@ export default function ShelfView() {
                     value: categoryAvailability,
                     label: `category average ${categoryAvailability}%`,
                   }}
-                  rowAction={(row) => (
-                    <WatchButton
-                      target={{
-                        metric: "availability",
-                        segmentType: "sku",
-                        segment: row.id,
-                        label: `${row.label} availability`,
-                        currentValue: row.value,
-                        visit: view.visit,
-                        suggestedTarget: {
-                          value: categoryAvailability,
-                          why: `The ${categoryAvailability}% category average.`,
-                        },
-                      }}
-                    />
-                  )}
+                  watchTargets={skuWatchTargets}
                 />
               </ChartStory>
             ) : (
@@ -389,6 +412,7 @@ export default function ShelfView() {
                 <RankedBar
                   rows={shareRows}
                   max={Math.max(...view.byBrand.map((c) => c.share), 1)}
+                  watchTargets={shareWatchTargets}
                 />
               </ChartStory>
             ) : (

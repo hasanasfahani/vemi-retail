@@ -22,6 +22,7 @@
                 rather than in a separate delta column. */
 
 import { useState } from "react";
+import WatchButton, { type WatchTarget } from "@/components/portal/WatchButton";
 
 export type BarRow = {
   id: string;
@@ -49,10 +50,13 @@ type Props = {
   /* Names the ghost series in the legend — only rendered when at least
      one row carries a `previous`. */
   previousLabel?: string;
-  /* Renders a per-row control — the Watch pin. A row already IS a
-     metric on a segment, which is exactly what a monitor holds, so
-     the affordance belongs here rather than in a builder screen. */
-  rowAction?: (row: BarRow) => React.ReactNode;
+  /* Per-row Watch pins, keyed by row id. Deliberately DATA, not a
+     render function: Command Center and Digest are Server Components,
+     and a function prop cannot cross that boundary — the same
+     constraint that turned `format` into a `unit` string back in
+     Phase 5. The chart is a client component, so it renders the
+     button itself from this map. */
+  watchTargets?: Record<string, WatchTarget>;
 };
 
 export default function RankedBar({
@@ -63,7 +67,7 @@ export default function RankedBar({
   topN,
   reference,
   previousLabel = "previous visit",
-  rowAction,
+  watchTargets,
 }: Props) {
   const [hover, setHover] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(false);
@@ -191,9 +195,9 @@ export default function RankedBar({
                 {unit}
               </div>
 
-              {rowAction && (
+              {watchTargets?.[row.id] && (
                 <div className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
-                  {rowAction(row)}
+                  <WatchButton target={watchTargets[row.id]} />
                 </div>
               )}
             </div>
