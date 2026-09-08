@@ -17,7 +17,7 @@ import FilterBar, {
 import StatTile from "@/components/portal/charts/StatTile";
 import RankedBar from "@/components/portal/charts/RankedBar";
 import ChartStory from "@/components/portal/ChartStory";
-import { brandShareWatchTarget } from "@/lib/watchTargets";
+import { brandShareWatchTarget, kpiWatchTarget } from "@/lib/watchTargets";
 import { useViewInsights } from "@/components/portal/useViewInsights";
 import DistrictMap, {
   type DistrictDatum,
@@ -202,6 +202,13 @@ export default function OosView() {
           value={`${mine.length}`}
           goodDirection="down"
           footnote={`of ${rows.length} across the category`}
+          watch={kpiWatchTarget({
+            metric: "gaps",
+            value: mine.length,
+            visit: view.visit,
+            filters,
+            suggestedTarget: { value: 0, why: "No gaps — the shelf as it should be." },
+          })}
         />
         <StatTile
           label="Lost facing-days"

@@ -4,7 +4,7 @@ import PrintButton from "@/components/portal/PrintButton";
 import StatTile from "@/components/portal/charts/StatTile";
 import ChartFrame from "@/components/portal/ChartFrame";
 import DivergingBar from "@/components/portal/charts/DivergingBar";
-import { districtWatchTarget } from "@/lib/watchTargets";
+import { districtWatchTarget, kpiWatchTarget } from "@/lib/watchTargets";
 import DecisionBlock from "@/components/portal/DecisionBlock";
 import { scope } from "@/lib/portal";
 import { EMPTY_FILTERS, applyFilters } from "@/lib/portalFilters";
@@ -164,21 +164,43 @@ export default async function DigestPage() {
           value={`${headline.availability}%`}
           delta={headline.availabilityDelta}
           goodDirection="up"
+          watch={kpiWatchTarget({
+            metric: "availability",
+            value: headline.availability,
+            visit: view.visit,
+          })}
         />
         <StatTile
           label="Shelf share"
           value={`${headline.shelfShare}%`}
           delta={headline.shelfShareDelta}
           goodDirection="up"
+          watch={kpiWatchTarget({
+            metric: "shelf-share",
+            value: headline.shelfShare,
+            visit: view.visit,
+          })}
         />
         <StatTile
           label="Price compliance"
           value={`${headline.priceCompliance}%`}
+          watch={kpiWatchTarget({
+            metric: "compliance",
+            value: headline.priceCompliance,
+            visit: view.visit,
+            suggestedTarget: { value: 100, why: "Every line within RRP ±5%." },
+          })}
         />
         <StatTile
           label="Active out-of-stocks"
           value={`${headline.activeOos}`}
           goodDirection="down"
+          watch={kpiWatchTarget({
+            metric: "gaps",
+            value: headline.activeOos,
+            visit: view.visit,
+            suggestedTarget: { value: 0, why: "No gaps — the shelf as it should be." },
+          })}
         />
       </div>
 

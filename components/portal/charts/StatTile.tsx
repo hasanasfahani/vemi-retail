@@ -6,6 +6,7 @@
 
 import { scope } from "@/lib/portal";
 import CountUp from "./CountUp";
+import WatchButton, { type WatchTarget } from "@/components/portal/WatchButton";
 
 type Props = {
   label: string;
@@ -14,6 +15,9 @@ type Props = {
   unit?: string;
   goodDirection?: "up" | "down";
   footnote?: string;
+  /* Plain data, not a callback — this component renders inside Server
+     Components, where a function prop cannot cross the boundary. */
+  watch?: WatchTarget;
 };
 
 export default function StatTile({
@@ -23,13 +27,19 @@ export default function StatTile({
   unit = "pt",
   goodDirection = "up",
   footnote,
+  watch,
 }: Props) {
   const moved = delta !== undefined && Math.abs(delta) >= 0.05;
   const rising = (delta ?? 0) > 0;
   const good = goodDirection === "up" ? rising : !rising;
 
   return (
-    <div className="rounded-[14px] border border-line bg-white p-4">
+    <div className="group relative rounded-[14px] border border-line bg-white p-4">
+      {watch && (
+        <div className="absolute right-3 top-3 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+          <WatchButton target={watch} />
+        </div>
+      )}
       <div className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
         {label}
       </div>

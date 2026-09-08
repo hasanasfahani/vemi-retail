@@ -21,7 +21,7 @@ import AvailabilityHeatmap from "@/components/portal/charts/AvailabilityHeatmap"
 import StoreTable from "@/components/portal/charts/StoreTable";
 import ChartStory from "@/components/portal/ChartStory";
 import { useViewInsights } from "@/components/portal/useViewInsights";
-import { brandShareWatchTarget } from "@/lib/watchTargets";
+import { brandShareWatchTarget, kpiWatchTarget } from "@/lib/watchTargets";
 import DistrictMap, {
   type DistrictDatum,
 } from "@/components/portal/charts/DistrictMap";
@@ -297,6 +297,16 @@ export default function ShelfView() {
               value={`${view.client?.availability ?? 0}%`}
               delta={comparable ? headline.availabilityDelta : undefined}
               footnote={comparable ? undefined : "In the current selection"}
+              watch={kpiWatchTarget({
+                metric: "availability",
+                value: view.client?.availability ?? 0,
+                visit: view.visit,
+                filters,
+                suggestedTarget: {
+                  value: categoryAvg,
+                  why: `The ${categoryAvg}% category average in this selection.`,
+                },
+              })}
             />
             <StatTile
               label="Category average"
@@ -307,11 +317,24 @@ export default function ShelfView() {
               label={`${clientBrand.name} distribution`}
               value={`${distributionAvg}%`}
               footnote="Average outlets listing each SKU"
+              watch={kpiWatchTarget({
+                metric: "distribution",
+                value: distributionAvg,
+                visit: view.visit,
+                filters,
+              })}
             />
             <StatTile
               label="Open gaps"
               value={`${view.gapCount}`}
               goodDirection="down"
+              watch={kpiWatchTarget({
+                metric: "gaps",
+                value: view.gapCount,
+                visit: view.visit,
+                filters,
+                suggestedTarget: { value: 0, why: "No gaps — the shelf as it should be." },
+              })}
               footnote={comparable ? `${headline.activeOos} on your SKUs` : "In the current selection"}
             />
           </div>
@@ -369,6 +392,12 @@ export default function ShelfView() {
               value={`${client?.share ?? 0}%`}
               delta={comparable ? clientRow.shareDelta : undefined}
               footnote={comparable ? undefined : "In the current selection"}
+              watch={kpiWatchTarget({
+                metric: "shelf-share",
+                value: client?.share ?? 0,
+                visit: view.visit,
+                filters,
+              })}
             />
             <StatTile
               label="Facings counted"
