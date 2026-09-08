@@ -568,12 +568,78 @@ function coreTrend() {
   const shareFloor = bootstrapFloor("share");
   const availFloor = bootstrapFloor("availability");
 
+  /* THE PORTFOLIO — the client's whole house, not just its lead brand.
+
+     Baghdad Soft Drinks owns Pepsi, 7UP and Mirinda; Coca-Cola Iraq
+     owns Coca-Cola, Fanta and Sprite. A company-level reader is not
+     asking how Pepsi did, they are asking how their shelf did against
+     the other house — and those two questions have different answers,
+     because share ceded by one of your own brands to another of your
+     own brands is not a loss at all.
+
+     Given its own bootstrapped floor rather than borrowing the
+     client-brand one: a portfolio is a different quantity with a
+     different variance, and reusing the wrong floor would be exactly
+     the sort of transplanted number this file avoids. */
+  const CLIENT_OWNER = BRANDS.find((b) => b.client).owner;
+  const ownerOf = (brandId) => BRANDS.find((b) => b.id === brandId).owner;
+
+  const houseShare = (windowId, owner, ids) => {
+    const set = ids ? new Set(ids) : null;
+    const rows = at(windowId).filter(
+      (c) => c.inStock && (set ? set.has(c.posId) : CORE.has(c.posId))
+    );
+    const total = rows.reduce((s, c) => s + c.facings, 0);
+    const mine = rows
+      .filter((c) => ownerOf(brandOf(c.skuId)) === owner)
+      .reduce((s, c) => s + c.facings, 0);
+    return total ? (mine / total) * 100 : 0;
+  };
+
+  const core = [...CORE];
+  const portfolioDeltas = [];
+  for (let r = 0; r < 3000; r++) {
+    const sample = Array.from(
+      { length: core.length },
+      () => core[Math.floor(rand() * core.length)]
+    );
+    portfolioDeltas.push(
+      houseShare(CURR, CLIENT_OWNER, sample) - houseShare(PREV, CLIENT_OWNER, sample)
+    );
+  }
+  const pMean = portfolioDeltas.reduce((s, x) => s + x, 0) / portfolioDeltas.length;
+  const portfolioFloor =
+    Math.round(
+      2.8 *
+        Math.sqrt(
+          portfolioDeltas.reduce((s, x) => s + (x - pMean) ** 2, 0) /
+            (portfolioDeltas.length - 1)
+        ) *
+        10
+    ) / 10;
+
+  const houses = [...new Set(BRANDS.map((b) => b.owner))].map((owner) => {
+    const now = Math.round(houseShare(CURR, owner) * 10) / 10;
+    const before = Math.round(houseShare(PREV, owner) * 10) / 10;
+    return {
+      owner,
+      isClient: owner === CLIENT_OWNER,
+      brands: BRANDS.filter((b) => b.owner === owner).map((b) => b.id),
+      share: now,
+      previousShare: before,
+      shareDelta: Math.round((now - before) * 10) / 10,
+      shareSignificant: Math.abs(now - before) >= portfolioFloor,
+    };
+  }).sort((a, b) => b.share - a.share);
+
   return {
     outlets: CORE.size,
     windowDays: WINDOW_DAYS,
     /* Smallest move this panel can tell from noise, per metric. */
     shareFloorPt: shareFloor,
     availabilityFloorPt: availFloor,
+    portfolioFloorPt: portfolioFloor,
+    houses,
     brands: BRANDS.map((b) => {
       const now = shareIn(CURR, b.id);
       const before = shareIn(PREV, b.id);

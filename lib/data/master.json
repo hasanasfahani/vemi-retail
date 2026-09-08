@@ -921,6 +921,46 @@
     "windowDays": 28,
     "shareFloorPt": 2.1,
     "availabilityFloorPt": 7,
+    "portfolioFloorPt": 3.4,
+    "houses": [
+      {
+        "owner": "Baghdad Soft Drinks",
+        "isClient": true,
+        "brands": [
+          "pepsi",
+          "7up",
+          "mirinda"
+        ],
+        "share": 58.8,
+        "previousShare": 60,
+        "shareDelta": -1.2,
+        "shareSignificant": false
+      },
+      {
+        "owner": "Coca-Cola Iraq",
+        "isClient": false,
+        "brands": [
+          "coca-cola",
+          "fanta",
+          "sprite"
+        ],
+        "share": 37.4,
+        "previousShare": 36.1,
+        "shareDelta": 1.3,
+        "shareSignificant": false
+      },
+      {
+        "owner": "Zam Zam Group",
+        "isClient": false,
+        "brands": [
+          "zamzam"
+        ],
+        "share": 3.9,
+        "previousShare": 3.9,
+        "shareDelta": 0,
+        "shareSignificant": false
+      }
+    ],
     "brands": [
       {
         "brandId": "pepsi",

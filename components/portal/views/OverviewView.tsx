@@ -25,20 +25,17 @@ import PageHeader from "@/components/portal/PageHeader";
 import StatTile from "@/components/portal/charts/StatTile";
 import NationalMap from "@/components/portal/NationalMap";
 import FilterBar, { useFilters } from "@/components/portal/FilterBar";
-import { kpiWatchTarget } from "@/lib/watchTargets";
-import { scope } from "@/lib/portal";
+import { scope, coverage, categories } from "@/lib/portal";
 import { applyFilters } from "@/lib/portalFilters";
 import { generateInsights } from "@/lib/insights";
 import { buildDecisions } from "@/lib/decisions";
 import { formatImpact } from "@/lib/economics";
 import ImpactBasis from "@/components/portal/ImpactBasis";
-import { computeMetric } from "@/lib/monitorValue";
 import {
   clientBrand,
-  competitors,
   brandName,
-  headline,
   coreTrend,
+  skuOf,
   latest,
 } from "@/lib/portalData";
 
@@ -58,27 +55,35 @@ export default function OverviewView() {
   }, [view]);
 
   const client = view.byBrand.find((b) => b.isClient);
-  const rank = view.byBrand.findIndex((b) => b.isClient) + 1;
-  const gaps = view.oosRows.length;
-  /* Through the same function the Watchlist uses to take its readings,
-     so a pinned compliance monitor can never disagree with the tile it
-     was pinned from. */
-  const compliance = useMemo(
-    () =>
-      computeMetric(
-        { metric: "compliance", segmentType: "panel", segment: "", filters },
-        latest
-      ) ?? 0,
-    [filters]
-  );
 
-  const atRisk = view.oosRows.reduce((s, r) => s + r.facingDaysAtRisk, 0);
+  /* Company altitude: the client's house, and the house behind it. */
+  const house = coreTrend.houses.find((h) => h.isClient);
+  const rivalHouse = coreTrend.houses.find((h) => !h.isClient);
+  const houseBrands = house?.brands.length ?? 0;
+  const leadPt =
+    Math.round(((house?.share ?? 0) - (rivalHouse?.share ?? 0)) * 10) / 10;
+  const activeCategories = categories.filter((c) => c.active).length;
 
+  /* Availability across every brand the company owns, not just the
+     lead one — the same widening the share figure gets. */
+  const portfolioAvailability = useMemo(() => {
+    const ids = new Set(house?.brands ?? []);
+    const own = view.cells.filter((c) => {
+      const b = skuOf(c.skuId)?.brandId;
+      return b && ids.has(b) && c.state !== "not-listed";
+    });
+    if (!own.length) return 0;
+    return (
+      Math.round(
+        (own.filter((c) => c.state === "in-stock").length / own.length) * 1000
+      ) / 10
+    );
+  }, [view, house]);
   return (
     <div>
       <PageHeader
         title="Overview"
-        lead="How the shelf is holding, and where"
+        lead={`${clientBrand.owner} across every brand, category and city audited`}
         posCount={view.posCount}
       />
 
@@ -161,60 +166,92 @@ export default function OverviewView() {
         )}
       </section>
 
-      {/* the four figures */}
+      {/* THE FOUR FIGURES, AT COMPANY ALTITUDE.
+
+          This row used to report Pepsi: its availability, its share,
+          its compliance, its gaps. That is a brand manager's row. A
+          company-level reader owns Pepsi, 7UP and Mirinda, and the
+          question they are actually asking is how their SHELF did
+          against the other house — because share ceded by one of their
+          own brands to another is not a loss, and a Pepsi-only row
+          reports it as one. */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatTile
-          label="On-shelf availability"
-          value={`${client?.availability ?? 0}%`}
-          delta={headline.availabilityDelta}
-          moved={headline.availabilityMoved}
-          floorPt={coreTrend.availabilityFloorPt}
+          label="Portfolio shelf share"
+          value={`${house?.share ?? 0}%`}
+          delta={house?.shareDelta}
+          moved={house?.shareSignificant}
+          floorPt={coreTrend.portfolioFloorPt}
+          goodDirection="up"
+          footnote={`${clientBrand.owner} — ${houseBrands} brands`}
+        />
+        <StatTile
+          label={`Lead over ${rivalHouse?.owner ?? "the next house"}`}
+          value={`${leadPt > 0 ? "+" : ""}${leadPt}pt`}
+          goodDirection="up"
+          footnote={`They hold ${rivalHouse?.share ?? 0}% across ${rivalHouse?.brands.length ?? 0} brands`}
+        />
+        <StatTile
+          label="Portfolio on-shelf"
+          value={`${portfolioAvailability}%`}
           goodDirection="up"
           footnote={`Level across ${view.posCount} outlets audited`}
-          watch={kpiWatchTarget({
-            metric: "availability",
-            value: client?.availability ?? 0,
-            visit: view.visit,
-          })}
         />
         <StatTile
-          label="Shelf share"
-          value={`${client?.share ?? 0}%`}
-          delta={headline.shelfShareDelta}
-          moved={headline.shelfShareMoved}
-          floorPt={coreTrend.shareFloorPt}
-          goodDirection="up"
-          footnote={`Rank ${rank} of ${competitors.length} in category`}
-          watch={kpiWatchTarget({
-            metric: "shelf-share",
-            value: client?.share ?? 0,
-            visit: view.visit,
-          })}
-        />
-        <StatTile
-          label="Price compliance"
-          value={`${compliance}%`}
-          footnote={`${clientBrand.name} SKUs at RRP ±5%`}
-          watch={kpiWatchTarget({
-            metric: "compliance",
-            value: compliance,
-            visit: view.visit,
-            suggestedTarget: { value: 100, why: "Every line within RRP ±5%." },
-          })}
-        />
-        <StatTile
-          label="Open gaps"
-          value={`${gaps}`}
-          goodDirection="down"
-          footnote={`${atRisk.toLocaleString()} facing-days at risk`}
-          watch={kpiWatchTarget({
-            metric: "gaps",
-            value: gaps,
-            visit: view.visit,
-            suggestedTarget: { value: 0, why: "No gaps — the shelf as it should be." },
-          })}
+          label="Footprint"
+          value={`${coverage.activeCount} of ${coverage.totalCount}`}
+          footnote={`governorates · ${activeCategories} of ${categories.length} categories`}
         />
       </div>
+
+      {/* House against house — the one chart a company-level page
+          needs, and the one that cannot be read off a brand ranking. */}
+      <section className="mt-4 rounded-[18px] border border-line bg-white p-5 sm:p-6">
+        <h2 className="t-h3">Shelf by company</h2>
+        <p className="mt-1 mb-4 text-sm text-ink-500">
+          Every facing counted in this window, grouped by who owns the
+          brand. Movement is measured on the {scope.corePanelSize} core
+          outlets, against a ±{coreTrend.portfolioFloorPt}pt floor.
+        </p>
+        <div className="flex flex-col gap-3">
+          {coreTrend.houses.map((h) => (
+            <div key={h.owner} className="flex items-center gap-3">
+              <span
+                className={`w-[150px] shrink-0 truncate text-[13px] ${
+                  h.isClient ? "font-semibold text-ink-900" : "text-ink-500"
+                }`}
+              >
+                {h.owner}
+              </span>
+              <span className="relative h-[22px] min-w-0 flex-1 rounded-[5px] bg-canvas">
+                <span
+                  className="absolute inset-y-0 left-0 rounded-[5px]"
+                  style={{
+                    width: `${h.share}%`,
+                    background: h.isClient
+                      ? "var(--color-violet)"
+                      : "var(--color-chart-context)",
+                  }}
+                />
+              </span>
+              <span className="mono w-[104px] shrink-0 text-right text-[12.5px]">
+                <span className="font-semibold text-ink-900">{h.share}%</span>
+                <span className="ml-1.5 text-ink-400">
+                  {h.shareSignificant
+                    ? `${h.shareDelta > 0 ? "+" : ""}${h.shareDelta}pt`
+                    : "—"}
+                </span>
+              </span>
+            </div>
+          ))}
+        </div>
+        <p className="mt-4 border-t border-line pt-3 text-[12.5px] leading-snug text-ink-500">
+          <span className="font-semibold text-ink-700">How to read this. </span>
+          Each bar is one company&rsquo;s share of every facing audited. A dash
+          instead of a movement means the change is inside the panel&rsquo;s
+          detection floor — a reading, not a move.
+        </p>
+      </section>
 
       {/* the map — national, not the Erbil district heat.
 

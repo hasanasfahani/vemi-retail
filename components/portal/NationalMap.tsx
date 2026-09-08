@@ -50,8 +50,12 @@ export default function NationalMap({
         </span>
       </div>
 
-      <div className="mt-5 grid gap-5 sm:grid-cols-[minmax(0,1fr)_240px]">
-        <div className="min-w-0">
+      {/* The map was filling the column and reading as the subject of
+          the page rather than as orientation on it. Capped and
+          centred: at company altitude the footprint is one fact among
+          four, not a poster. */}
+      <div className="mt-5 grid items-start gap-5 sm:grid-cols-[200px_minmax(0,1fr)]">
+        <div className="mx-auto w-full max-w-[200px]">
           <svg
             viewBox={`0 0 ${VIEW.w} ${VIEW.h}`}
             className="h-auto w-full"

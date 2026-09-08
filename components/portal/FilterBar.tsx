@@ -6,7 +6,7 @@
    a reload. Every chart and table on the page re-renders against the
    same slice — filters never live inside a single card. */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   EMPTY_FILTERS,
@@ -106,7 +106,7 @@ export default function FilterBar({
 
   return (
     <div className="mb-4 rounded-[14px] border border-line bg-white p-3">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-3">
         {/* THE WINDOW SELECTOR WAS REMOVED HERE.
 
             It let a reader switch between the two collection windows.
@@ -168,7 +168,6 @@ function Group({
   options,
   selected,
   onToggle,
-  scroll,
 }: {
   label: string;
   options: { value: string; label: string }[];
@@ -176,54 +175,117 @@ function Group({
   onToggle: (value: string) => void;
   scroll?: boolean;
 }) {
-  /* A LIST, not a row of chips.
+  /* A DROPDOWN, not an always-open list.
 
-     Chips read as a set of buttons of equal weight, which is fine for
-     four channels and wrong for eighteen districts: they wrapped over
-     several lines, the selected ones scattered among the unselected,
-     and finding one meant scanning a paragraph. A list gives every
-     option the same left edge, so the eye runs down a column instead
-     of hunting across rows, and a checkbox says "several of these" in
-     a way a highlighted pill does not. */
+     The list fixed the chips' scanning problem but traded it for a
+     new one: three open columns of checkboxes are a permanent block of
+     furniture above every page, and eighteen districts pushed the
+     actual content below the fold on a laptop. A filter is used
+     occasionally and read constantly, so what it owes the page at rest
+     is a one-line summary of what is selected — the detail belongs
+     behind a click.
+
+     Closed, each control states its own state ("All brands", "Pepsi",
+     "3 selected"), which is the thing a reader needs when they arrive
+     at a filtered link somebody sent them. */
+  const [open, setOpen] = useState(false);
+  const box = useRef<HTMLDivElement>(null);
+
+  /* Click-away and Escape. A dropdown that only closes by re-clicking
+     its own button is a dropdown people leave open. */
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (box.current && !box.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  const summary =
+    selected.length === 0
+      ? `All ${label.toLowerCase()}s`
+      : selected.length === 1
+        ? options.find((o) => o.value === selected[0])?.label ?? "1 selected"
+        : `${selected.length} selected`;
+
   return (
-    <div className="min-w-0">
-      <div className="flex items-baseline justify-between gap-2 pb-1.5">
-        <span className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
-          {label}
-        </span>
-        {selected.length > 0 && (
-          <span className="mono text-[11px] text-violet-ink">
-            {selected.length}
-          </span>
-        )}
-      </div>
-      <div
-        className={`flex flex-col rounded-[10px] border border-line bg-canvas p-1 ${
-          scroll ? "max-h-[132px] overflow-y-auto" : ""
+    <div className="relative min-w-0" ref={box}>
+      <span className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+        {label}
+      </span>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-haspopup="listbox"
+        className={`flex w-full items-center justify-between gap-2 rounded-[10px] border px-3 py-2 text-left text-[13px] transition-colors ${
+          selected.length
+            ? "border-violet-100 bg-violet-050 font-semibold text-violet-ink"
+            : "border-line-strong bg-white text-ink-700 hover:border-ink-400"
         }`}
       >
-        {options.map((option) => {
-          const on = selected.includes(option.value);
-          return (
-            <label
-              key={option.value}
-              className={`flex cursor-pointer items-center gap-2 rounded-md px-2 py-[5px] text-[12.5px] transition-colors ${
-                on
-                  ? "bg-white font-semibold text-ink-900 shadow-[var(--shadow-card)]"
-                  : "text-ink-700 hover:bg-white/60"
-              }`}
+        <span className="min-w-0 truncate">{summary}</span>
+        <svg
+          viewBox="0 0 16 16"
+          className="h-3.5 w-3.5 shrink-0 opacity-60"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{ transform: open ? "rotate(180deg)" : "none" }}
+          aria-hidden
+        >
+          <path d="M4 6.5 8 10.5 12 6.5" />
+        </svg>
+      </button>
+
+      {open && (
+        <div
+          role="listbox"
+          aria-multiselectable
+          className="absolute left-0 right-0 z-30 mt-1 max-h-[240px] overflow-y-auto rounded-[10px] border border-line bg-white p-1 shadow-[var(--shadow-pop)]"
+        >
+          {selected.length > 0 && (
+            <button
+              type="button"
+              onClick={() => selected.forEach(onToggle)}
+              className="mb-1 w-full rounded-md px-2 py-1.5 text-left text-[12px] font-medium text-violet-ink hover:bg-canvas"
             >
-              <input
-                type="checkbox"
-                checked={on}
-                onChange={() => onToggle(option.value)}
-                className="h-3.5 w-3.5 shrink-0 accent-[var(--color-violet)]"
-              />
-              <span className="min-w-0 truncate">{option.label}</span>
-            </label>
-          );
-        })}
-      </div>
+              Clear {label.toLowerCase()}
+            </button>
+          )}
+          {options.map((option) => {
+            const on = selected.includes(option.value);
+            return (
+              <label
+                key={option.value}
+                role="option"
+                aria-selected={on}
+                className={`flex cursor-pointer items-center gap-2 rounded-md px-2 py-[6px] text-[13px] transition-colors ${
+                  on ? "font-semibold text-ink-900" : "text-ink-700"
+                } hover:bg-canvas`}
+              >
+                <input
+                  type="checkbox"
+                  checked={on}
+                  onChange={() => onToggle(option.value)}
+                  className="h-3.5 w-3.5 shrink-0 accent-[var(--color-violet)]"
+                />
+                <span className="min-w-0 truncate">{option.label}</span>
+              </label>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

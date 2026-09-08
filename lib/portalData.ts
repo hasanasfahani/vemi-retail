@@ -207,6 +207,16 @@ export type CoreBrandTrend = {
   availabilitySignificant: boolean;
 };
 
+export type House = {
+  owner: string;
+  isClient: boolean;
+  brands: string[];
+  share: number;
+  previousShare: number;
+  shareDelta: number;
+  shareSignificant: boolean;
+};
+
 export type CoreTrend = {
   outlets: number;
   windowDays: number;
@@ -214,7 +224,14 @@ export type CoreTrend = {
      the panel's own outlets. */
   shareFloorPt: number;
   availabilityFloorPt: number;
+  /* The portfolio has its own variance, so it gets its own floor
+     rather than borrowing the client brand's. */
+  portfolioFloorPt: number;
   brands: CoreBrandTrend[];
+  /* Share by owning company — the altitude a company-level reader is
+     actually at. Share ceded by one of your brands to another of your
+     brands is not a loss, and only this view can say so. */
+  houses: House[];
 };
 
 export const meta = masterJson.meta as Meta;
