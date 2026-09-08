@@ -28,7 +28,7 @@ import FilterBar, { useFilters } from "@/components/portal/FilterBar";
 import { scope, coverage, categories } from "@/lib/portal";
 import { applyFilters } from "@/lib/portalFilters";
 import { generateInsights } from "@/lib/insights";
-import { buildDecisions } from "@/lib/decisions";
+import { portfolioRisk, portfolioVerdict } from "@/lib/portfolio";
 import { formatImpact } from "@/lib/economics";
 import ImpactBasis from "@/components/portal/ImpactBasis";
 import {
@@ -46,13 +46,16 @@ export default function OverviewView() {
     [filters]
   );
 
-  /* One sentence, from the same rollup the operator pages' findings
-     feed. Not a section — a line. */
-  const { verdict, momentum } = useMemo(() => {
-    const report = generateInsights(view);
-    const { decisions } = buildDecisions(report);
-    return { verdict: decisions[0] ?? null, momentum: report.momentum };
-  }, [view]);
+  /* Company-level exposure, and the momentum line beneath it. The
+     insight engine still runs — it is what every operator page reads —
+     but the verdict here is computed at portfolio altitude rather than
+     lifted from a brand-scoped decision. */
+  const momentum = useMemo(() => generateInsights(view).momentum, [view]);
+  const risk = useMemo(() => portfolioRisk(view), [view]);
+  const verdict = useMemo(
+    () => (risk ? portfolioVerdict(risk) : { headline: "", detail: "" }),
+    [risk]
+  );
 
   const client = view.byBrand.find((b) => b.isClient);
 
@@ -93,18 +96,29 @@ export default function OverviewView() {
         resultLabel={`${view.posCount} of ${view.inScopeCount} outlets audited · ${view.coveragePct}% covered · ${scope.corePanelSize} core outlets carry the movement figures`}
       />
 
-      {/* the one sentence */}
+      {/* THE VERDICT, AT COMPANY ALTITUDE.
+
+          This used to render the top decision from the rollup, which
+          is brand-scoped and outlet-shaped: "Get stock back on shelf
+          at 4 outlets". True, useful, and the wrong altitude for a
+          page about a company that owns three brands — it named
+          Pepsi's worst doors while saying nothing about the house.
+
+          The company question is which AXIS the exposure sits on,
+          because brand-concentrated risk is a supply conversation and
+          outlet-concentrated risk is a coverage one, and they have
+          different owners. See lib/portfolio.ts. */}
       <section className="mt-4 mb-4 rounded-[18px] border border-line bg-white p-5 sm:p-6">
-        {verdict ? (
+        {risk ? (
           <>
             <div className="flex items-center gap-2">
               <span
                 className="dot"
                 style={{
                   background:
-                    verdict.severity === "critical"
-                      ? "var(--color-critical)"
-                      : "var(--color-warn)",
+                    risk.concentratedBy === "neither"
+                      ? "var(--color-warn)"
+                      : "var(--color-critical)",
                 }}
               />
               <span className="t-eyebrow">
@@ -114,12 +128,16 @@ export default function OverviewView() {
             <p className="mt-2 t-h3 !text-[19px] leading-snug">
               {verdict.headline}
             </p>
-            <p className="mt-1 text-sm text-ink-500">
+            <p className="mt-1 max-w-[74ch] text-sm text-ink-500">
+              {verdict.detail}
+            </p>
+            <p className="mt-2 text-sm text-ink-500">
               <span className="mono font-semibold text-ink-900">
-                {formatImpact(verdict.impact.value)}
+                {formatImpact(risk.totalAtRisk)}
               </span>
-              {" at stake across "}
-              {verdict.outlets} outlet{verdict.outlets === 1 ? "" : "s"}.
+              {" at risk across the "}
+              {risk.brands.length} {clientBrand.owner} brand
+              {risk.brands.length === 1 ? "" : "s"}.
             </p>
             <ImpactBasis className="mt-2.5" />
           </>
@@ -130,11 +148,11 @@ export default function OverviewView() {
               <span className="t-eyebrow">This window · {scope.dataAsOf}</span>
             </div>
             <p className="mt-2 t-h3 !text-[19px] leading-snug">
-              Nothing crossed a threshold in this window.
+              Every line you own was on the shelf where it is listed.
             </p>
             <p className="mt-1 text-sm text-ink-500">
-              No district, channel, SKU or outlet is currently outside its
-              expected range. We looked — that is the result.
+              No gap against any {clientBrand.owner} brand in this selection.
+              We looked — that is the result.
             </p>
           </>
         )}
