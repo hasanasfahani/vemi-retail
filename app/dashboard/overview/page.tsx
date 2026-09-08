@@ -17,6 +17,7 @@ import { buildDecisions } from "@/lib/decisions";
 import { chartFor, districtShares } from "@/lib/decisionCharts";
 import { routeDraft } from "@/lib/actionDrafts";
 import { formatImpact } from "@/lib/economics";
+import ImpactBasis from "@/components/portal/ImpactBasis";
 import {
   headline,
   clientBrand,
@@ -145,6 +146,7 @@ export default function CommandCenterPage() {
                   } below.`
                 : "the only decision flagged this cycle."}
             </p>
+            <ImpactBasis className="mt-2.5" />
           </>
         ) : (
           <>

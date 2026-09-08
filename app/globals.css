@@ -508,4 +508,18 @@ body {
   body {
     background: #fff;
   }
+
+  /* A report is read as pages, so a band that straddles a break is a
+     band nobody reads. Each block stays whole; the document itself is
+     allowed to flow. */
+  .report-block {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .report-doc {
+    display: block !important;
+  }
+  .report-doc > * {
+    margin-bottom: 12px;
+  }
 }
