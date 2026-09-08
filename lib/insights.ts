@@ -244,6 +244,17 @@ export const THRESHOLDS = {
 
 const COOLER_PACKS = new Set(["can-330", "pet-500", "glass-300"]);
 
+/* Pack codes are how the audit records a format; these are how a
+   person says them. */
+const PACK_LABEL: Record<string, string> = {
+  "can-330": "330ml can",
+  "pet-500": "500ml PET",
+  "pet-1000": "1L PET",
+  "pet-1500": "1.5L PET",
+  "pet-2250": "2.25L PET",
+  "glass-300": "300ml glass",
+};
+
 /* The interval the "deficit × time" formulas treat as the exposure
    window — the literal number of days between the two field visits,
    read from their ids (which are ISO dates), never hardcoded. */
@@ -495,14 +506,24 @@ function r4RivalSubstitution(view: FilteredView): Insight[] {
   );
 
   const tally = new Map<string, number>();
+  /* Substitution happens at the fixture, one pack at a time. A brand
+     can lead the whole contested space and still not be the one
+     taking a particular format — and "which format" is what a rep
+     defends. So the pair is tracked alongside the brand total. */
+  const pairs = new Map<string, number>();
   const outletsAffected = new Set<string>();
   let total = 0;
   for (const row of clientGaps) {
     if (!row.rivalsInStock.length) continue;
+    const pack = skuOf(row.skuId)?.pack;
     outletsAffected.add(row.posId);
     for (const rival of row.rivalsInStock) {
       const value = rival.facings * row.daysOut;
       tally.set(rival.brandId, (tally.get(rival.brandId) ?? 0) + value);
+      if (pack) {
+        const key = `${pack}|${rival.brandId}`;
+        pairs.set(key, (pairs.get(key) ?? 0) + value);
+      }
       total += value;
     }
   }
@@ -514,16 +535,34 @@ function r4RivalSubstitution(view: FilteredView): Insight[] {
   if (topShare < THRESHOLDS.r4RivalSubstitution.warningSharePct) return [];
   const severity: Severity =
     topShare >= THRESHOLDS.r4RivalSubstitution.criticalSharePct ? "critical" : "warning";
-  const impactValue = Math.round(topValue);
+
+  const rankedPairs = [...pairs.entries()].sort((a, b) => b[1] - a[1]);
+  const [topPairKey, topPairValue] = rankedPairs[0] ?? ["", 0];
+  const [topPack, topPairBrand] = topPairKey.split("|");
+  const packLabel = PACK_LABEL[topPack] ?? topPack;
+
+  /* The finding leads with the pack-level pair, because that is the
+     one someone can act on: you defend a format in a fixture, not a
+     brand in the abstract. The brand that leads overall is still
+     named when it differs, so the sharper fact never hides the
+     broader one. */
+  const leadsOverall = topPairBrand === topBrandId;
+  const impactValue = Math.round(topPairValue || topValue);
 
   return [
     {
-      id: `r4:${topBrandId}`,
+      id: `r4:${topPairKey || topBrandId}`,
       rule: "r4-rival-substitution",
       confidence: "measured",
       severity,
-      headline: `${brandName(topBrandId)} is filling the shelf where ${clientBrand.name} is out of stock`,
-      detail: `Across ${outletsAffected.size} outlets, ${brandName(topBrandId)} holds ${Math.round(topShare)}% of the space contested during your gaps.`,
+      headline: topPairKey
+        ? `${brandName(topPairBrand)} is taking your ${packLabel} space when it runs out`
+        : `${brandName(topBrandId)} is filling the shelf where ${clientBrand.name} is out of stock`,
+      detail: topPairKey
+        ? leadsOverall
+          ? `${brandName(topPairBrand)} holds ${Math.round(topPairValue)} facing-days of your ${packLabel} gaps, and ${Math.round(topShare)}% of all the space contested across ${outletsAffected.size} outlets.`
+          : `${brandName(topPairBrand)} holds ${Math.round(topPairValue)} facing-days of your ${packLabel} gaps — the sharpest single format. ${brandName(topBrandId)} leads the contested space overall at ${Math.round(topShare)}%, but not in this pack.`
+        : `Across ${outletsAffected.size} outlets, ${brandName(topBrandId)} holds ${Math.round(topShare)}% of the space contested during your gaps.`,
       impact: {
         value: impactValue,
         unit: "facing-days",
@@ -536,17 +575,16 @@ function r4RivalSubstitution(view: FilteredView): Insight[] {
       trend: "new",
       evidence: {
         href: `/dashboard/oos-alerts`,
-        formula: `Σ (rival facings × days ${clientBrand.name} was out), for every gap where ${brandName(topBrandId)} held the same pack size in stock.`,
+        formula: `Σ (rival facings × days ${clientBrand.name} was out), grouped by your pack format and the rival holding that space.`,
         table: {
-          columns: ["Rival", "Contested facing-days", "Share of contested space"],
-          rows: ranked.map(([bId, val]) => [
-            brandName(bId),
-            Math.round(val),
-            `${Math.round((val / total) * 100)}%`,
-          ]),
+          columns: ["Your pack", "Rival", "Contested facing-days"],
+          rows: rankedPairs.slice(0, 10).map(([key, val]) => {
+            const [pack, bId] = key.split("|");
+            return [PACK_LABEL[pack] ?? pack, brandName(bId), Math.round(val)];
+          }),
         },
       },
-      entities: { brandId: topBrandId },
+      entities: { brandId: topPairBrand || topBrandId },
     },
   ];
 }
