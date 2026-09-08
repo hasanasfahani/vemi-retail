@@ -17,6 +17,7 @@ import { buildDecisions } from "@/lib/decisions";
 import { chartFor, districtShares } from "@/lib/decisionCharts";
 import { routeDraft } from "@/lib/actionDrafts";
 import { formatImpact } from "@/lib/economics";
+import ImpactBasis from "@/components/portal/ImpactBasis";
 import {
   headline,
   clientBrand,
@@ -47,6 +48,14 @@ export default function CommandCenterPage() {
   const { momentum, pricing } = report;
 
   const top = decisions.slice(0, 3);
+
+  /* The engine already sorts measured before estimated; the
+     composition bars reuse that same partition rather than inventing
+     their own grouping. */
+  const measuredDecisions = decisions.filter((d) => d.confidence === "measured");
+  const estimatedDecisions = decisions.filter((d) => d.confidence === "estimated");
+  const measuredTotal = measuredDecisions.reduce((s, d) => s + d.impact.value, 0);
+  const estimatedTotal = estimatedDecisions.reduce((s, d) => s + d.impact.value, 0);
   const rank = competitors.findIndex((c) => c.isClient) + 1;
 
   /* The structural finding and the district rows that prove it. */
@@ -137,6 +146,7 @@ export default function CommandCenterPage() {
                   } below.`
                 : "the only decision flagged this cycle."}
             </p>
+            <ImpactBasis className="mt-2.5" />
           </>
         ) : (
           <>
@@ -219,29 +229,71 @@ export default function CommandCenterPage() {
         />
       </div>
 
-      {/* What KIND of cycle this is, before any card is read. The
-          decision list answers "which is biggest"; this answers
-          "is this a replenishment problem or a range problem", which
-          is the question an executive actually decides against. */}
+      {/* What KIND of cycle this is, before any card is read.
+
+          Split by confidence rather than shown as one bar. Mixing a
+          measured facing-day with an estimated one into a single
+          percentage is exactly the false equivalence Phase 12's
+          tiering exists to prevent — and it showed: the fixture
+          rebalance took 43% of one combined bar while ranking fourth
+          in the list beside it, so the page appeared to contradict
+          itself. It never did. The bar was measuring size, the list
+          was ranking evidence, and only the bar was pretending the two
+          kinds of number were the same. Two bars, each summing within
+          its own tier, and the disagreement disappears. */}
       {decisions.length > 1 && (
         <section className="mt-4 rounded-[18px] border border-line bg-white p-5 sm:p-6">
           <h2 className="t-h3">What kind of cycle this is</h2>
-          <p className="mt-1 mb-4 text-sm text-ink-500">
-            Every facing-day at stake, split by the move that would
-            recover it.
+          <p className="mt-1 text-sm text-ink-500">
+            Every facing-day at stake, split by the move that would recover
+            it — and by how firmly it is known.
           </p>
-          <CompositionBar
-            segments={decisions.map((d) => ({
-              id: d.id,
-              label: d.headline,
-              value: d.impact.value,
-            }))}
-            unitNoun="facing-days"
-          />
-          <p className="mt-3 border-t border-line pt-3 text-[12.5px] text-ink-500">
+
+          {measuredDecisions.length > 0 && (
+            <div className="mt-4">
+              <div className="mb-2 flex items-baseline justify-between gap-3">
+                <h3 className="t-h3 !text-[13px]">Confirmed losses</h3>
+                <span className="mono text-[12px] text-ink-400">
+                  {measuredTotal.toLocaleString()} facing-days
+                </span>
+              </div>
+              <CompositionBar
+                segments={measuredDecisions.map((d) => ({
+                  id: d.id,
+                  label: d.headline,
+                  value: d.impact.value,
+                }))}
+                unitNoun="facing-days"
+              />
+            </div>
+          )}
+
+          {estimatedDecisions.length > 0 && (
+            <div className="mt-5 border-t border-line pt-4">
+              <div className="mb-2 flex items-baseline justify-between gap-3">
+                <h3 className="t-h3 !text-[13px]">Projected gaps</h3>
+                <span className="mono text-[12px] text-ink-400">
+                  {estimatedTotal.toLocaleString()} facing-days
+                </span>
+              </div>
+              <CompositionBar
+                segments={estimatedDecisions.map((d) => ({
+                  id: d.id,
+                  label: d.headline,
+                  value: d.impact.value,
+                }))}
+                unitNoun="facing-days"
+              />
+            </div>
+          )}
+
+          <p className="mt-4 border-t border-line pt-3 text-[12.5px] text-ink-500">
             <span className="font-semibold text-ink-700">How to read this. </span>
-            One bar, split by decision type — the widest band is the kind of
-            problem this cycle mostly is.
+            Each bar splits its own total, so the widest band is the kind of
+            problem that tier mostly is. The two are kept apart because a
+            confirmed loss and a projected one are different kinds of number —
+            which is also why the biggest projection can rank below a smaller
+            confirmed loss in the decisions above.
           </p>
         </section>
       )}

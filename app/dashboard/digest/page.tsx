@@ -12,6 +12,7 @@ import { generateInsights } from "@/lib/insights";
 import { buildDecisions } from "@/lib/decisions";
 import { chartFor, districtShares } from "@/lib/decisionCharts";
 import { formatImpact } from "@/lib/economics";
+import ImpactBasis from "@/components/portal/ImpactBasis";
 import { headline, clientBrand, brandName, latest } from "@/lib/portalData";
 import { listActions } from "@/lib/actionsServer";
 import type { ActionRecord } from "@/lib/actionsShared";
@@ -127,6 +128,7 @@ export default async function DigestPage() {
                   } this cycle.`
                 : "the only decision flagged this cycle."}
             </p>
+            <ImpactBasis className="mt-2.5" />
           </>
         ) : (
           <>
