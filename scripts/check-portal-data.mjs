@@ -218,6 +218,26 @@ for (const win of master.meta.windows) {
     `${win.outletsAudited} of ${master.meta.posUniverse}`
   );
 }
+
+/* The core panel is the paired population — if a core outlet is ever
+   missing from a window, that window's movement figures are no longer
+   comparing the same doors, and every delta built on them is wrong in
+   a way nothing else here would catch. */
+const core = new Set(master.meta.corePanel);
+for (const id of Object.keys(visitData)) {
+  const seen = new Set(visitData[id].matrix.map((c) => c.posId));
+  const missing = [...core].filter((p) => !seen.has(p));
+  check(
+    `[${id}] every core outlet was audited`,
+    missing.length === 0,
+    `${core.size} core · ${missing.length} missing`
+  );
+}
+check(
+  "the detection floor is measured, not assumed",
+  master.coreTrend.shareFloorPt > 0 && master.coreTrend.availabilityFloorPt > 0,
+  `±${master.coreTrend.shareFloorPt}pt share · ±${master.coreTrend.availabilityFloorPt}pt availability`
+);
 check("SKU count matches the stated scope", master.skus.length === master.meta.skuCount);
 check(
   "exactly one brand is flagged as the client",

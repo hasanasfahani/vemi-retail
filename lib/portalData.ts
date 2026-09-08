@@ -47,6 +47,9 @@ export type Meta = {
   /* Planned days between audits of the same outlet — the basis of every
      forward loss estimate in the product. */
   revisitIntervalDays: number;
+  /* Outlets audited in EVERY window — the paired population. */
+  corePanel: string[];
+  corePanelSize: number;
   /* The outlet universe. Distinct from how many any one window reached. */
   posUniverse: number;
   skuCount: number;
@@ -184,7 +187,40 @@ export type Photo = {
 
 /* ---------- getters ---------- */
 
+/* ---------- the core panel ----------
+
+   The one population in this dataset measured twice with the same
+   doors on both sides. Every movement claim in the product is drawn
+   from here; everything else reports a level. */
+export type CoreBrandTrend = {
+  brandId: string;
+  share: number;
+  previousShare: number;
+  shareDelta: number;
+  availability: number;
+  previousAvailability: number;
+  availabilityDelta: number;
+  /* Whether the move clears the panel's own detection floor. A delta
+     that does not is a reading, not a finding, and the product must
+     not present it as one. */
+  shareSignificant: boolean;
+  availabilitySignificant: boolean;
+};
+
+export type CoreTrend = {
+  outlets: number;
+  windowDays: number;
+  /* Smallest move this panel can tell from noise, bootstrapped from
+     the panel's own outlets. */
+  shareFloorPt: number;
+  availabilityFloorPt: number;
+  brands: CoreBrandTrend[];
+};
+
 export const meta = masterJson.meta as Meta;
+export const coreTrend = masterJson.coreTrend as CoreTrend;
+export const corePanel = new Set(meta.corePanel);
+export const isCore = (posId: string) => corePanel.has(posId);
 export const brands = masterJson.brands as Brand[];
 export const skus = masterJson.skus as Sku[];
 export const pos = masterJson.pos as Pos[];
@@ -362,21 +398,26 @@ export const photosFor = (posId: string) => {
 /* ---------- headline figures ---------- */
 
 const clientShare = shelfShare.current.find((s) => s.brandId === clientBrand.id)!;
-const clientSharePrev = shelfShare.previous.find((s) => s.brandId === clientBrand.id)!;
 const clientAvail = availability.current.byBrand.find(
-  (b) => b.brandId === clientBrand.id
-)!;
-const clientAvailPrev = availability.previous.byBrand.find(
   (b) => b.brandId === clientBrand.id
 )!;
 
 const round1 = (n: number) => Math.round(n * 10) / 10;
 
+const coreClient = coreTrend.brands.find((b) => b.brandId === clientBrand.id)!;
+
 export const headline = {
+  /* LEVELS come from everything audited — breadth is what a level
+     wants. MOVEMENT comes from the core panel alone, because the same
+     doors on both sides is the only way a delta means the market
+     rather than the sample. The two populations differ, which is why
+     each is labelled on screen rather than presented as one figure. */
   availability: clientAvail.availability,
-  availabilityDelta: round1(clientAvail.availability - clientAvailPrev.availability),
+  availabilityDelta: coreClient.availabilityDelta,
+  availabilityMoved: coreClient.availabilitySignificant,
   shelfShare: clientShare.share,
-  shelfShareDelta: round1(clientShare.share - clientSharePrev.share),
+  shelfShareDelta: coreClient.shareDelta,
+  shelfShareMoved: coreClient.shareSignificant,
   activeOos: latest.oos.filter((r) => brandOf(skuOf(r.skuId)!.brandId)!.client)
     .length,
   totalOos: latest.oos.length,

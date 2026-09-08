@@ -33,7 +33,13 @@ import { buildDecisions } from "@/lib/decisions";
 import { formatImpact } from "@/lib/economics";
 import ImpactBasis from "@/components/portal/ImpactBasis";
 import { computeMetric } from "@/lib/monitorValue";
-import { clientBrand, competitors, brandName } from "@/lib/portalData";
+import {
+  clientBrand,
+  competitors,
+  brandName,
+  headline,
+  coreTrend,
+} from "@/lib/portalData";
 
 export default function OverviewView() {
   const [filters, setFilters] = useFilters();
@@ -79,7 +85,7 @@ export default function OverviewView() {
       <FilterBar
         filters={filters}
         onChange={setFilters}
-        resultLabel={`${view.posCount} of ${view.inScopeCount} outlets audited · ${view.coveragePct}% covered`}
+        resultLabel={`${view.posCount} of ${view.inScopeCount} outlets audited · ${view.coveragePct}% covered · ${scope.corePanelSize} core outlets carry the movement figures`}
       />
 
       {/* the one sentence */}
@@ -160,8 +166,11 @@ export default function OverviewView() {
         <StatTile
           label="On-shelf availability"
           value={`${client?.availability ?? 0}%`}
+          delta={headline.availabilityDelta}
+          moved={headline.availabilityMoved}
+          floorPt={coreTrend.availabilityFloorPt}
           goodDirection="up"
-          footnote={`Across ${view.posCount} outlets audited`}
+          footnote={`Level across ${view.posCount} outlets audited`}
           watch={kpiWatchTarget({
             metric: "availability",
             value: client?.availability ?? 0,
@@ -171,6 +180,9 @@ export default function OverviewView() {
         <StatTile
           label="Shelf share"
           value={`${client?.share ?? 0}%`}
+          delta={headline.shelfShareDelta}
+          moved={headline.shelfShareMoved}
+          floorPt={coreTrend.shareFloorPt}
           goodDirection="up"
           footnote={`Rank ${rank} of ${competitors.length} in category`}
           watch={kpiWatchTarget({

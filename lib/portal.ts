@@ -34,6 +34,9 @@ export const scope = {
   posUniverse: meta.posUniverse,
   previousPosCount: previousWindow.outletsAudited,
   skuCount: meta.skuCount,
+  /* Outlets audited in every window — the paired population every
+     movement claim is drawn from. */
+  corePanelSize: meta.corePanelSize,
 };
 
 /* Categories the platform runs. Only the subscribed one carries data;

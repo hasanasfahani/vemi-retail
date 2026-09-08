@@ -18,6 +18,13 @@ type Props = {
   /* Plain data, not a callback — this component renders inside Server
      Components, where a function prop cannot cross the boundary. */
   watch?: WatchTarget;
+  /* The core panel's detection floor for this metric, and whether the
+     delta clears it. A move the panel cannot resolve is shown as a
+     reading rather than as a direction — the arrow and the status
+     colour are what turn a number into a claim, so both are withheld
+     below the floor. */
+  floorPt?: number;
+  moved?: boolean;
 };
 
 export default function StatTile({
@@ -28,8 +35,11 @@ export default function StatTile({
   goodDirection = "up",
   footnote,
   watch,
+  floorPt,
+  moved: clearsFloor,
 }: Props) {
-  const moved = delta !== undefined && Math.abs(delta) >= 0.05;
+  const belowFloor = clearsFloor === false;
+  const moved = delta !== undefined && Math.abs(delta) >= 0.05 && !belowFloor;
   const rising = (delta ?? 0) > 0;
   const good = goodDirection === "up" ? rising : !rising;
 
@@ -79,17 +89,30 @@ export default function StatTile({
         )}
       </div>
 
-      <div className="mt-1.5 text-[12px] text-ink-500">
-        {footnote ?? (
-          <>
-            {/* Window over window, across two DIFFERENT samples of
-                outlets. Saying "vs 15 Jul" implied the same panel was
-                re-measured; it was not, and a reader who assumes it was
-                will read panel rotation as market movement. */}
-            {moved ? "vs" : "unchanged vs"} {scope.previousVisit} ·{" "}
-            {scope.previousPosCount} outlets then, {scope.posCount} now
-          </>
-        )}
+      <div className="mt-1.5 flex flex-col gap-0.5 text-[12px] text-ink-500">
+        {footnote && <span>{footnote}</span>}
+
+        {/* The delta's provenance, ALWAYS rendered alongside the
+            footnote rather than instead of it — they are different
+            facts. The footnote describes the level, which comes from
+            everything audited; this line describes the movement, which
+            comes from the core panel and is subject to its floor.
+            Collapsing the two let a tile show a level's population
+            while implying it also explained the delta. */}
+        {delta !== undefined &&
+          (belowFloor ? (
+            <span>
+              {delta > 0 ? "+" : ""}
+              {delta}pt vs {scope.previousVisit}
+              {" — inside this panel\u2019s \u00b1"}
+              {floorPt}pt floor, so not a move
+            </span>
+          ) : (
+            <span>
+              {moved ? "vs" : "unchanged vs"} {scope.previousVisit} · same{" "}
+              {scope.corePanelSize} core outlets both windows
+            </span>
+          ))}
       </div>
     </div>
   );

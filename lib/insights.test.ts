@@ -41,6 +41,8 @@ import {
   posOf,
   skuOf,
   visits,
+  corePanel,
+  coreTrend,
   REVISIT_INTERVAL_DAYS,
 } from "./portalData";
 
@@ -206,6 +208,67 @@ describe("recomputation — the engine's arithmetic, checked independently", () 
     const seen = new Set(latest.matrix.map((c) => c.posId));
     expect([...seen].filter((p) => !dated.has(p))).toEqual([]);
     expect(latest.audited.every((a) => /^\d{4}-\d{2}-\d{2}$/.test(a.auditedAt))).toBe(true);
+  });
+
+  test("the core panel is audited in EVERY window", () => {
+    /* The whole basis of a paired comparison. One missing core outlet
+       in one window and that window's delta is no longer measuring the
+       same doors on both sides. */
+    for (const win of visits) {
+      const audited = new Set(
+        win.id === latest.visit ? latest.audited.map((a) => a.posId) : []
+      );
+      if (!audited.size) continue;
+      const missing = [...corePanel].filter((p) => !audited.has(p));
+      expect(missing, `core outlets missing from ${win.id}`).toEqual([]);
+    }
+  });
+
+  test("the core panel mirrors the universe it is drawn from", () => {
+    /* A core that is 60% hypermarket measures hypermarkets. Selection
+       is stratified; this asserts the result, not the intent. */
+    const share = (ids: string[], key: "channel" | "area") => {
+      const counts = new Map<string, number>();
+      for (const id of ids) {
+        const v = posOf(id)![key];
+        counts.set(v, (counts.get(v) ?? 0) + 1);
+      }
+      return counts;
+    };
+    const core = share([...corePanel], "channel");
+    const all = share(allPos.map((p) => p.id), "channel");
+    for (const [channel, n] of all) {
+      const universePct = (n / allPos.length) * 100;
+      const corePct = ((core.get(channel) ?? 0) / corePanel.size) * 100;
+      /* Within 12pt — a 40-outlet stratified draw cannot match a
+         100-outlet universe exactly, but it must not skew. */
+      expect(Math.abs(corePct - universePct), channel).toBeLessThan(12);
+    }
+  });
+
+  test("a movement inside the detection floor is not called a move", () => {
+    /* The point of the whole exercise. `shareSignificant` gates every
+       movement claim in the product, and it must agree with the floor
+       rather than being set independently. */
+    for (const b of coreTrend.brands) {
+      expect(b.shareSignificant, `${b.brandId} share`).toBe(
+        Math.abs(b.shareDelta) >= coreTrend.shareFloorPt
+      );
+      expect(b.availabilitySignificant, `${b.brandId} availability`).toBe(
+        Math.abs(b.availabilityDelta) >= coreTrend.availabilityFloorPt
+      );
+    }
+    expect(coreTrend.shareFloorPt).toBeGreaterThan(0);
+  });
+
+  test("momentum never fires on a move below the floor", () => {
+    /* R8 used to fire on any rival gain of 1pt, which sits under the
+       measured floor — it was manufacturing momentum out of panel
+       noise. Conceding is now gated on BOTH sides clearing it. */
+    const m = report.momentum;
+    if (!m?.conceding) return;
+    expect(Math.abs(m.clientDelta)).toBeGreaterThanOrEqual(coreTrend.shareFloorPt);
+    expect(m.rivalDelta!).toBeGreaterThanOrEqual(coreTrend.shareFloorPt);
   });
 
   test("coverage separates 'audited' from 'in scope'", () => {
@@ -427,21 +490,29 @@ describe("golden output for the shipped visit", () => {
       report.presence.map((i) => `${i.id} ${i.severity} ${i.confidence} ${i.impact.value}`)
     ).toMatchInlineSnapshot(`
       [
-        "r1:erb-502 critical measured 308",
-        "r1:erb-1102 critical measured 308",
-        "r1:erb-206 warning measured 280",
-        "r1:erb-601 warning measured 224",
-        "r4:pet-500|coca-cola critical measured 868",
-        "r11:erb-201 warning estimated 244",
-        "r11:erb-301 warning estimated 244",
-        "r11:erb-404 warning estimated 244",
-        "r11:erb-1004 warning estimated 244",
-        "r11:erb-1604 warning estimated 244",
-        "r2:Kasnazan critical estimated 371",
-        "r2:Iskan critical estimated 311",
-        "r2:Daratu critical estimated 178",
-        "r2:Downtown / Qaysari warning estimated 443",
-        "r6:Mini-market warning estimated 488",
+        "r1:erb-204 warning measured 224",
+        "r1:erb-1104 warning measured 224",
+        "r9:erb-1602 critical measured 112",
+        "r9:erb-1702 critical measured 84",
+        "r4:can-330|coca-cola critical measured 644",
+        "r11:erb-405 critical estimated 382",
+        "r11:erb-205 warning estimated 255",
+        "r11:erb-505 warning estimated 255",
+        "r11:erb-603 warning estimated 255",
+        "r11:erb-1301 warning estimated 255",
+        "r11:erb-1601 warning estimated 255",
+        "r11:erb-1602 warning estimated 255",
+        "r11:erb-1702 warning estimated 255",
+        "r11:erb-1704 warning estimated 255",
+        "r2:Dream City warning estimated 365",
+        "r2:Daratu critical estimated 385",
+        "r2:Kasnazan critical estimated 450",
+        "r2:Brayati critical estimated 278",
+        "r2:Baharka warning estimated 198",
+        "r2:Shorsh critical estimated 255",
+        "r2:Havalan warning estimated 263",
+        "r7:fixture-imbalance warning estimated 3693",
+        "r6:Mini-market warning estimated 382",
       ]
     `);
   });
@@ -451,9 +522,10 @@ describe("golden output for the shipped visit", () => {
       report.pricing.map((i) => `${i.id} ${i.severity} ${i.impact.value}`)
     ).toMatchInlineSnapshot(`
       [
-        "r5:erb-105 critical 4",
-        "r5:erb-1704 warning 3",
-        "r5:erb-403 warning 2",
+        "r5:erb-105 warning 3",
+        "r5:erb-203 warning 3",
+        "r5:erb-702 warning 3",
+        "r5:erb-1203 warning 2",
       ]
     `);
   });
@@ -464,10 +536,11 @@ describe("golden output for the shipped visit", () => {
       decisions.map((d) => `${d.id} ${d.confidence} ${d.impact.value} across ${d.outlets}`)
     ).toMatchInlineSnapshot(`
       [
-        "replenish measured 1120 across 4",
-        "defend measured 868 across 25",
-        "list estimated 1220 across 5",
-        "cover estimated 1791 across 47",
+        "replenish measured 644 across 4",
+        "defend measured 644 across 22",
+        "list estimated 2422 across 9",
+        "negotiate estimated 3693 across 87",
+        "cover estimated 2576 across 67",
       ]
     `);
   });

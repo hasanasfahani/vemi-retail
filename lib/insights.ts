@@ -46,6 +46,7 @@
    ============================================================ */
 
 import {
+  coreTrend,
   posOf,
   skuOf,
   brandName,
@@ -53,7 +54,6 @@ import {
   clientBrand,
   skus,
   pos as allPos,
-  competitors,
 } from "./portalData";
 import { districtPoints, ERBIL_CITADEL, type DistrictPoint } from "./portal";
 import { REVISIT_INTERVAL_DAYS } from "./portalData";
@@ -1138,13 +1138,36 @@ function r12GeographicConcentration(districtInsights: Insight[]): Insight[] {
 
 /* ---------- R8 · momentum (a single fact, not a ranked list) ---------- */
 
+/* R8 · momentum — now drawn from the core panel, and gated on the
+   panel's own detection floor.
+
+   This rule used to read `competitors`, which is a full-window figure
+   computed over whichever outlets each window happened to reach, and
+   fired whenever a rival gained 1pt. With a measured floor of ~2pt on
+   a 40-outlet core, a 1pt threshold fires on noise roughly as often as
+   on signal — the rule was manufacturing momentum stories out of panel
+   rotation.
+
+   Two changes: the numbers come from the paired core, and both sides
+   must clear the floor. A finding that says "you are conceding ground"
+   is one of the most consequential things this product can tell a
+   commercial team, and it should not be sayable about a move the panel
+   cannot resolve. */
 function computeMomentum(): Momentum | null {
-  const client = competitors.find((c) => c.isClient);
+  const client = coreTrend.brands.find((b) => b.brandId === clientBrand.id);
   if (!client) return null;
-  const rivals = competitors
-    .filter((c) => !c.isClient && c.shareDelta >= THRESHOLDS.r8Momentum.rivalGainPt)
+
+  const rivals = coreTrend.brands
+    .filter(
+      (b) =>
+        b.brandId !== clientBrand.id &&
+        b.shareDelta >= Math.max(THRESHOLDS.r8Momentum.rivalGainPt, coreTrend.shareFloorPt) &&
+        b.shareSignificant
+    )
     .sort((a, b) => b.shareDelta - a.shareDelta);
-  const conceding = client.shareDelta < 0 && rivals.length > 0;
+
+  const conceding =
+    client.shareDelta < 0 && client.shareSignificant && rivals.length > 0;
 
   return {
     conceding,

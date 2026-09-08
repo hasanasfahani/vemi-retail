@@ -34,6 +34,13 @@ const pick = (n) => rand() < n;
 const between = (lo, hi) => lo + rand() * (hi - lo);
 const intBetween = (lo, hi) => Math.round(between(lo, hi));
 
+/* Box-Muller, for the persistent outlet effects below. */
+function normal(mean = 0, sd = 1) {
+  const u = Math.max(rand(), 1e-9);
+  return mean + sd * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * rand());
+}
+const clamp = (lo, hi, x) => Math.min(hi, Math.max(lo, x));
+
 /* ------------------------------------------------------------------
    COLLECTION WINDOWS — not field visits.
 
@@ -91,6 +98,45 @@ for (const win of WINDOWS) win.start = startOf(win);
    any given window, and a portal that cannot show that gap cannot tell
    a client whether they got the coverage they bought. */
 const WINDOW_COVERAGE = 0.78;
+
+/* ------------------------------------------------------------------
+   THE CORE PANEL — the same outlets, every window.
+
+   A rotating sample cannot tell market movement from panel movement:
+   measure 75 stores this month and 75 different stores next month, and
+   a shelf-share delta is partly the market and partly which doors you
+   happened to walk through. On this dataset a rotating sample of 50
+   cannot detect a real move smaller than 7.2pt. Nothing in FMCG moves
+   7 points in a month, so in practice it detects nothing.
+
+   A FIXED sub-panel fixes that, because the comparison becomes paired:
+   an outlet's own persistent character — its planogram, its rep, its
+   service level — appears on both sides of the subtraction and cancels.
+   The measured outlet-level share correlation across windows here is
+   r = 0.75, which is what makes the cancellation worth having.
+
+   Bootstrapped from the paired outlets in this dataset, smallest real
+   shelf-share move detectable at 80% power, 5% two-sided:
+
+     rotating 50   7.20pt          fixed core 50   3.56pt
+     rotating 205  3.56pt          fixed core 40   3.98pt
+
+   A fixed 50 does the work of a rotating 205. Returns diminish as
+   1/sqrt(n), so 40 is the knee: past it each extra outlet buys less
+   than a tenth of a point.
+
+   CORE_PANEL is therefore 40 of a 100-outlet universe — 40% of visits
+   buying trend, 60% buying breadth. It is one constant, and it is the
+   number to revisit once real field data exists: everything above is
+   calibrated against this generator's persistence assumptions, not
+   against Erbil. Re-run scripts/size-core-panel.mjs on real paired
+   visits before defending it to a client.
+
+   Selection is STRATIFIED by district and channel, so the core mirrors
+   the universe rather than over-weighting whichever doors are easiest
+   to work. A core panel that is 60% hypermarket measures hypermarkets.
+------------------------------------------------------------------ */
+const CORE_PANEL = 40;
 
 /* ------------------------------------------------------------------
    BRANDS — the carbonated set actually facing each other in Erbil
@@ -232,6 +278,45 @@ const brandOf = (skuId) => SKUS.find((s) => s.id === skuId).brandId;
 const brandById = (id) => BRANDS.find((b) => b.id === id);
 
 /* ------------------------------------------------------------------
+   PERSISTENT OUTLET CHARACTER — drawn once per outlet, not per visit.
+
+   Without this every visit to a store was an independent draw from the
+   same distribution, which made an outlet's shelf share in one window
+   uncorrelated with its share in the next (measured r = -0.175 on the
+   paired outlets). Real shelves do not behave that way: a planogram, a
+   store manager's preference and a distributor's service level all
+   persist for months. ERB-204 gives you the same generous facing count
+   visit after visit; a kiosk on the ring road does not.
+
+   That absence was not a cosmetic flaw. It made a fixed core panel
+   provably pointless in this dataset — pairing cancels the part of an
+   outlet that stays the same, and nothing stayed the same. Any panel
+   sizing done on the old data would have measured the generator rather
+   than the market.
+
+   Two persistent effects, both per outlet:
+
+     brandBias   how this store treats each brand — its planogram
+                 preference. Drives listing odds AND facings, because a
+                 store that ranges you wider also faces you deeper.
+     keepBias    how reliably this store stays in stock at all — the
+                 distributor's service level to that door.
+
+   Per-visit noise shrinks accordingly (was ±35% on facings, now ±15%),
+   so the visit-to-visit variation is real sampling jitter around a
+   stable shelf rather than the shelf itself being redrawn each time.
+------------------------------------------------------------------ */
+const brandBias = new Map(); // `${posId}|${brandId}` -> multiplier
+const keepBias = new Map();  // posId -> multiplier on staying in stock
+
+for (const pos of POS) {
+  keepBias.set(pos.id, clamp(0.6, 1.4, normal(1, 0.2)));
+  for (const brand of BRANDS) {
+    brandBias.set(`${pos.id}|${brand.id}`, clamp(0.55, 1.5, normal(1, 0.24)));
+  }
+}
+
+/* ------------------------------------------------------------------
    THE ROTATION — who gets audited, in which window, on what day.
 
    Each window reaches WINDOW_COVERAGE of the universe, and the outlets
@@ -243,12 +328,36 @@ const brandById = (id) => BRANDS.find((b) => b.id === id);
    under rolling collection "when was this seen" is a property of the
    outlet, never of the panel.
 ------------------------------------------------------------------ */
+/* Stratified pick: walk the universe grouped by district x channel and
+   take every k-th outlet, so the core's mix matches the universe's. */
+function chooseCore(size) {
+  const strata = new Map();
+  for (const pos of POS) {
+    const key = `${pos.area}|${pos.channel}`;
+    strata.set(key, [...(strata.get(key) ?? []), pos.id]);
+  }
+  const ordered = [...strata.values()];
+  const core = new Set();
+  let i = 0;
+  while (core.size < size && i < 40) {
+    for (const group of ordered) {
+      if (core.size >= size) break;
+      if (group[i]) core.add(group[i]);
+    }
+    i += 1;
+  }
+  return core;
+}
+const CORE = chooseCore(CORE_PANEL);
+
 const schedule = new Map(); // `${windowId}|${posId}` -> auditedAt ISO date
 
 for (const win of WINDOWS) {
   const start = Date.parse(win.start);
   for (const pos of POS) {
-    if (!pick(WINDOW_COVERAGE)) continue;
+    /* Core outlets are audited every window without exception — that
+       is what makes them core. Everything else rotates. */
+    if (!CORE.has(pos.id) && !pick(WINDOW_COVERAGE)) continue;
     const dayOffset = intBetween(0, WINDOW_DAYS - 1);
     schedule.set(
       `${win.id}|${pos.id}`,
@@ -273,16 +382,35 @@ const cells = [];
 for (const pos of POS) {
   for (const sku of SKUS) {
     const brand = brandById(sku.brandId);
+    const bias = brandBias.get(`${pos.id}|${brand.id}`);
     const listingOdds =
       brand.strength *
       CHANNEL_LISTING_INDEX[pos.channel] *
-      PACK_LISTING_INDEX[sku.pack];
+      PACK_LISTING_INDEX[sku.pack] *
+      bias;
+
+    /* RANGE IS A DECISION, NOT A COIN FLIP PER VISIT.
+
+       Whether a store carries a SKU at all is a listing decision that
+       holds for months — it is renegotiated a few times a year, not
+       redrawn every time an auditor walks in. Deciding it once per
+       outlet x SKU and letting it churn slightly is what makes an
+       outlet's shelf share persist across windows, which is the whole
+       basis on which a fixed panel beats a rotating one.
+
+       In stock vs empty stays per-visit, because that genuinely is
+       what changes between visits — and it is the thing this product
+       is built to catch. */
+    const baseListed = pick(Math.min(0.97, listingOdds));
 
     for (const snap of WINDOWS) {
       /* Not on this window's schedule — no observation exists. */
       if (!schedule.has(`${snap.id}|${pos.id}`)) continue;
 
-      const listed = pick(Math.min(0.97, listingOdds));
+      /* ~5% churn per window: real range changes, delistings, new
+         listings won. Enough that R3 and R11 still have something to
+         find; far short of redrawing the planogram monthly. */
+      const listed = pick(0.05) ? !baseListed : baseListed;
       if (!listed) {
         cells.push({
           snapshot: snap.id,
@@ -299,13 +427,17 @@ for (const pos of POS) {
       /* Out-of-stock risk climbs in smaller outlets and on the
          fastest-moving packs. */
       const oosRisk =
-        (pos.channel === "Grocery" || pos.channel === "Mini-market" ? 0.13 : 0.07) *
-        (sku.pack === "can-330" ? 1.25 : 1) *
-        (brand.client ? 1.1 : 1); // the client is stocked hardest, so it empties fastest
-      const inStock = !pick(oosRisk);
+        ((pos.channel === "Grocery" || pos.channel === "Mini-market" ? 0.13 : 0.07) *
+          (sku.pack === "can-330" ? 1.25 : 1) *
+          (brand.client ? 1.1 : 1)) / // the client is stocked hardest, so it empties fastest
+        keepBias.get(pos.id); // ...and some doors are simply served better
+      const inStock = !pick(clamp(0.01, 0.6, oosRisk));
 
-      const baseFacings = brand.strength * (pos.channel === "Hypermarket" ? 9 : pos.channel === "Supermarket" ? 6 : 4);
-      const facings = inStock ? Math.max(1, Math.round(baseFacings * between(0.65, 1.35))) : 0;
+      const baseFacings =
+        brand.strength *
+        bias *
+        (pos.channel === "Hypermarket" ? 9 : pos.channel === "Supermarket" ? 6 : 4);
+      const facings = inStock ? Math.max(1, Math.round(baseFacings * between(0.85, 1.15))) : 0;
 
       const rrp = RRP[sku.pack];
       const price = inStock
@@ -344,6 +476,10 @@ const meta = {
   currentWindow: CURR,
   previousWindow: PREV,
   windowDays: WINDOW_DAYS,
+  /* Outlets audited in EVERY window. Movement claims are drawn from
+     these and from nothing else. */
+  corePanel: [...CORE],
+  corePanelSize: CORE.size,
   /* The planned gap between audits of the same outlet — the basis for
      every forward loss estimate. */
   revisitIntervalDays: WINDOW_DAYS,
@@ -353,12 +489,120 @@ const meta = {
   skuCount: SKUS.length,
 };
 
+/* --- the core-panel trend ---
+
+   The ONLY place in this payload where a movement claim is computed,
+   and it is computed over the core outlets alone. Everywhere else
+   reports a level: what the shelf looked like across everything we
+   reached. Levels want breadth; movement wants the same doors twice,
+   and mixing the two is how panel rotation gets read as market change.
+
+   Both sides of every subtraction below are the same 40 stores. */
+function coreTrend() {
+  const inCore = (c) => CORE.has(c.posId);
+  const shareIn = (windowId, brandId) => {
+    const rows = at(windowId).filter((c) => c.inStock && inCore(c));
+    const total = rows.reduce((s, c) => s + c.facings, 0);
+    const mine = rows
+      .filter((c) => brandOf(c.skuId) === brandId)
+      .reduce((s, c) => s + c.facings, 0);
+    return total ? Math.round((mine / total) * 1000) / 10 : 0;
+  };
+  const availIn = (windowId, brandId) => {
+    const rows = at(windowId).filter(
+      (c) => inCore(c) && c.listed && brandOf(c.skuId) === brandId
+    );
+    if (!rows.length) return 0;
+    return Math.round((rows.filter((c) => c.inStock).length / rows.length) * 1000) / 10;
+  };
+  const round1 = (n) => Math.round(n * 10) / 10;
+
+  /* THE DETECTION FLOOR.
+
+     A panel this size cannot resolve arbitrarily small moves, and a
+     number reported without that floor invites the reader to act on
+     noise. Bootstrapped rather than assumed: resample the core outlets
+     with replacement, recompute the delta each time, and take the
+     spread of those deltas as the standard error of the measurement.
+     MDE = 2.8 x SE — the smallest real move a 5% two-sided test would
+     catch 80% of the time.
+
+     Reported alongside every movement claim so "-1.9pt" can be shown
+     for what it is when the floor is 4pt: a reading, not a finding. */
+  const CLIENT_ID = BRANDS.find((b) => b.client).id;
+  const bootstrapFloor = (metric) => {
+    const core = [...CORE];
+    const deltas = [];
+    for (let r = 0; r < 3000; r++) {
+      const sample = [];
+      for (let i = 0; i < core.length; i++) {
+        sample.push(core[Math.floor(rand() * core.length)]);
+      }
+      const at2 = (windowId) => {
+        const set = new Set(sample);
+        const rows = at(windowId).filter((c) => set.has(c.posId));
+        if (metric === "share") {
+          const stocked = rows.filter((c) => c.inStock);
+          const total = stocked.reduce((s, c) => s + c.facings, 0);
+          const mine = stocked
+            .filter((c) => brandOf(c.skuId) === CLIENT_ID)
+            .reduce((s, c) => s + c.facings, 0);
+          return total ? (mine / total) * 100 : 0;
+        }
+        const listed = rows.filter(
+          (c) => c.listed && brandOf(c.skuId) === CLIENT_ID
+        );
+        return listed.length
+          ? (listed.filter((c) => c.inStock).length / listed.length) * 100
+          : 0;
+      };
+      deltas.push(at2(CURR) - at2(PREV));
+    }
+    const mean = deltas.reduce((s, x) => s + x, 0) / deltas.length;
+    const sd = Math.sqrt(
+      deltas.reduce((s, x) => s + (x - mean) ** 2, 0) / (deltas.length - 1)
+    );
+    return Math.round(2.8 * sd * 10) / 10;
+  };
+
+  const shareFloor = bootstrapFloor("share");
+  const availFloor = bootstrapFloor("availability");
+
+  return {
+    outlets: CORE.size,
+    windowDays: WINDOW_DAYS,
+    /* Smallest move this panel can tell from noise, per metric. */
+    shareFloorPt: shareFloor,
+    availabilityFloorPt: availFloor,
+    brands: BRANDS.map((b) => {
+      const now = shareIn(CURR, b.id);
+      const before = shareIn(PREV, b.id);
+      const availNow = availIn(CURR, b.id);
+      const availBefore = availIn(PREV, b.id);
+      return {
+        brandId: b.id,
+        share: now,
+        previousShare: before,
+        shareDelta: round1(now - before),
+        availability: availNow,
+        previousAvailability: availBefore,
+        availabilityDelta: round1(availNow - availBefore),
+        /* Does the move clear the floor? Computed once here so no
+           surface has to re-derive it and get it different. */
+        shareSignificant: Math.abs(now - before) >= shareFloor,
+        availabilitySignificant: Math.abs(availNow - availBefore) >= availFloor,
+      };
+    }),
+  };
+}
+
 /* --- master --- */
 const master = {
   meta,
   brands: BRANDS,
   skus: SKUS.map((s) => ({ ...s, rrp: RRP[s.pack] })),
-  pos: POS,
+  pos: POS.map((p) => (CORE.has(p.id) ? { ...p, core: true } : p)),
+  coreTrend: coreTrend(),
 };
 
 /* --- availability: per SKU, per outlet, per snapshot --- */
@@ -690,6 +934,9 @@ console.log(`  active out-of-stocks ${oosRows.length}`);
 console.log(
   `  coverage:`,
   WINDOWS.map((w) => `${w.shortLabel} ${auditedIn(w.id).length}/${POS.length}`).join(" · ")
+);
+console.log(
+  `  core panel ${CORE.size} outlets, in every window · ${POS.length - CORE.size} rotating`
 );
 console.log(
   `  brand share:`,
