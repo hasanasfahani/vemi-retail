@@ -74,7 +74,6 @@ export const portalNav: NavItem[] = [
   { href: "/dashboard/overview", label: "Overview" },
   { href: "/dashboard/priorities", label: "Priorities" },
   { href: "/dashboard/watchlist", label: "Watchlist" },
-  { href: "/dashboard/field-ops", label: "Field Ops" },
   { href: "/dashboard/shelf", label: "Shelf" },
   { href: "/dashboard/oos-alerts", label: "Out-of-Stock Alerts" },
   { href: "/dashboard/pricing", label: "Price Intelligence" },

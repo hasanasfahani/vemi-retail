@@ -85,7 +85,6 @@ describe("invariants — must hold for any dataset", () => {
       "/dashboard/oos-alerts",
       "/dashboard/pricing",
       "/dashboard/competitors",
-      "/dashboard/field-ops",
     ];
     const bad = all.filter(
       (i) => !routes.some((r) => i.evidence.href.startsWith(r))

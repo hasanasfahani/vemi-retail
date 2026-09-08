@@ -2,10 +2,7 @@
 
 import { useMemo } from "react";
 import PageHeader from "@/components/portal/PageHeader";
-import FilterBar, {
-  useFilters,
-  useVisitData,
-} from "@/components/portal/FilterBar";
+import FilterBar, { useFilters } from "@/components/portal/FilterBar";
 import StatTile from "@/components/portal/charts/StatTile";
 import PriceBand from "@/components/portal/charts/PriceBand";
 import RankedBar from "@/components/portal/charts/RankedBar";
@@ -17,7 +14,14 @@ import { useViewInsights } from "@/components/portal/useViewInsights";
 import { OutletButton } from "@/components/portal/OutletDrawer";
 import { scope } from "@/lib/portal";
 import { applyFilters } from "@/lib/portalFilters";
-import { clientBrand, brandName, skuName, skuOf, posOf } from "@/lib/portalData";
+import {
+  clientBrand,
+  brandName,
+  skuName,
+  skuOf,
+  posOf,
+  latest,
+} from "@/lib/portalData";
 
 const iqd = (n: number) => `${n.toLocaleString()} IQD`;
 
@@ -36,10 +40,9 @@ const round1 = (n: number) => Math.round(n * 10) / 10;
 
 export default function PricingView() {
   const [filters, setFilters] = useFilters();
-  const { data: visitData, loading } = useVisitData(filters.visit);
   const view = useMemo(
-    () => applyFilters(filters, visitData),
-    [filters, visitData]
+    () => applyFilters(filters, latest),
+    [filters]
   );
 
   const insights = useViewInsights(view);
@@ -213,11 +216,7 @@ export default function PricingView() {
   );
 
   return (
-    <div
-      className="transition-opacity duration-200"
-      style={{ opacity: loading ? 0.55 : 1 }}
-      aria-busy={loading}
-    >
+    <div>
       <PageHeader
         title="Price Intelligence"
         lead="Shelf pricing and compliance by SKU"

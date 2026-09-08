@@ -2,10 +2,7 @@
 
 import { useMemo } from "react";
 import PageHeader from "@/components/portal/PageHeader";
-import FilterBar, {
-  useFilters,
-  useVisitData,
-} from "@/components/portal/FilterBar";
+import FilterBar, { useFilters } from "@/components/portal/FilterBar";
 import StatTile from "@/components/portal/charts/StatTile";
 import RankedBar from "@/components/portal/charts/RankedBar";
 import ChartStory from "@/components/portal/ChartStory";
@@ -22,14 +19,14 @@ import {
   competitors,
   posOf,
   skuOf,
+  latest,
 } from "@/lib/portalData";
 
 export default function CompetitorsView() {
   const [filters, setFilters] = useFilters();
-  const { data: visitData, loading } = useVisitData(filters.visit);
   const view = useMemo(
-    () => applyFilters(filters, visitData),
-    [filters, visitData]
+    () => applyFilters(filters, latest),
+    [filters]
   );
   const insights = useViewInsights(view);
 
@@ -147,11 +144,7 @@ export default function CompetitorsView() {
   );
 
   return (
-    <div
-      className="transition-opacity duration-200"
-      style={{ opacity: loading ? 0.55 : 1 }}
-      aria-busy={loading}
-    >
+    <div>
       <PageHeader
         title="Competitor Watch"
         lead="How the rest of the category is performing"

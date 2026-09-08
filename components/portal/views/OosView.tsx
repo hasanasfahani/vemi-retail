@@ -10,10 +10,7 @@
 
 import { useMemo, useState } from "react";
 import PageHeader from "@/components/portal/PageHeader";
-import FilterBar, {
-  useFilters,
-  useVisitData,
-} from "@/components/portal/FilterBar";
+import FilterBar, { useFilters } from "@/components/portal/FilterBar";
 import StatTile from "@/components/portal/charts/StatTile";
 import RankedBar from "@/components/portal/charts/RankedBar";
 import ChartStory from "@/components/portal/ChartStory";
@@ -30,6 +27,7 @@ import {
   skuName,
   skuOf,
   REVISIT_INTERVAL_DAYS,
+  latest,
 } from "@/lib/portalData";
 
 type Grouping = "gap" | "outlet";
@@ -49,10 +47,9 @@ export default function OosView() {
   const [grouping, setGrouping] = useState<Grouping>("gap");
   const [urgency, setUrgency] = useState<Urgency>("all");
 
-  const { data: visitData, loading } = useVisitData(filters.visit);
   const view = useMemo(
-    () => applyFilters(filters, visitData),
-    [filters, visitData]
+    () => applyFilters(filters, latest),
+    [filters]
   );
   const insights = useViewInsights(view);
 
@@ -200,11 +197,7 @@ export default function OosView() {
   );
 
   return (
-    <div
-      className="transition-opacity duration-200"
-      style={{ opacity: loading ? 0.55 : 1 }}
-      aria-busy={loading}
-    >
+    <div>
       <PageHeader
         title="Out-of-Stock Alerts"
         lead="Where you are missing from the shelf, and what it is costing"

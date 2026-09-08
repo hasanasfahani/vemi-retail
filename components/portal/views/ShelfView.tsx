@@ -10,10 +10,7 @@
 import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import PageHeader from "@/components/portal/PageHeader";
-import FilterBar, {
-  useFilters,
-  useVisitData,
-} from "@/components/portal/FilterBar";
+import FilterBar, { useFilters } from "@/components/portal/FilterBar";
 import StatTile from "@/components/portal/charts/StatTile";
 import RankedBar from "@/components/portal/charts/RankedBar";
 import SplitBar from "@/components/portal/charts/SplitBar";
@@ -37,6 +34,7 @@ import {
   skuName,
   skuOf,
   headline,
+  latest,
 } from "@/lib/portalData";
 
 type Mode = "availability" | "share";
@@ -60,10 +58,9 @@ export default function ShelfView() {
   );
 
   const [filters, setFilters] = useFilters();
-  const { data: visitData, loading } = useVisitData(filters.visit);
   const view = useMemo(
-    () => applyFilters(filters, visitData),
-    [filters, visitData]
+    () => applyFilters(filters, latest),
+    [filters]
   );
   const skus = useMemo(() => matchingSkus(filters), [filters]);
 
@@ -259,11 +256,7 @@ export default function ShelfView() {
   );
 
   return (
-    <div
-      className="transition-opacity duration-200"
-      style={{ opacity: loading ? 0.55 : 1 }}
-      aria-busy={loading}
-    >
+    <div>
       <PageHeader
         title="Shelf"
         lead="Availability and shelf share, in one view"

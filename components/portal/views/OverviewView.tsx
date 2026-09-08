@@ -23,8 +23,8 @@
 import { useMemo } from "react";
 import PageHeader from "@/components/portal/PageHeader";
 import StatTile from "@/components/portal/charts/StatTile";
-import DistrictHeat from "@/components/portal/DistrictHeat";
-import FilterBar, { useFilters, useVisitData } from "@/components/portal/FilterBar";
+import NationalMap from "@/components/portal/NationalMap";
+import FilterBar, { useFilters } from "@/components/portal/FilterBar";
 import { kpiWatchTarget } from "@/lib/watchTargets";
 import { scope } from "@/lib/portal";
 import { applyFilters } from "@/lib/portalFilters";
@@ -39,14 +39,14 @@ import {
   brandName,
   headline,
   coreTrend,
+  latest,
 } from "@/lib/portalData";
 
 export default function OverviewView() {
   const [filters, setFilters] = useFilters();
-  const { data: visitData, loading } = useVisitData(filters.visit);
   const view = useMemo(
-    () => applyFilters(filters, visitData),
-    [filters, visitData]
+    () => applyFilters(filters, latest),
+    [filters]
   );
 
   /* One sentence, from the same rollup the operator pages' findings
@@ -67,15 +67,15 @@ export default function OverviewView() {
     () =>
       computeMetric(
         { metric: "compliance", segmentType: "panel", segment: "", filters },
-        visitData
+        latest
       ) ?? 0,
-    [filters, visitData]
+    [filters]
   );
 
   const atRisk = view.oosRows.reduce((s, r) => s + r.facingDaysAtRisk, 0);
 
   return (
-    <div className={loading ? "opacity-60 transition-opacity" : "transition-opacity"}>
+    <div>
       <PageHeader
         title="Overview"
         lead="How the shelf is holding, and where"
@@ -216,19 +216,16 @@ export default function OverviewView() {
         />
       </div>
 
-      {/* the one map */}
+      {/* the map — national, not the Erbil district heat.
+
+          The entry point's job is footprint and orientation: where are
+          we live, and what is next. District-level heat is an operator
+          question and lives on Shelf and Out-of-Stock, where the
+          measure selector belongs with the pages that act on it. */}
       <div className="mt-4">
-        <DistrictHeat
-          view={view}
-          selectedAreas={filters.areas}
-          onSelectArea={(name) =>
-            setFilters({
-              ...filters,
-              areas: filters.areas.includes(name)
-                ? filters.areas.filter((a) => a !== name)
-                : [...filters.areas, name],
-            })
-          }
+        <NationalMap
+          outletsAudited={view.posCount}
+          availability={client?.availability ?? 0}
         />
       </div>
 

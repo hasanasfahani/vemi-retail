@@ -19,8 +19,6 @@ import {
 } from "@/lib/portalFilters";
 import {
   brands,
-  visits,
-  currentVisit,
   cachedVisit,
   loadVisit,
   latest,
@@ -108,40 +106,19 @@ export default function FilterBar({
 
   return (
     <div className="mb-4 rounded-[14px] border border-line bg-white p-3">
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
-        {/* Collection window — always shown. Every figure on the page is
-            a composite across one trailing window, not a reading from
-            one day, and which window is the first thing to know. The
-            control used to be labelled "Visit", which implied a single
-            date the whole panel shares; it never did under rolling
-            collection. */}
-        <div className="flex items-center gap-2">
-          <span className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
-            Window
-          </span>
-          <div className="flex gap-1 rounded-lg bg-canvas p-1">
-            {visits.map((visit) => (
-              <button
-                key={visit.id}
-                type="button"
-                aria-pressed={filters.visit === visit.id}
-                onClick={() => onChange({ ...filters, visit: visit.id })}
-                className={`rounded-md px-2.5 py-1 text-[12px] font-medium transition-colors ${
-                  filters.visit === visit.id
-                    ? "bg-white text-ink-900 shadow-[var(--shadow-card)]"
-                    : "text-ink-500 hover:text-ink-900"
-                }`}
-              >
-                {visit.shortLabel}
-                {visit.id === currentVisit && (
-                  <span className="ml-1.5 text-[10px] uppercase tracking-wide text-ink-400">
-                    latest
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {/* THE WINDOW SELECTOR WAS REMOVED HERE.
+
+            It let a reader switch between the two collection windows.
+            Under rolling collection there is only one answer to "what
+            does the shelf look like" — the current trailing window —
+            and the previous one exists to be subtracted from it, not
+            browsed. Keeping the control put a date picker on every
+            page to serve a case nobody had, and implied the portal
+            was a historical archive rather than a live view.
+
+            The previous window is still in the payload and still does
+            its job: it is the other half of every core-panel delta. */}
 
         {show.includes("brands") && (
           <Group
@@ -199,41 +176,51 @@ function Group({
   onToggle: (value: string) => void;
   scroll?: boolean;
 }) {
+  /* A LIST, not a row of chips.
+
+     Chips read as a set of buttons of equal weight, which is fine for
+     four channels and wrong for eighteen districts: they wrapped over
+     several lines, the selected ones scattered among the unselected,
+     and finding one meant scanning a paragraph. A list gives every
+     option the same left edge, so the eye runs down a column instead
+     of hunting across rows, and a checkbox says "several of these" in
+     a way a highlighted pill does not. */
   return (
-    <div className="flex min-w-0 items-start gap-2">
-      <span className="mt-1 shrink-0 text-[11px] font-semibold uppercase tracking-wide text-ink-400">
-        {label}
-      </span>
+    <div className="min-w-0">
+      <div className="flex items-baseline justify-between gap-2 pb-1.5">
+        <span className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+          {label}
+        </span>
+        {selected.length > 0 && (
+          <span className="mono text-[11px] text-violet-ink">
+            {selected.length}
+          </span>
+        )}
+      </div>
       <div
-        className={`flex flex-wrap gap-1 ${
-          scroll ? "max-h-[64px] overflow-y-auto" : ""
+        className={`flex flex-col rounded-[10px] border border-line bg-canvas p-1 ${
+          scroll ? "max-h-[132px] overflow-y-auto" : ""
         }`}
       >
         {options.map((option) => {
           const on = selected.includes(option.value);
           return (
-            <button
+            <label
               key={option.value}
-              type="button"
-              aria-pressed={on}
-              onClick={() => onToggle(option.value)}
-              className="rounded-full border px-2.5 py-1 text-[12px] font-medium transition-colors"
-              style={
+              className={`flex cursor-pointer items-center gap-2 rounded-md px-2 py-[5px] text-[12.5px] transition-colors ${
                 on
-                  ? {
-                      background: "var(--color-violet-050)",
-                      borderColor: "var(--color-violet-100)",
-                      color: "var(--color-violet-ink)",
-                    }
-                  : {
-                      background: "#fff",
-                      borderColor: "var(--color-line-strong)",
-                      color: "var(--color-ink-700)",
-                    }
-              }
+                  ? "bg-white font-semibold text-ink-900 shadow-[var(--shadow-card)]"
+                  : "text-ink-700 hover:bg-white/60"
+              }`}
             >
-              {option.label}
-            </button>
+              <input
+                type="checkbox"
+                checked={on}
+                onChange={() => onToggle(option.value)}
+                className="h-3.5 w-3.5 shrink-0 accent-[var(--color-violet)]"
+              />
+              <span className="min-w-0 truncate">{option.label}</span>
+            </label>
           );
         })}
       </div>
