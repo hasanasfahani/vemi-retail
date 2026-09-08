@@ -16,7 +16,10 @@ export default function PageHeader({
       <h1 className="t-h3 !text-2xl">{title}</h1>
       <p className="mt-1 text-sm text-ink-500">
         {lead} · {scope.city}, {scope.country} · {count} outlet
-        {count === 1 ? "" : "s"}
+        {count === 1 ? "" : "s"} audited{" "}
+        <span className="text-ink-400">
+          of {scope.posUniverse} · {scope.windowLabel.toLowerCase()}
+        </span>
       </p>
     </div>
   );

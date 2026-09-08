@@ -17,8 +17,8 @@ const DATA = join(dirname(fileURLToPath(import.meta.url)), "..", "lib", "data");
 const load = (f) => JSON.parse(readFileSync(join(DATA, f), "utf8"));
 
 const master = load("master.json");
-const CURRENT = master.meta.currentSnapshot;
-const VISITS = master.meta.snapshots.map((v) => v.id);
+const CURRENT = master.meta.currentWindow;
+const VISITS = master.meta.windows.map((w) => w.id);
 const availability = load("availability.json");
 const shelfShare = load("shelf-share.json");
 const pricing = load("pricing.json");
@@ -42,13 +42,11 @@ const visitData = Object.fromEntries(
           state: CELL_STATE[state],
           facings,
         })),
-        oos: raw.oos.map(([p, k, daysOut, persistent, normalFacings]) => ({
+        oos: raw.oos.map(([p, k, normalFacings]) => ({
           posId: posId(p),
           skuId: sku(k).id,
-          daysOut,
-          persistent: persistent === 1,
           normalFacings,
-          lostFacingDays: normalFacings * daysOut,
+          facingDaysAtRisk: normalFacings * master.meta.revisitIntervalDays,
         })),
         observations: raw.observations.map(([p, k, price]) => ({
           posId: posId(p),
@@ -80,8 +78,8 @@ const rule = (label) => console.log(`\n\x1b[1m${label}\x1b[0m`);
 
 console.log(`\n\x1b[1mVEMI AUDIT DATA — ${master.meta.city} · ${master.meta.category}\x1b[0m`);
 console.log(
-  `Visits: ${master.meta.snapshots.map((s) => s.label).join("  →  ")}` +
-    `   |   ${master.meta.posCount} outlets · ${master.meta.skuCount} SKUs`
+  `Windows: ${master.meta.windows.map((w) => `${w.shortLabel} (${w.outletsAudited} outlets)`).join("  →  ")}` +
+    `   |   universe ${master.meta.posUniverse} · ${master.meta.skuCount} SKUs`
 );
 
 rule("BRAND SCOREBOARD (current visit)");
@@ -128,11 +126,11 @@ for (const p of [...availability.current.byPos]
 rule("LONGEST-RUNNING OUT-OF-STOCKS");
 for (const r of current.oos.slice(0, 8)) {
   console.log(
-    `  ${padL(r.daysOut + "d", 5)}  ${pad(posCode(r.posId), 9)}${pad(skuName(r.skuId), 28)}${r.persistent ? "\x1b[33mpersistent\x1b[0m" : ""}`
+    `  ${padL(r.normalFacings + "f", 5)}  ${pad(posCode(r.posId), 9)}${pad(skuName(r.skuId), 28)}`
   );
 }
 console.log(
-  `  … ${current.oos.length} active in total (${current.oos.filter((r) => r.persistent).length} unresolved since the previous visit)`
+  `  … ${current.oos.length} active in total`
 );
 
 rule("PRICE BANDS (current visit)");
@@ -196,9 +194,9 @@ for (const visit of VISITS) {
   check(`[${tag}] every SKU and outlet reference resolves`, dangling.length === 0, `${dangling.length} dangling`);
 
   const badCost = rows.filter(
-    (r) => r.lostFacingDays !== r.normalFacings * r.daysOut
+    (r) => r.facingDaysAtRisk !== r.normalFacings * master.meta.revisitIntervalDays
   );
-  check(`[${tag}] lost facing-days = facings x days`, badCost.length === 0, `${badCost.length} off`);
+  check(`[${tag}] facing-days at risk = facings x revisit interval`, badCost.length === 0, `${badCost.length} off`);
 }
 
 const compOos = competitors.rows.reduce((t, r) => t + r.activeOos, 0);
@@ -208,7 +206,18 @@ check(
   `${compOos} vs ${current.oos.length}`
 );
 
-check("outlet count matches the stated scope", master.pos.length === master.meta.posCount);
+check("outlet universe matches the stated scope", master.pos.length === master.meta.posUniverse);
+
+/* The rotation must actually rotate: a window that reached everything
+   would mean the panel is fixed after all, and every "we did not look
+   there" state in the portal would be unreachable and untested. */
+for (const win of master.meta.windows) {
+  check(
+    `[${win.shortLabel}] window reaches part of the universe, not all of it`,
+    win.outletsAudited > 0 && win.outletsAudited < master.meta.posUniverse,
+    `${win.outletsAudited} of ${master.meta.posUniverse}`
+  );
+}
 check("SKU count matches the stated scope", master.skus.length === master.meta.skuCount);
 check(
   "exactly one brand is flagged as the client",

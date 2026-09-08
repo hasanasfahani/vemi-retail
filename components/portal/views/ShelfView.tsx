@@ -20,13 +20,12 @@ import SplitBar from "@/components/portal/charts/SplitBar";
 import AvailabilityHeatmap from "@/components/portal/charts/AvailabilityHeatmap";
 import StoreTable from "@/components/portal/charts/StoreTable";
 import ChartStory from "@/components/portal/ChartStory";
+import GoDeeper from "@/components/portal/GoDeeper";
 import { useViewInsights } from "@/components/portal/useViewInsights";
 import { brandShareWatchTarget, kpiWatchTarget } from "@/lib/watchTargets";
 import QuadrantScatter from "@/components/portal/charts/QuadrantScatter";
 import DivergingBar from "@/components/portal/charts/DivergingBar";
-import DistrictMap, {
-  type DistrictDatum,
-} from "@/components/portal/charts/DistrictMap";
+import DistrictHeat from "@/components/portal/DistrictHeat";
 import Delta from "@/components/portal/charts/Delta";
 import { scope } from "@/lib/portal";
 import { applyFilters, matchingSkus } from "@/lib/portalFilters";
@@ -37,7 +36,6 @@ import {
   competitors,
   skuName,
   skuOf,
-  posOf,
   headline,
 } from "@/lib/portalData";
 
@@ -214,62 +212,13 @@ export default function ShelfView() {
     };
   }, [view]);
 
-  /* ---------------- one district map, metric follows the tab ---------------- */
+  /* The two district rollups that lived here — one for availability,
+     one for share — are gone. Both fed the same map component with a
+     different meaning for colour depending on which tab was active,
+     which is precisely the confusion DistrictHeat exists to end: the
+     measure is now a visible choice rather than a side effect of the
+     tab you happen to be on. */
 
-  const availabilityDistricts = useMemo<DistrictDatum[]>(() => {
-    const acc = new Map<string, { outlets: Set<string>; listings: number; gaps: number }>();
-    for (const cell of view.cells) {
-      if (cell.state === "not-listed") continue;
-      const area = posOf(cell.posId)!.area;
-      const entry = acc.get(area) ?? { outlets: new Set<string>(), listings: 0, gaps: 0 };
-      entry.outlets.add(cell.posId);
-      entry.listings += 1;
-      if (cell.state === "out-of-stock") entry.gaps += 1;
-      acc.set(area, entry);
-    }
-    return [...acc.entries()].map(([name, e]) => {
-      const gapRate = Math.round((e.gaps / e.listings) * 1000) / 10;
-      return {
-        name,
-        outlets: e.outlets.size,
-        value: gapRate,
-        rows: [
-          { label: "On shelf", value: `${Math.round((100 - gapRate) * 10) / 10}%` },
-          { label: "Out of shelf", value: `${gapRate}%`, tone: "critical" as const },
-          { label: "Open gaps", value: `${e.gaps}` },
-        ],
-      };
-    });
-  }, [view]);
-
-  const shareDistricts = useMemo<DistrictDatum[]>(() => {
-    const acc = new Map<string, { outlets: Set<string>; total: number; mine: number }>();
-    for (const cell of view.cells) {
-      if (cell.state !== "in-stock") continue;
-      const area = posOf(cell.posId)!.area;
-      const entry = acc.get(area) ?? { outlets: new Set<string>(), total: 0, mine: 0 };
-      entry.outlets.add(cell.posId);
-      entry.total += cell.facings;
-      if (skuOf(cell.skuId)!.brandId === clientBrand.id) entry.mine += cell.facings;
-      acc.set(area, entry);
-    }
-    return [...acc.entries()].map(([name, e]) => {
-      const share = e.total ? Math.round((e.mine / e.total) * 1000) / 10 : 0;
-      return {
-        name,
-        outlets: e.outlets.size,
-        value: Math.round((100 - share) * 10) / 10,
-        rows: [
-          { label: `${clientBrand.name} share`, value: `${share}%` },
-          { label: "Held by rivals", value: `${Math.round((100 - share) * 10) / 10}%`, tone: "critical" as const },
-          { label: "Your facings", value: `${e.mine}` },
-          { label: "Category facings", value: `${e.total}` },
-        ],
-      };
-    });
-  }, [view]);
-
-  const districts = mode === "availability" ? availabilityDistricts : shareDistricts;
 
   const skuWatchTargets = useMemo(
     () =>
@@ -553,7 +502,7 @@ export default function ShelfView() {
                 subtitle="Chilled space drives impulse purchase; ambient drives take-home"
                 howToRead="Each row is a brand and the bar splits its facings between the two fixture types. A brand leaning right is winning take-home space; leaning left, the cold shelf."
                 findings={insights.forRules("r7-fixture-imbalance")}
-                clean="Your split between chilled and ambient is in line — no space renegotiation needed this cycle."
+                clean="Your split between chilled and ambient is in line — no space renegotiation needed in this window."
                 allClear="Fixture split within range"
                 actionLabel="Create space action"
               >
@@ -573,161 +522,152 @@ export default function ShelfView() {
         </>
       )}
 
-      <section className="mt-4 rounded-[18px] border border-line bg-white p-5 sm:p-6">
-        <h2 className="t-h3">Erbil by district</h2>
-        <p className="mt-1 mb-5 text-sm text-ink-500">
-          {mode === "availability"
-            ? "Where the gaps concentrate across the city. Darker is a higher out-of-shelf rate; circle size is outlets audited."
-            : "Where rivals hold the most shelf. Darker is a larger share of facings in competitors' hands; circle size is outlets audited."}{" "}
-          Click a district to filter this page to it.
-        </p>
-        {districts.length ? (
-          <DistrictMap
-            data={districts}
-            selected={filters.areas}
-            onSelect={toggleDistrict}
-            legendLabel={mode === "availability" ? "Out-of-shelf rate" : "Rival shelf share"}
-            formatValue={(v) => `${v}%`}
-          />
+      <DistrictHeat
+        view={view}
+        selectedAreas={filters.areas}
+        defaultMeasure="out-of-shelf"
+        onSelectArea={toggleDistrict}
+      />
+
+      <GoDeeper
+        id="shelf"
+        items={
+          mode === "availability"
+            ? ["SKU quadrant", "Outlet × SKU heatmap", "Outlet performance table"]
+            : ["Full brand breakdown"]
+        }
+      >
+        {mode === "availability" ? (
+          <>
+            <div className="mt-4">
+              {skuQuadrant.points.length ? (
+                <ChartStory
+                  title="Listed, or on the shelf?"
+                  subtitle={`Every SKU in the selection · ${scope.dataAsOf}`}
+                  howToRead={`Each dot is a SKU. Across is how many outlets list it; up is how often it is actually on shelf where listed. The lines are the panel averages (${skuQuadrant.xDivider}% and ${skuQuadrant.yDivider}%). Violet is ${clientBrand.name}.`}
+                  findings={insights.forRules("r3-distribution-gap")}
+                  clean="Your range sits with the category on both measures — no listing push needed."
+                  allClear="No SKU behind its peers here"
+                  soWhat="Bottom-right is a replenishment problem; top-left is a listing conversation. They look identical on a bar chart and need opposite fixes."
+                  visit={view.visit}
+                >
+                  <QuadrantScatter
+                    points={skuQuadrant.points}
+                    xLabel="Distribution"
+                    yLabel="On-shelf availability"
+                    xDivider={skuQuadrant.xDivider}
+                    yDivider={skuQuadrant.yDivider}
+                    quadrants={{
+                      topLeft: "Few stores, well stocked — list it wider",
+                      topRight: "Wide and well stocked",
+                      bottomLeft: "Few stores, often empty",
+                      bottomRight: "Everywhere, often empty — replenish",
+                    }}
+                  />
+                </ChartStory>
+              ) : null}
+            </div>
+  
+            <div className="mt-4">
+              {view.posCount && view.skuCount ? (
+                <ChartStory
+                  title="Outlet × SKU"
+                  subtitle={`${(view.posCount * view.skuCount).toLocaleString()} combinations across ${view.posCount} outlets audited ${scope.dataAsOf}`}
+                  howToRead="Opens by district: each row is a district, each column a SKU, and the deeper the red the larger the share of that district's listings currently empty. Select a district to drop into its outlets, where colour switches to facings held and red marks a gap."
+                  findings={insights.forRules("r1-outlet-gaps", "r9-dark-outlet")}
+                  clean="Every listed SKU in this selection was on the shelf when its outlet was audited."
+                  allClear="No gap in this selection"
+                  actionLabel="Create replenishment action"
+                >
+                  <AvailabilityHeatmap
+                    cells={view.cells}
+                    outlets={view.outlets}
+                    skus={skus}
+                  />
+                </ChartStory>
+              ) : (
+                <section className="rounded-[18px] border border-line bg-white p-5 sm:p-6">
+                  <h2 className="t-h3">Outlet × SKU</h2>
+                  <Empty />
+                </section>
+              )}
+            </div>
+  
+            <section className="mt-4 min-w-0 overflow-hidden rounded-[18px] border border-line bg-white">
+              <div className="border-b border-line p-5 sm:p-6">
+                <h2 className="t-h3">Outlet performance</h2>
+                <p className="mt-1 text-sm text-ink-500">
+                  Worst first. Sort any column, or open an outlet for its full record.
+                </p>
+              </div>
+              <StoreTable view={view} />
+            </section>
+          </>
         ) : (
-          <Empty />
-        )}
-      </section>
-
-      {mode === "availability" ? (
-        <>
-          <div className="mt-4">
-            {skuQuadrant.points.length ? (
-              <ChartStory
-                title="Listed, or on the shelf?"
-                subtitle={`Every SKU in the selection · ${scope.dataAsOf}`}
-                howToRead={`Each dot is a SKU. Across is how many outlets list it; up is how often it is actually on shelf where listed. The lines are the panel averages (${skuQuadrant.xDivider}% and ${skuQuadrant.yDivider}%). Violet is ${clientBrand.name}.`}
-                findings={insights.forRules("r3-distribution-gap")}
-                clean="Your range sits with the category on both measures — no listing push needed."
-                allClear="No SKU behind its peers here"
-                soWhat="Bottom-right is a replenishment problem; top-left is a listing conversation. They look identical on a bar chart and need opposite fixes."
-                visit={view.visit}
-              >
-                <QuadrantScatter
-                  points={skuQuadrant.points}
-                  xLabel="Distribution"
-                  yLabel="On-shelf availability"
-                  xDivider={skuQuadrant.xDivider}
-                  yDivider={skuQuadrant.yDivider}
-                  quadrants={{
-                    topLeft: "Few stores, well stocked — list it wider",
-                    topRight: "Wide and well stocked",
-                    bottomLeft: "Few stores, often empty",
-                    bottomRight: "Everywhere, often empty — replenish",
-                  }}
-                />
-              </ChartStory>
-            ) : null}
-          </div>
-
-          <div className="mt-4">
-            {view.posCount && view.skuCount ? (
-              <ChartStory
-                title="Outlet × SKU"
-                subtitle={`${(view.posCount * view.skuCount).toLocaleString()} combinations audited on ${scope.dataAsOf}`}
-                howToRead="Opens by district: each row is a district, each column a SKU, and the deeper the red the larger the share of that district's listings currently empty. Select a district to drop into its outlets, where colour switches to facings held and red marks a gap."
-                findings={insights.forRules(
-                  "r1-persistent-gap",
-                  "r9-dark-outlet",
-                  "r10-new-gap-cluster"
-                )}
-                clean="Nothing in this selection is empty on a second visit — no replenishment escalation needed."
-                allClear="No confirmed gap in this selection"
-                actionLabel="Create replenishment action"
-              >
-                <AvailabilityHeatmap
-                  cells={view.cells}
-                  outlets={view.outlets}
-                  skus={skus}
-                />
-              </ChartStory>
-            ) : (
-              <section className="rounded-[18px] border border-line bg-white p-5 sm:p-6">
-                <h2 className="t-h3">Outlet × SKU</h2>
-                <Empty />
-              </section>
-            )}
-          </div>
-
           <section className="mt-4 min-w-0 overflow-hidden rounded-[18px] border border-line bg-white">
             <div className="border-b border-line p-5 sm:p-6">
-              <h2 className="t-h3">Outlet performance</h2>
+              <h2 className="t-h3">Full breakdown</h2>
               <p className="mt-1 text-sm text-ink-500">
-                Worst first. Sort any column, or open an outlet for its full record.
+                {comparable
+                  ? `Movement measured against ${scope.previousVisit}.`
+                  : "Movement is only shown for the latest visit on the full panel."}
               </p>
             </div>
-            <StoreTable view={view} />
-          </section>
-        </>
-      ) : (
-        <section className="mt-4 min-w-0 overflow-hidden rounded-[18px] border border-line bg-white">
-          <div className="border-b border-line p-5 sm:p-6">
-            <h2 className="t-h3">Full breakdown</h2>
-            <p className="mt-1 text-sm text-ink-500">
-              {comparable
-                ? `Movement measured against ${scope.previousVisit}.`
-                : "Movement is only shown for the latest visit on the full panel."}
-            </p>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-line text-[12px] uppercase tracking-wide text-ink-400">
-                  <th className="px-5 py-2.5 text-left font-semibold">Brand</th>
-                  <th className="px-5 py-2.5 text-left font-semibold">Owner</th>
-                  <th className="px-5 py-2.5 text-right font-semibold">Facings</th>
-                  <th className="px-5 py-2.5 text-right font-semibold">Share</th>
-                  <th className="px-5 py-2.5 text-right font-semibold">MoM</th>
-                  <th className="px-5 py-2.5 text-right font-semibold">Cooler</th>
-                  <th className="px-5 py-2.5 text-right font-semibold">Ambient</th>
-                </tr>
-              </thead>
-              <tbody>
-                {view.byBrand.map((row) => {
-                  const comp = competitors.find((c) => c.brandId === row.brandId)!;
-                  const fx = fixtures.get(row.brandId) ?? { cooler: 0, ambient: 0 };
-                  return (
-                    <tr
-                      key={row.brandId}
-                      className="border-b border-line last:border-0"
-                      style={row.isClient ? { background: "var(--color-violet-050)" } : undefined}
-                    >
-                      <td className="px-5 py-2.5">
-                        <span className="flex items-center gap-2">
-                          <span
-                            className="h-[10px] w-[10px] shrink-0 rounded-[2px]"
-                            style={{
-                              background: row.isClient ? "var(--color-violet)" : "var(--color-chart-context)",
-                            }}
-                          />
-                          <span className={row.isClient ? "font-semibold text-ink-900" : "text-ink-700"}>
-                            {brandName(row.brandId)}
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-line text-[12px] uppercase tracking-wide text-ink-400">
+                    <th className="px-5 py-2.5 text-left font-semibold">Brand</th>
+                    <th className="px-5 py-2.5 text-left font-semibold">Owner</th>
+                    <th className="px-5 py-2.5 text-right font-semibold">Facings</th>
+                    <th className="px-5 py-2.5 text-right font-semibold">Share</th>
+                    <th className="px-5 py-2.5 text-right font-semibold">MoM</th>
+                    <th className="px-5 py-2.5 text-right font-semibold">Cooler</th>
+                    <th className="px-5 py-2.5 text-right font-semibold">Ambient</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {view.byBrand.map((row) => {
+                    const comp = competitors.find((c) => c.brandId === row.brandId)!;
+                    const fx = fixtures.get(row.brandId) ?? { cooler: 0, ambient: 0 };
+                    return (
+                      <tr
+                        key={row.brandId}
+                        className="border-b border-line last:border-0"
+                        style={row.isClient ? { background: "var(--color-violet-050)" } : undefined}
+                      >
+                        <td className="px-5 py-2.5">
+                          <span className="flex items-center gap-2">
+                            <span
+                              className="h-[10px] w-[10px] shrink-0 rounded-[2px]"
+                              style={{
+                                background: row.isClient ? "var(--color-violet)" : "var(--color-chart-context)",
+                              }}
+                            />
+                            <span className={row.isClient ? "font-semibold text-ink-900" : "text-ink-700"}>
+                              {brandName(row.brandId)}
+                            </span>
                           </span>
-                        </span>
-                      </td>
-                      <td className="px-5 py-2.5 text-ink-500">
-                        {brands.find((b) => b.id === row.brandId)?.owner}
-                      </td>
-                      <td className="mono px-5 py-2.5 text-right text-ink-700">{row.facings}</td>
-                      <td className="mono px-5 py-2.5 text-right font-semibold text-ink-900">{row.share}%</td>
-                      <td className="mono px-5 py-2.5 text-right">
-                        {comparable ? <Delta value={comp.shareDelta} /> : <span className="text-ink-400">—</span>}
-                      </td>
-                      <td className="mono px-5 py-2.5 text-right text-ink-700">{fx.cooler}</td>
-                      <td className="mono px-5 py-2.5 text-right text-ink-700">{fx.ambient}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      )}
+                        </td>
+                        <td className="px-5 py-2.5 text-ink-500">
+                          {brands.find((b) => b.id === row.brandId)?.owner}
+                        </td>
+                        <td className="mono px-5 py-2.5 text-right text-ink-700">{row.facings}</td>
+                        <td className="mono px-5 py-2.5 text-right font-semibold text-ink-900">{row.share}%</td>
+                        <td className="mono px-5 py-2.5 text-right">
+                          {comparable ? <Delta value={comp.shareDelta} /> : <span className="text-ink-400">—</span>}
+                        </td>
+                        <td className="mono px-5 py-2.5 text-right text-ink-700">{fx.cooler}</td>
+                        <td className="mono px-5 py-2.5 text-right text-ink-700">{fx.ambient}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
+      </GoDeeper>
 
       <p className="mt-3 text-[12px] text-ink-400">
         Panel-wide: {clientBrand.name} holds {headline.shelfShare}% of category facings across all{" "}
@@ -757,5 +697,5 @@ function packMixSoWhat(rows: { label: string; delta: number }[]) {
   }
   return worst && worst.delta < -5
     ? `${worst.label} runs ${Math.abs(worst.delta)}pt below your own average — the format worth arguing for.`
-    : "No format is far enough off your average to act on this cycle.";
+    : "No format is far enough off your average to act on in this window.";
 }

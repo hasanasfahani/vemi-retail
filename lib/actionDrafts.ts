@@ -26,9 +26,8 @@ import type { SheetDraft } from "@/components/portal/ActionSheet";
    stops are called in that context. A rule absent here makes a single
    piece of work, not a route. */
 const ITEM_NOUN: Partial<Record<RuleId, string>> = {
-  "r1-persistent-gap": "outlets",
+  "r1-outlet-gaps": "outlets",
   "r9-dark-outlet": "outlets",
-  "r10-new-gap-cluster": "outlets",
   "r5-price-cluster": "retailers",
   "r11-assortment-gap": "outlets",
   "r2-district-deficit": "districts",
@@ -187,9 +186,8 @@ function watchForFindings(findings: Insight[], visit: string) {
         : undefined;
 
     /* Replenishment is proven by the gaps going away. */
-    case "r1-persistent-gap":
+    case "r1-outlet-gaps":
     case "r9-dark-outlet":
-    case "r10-new-gap-cluster":
       return single && outlet
         ? outletGapsWatchTarget({
             posId: posId!,

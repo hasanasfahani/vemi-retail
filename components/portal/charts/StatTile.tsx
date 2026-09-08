@@ -1,4 +1,4 @@
-/* Stat tile — label · value · signed delta against the previous visit.
+/* Stat tile — label · value · signed delta against the previous window.
 
    `goodDirection` decides what a rise means: availability rising is
    good, out-of-stocks rising is not. Direction colour is a status
@@ -82,7 +82,12 @@ export default function StatTile({
       <div className="mt-1.5 text-[12px] text-ink-500">
         {footnote ?? (
           <>
-            {moved ? "vs" : "unchanged since"} {scope.previousVisit}
+            {/* Window over window, across two DIFFERENT samples of
+                outlets. Saying "vs 15 Jul" implied the same panel was
+                re-measured; it was not, and a reader who assumes it was
+                will read panel rotation as market movement. */}
+            {moved ? "vs" : "unchanged vs"} {scope.previousVisit} ·{" "}
+            {scope.previousPosCount} outlets then, {scope.posCount} now
           </>
         )}
       </div>

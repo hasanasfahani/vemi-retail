@@ -2,123 +2,133 @@
   "meta": {
     "city": "Erbil",
     "category": "Carbonated Beverages",
-    "snapshots": [
+    "windows": [
       {
         "id": "2026-07-15",
-        "label": "15 Jul 2026",
-        "current": false
+        "label": "Trailing 28 days to 15 Jul 2026",
+        "shortLabel": "to 15 Jul",
+        "end": "2026-07-15",
+        "current": false,
+        "start": "2026-06-18",
+        "outletsAudited": 79
       },
       {
         "id": "2026-08-12",
-        "label": "12 Aug 2026",
-        "current": true
+        "label": "Trailing 28 days to 12 Aug 2026",
+        "shortLabel": "to 12 Aug",
+        "end": "2026-08-12",
+        "current": true,
+        "start": "2026-07-16",
+        "outletsAudited": 73
       }
     ],
-    "currentSnapshot": "2026-08-12",
-    "previousSnapshot": "2026-07-15",
-    "posCount": 100,
+    "currentWindow": "2026-08-12",
+    "previousWindow": "2026-07-15",
+    "windowDays": 28,
+    "revisitIntervalDays": 28,
+    "posUniverse": 100,
     "skuCount": 20
   },
   "current": [
     {
       "brandId": "pepsi",
-      "facings": 1099,
-      "share": 27.3,
-      "coolerFacings": 582,
-      "ambientFacings": 517
+      "facings": 872,
+      "share": 27.4,
+      "coolerFacings": 429,
+      "ambientFacings": 443
     },
     {
       "brandId": "coca-cola",
-      "facings": 1012,
-      "share": 25.1,
-      "coolerFacings": 503,
-      "ambientFacings": 509
+      "facings": 803,
+      "share": 25.2,
+      "coolerFacings": 418,
+      "ambientFacings": 385
     },
     {
       "brandId": "7up",
-      "facings": 605,
-      "share": 15,
-      "coolerFacings": 223,
-      "ambientFacings": 382
+      "facings": 449,
+      "share": 14.1,
+      "coolerFacings": 164,
+      "ambientFacings": 285
     },
     {
       "brandId": "mirinda",
-      "facings": 576,
-      "share": 14.3,
-      "coolerFacings": 188,
-      "ambientFacings": 388
+      "facings": 471,
+      "share": 14.8,
+      "coolerFacings": 161,
+      "ambientFacings": 310
     },
     {
       "brandId": "fanta",
-      "facings": 335,
-      "share": 8.3,
-      "coolerFacings": 167,
-      "ambientFacings": 168
+      "facings": 251,
+      "share": 7.9,
+      "coolerFacings": 114,
+      "ambientFacings": 137
     },
     {
       "brandId": "sprite",
-      "facings": 280,
-      "share": 6.9,
-      "coolerFacings": 136,
-      "ambientFacings": 144
+      "facings": 239,
+      "share": 7.5,
+      "coolerFacings": 117,
+      "ambientFacings": 122
     },
     {
       "brandId": "zamzam",
-      "facings": 125,
-      "share": 3.1,
-      "coolerFacings": 58,
-      "ambientFacings": 67
+      "facings": 103,
+      "share": 3.2,
+      "coolerFacings": 48,
+      "ambientFacings": 55
     }
   ],
   "previous": [
     {
       "brandId": "pepsi",
-      "facings": 1220,
-      "share": 29.4,
-      "coolerFacings": 671,
-      "ambientFacings": 549
+      "facings": 944,
+      "share": 28.5,
+      "coolerFacings": 475,
+      "ambientFacings": 469
     },
     {
       "brandId": "coca-cola",
-      "facings": 969,
-      "share": 23.3,
-      "coolerFacings": 512,
-      "ambientFacings": 457
+      "facings": 845,
+      "share": 25.5,
+      "coolerFacings": 421,
+      "ambientFacings": 424
     },
     {
       "brandId": "7up",
-      "facings": 612,
-      "share": 14.7,
-      "coolerFacings": 194,
-      "ambientFacings": 418
+      "facings": 409,
+      "share": 12.3,
+      "coolerFacings": 162,
+      "ambientFacings": 247
     },
     {
       "brandId": "mirinda",
-      "facings": 617,
-      "share": 14.9,
-      "coolerFacings": 222,
-      "ambientFacings": 395
+      "facings": 469,
+      "share": 14.1,
+      "coolerFacings": 173,
+      "ambientFacings": 296
     },
     {
       "brandId": "fanta",
-      "facings": 325,
-      "share": 7.8,
-      "coolerFacings": 157,
-      "ambientFacings": 168
+      "facings": 324,
+      "share": 9.8,
+      "coolerFacings": 169,
+      "ambientFacings": 155
     },
     {
       "brandId": "sprite",
-      "facings": 265,
-      "share": 6.4,
-      "coolerFacings": 133,
-      "ambientFacings": 132
+      "facings": 208,
+      "share": 6.3,
+      "coolerFacings": 103,
+      "ambientFacings": 105
     },
     {
       "brandId": "zamzam",
-      "facings": 143,
-      "share": 3.4,
-      "coolerFacings": 63,
-      "ambientFacings": 80
+      "facings": 117,
+      "share": 3.5,
+      "coolerFacings": 58,
+      "ambientFacings": 59
     }
   ]
 }

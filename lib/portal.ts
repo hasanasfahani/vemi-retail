@@ -11,16 +11,28 @@ import { meta, pos } from "./portalData";
 
 /* Scope reads from the audit payload, so the badge, the page headers
    and the numbers can never disagree. */
-const currentVisit = meta.snapshots.find((s) => s.id === meta.currentSnapshot)!;
-const previousVisit = meta.snapshots.find((s) => s.id === meta.previousSnapshot)!;
+const currentWindow = meta.windows.find((w) => w.id === meta.currentWindow)!;
+const previousWindow = meta.windows.find((w) => w.id === meta.previousWindow)!;
 
 export const scope = {
   country: "Iraq",
   city: meta.city,
   category: meta.category,
-  dataAsOf: currentVisit.label,
-  previousVisit: previousVisit.label,
-  posCount: meta.posCount,
+  /* "As of" is now a window, not a day. The short form is for places
+     that were already tight on space; the long form states the trailing
+     period, which is what the figure actually describes. */
+  dataAsOf: currentWindow.shortLabel,
+  windowLabel: currentWindow.label,
+  windowStart: currentWindow.start,
+  windowEnd: currentWindow.end,
+  windowDays: meta.windowDays,
+  previousVisit: previousWindow.shortLabel,
+  previousWindowLabel: previousWindow.label,
+  /* Audited in the current window vs the universe. Two different
+     numbers, and the gap between them is the coverage story. */
+  posCount: currentWindow.outletsAudited,
+  posUniverse: meta.posUniverse,
+  previousPosCount: previousWindow.outletsAudited,
   skuCount: meta.skuCount,
 };
 
@@ -43,39 +55,33 @@ export type NavItem = {
   locked?: boolean;
 };
 
-/* Two groups, not one flat list: Command Center is built for the
-   30-second executive read; everything under Operate is built for
-   the person who spends their week in the numbers. The grouping in
-   the sidebar is the same split made visible in the furniture. */
+/* One flat list.
+
+   The sidebar used to split into Executive and Operate, which made a
+   real persona difference visible in the furniture. That split earned
+   its keep while three pages sat under Executive — Command Center,
+   Digest and Reports, which between them rendered substantially the
+   same content three times. With Digest and Reports gone and Command
+   Center thinned to Overview, "Executive" would be a heading over a
+   single item: a group label that groups nothing, and one more thing
+   to read on the way to the page you wanted. */
 export type NavGroup = { label: string; items: NavItem[] };
 
-export const portalNavGroups: NavGroup[] = [
-  {
-    label: "Executive",
-    items: [
-      { href: "/dashboard/overview", label: "Command Center" },
-      { href: "/dashboard/digest", label: "Digest" },
-      { href: "/dashboard/reports", label: "Reports" },
-    ],
-  },
-  {
-    label: "Operate",
-    items: [
-      { href: "/dashboard/priorities", label: "Priorities" },
-      { href: "/dashboard/watchlist", label: "Watchlist" },
-      { href: "/dashboard/field-ops", label: "Field Ops" },
-      { href: "/dashboard/shelf", label: "Shelf" },
-      { href: "/dashboard/oos-alerts", label: "Out-of-Stock Alerts" },
-      { href: "/dashboard/pricing", label: "Price Intelligence" },
-      { href: "/dashboard/competitors", label: "Competitor Watch" },
-      { href: "/dashboard/visibility", label: "Visibility & POSM", locked: true },
-    ],
-  },
+export const portalNav: NavItem[] = [
+  { href: "/dashboard/overview", label: "Overview" },
+  { href: "/dashboard/priorities", label: "Priorities" },
+  { href: "/dashboard/watchlist", label: "Watchlist" },
+  { href: "/dashboard/field-ops", label: "Field Ops" },
+  { href: "/dashboard/shelf", label: "Shelf" },
+  { href: "/dashboard/oos-alerts", label: "Out-of-Stock Alerts" },
+  { href: "/dashboard/pricing", label: "Price Intelligence" },
+  { href: "/dashboard/competitors", label: "Competitor Watch" },
+  { href: "/dashboard/visibility", label: "Visibility & POSM", locked: true },
 ];
 
-/* Flat form for the mobile tab strip, which scrolls horizontally and
-   has no room for group headers. */
-export const portalNav: NavItem[] = portalNavGroups.flatMap((g) => g.items);
+export const portalNavGroups: NavGroup[] = [
+  { label: "", items: portalNav },
+];
 
 /* ------------------------------------------------------------------
    National coverage.

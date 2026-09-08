@@ -31,7 +31,7 @@ export type BarRow = {
   emphasis?: boolean;
   /* Optional second line under the label — channel, pack, owner. */
   meta?: string;
-  /* Same measure at the previous visit, drawn as a ghost behind. */
+  /* Same measure at the previous window, drawn as a ghost behind. */
   previous?: number;
 };
 
@@ -73,7 +73,7 @@ export default function RankedBar({
   labelWidth = 132,
   topN,
   reference,
-  previousLabel = "previous visit",
+  previousLabel = "previous window",
   mark,
   watchTargets,
 }: Props) {

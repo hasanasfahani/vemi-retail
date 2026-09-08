@@ -2,21 +2,31 @@
   "meta": {
     "city": "Erbil",
     "category": "Carbonated Beverages",
-    "snapshots": [
+    "windows": [
       {
         "id": "2026-07-15",
-        "label": "15 Jul 2026",
-        "current": false
+        "label": "Trailing 28 days to 15 Jul 2026",
+        "shortLabel": "to 15 Jul",
+        "end": "2026-07-15",
+        "current": false,
+        "start": "2026-06-18",
+        "outletsAudited": 79
       },
       {
         "id": "2026-08-12",
-        "label": "12 Aug 2026",
-        "current": true
+        "label": "Trailing 28 days to 12 Aug 2026",
+        "shortLabel": "to 12 Aug",
+        "end": "2026-08-12",
+        "current": true,
+        "start": "2026-07-16",
+        "outletsAudited": 73
       }
     ],
-    "currentSnapshot": "2026-08-12",
-    "previousSnapshot": "2026-07-15",
-    "posCount": 100,
+    "currentWindow": "2026-08-12",
+    "previousWindow": "2026-07-15",
+    "windowDays": 28,
+    "revisitIntervalDays": 28,
+    "posUniverse": 100,
     "skuCount": 20
   },
   "clientBrandId": "pepsi",
@@ -24,71 +34,71 @@
     {
       "brandId": "pepsi",
       "isClient": true,
-      "share": 27.3,
-      "shareDelta": -2.1,
-      "availability": 86,
-      "availabilityDelta": -1,
-      "activeOos": 42,
+      "share": 27.4,
+      "shareDelta": -1.1,
+      "availability": 85.1,
+      "availabilityDelta": -3.6,
+      "activeOos": 35,
       "skuCount": 4
     },
     {
       "brandId": "coca-cola",
       "isClient": false,
-      "share": 25.1,
-      "shareDelta": 1.8,
-      "availability": 84.9,
-      "availabilityDelta": -1.2,
-      "activeOos": 44,
+      "share": 25.2,
+      "shareDelta": -0.3,
+      "availability": 88,
+      "availabilityDelta": 1.3,
+      "activeOos": 26,
       "skuCount": 4
-    },
-    {
-      "brandId": "7up",
-      "isClient": false,
-      "share": 15,
-      "shareDelta": 0.3,
-      "availability": 83.6,
-      "availabilityDelta": -0.7,
-      "activeOos": 32,
-      "skuCount": 3
     },
     {
       "brandId": "mirinda",
       "isClient": false,
-      "share": 14.3,
-      "shareDelta": -0.6,
-      "availability": 84.7,
-      "availabilityDelta": -3.3,
-      "activeOos": 29,
+      "share": 14.8,
+      "shareDelta": 0.7,
+      "availability": 91.9,
+      "availabilityDelta": 1.6,
+      "activeOos": 12,
+      "skuCount": 3
+    },
+    {
+      "brandId": "7up",
+      "isClient": false,
+      "share": 14.1,
+      "shareDelta": 1.8,
+      "availability": 85.8,
+      "availabilityDelta": 4.8,
+      "activeOos": 20,
       "skuCount": 3
     },
     {
       "brandId": "fanta",
       "isClient": false,
-      "share": 8.3,
-      "shareDelta": 0.5,
-      "availability": 81.5,
-      "availabilityDelta": -2.4,
-      "activeOos": 24,
+      "share": 7.9,
+      "shareDelta": -1.9,
+      "availability": 81.1,
+      "availabilityDelta": -8.7,
+      "activeOos": 18,
       "skuCount": 2
     },
     {
       "brandId": "sprite",
       "isClient": false,
-      "share": 6.9,
-      "shareDelta": 0.5,
-      "availability": 86.4,
-      "availabilityDelta": 0.7,
-      "activeOos": 15,
+      "share": 7.5,
+      "shareDelta": 1.2,
+      "availability": 89.1,
+      "availabilityDelta": -1.3,
+      "activeOos": 10,
       "skuCount": 2
     },
     {
       "brandId": "zamzam",
       "isClient": false,
-      "share": 3.1,
+      "share": 3.2,
       "shareDelta": -0.3,
-      "availability": 87.7,
-      "availabilityDelta": -6.4,
-      "activeOos": 8,
+      "availability": 90.4,
+      "availabilityDelta": -3,
+      "activeOos": 5,
       "skuCount": 2
     }
   ]

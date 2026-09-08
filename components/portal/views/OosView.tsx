@@ -17,15 +17,11 @@ import FilterBar, {
 import StatTile from "@/components/portal/charts/StatTile";
 import RankedBar from "@/components/portal/charts/RankedBar";
 import ChartStory from "@/components/portal/ChartStory";
-import Histogram from "@/components/portal/charts/Histogram";
 import MatrixChart from "@/components/portal/charts/MatrixChart";
 import { brandShareWatchTarget, kpiWatchTarget } from "@/lib/watchTargets";
 import { useViewInsights } from "@/components/portal/useViewInsights";
-import DistrictMap, {
-  type DistrictDatum,
-} from "@/components/portal/charts/DistrictMap";
+import DistrictHeat from "@/components/portal/DistrictHeat";
 import { OutletButton } from "@/components/portal/OutletDrawer";
-import { scope } from "@/lib/portal";
 import { applyFilters } from "@/lib/portalFilters";
 import {
   brandName,
@@ -33,10 +29,11 @@ import {
   posOf,
   skuName,
   skuOf,
+  REVISIT_INTERVAL_DAYS,
 } from "@/lib/portalData";
 
 type Grouping = "gap" | "outlet";
-type Urgency = "all" | "mine" | "persistent";
+type Urgency = "all" | "mine";
 
 const PACK_LABEL: Record<string, string> = {
   "can-330": "330ml can",
@@ -64,21 +61,18 @@ export default function OosView() {
      three views can never describe different slices. */
   const {
     rows,
-    districts,
     mine,
     takers,
     byOutlet,
-    lostFacingDays,
-    myLostFacingDays,
-    persistent,
+    facingDaysAtRisk,
+    myFacingDaysAtRisk,
   } =
     useMemo(() => {
       let list = view.oosRows;
       if (urgency === "mine")
         list = list.filter((r) => skuOf(r.skuId)?.brandId === clientBrand.id);
-      if (urgency === "persistent") list = list.filter((r) => r.persistent);
-
-      const sorted = [...list].sort((a, b) => b.lostFacingDays - a.lostFacingDays);
+  
+      const sorted = [...list].sort((a, b) => b.facingDaysAtRisk - a.facingDaysAtRisk);
       const ours = sorted.filter(
         (r) => skuOf(r.skuId)?.brandId === clientBrand.id
       );
@@ -100,58 +94,16 @@ export default function OosView() {
         grouped.set(row.posId, [...(grouped.get(row.posId) ?? []), row]);
       }
 
-      /* District rollup. Colour carries lost facing-days — the measure
-         this page ranks everything else by — while circle size stays
-         outlets audited, same as the Availability map. It follows the
-         urgency toggle too, so "Pepsi only" recolours the city. */
-      const areaGaps = new Map<
-        string,
-        { gaps: number; lost: number; mine: number; worst: number }
-      >();
-      for (const row of sorted) {
-        const area = posOf(row.posId)!.area;
-        const e = areaGaps.get(area) ?? { gaps: 0, lost: 0, mine: 0, worst: 0 };
-        e.gaps += 1;
-        e.lost += row.lostFacingDays;
-        if (skuOf(row.skuId)?.brandId === clientBrand.id) e.mine += 1;
-        e.worst = Math.max(e.worst, row.daysOut);
-        areaGaps.set(area, e);
-      }
-      const areaOutlets = new Map<string, Set<string>>();
-      for (const cell of view.cells) {
-        const area = posOf(cell.posId)!.area;
-        const set = areaOutlets.get(area) ?? new Set<string>();
-        set.add(cell.posId);
-        areaOutlets.set(area, set);
-      }
-      const districts: DistrictDatum[] = [...areaOutlets.entries()].map(
-        ([name, outlets]) => {
-          const e = areaGaps.get(name) ?? { gaps: 0, lost: 0, mine: 0, worst: 0 };
-          return {
-            name,
-            outlets: outlets.size,
-            value: e.lost,
-            rows: [
-              { label: "Open gaps", value: `${e.gaps}` },
-              {
-                label: "Lost facing-days",
-                value: e.lost.toLocaleString(),
-                tone: "critical" as const,
-              },
-              { label: `${clientBrand.name} gaps`, value: `${e.mine}` },
-              { label: "Longest open", value: e.worst ? `${e.worst}d` : "—" },
-            ],
-          };
-        }
-      );
+      /* The district rollup used to be computed here, and again on
+         Shelf, and again on Field Ops — three derivations of the same
+         geography, each colouring by whatever its host page happened
+         to be about. DistrictHeat owns all of it now. */
 
       return {
         rows: sorted,
-        districts,
         mine: ours,
-        persistent: sorted.filter((r) => r.persistent),
-        lostFacingDays: sorted.reduce((s, r) => s + r.lostFacingDays, 0),
-        myLostFacingDays: ours.reduce((s, r) => s + r.lostFacingDays, 0),
+        facingDaysAtRisk: sorted.reduce((s, r) => s + r.facingDaysAtRisk, 0),
+        myFacingDaysAtRisk: ours.reduce((s, r) => s + r.facingDaysAtRisk, 0),
         takers: [...tally.entries()]
           .map(([brandId, facings]) => ({
             id: brandId,
@@ -163,42 +115,29 @@ export default function OosView() {
           .map(([posId, gaps]) => ({
             posId,
             gaps,
-            lostFacingDays: gaps.reduce((s, g) => s + g.lostFacingDays, 0),
+            facingDaysAtRisk: gaps.reduce((s, g) => s + g.facingDaysAtRisk, 0),
             mine: gaps.filter(
               (g) => skuOf(g.skuId)?.brandId === clientBrand.id
             ).length,
-            worst: Math.max(...gaps.map((g) => g.daysOut)),
           }))
-          .sort((a, b) => b.lostFacingDays - a.lostFacingDays),
+          .sort((a, b) => b.facingDaysAtRisk - a.facingDaysAtRisk),
       };
     }, [view, urgency]);
 
-  /* How OLD the gaps are. lostFacingDays already multiplies space by
-     time, but the shape of that time has never been shown — and the
-     difference between a shelf that emptied last week and one that
-     has been empty for a month is the difference between a delivery
-     problem and a neglected account. */
-  const ageing = useMemo(() => {
-    const bands = [
-      { id: "1-7", label: "1–7 days", max: 7 },
-      { id: "8-14", label: "8–14", max: 14 },
-      { id: "15-28", label: "15–28", max: 28 },
-      { id: "29+", label: "29+", max: Infinity },
-    ];
-    const counts = new Map(bands.map((b) => [b.id, 0]));
-    for (const row of mine) {
-      const band = bands.find((b) => row.daysOut <= b.max)!;
-      counts.set(band.id, (counts.get(band.id) ?? 0) + 1);
-    }
-    return bands.map((b) => ({
-      id: b.id,
-      label: b.label,
-      count: counts.get(b.id) ?? 0,
-      /* Past a full audit cycle a gap is no longer a stockout — it is
-         a listing nobody is replenishing. */
-      flagged: b.id === "15-28" || b.id === "29+",
-    }));
-  }, [mine]);
+  /* THE AGEING HISTOGRAM WAS REMOVED HERE.
+
+     It binned gaps by `daysOut` into 1-7 / 8-14 / 15-28 / 29+ and
+     flagged anything past a fortnight as "not waiting on a delivery,
+     it needs an account conversation". Good chart, honest intent,
+     impossible data: knowing how long a shelf has been empty requires
+     having seen that outlet before, and a rotating panel does not
+     revisit. Every band was reading a field the generator invented.
+
+     Nothing replaces it, because nothing can from a single observation.
+     What the page can still say — and now does, per row — is WHEN the
+     outlet was audited, which is the honest version of the same
+     question: not "how long has this been wrong" but "how fresh is
+     this reading". */
 
   /* Which rival pack stands in which of your gaps. rivalsInStock has
      always held this; it has only ever been summed to a single winner,
@@ -223,7 +162,7 @@ export default function OosView() {
            facings this matrix named 7UP; measured the way R4 measures,
            it names Fanta. Same data, and only one of them agreed with
            the engine. */
-        cellMap.set(key, (cellMap.get(key) ?? 0) + r.facings * row.daysOut);
+        cellMap.set(key, (cellMap.get(key) ?? 0) + r.facings * REVISIT_INTERVAL_DAYS);
       }
     }
     const rivalTotals = new Map<string, number>();
@@ -293,16 +232,21 @@ export default function OosView() {
           })}
         />
         <StatTile
-          label="Lost facing-days"
-          value={`${myLostFacingDays.toLocaleString()}`}
+          label="Facing-days at risk"
+          value={`${myFacingDaysAtRisk.toLocaleString()}`}
           goodDirection="down"
-          footnote={`${lostFacingDays.toLocaleString()} category-wide`}
+          footnote={`${facingDaysAtRisk.toLocaleString()} category-wide`}
         />
+        {/* Was "Unresolved gaps — still empty since the previous window".
+            A rotating panel never confirms a gap twice, so the tile
+            was counting an invented flag. Replaced with the figure
+            this collection model actually owes the reader: how much of
+            the selection we reached at all. An unvisited outlet is not
+            a clean one. */}
         <StatTile
-          label="Unresolved gaps"
-          value={`${persistent.length}`}
-          goodDirection="down"
-          footnote={`Still empty since ${scope.previousVisit}`}
+          label="Outlets audited"
+          value={`${view.posCount}`}
+          footnote={`of ${view.inScopeCount} in selection · ${view.coveragePct}% covered`}
         />
         <StatTile
           label="Outlets to visit"
@@ -330,39 +274,23 @@ export default function OosView() {
           options={[
             { value: "all", label: "All gaps" },
             { value: "mine", label: `${clientBrand.name} only` },
-            { value: "persistent", label: "Unresolved" },
           ]}
         />
       </div>
 
-      <section className="mt-4 rounded-[18px] border border-line bg-white p-5 sm:p-6">
-        <h2 className="t-h3">Erbil by district</h2>
-        <p className="mt-1 mb-5 text-sm text-ink-500">
-          Where the cost concentrates across the city. Darker is more lost
-          facing-days; circle size is outlets audited. Click a district to
-          filter this page to it.
-        </p>
-        {districts.length ? (
-          <DistrictMap
-            data={districts}
-            selected={filters.areas}
-            onSelect={(name) =>
-              setFilters({
-                ...filters,
-                areas: filters.areas.includes(name)
-                  ? filters.areas.filter((a) => a !== name)
-                  : [...filters.areas, name],
-              })
-            }
-            legendLabel="Lost facing-days"
-            formatValue={(v) => v.toLocaleString()}
-          />
-        ) : (
-          <p className="py-8 text-center text-sm text-ink-400">
-            Nothing matches the current filters.
-          </p>
-        )}
-      </section>
+      <DistrictHeat
+        view={view}
+        selectedAreas={filters.areas}
+        defaultMeasure="at-risk"
+        onSelectArea={(name) =>
+          setFilters({
+            ...filters,
+            areas: filters.areas.includes(name)
+              ? filters.areas.filter((a) => a !== name)
+              : [...filters.areas, name],
+          })
+        }
+      />
 
       <div className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
         <section className="min-w-0 overflow-hidden rounded-[18px] border border-line bg-white">
@@ -373,7 +301,7 @@ export default function OosView() {
               </h2>
               <p className="mt-1 text-sm text-ink-500">
                 {grouping === "gap"
-                  ? "Ranked by lost facing-days — shelf space multiplied by time off shelf."
+                  ? "Ranked by facing-days at risk — shelf space multiplied by the days until we are next in that store."
                   : "Outlets ranked by what their gaps are costing you."}
               </p>
             </div>
@@ -385,7 +313,7 @@ export default function OosView() {
 
           <div className="max-h-[620px] overflow-auto">
             {grouping === "gap" ? (
-              <GapTable rows={rows} />
+              <GapTable rows={rows} auditedAt={view.auditedAt} />
             ) : (
               <VisitList outlets={byOutlet} />
             )}
@@ -393,36 +321,14 @@ export default function OosView() {
         </section>
 
         <div className="flex flex-col gap-4">
-          {mine.length ? (
-            <ChartStory
-              title="How long these have been empty"
-              subtitle={`${mine.length} ${clientBrand.name} gaps by age`}
-              howToRead="Each column is an age band and its height is how many of your gaps fall in it. Red marks gaps older than a fortnight — past that a shelf is not waiting on a delivery."
-              findings={insights.forRules("r1-persistent-gap", "r9-dark-outlet")}
-              clean="Nothing has been empty long enough to escalate."
-              allClear="No gap older than a cycle"
-              soWhat={ageingSoWhat(ageing)}
-              actionLabel="Create replenishment action"
-              visit={view.visit}
-              table={{
-                columns: ["Age", "Gaps"],
-                rows: ageing.map((b) => [b.label, b.count]),
-              }}
-            >
-              <Histogram
-                bins={ageing}
-                unitNoun="gaps"
-                bandLabel="Within one audit cycle"
-                bandIds={["1-7", "8-14"]}
-              />
-            </ChartStory>
-          ) : null}
+          {/* the gap-age histogram lived here — see the note above */}
+          {false ? null : null}
 
           {substitution.cells.length ? (
             <ChartStory
               title="Which rival takes which pack"
               subtitle="Rival facings standing in your gaps, by your pack format"
-              howToRead="Rows are your pack formats; columns are the rival brands holding that space when you are empty. Darker means more facing-days taken — space multiplied by how long you were out. A brand can lead the category overall and still not be the one taking a given pack."
+              howToRead="Rows are your pack formats; columns are the rival brands holding that space when you are empty. Darker means more facing-days taken — space multiplied by the days until the next audit. A brand can lead the category overall and still not be the one taking a given pack."
               findings={insights.forRules("r4-rival-substitution")}
               clean="No rival is consistently taking a particular format."
               allClear="No pattern by pack"
@@ -478,46 +384,27 @@ export default function OosView() {
             </section>
           )}
 
-          <section className="rounded-[18px] border border-line bg-white p-5 sm:p-6">
-            <h2 className="t-h3">Unresolved since {scope.previousVisit}</h2>
-            <p className="mt-1 mb-4 text-sm text-ink-500">
-              Empty at both visits — a distribution problem, not a demand spike.
-            </p>
-            {persistent.length ? (
-              <ul className="space-y-3">
-                {persistent.slice(0, 10).map((row) => (
-                  <li key={`${row.posId}-${row.skuId}`} className="text-[13px]">
-                    <span className="font-semibold text-ink-900">
-                      {skuName(row.skuId)}
-                    </span>
-                    <span className="block text-ink-500">
-                      <OutletButton posId={row.posId} className="!text-[13px] !font-medium" />{" "}
-                      ·{" "}
-                      <span className="mono font-semibold" style={{ color: "var(--color-critical)" }}>
-                        {row.daysOut} days
-                      </span>
-                    </span>
-                  </li>
-                ))}
-                {persistent.length > 10 && (
-                  <li className="text-[12px] text-ink-400">
-                    +{persistent.length - 10} more
-                  </li>
-                )}
-              </ul>
-            ) : (
-              <p className="py-4 text-sm text-ink-400">
-                Nothing unresolved in this selection.
-              </p>
-            )}
-          </section>
+          {/* THE "UNRESOLVED SINCE" PANEL WAS REMOVED HERE.
+
+              It listed gaps "empty at both visits — a distribution
+              problem, not a demand spike". That claim needs the same
+              outlet observed twice, which a rotating schedule does not
+              deliver, so the panel was ranking a fabricated field. The
+              distinction it drew is real and worth having; it just
+              needs a fixed core panel to earn it back. */}
         </div>
       </div>
     </div>
   );
 }
 
-function GapTable({ rows }: { rows: ReturnType<typeof applyFilters>["oosRows"] }) {
+function GapTable({
+  rows,
+  auditedAt,
+}: {
+  rows: ReturnType<typeof applyFilters>["oosRows"];
+  auditedAt: Map<string, string>;
+}) {
   if (!rows.length)
     return <p className="p-8 text-center text-sm text-ink-400">No gaps in this selection.</p>;
 
@@ -527,7 +414,7 @@ function GapTable({ rows }: { rows: ReturnType<typeof applyFilters>["oosRows"] }
         <tr className="border-b border-line text-[12px] uppercase tracking-wide text-ink-400">
           <th className="px-5 py-2.5 text-left font-semibold">SKU / outlet</th>
           <th className="px-5 py-2.5 text-left font-semibold">Space taken by</th>
-          <th className="px-5 py-2.5 text-right font-semibold">Days</th>
+          <th className="px-5 py-2.5 text-right font-semibold">Audited</th>
           <th className="px-5 py-2.5 text-right font-semibold">Lost facing-days</th>
         </tr>
       </thead>
@@ -569,19 +456,15 @@ function GapTable({ rows }: { rows: ReturnType<typeof applyFilters>["oosRows"] }
                   <span className="text-[12px] text-ink-400">Shelf empty</span>
                 )}
               </td>
-              <td className="px-5 py-2.5 text-right align-middle">
-                <span
-                  className="mono font-semibold"
-                  style={{ color: row.persistent ? "var(--color-critical)" : "var(--color-ink-900)" }}
-                >
-                  {row.daysOut}d
-                </span>
-                {row.persistent && (
-                  <span className="pill pill-critical ml-2">Unresolved</span>
-                )}
+              {/* Was "days out" plus an Unresolved pill. Both read a
+                  previous observation of this outlet, which a rotating
+                  panel never has. Replaced with the one date that IS
+                  recorded: when we were in the store. */}
+              <td className="mono px-5 py-2.5 text-right align-middle text-[12px] text-ink-500">
+                {auditedAt.get(row.posId) ?? "—"}
               </td>
               <td className="mono px-5 py-2.5 text-right">
-                <span className="font-semibold text-ink-900">{row.lostFacingDays}</span>
+                <span className="font-semibold text-ink-900">{row.facingDaysAtRisk}</span>
                 <span className="block text-[11px] text-ink-400">
                   normally {row.normalFacings} facings
                 </span>
@@ -600,9 +483,8 @@ function VisitList({
   outlets: {
     posId: string;
     gaps: ReturnType<typeof applyFilters>["oosRows"];
-    lostFacingDays: number;
+    facingDaysAtRisk: number;
     mine: number;
-    worst: number;
   }[];
 }) {
   if (!outlets.length)
@@ -625,7 +507,7 @@ function VisitList({
                 </span>
                 <span className="mt-0.5 block text-[12px] text-ink-400">
                   {outlet.area} · {outlet.channel} · {entry.gaps.length} gap
-                  {entry.gaps.length === 1 ? "" : "s"} · longest {entry.worst}d
+                  {entry.gaps.length === 1 ? "" : "s"}
                 </span>
                 <span className="mt-1.5 block text-[12px] text-ink-700">
                   {entry.gaps
@@ -637,7 +519,7 @@ function VisitList({
               </div>
               <div className="mono shrink-0 text-right">
                 <span className="block font-semibold text-ink-900">
-                  {entry.lostFacingDays.toLocaleString()}
+                  {entry.facingDaysAtRisk.toLocaleString()}
                 </span>
                 <span className="text-[11px] text-ink-400">facing-days</span>
               </div>
@@ -686,14 +568,6 @@ function Toggle({
   );
 }
 
-function ageingSoWhat(bins: { id: string; count: number }[]) {
-  const old = bins
-    .filter((b) => b.id === "15-28" || b.id === "29+")
-    .reduce((s, b) => s + b.count, 0);
-  const total = bins.reduce((s, b) => s + b.count, 0);
-  if (!old) return "Every gap is inside one audit cycle — this is replenishment, not neglect.";
-  return `${old} of ${total} gaps have been open longer than a fortnight. Those are not waiting on a delivery; they need an account conversation.`;
-}
 
 function substitutionSoWhat(sub: {
   top?: [string, number];

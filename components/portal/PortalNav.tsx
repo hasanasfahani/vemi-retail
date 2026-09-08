@@ -25,10 +25,12 @@ export default function PortalNav() {
 
         <div className="flex-1 overflow-y-auto px-3 py-4">
           {portalNavGroups.map((group, i) => (
-            <div key={group.label} className={i > 0 ? "mt-4" : undefined}>
-              <div className="px-3 pb-1.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink-400">
-                {group.label}
-              </div>
+            <div key={group.label || `group-${i}`} className={i > 0 ? "mt-4" : undefined}>
+              {group.label && (
+                <div className="px-3 pb-1.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink-400">
+                  {group.label}
+                </div>
+              )}
               {group.items.map((item) => {
                 const active = pathname === item.href;
                 return (

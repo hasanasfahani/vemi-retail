@@ -7,7 +7,7 @@
 
      howToRead  the mechanics. What a row is, what the axis means,
                 what colour is doing. Never changes when the data does.
-     soWhat     the move this chart implies, this cycle. Changes every
+     soWhat     the move this chart implies, in this window. Changes every
                 cycle. Not an observation — a decision.
 
    A chart that cannot state the decision it implies has not earned its
@@ -130,7 +130,7 @@ export default function ChartFrame({
         {action ?? (
           <span className="flex shrink-0 items-center gap-1.5 text-[12.5px] text-ink-400">
             <span className="dot" style={{ background: "var(--color-good)" }} />
-            {allClear ?? "Nothing flagged this cycle"}
+            {allClear ?? "Nothing flagged in this window"}
           </span>
         )}
       </div>

@@ -2,21 +2,31 @@
   "meta": {
     "city": "Erbil",
     "category": "Carbonated Beverages",
-    "snapshots": [
+    "windows": [
       {
         "id": "2026-07-15",
-        "label": "15 Jul 2026",
-        "current": false
+        "label": "Trailing 28 days to 15 Jul 2026",
+        "shortLabel": "to 15 Jul",
+        "end": "2026-07-15",
+        "current": false,
+        "start": "2026-06-18",
+        "outletsAudited": 79
       },
       {
         "id": "2026-08-12",
-        "label": "12 Aug 2026",
-        "current": true
+        "label": "Trailing 28 days to 12 Aug 2026",
+        "shortLabel": "to 12 Aug",
+        "end": "2026-08-12",
+        "current": true,
+        "start": "2026-07-16",
+        "outletsAudited": 73
       }
     ],
-    "currentSnapshot": "2026-08-12",
-    "previousSnapshot": "2026-07-15",
-    "posCount": 100,
+    "currentWindow": "2026-08-12",
+    "previousWindow": "2026-07-15",
+    "windowDays": 28,
+    "revisitIntervalDays": 28,
+    "posUniverse": 100,
     "skuCount": 20
   },
   "rows": [

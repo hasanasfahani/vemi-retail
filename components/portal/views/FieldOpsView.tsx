@@ -13,7 +13,7 @@
    So the page is built around one artefact — a route — and everything
    on it either sizes that route, orders it, or tells the rep what to
    check when they walk in. The ranking comes from the same
-   `lostFacingDays` the rest of the product uses, so a stop's worth
+   `facingDaysAtRisk` the rest of the product uses, so a stop's worth
    here is the same number Command Center argued from; the ORDER comes
    from geography, because value-ranked and drivable are not the same
    list. Both steps live in lib/fieldOps.ts, named separately.
@@ -25,15 +25,12 @@ import { useMemo, useState } from "react";
 import PageHeader from "@/components/portal/PageHeader";
 import FilterBar, { useFilters, useVisitData } from "@/components/portal/FilterBar";
 import StatTile from "@/components/portal/charts/StatTile";
-import ChartStory from "@/components/portal/ChartStory";
-import Dumbbell from "@/components/portal/charts/Dumbbell";
 import DistrictMap, {
   type DistrictDatum,
 } from "@/components/portal/charts/DistrictMap";
 import DecisionAction from "@/components/portal/DecisionAction";
 import ImpactBasis from "@/components/portal/ImpactBasis";
 import { OutletButton } from "@/components/portal/OutletDrawer";
-import { useViewInsights } from "@/components/portal/useViewInsights";
 import {
   buildStops,
   orderRoute,
@@ -44,14 +41,11 @@ import {
 import { applyFilters } from "@/lib/portalFilters";
 import { formatImpact } from "@/lib/economics";
 import { nextVisitDate } from "@/lib/cadence";
-import { scope } from "@/lib/portal";
 import {
   clientBrand,
   posOf,
   skuName,
   skuOf,
-  visits,
-  type VisitData,
 } from "@/lib/portalData";
 
 /* A rep's day, in stops. Not a setting anyone configured — the
@@ -72,20 +66,18 @@ export default function FieldOpsView() {
 
   const { data: visitData, loading } = useVisitData(filters.visit);
 
-  /* The visit before the one in view, for the did-it-work band. */
-  const previousId = useMemo(() => {
-    const order = [...visits].map((v) => v.id).sort();
-    const i = order.indexOf(filters.visit);
-    return i > 0 ? order[i - 1] : null;
-  }, [filters.visit]);
-  const { data: previousData } = useVisitData(previousId ?? filters.visit);
-  const hasHistory = previousId !== null && previousData.visit === previousId;
+  /* NO PREVIOUS-WINDOW LOAD ANY MORE.
+
+     This page used to fetch the prior window and compare each stop's
+     availability then against now. Under a rotating schedule the same
+     outlet is not guaranteed a second audit, so for most stops there is
+     no "then" — and for the few that appear in both windows, comparing
+     them would quietly present the overlap as if it were the panel. */
 
   const view = useMemo(
     () => applyFilters(filters, visitData),
     [filters, visitData]
   );
-  const insights = useViewInsights(view);
 
   const stops = useMemo(() => buildStops(view), [view]);
 
@@ -128,7 +120,7 @@ export default function FieldOpsView() {
       const e = areas.get(stop.area) ?? { stops: 0, lost: 0, gaps: 0 };
       if (selected.has(stop.posId)) {
         e.stops += 1;
-        e.lost += stop.lostFacingDays;
+        e.lost += stop.facingDaysAtRisk;
         e.gaps += stop.mine;
       }
       areas.set(stop.area, e);
@@ -149,32 +141,7 @@ export default function FieldOpsView() {
     }));
   }, [stops, selected]);
 
-  /* Did the last run work? Outlet-level availability, previous visit
-     against this one, for the stops on today's route — the only
-     population where a rep actually did something. */
-  const history = useMemo(() => {
-    if (!hasHistory) return [];
-    const before = applyFilters(
-      { ...filters, visit: previousData.visit },
-      previousData as VisitData
-    );
-    const then = new Map(
-      before.byPos.map((p) => [p.posId, p.clientAvailability])
-    );
-    return route.stops
-      .filter((s) => then.has(s.posId))
-      .map((s) => ({
-        id: s.posId,
-        label: s.code,
-        a: then.get(s.posId)!,
-        b: s.clientAvailability,
-        emphasis: s.clientAvailability < then.get(s.posId)!,
-      }))
-      .sort((x, y) => x.b - y.b);
-  }, [hasHistory, filters, previousData, route.stops]);
 
-  const worsened = history.filter((h) => h.b < h.a).length;
-  const improved = history.filter((h) => h.b > h.a).length;
 
   const routeDraft = {
     title: `Work ${route.stops.length} outlet${
@@ -183,7 +150,7 @@ export default function FieldOpsView() {
     rule: "field-ops-route",
     where: route.legs.map((l) => l.area).join(" → ") || "Erbil",
     notes: `${route.gaps} ${clientBrand.name} gaps worth ${formatImpact(
-      route.lostFacingDays
+      route.facingDaysAtRisk
     )}, ordered by district so the run is one loop. Roughly ${route.km}km between district centres, out and back.`,
     items: route.stops.map((stop, i) => ({
       id: stop.posId,
@@ -194,7 +161,7 @@ export default function FieldOpsView() {
       done: false,
     })),
     itemNoun: "stops, in travel order",
-    context: `${formatImpact(route.lostFacingDays)} recoverable · due ${nextVisitDate()}`,
+    context: `${formatImpact(route.facingDaysAtRisk)} recoverable · due ${nextVisitDate()}`,
   };
 
   return (
@@ -230,7 +197,7 @@ export default function FieldOpsView() {
         />
         <StatTile
           label="Recoverable"
-          value={formatImpact(route.lostFacingDays)}
+          value={formatImpact(route.facingDaysAtRisk)}
           footnote="if every gap on the route is filled"
         />
         <StatTile
@@ -324,7 +291,7 @@ export default function FieldOpsView() {
               district{route.legs.length === 1 ? "" : "s"} in {route.km}km.{" "}
               <strong className="text-ink-700">Tightest route</strong> would
               cover {alternative.legs.length} in {alternative.km}km —{" "}
-              {tradeOff(route.lostFacingDays, alternative.lostFacingDays)}
+              {tradeOff(route.facingDaysAtRisk, alternative.facingDaysAtRisk)}
             </>
           ) : (
             <>
@@ -332,7 +299,7 @@ export default function FieldOpsView() {
               {route.legs.length === 1 ? "" : "s"} and {route.km}km.{" "}
               <strong className="text-ink-700">Highest value</strong> would
               reach {alternative.legs.length} in {alternative.km}km —{" "}
-              {tradeOff(route.lostFacingDays, alternative.lostFacingDays)}
+              {tradeOff(route.facingDaysAtRisk, alternative.facingDaysAtRisk)}
             </>
           )}
         </p>
@@ -449,35 +416,21 @@ export default function FieldOpsView() {
             </div>
           </section>
 
-          {hasHistory && history.length > 0 && (
-            <ChartStory
-              title="Did the last run work?"
-              subtitle={`${clientBrand.name} availability at today's stops`}
-              howToRead={`Each row is an outlet on the route. The hollow mark is where it stood at the ${
-                visits.find((v) => v.id === previousId)?.label ?? "previous visit"
-              }; the solid mark is today. A solid mark to the LEFT of the hollow one means the store went backwards since someone was last there.`}
-              soWhat={historySoWhat(improved, worsened, history.length)}
-              findings={insights.forRules("r1-persistent-gap", "r9-dark-outlet")}
-              clean={historySoWhat(improved, worsened, history.length)}
-              allClear="Every stop on this route improved or held since the last visit."
-              actionLabel="Create replenishment action"
-              visit={view.visit}
-              table={{
-                columns: ["Outlet", "Previous", "Now"],
-                rows: history.map((h) => [h.label, `${h.a}%`, `${h.b}%`]),
-              }}
-            >
-              <Dumbbell
-                rows={history}
-                aLabel={
-                  visits.find((v) => v.id === previousId)?.label ?? "Previous visit"
-                }
-                bLabel="This visit"
-                max={100}
-                labelWidth={78}
-              />
-            </ChartStory>
-          )}
+          {/* THE "DID THE LAST RUN WORK?" DUMBBELL WAS REMOVED HERE.
+
+              It plotted each stop's client availability at the previous
+              visit against today, and it produced the sharpest line on
+              the page: "5 of 8 stops went backwards since the last
+              visit." That claim needs the SAME outlet observed twice,
+              and a rotating panel does not revisit — so for most stops
+              the hollow mark had nothing behind it.
+
+              This is the most valuable thing the rotation costs, and it
+              is worth buying back: a small fixed core panel, revisited
+              on a schedule, would earn this chart honestly and with it
+              the only measure that compounds — whether an intervention
+              actually worked. Until that panel exists, the page does
+              not draw it. */}
         </div>
       </div>
     </div>
@@ -512,20 +465,16 @@ function PickRow({
           <span className="text-[13px] font-semibold text-ink-900">
             {stop.code}
           </span>
-          {stop.persistent > 0 && (
-            <span className="pill pill-critical">
-              {stop.persistent} unresolved
-            </span>
-          )}
+
         </span>
         <span className="mt-0.5 block text-[12px] text-ink-400">
           {stop.area} · {stop.channel} · {stop.mine} gap
-          {stop.mine === 1 ? "" : "s"} · longest {stop.worst}d
+          {stop.mine === 1 ? "" : "s"} · seen {stop.auditedAt}
         </span>
       </span>
       <span className="mono shrink-0 text-right text-[12px]">
         <span className="block font-semibold text-ink-900">
-          {stop.lostFacingDays.toLocaleString()}
+          {stop.facingDaysAtRisk.toLocaleString()}
         </span>
         <span className="text-[10.5px] text-ink-400">facing-days</span>
       </span>
@@ -559,7 +508,7 @@ function CallSheetStop({ stop, index }: { stop: Stop; index: number }) {
         </div>
         <span className="mono shrink-0 text-right text-[12px]">
           <span className="block font-semibold text-ink-900">
-            {stop.lostFacingDays.toLocaleString()}
+            {stop.facingDaysAtRisk.toLocaleString()}
           </span>
           <span className="text-[10.5px] text-ink-400">facing-days</span>
         </span>
@@ -577,17 +526,9 @@ function CallSheetStop({ stop, index }: { stop: Stop; index: number }) {
             >
               <span className="text-ink-900">
                 {skuName(gap.skuId)}
-                {gap.persistent && (
-                  <span
-                    className="ml-1.5 text-[11px] font-semibold"
-                    style={{ color: "var(--color-critical)" }}
-                  >
-                    still empty since {scope.previousVisit}
-                  </span>
-                )}
               </span>
               <span className="mono shrink-0 text-[11.5px] text-ink-500">
-                {gap.daysOut}d out · normally {gap.normalFacings} facing
+                normally {gap.normalFacings} facing
                 {gap.normalFacings === 1 ? "" : "s"}
               </span>
             </li>
@@ -610,11 +551,3 @@ function tradeOff(current: number, other: number) {
     : `${formatImpact(Math.abs(delta))} more recoverable.`;
 }
 
-function historySoWhat(improved: number, worsened: number, total: number) {
-  if (!total) return "No comparable reading at the previous visit for these stops.";
-  if (worsened === 0)
-    return `All ${total} stops on this route held or improved since the last visit — the previous run stuck.`;
-  if (improved === 0)
-    return `Every one of these ${total} stops is worse than at the last visit. That is a route problem, not ${total === 1 ? "an" : ""} isolated ${total === 1 ? "store" : "stores"} — check whether the last run actually happened.`;
-  return `${worsened} of ${total} stops went backwards since the last visit while ${improved} improved. Work the ones that slipped first: they were visited and did not hold.`;
-}
