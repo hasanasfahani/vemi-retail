@@ -12,6 +12,7 @@
    invent one. */
 
 import { clientBrand } from "./portalData";
+import { METRIC_META, type MonitorMetric } from "./monitorsShared";
 import type { WatchTarget } from "@/components/portal/WatchButton";
 
 export function districtWatchTarget(args: {
@@ -111,5 +112,57 @@ export function outletComplianceWatchTarget(args: {
     currentValue: args.value,
     visit: args.visit,
     suggestedTarget: { value: 100, why: "Every line within RRP ±5%." },
+  };
+}
+
+/* A headline tile, watched under whatever filters are applied.
+
+   The slice matters as much as the metric: "availability" watched from
+   an unfiltered page and from a page narrowed to Mini-markets are two
+   different monitors, and the label has to say which so the Watchlist
+   never shows two cards a reader cannot tell apart. Filters are stored
+   alongside, so computeMetric reproduces the exact slice on every
+   later reading. */
+export function kpiWatchTarget(args: {
+  metric: MonitorMetric;
+  value: number;
+  visit: string;
+  filters?: { areas?: string[]; channels?: string[]; brands?: string[] };
+  suggestedTarget?: { value: number; why: string };
+}): WatchTarget {
+  const areas = args.filters?.areas ?? [];
+  const channels = args.filters?.channels ?? [];
+
+  /* A single area or channel is a real segment the engine can narrow
+     to directly. Anything else — several districts, a mix, or nothing
+     — is the panel with filters attached. */
+  const segmentType: WatchTarget["segmentType"] =
+    areas.length === 1 && !channels.length
+      ? "area"
+      : channels.length === 1 && !areas.length
+        ? "channel"
+        : "panel";
+  const segment =
+    segmentType === "area" ? areas[0] : segmentType === "channel" ? channels[0] : "";
+
+  const where =
+    [...areas, ...channels].length === 0
+      ? "citywide"
+      : [...areas, ...channels].join(", ");
+
+  const stored: Record<string, string[]> = {};
+  if (areas.length) stored.areas = areas;
+  if (channels.length) stored.channels = channels;
+  if (args.filters?.brands?.length) stored.brands = args.filters.brands;
+
+  return {
+    metric: args.metric,
+    segmentType,
+    segment,
+    label: `${clientBrand.name} ${METRIC_META[args.metric].label.toLowerCase()} · ${where}`,
+    currentValue: args.value,
+    visit: args.visit,
+    filters: stored,
+    suggestedTarget: args.suggestedTarget,
   };
 }

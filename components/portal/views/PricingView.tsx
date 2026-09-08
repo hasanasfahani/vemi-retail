@@ -10,7 +10,7 @@ import StatTile from "@/components/portal/charts/StatTile";
 import PriceBand from "@/components/portal/charts/PriceBand";
 import RankedBar from "@/components/portal/charts/RankedBar";
 import ChartStory from "@/components/portal/ChartStory";
-import { outletComplianceWatchTarget } from "@/lib/watchTargets";
+import { outletComplianceWatchTarget, kpiWatchTarget } from "@/lib/watchTargets";
 import { useViewInsights } from "@/components/portal/useViewInsights";
 import { OutletButton } from "@/components/portal/OutletDrawer";
 import { scope } from "@/lib/portal";
@@ -205,6 +205,13 @@ export default function PricingView() {
           label={`${clientBrand.name} compliance`}
           value={`${clientCompliance}%`}
           footnote="Within RRP ±5%"
+          watch={kpiWatchTarget({
+            metric: "compliance",
+            value: clientCompliance,
+            visit: view.visit,
+            filters,
+            suggestedTarget: { value: 100, why: "Every line within RRP ±5%." },
+          })}
         />
         <StatTile
           label="Category compliance"
