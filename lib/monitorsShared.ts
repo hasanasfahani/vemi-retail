@@ -30,7 +30,13 @@ export type MonitorMetric =
   | "compliance"
   | "gaps";
 
-export type SegmentType = "area" | "channel" | "sku" | "outlet" | "panel";
+export type SegmentType =
+  | "area"
+  | "channel"
+  | "sku"
+  | "outlet"
+  | "brand"
+  | "panel";
 export type MonitorStatus = "Watching" | "Closed";
 
 /* Which way is better is a property of the metric, stored rather than

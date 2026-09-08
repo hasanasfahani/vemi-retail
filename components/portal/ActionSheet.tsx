@@ -17,6 +17,11 @@ import { nextVisitDate, describeDueDate } from "@/lib/cadence";
 import type { ActionItem } from "@/lib/actionsShared";
 
 export type SheetDraft = {
+  /* When the work has a number worth verifying afterwards, the sheet
+     offers to start watching it in the same gesture. Deciding to fix
+     something and deciding to check whether the fix held are the same
+     moment, and this is where that moment already happens. */
+  watch?: import("@/components/portal/WatchButton").WatchTarget;
   title: string;
   rule: string;
   where: string;
@@ -66,6 +71,7 @@ export default function ActionSheet({
   const [selected, setSelected] = useState<Set<string>>(
     () => new Set(draft.items.map((i) => i.id))
   );
+  const [alsoWatch, setAlsoWatch] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -151,6 +157,39 @@ export default function ActionSheet({
         insightId: draft.insightId,
         items: chosen.map((i) => ({ ...i, done: false })),
       });
+
+      /* The monitor is created after the action, and its failure is
+         reported without unwinding the action — the work item is the
+         thing that matters, and silently discarding a saved action
+         because a follow-on write failed would be worse than a
+         partial success the reader is told about. */
+      if (alsoWatch && draft.watch) {
+        try {
+          const res = await fetch("/api/monitors", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              label: draft.watch.label,
+              metric: draft.watch.metric,
+              segmentType: draft.watch.segmentType,
+              segment: draft.watch.segment,
+              filters: draft.watch.filters ?? {},
+              baseline: draft.watch.currentValue,
+              visit: draft.watch.visit,
+              owner: owner.trim(),
+              target: draft.watch.suggestedTarget?.value ?? null,
+            }),
+          });
+          const data = await res.json().catch(() => null);
+          if (!res.ok || !data?.ok) throw new Error("monitor failed");
+        } catch {
+          setSaving(false);
+          setError(
+            "The action saved, but the watch didn't. Add it from the chart when you get a moment."
+          );
+          return;
+        }
+      }
     } catch {
       /* The sheet stays open with everything the reader typed still in
          it — losing a filled form to a network blip is the fastest way
@@ -277,6 +316,30 @@ export default function ActionSheet({
                 </p>
               </Field>
             </div>
+
+            {draft.watch && (
+              <label className="flex cursor-pointer items-start gap-2 rounded-[10px] border border-line p-3">
+                <input
+                  type="checkbox"
+                  checked={alsoWatch}
+                  onChange={(e) => setAlsoWatch(e.target.checked)}
+                  className="mt-0.5 h-[14px] w-[14px] accent-[var(--color-violet)]"
+                />
+                <span className="text-[13px] leading-snug">
+                  <span className="font-semibold text-ink-900">
+                    Also watch this after the work is done
+                  </span>
+                  <span className="block text-[11.5px] text-ink-400">
+                    Tracks {draft.watch.label} from{" "}
+                    {draft.watch.currentValue}
+                    {draft.watch.suggestedTarget
+                      ? ` toward ${draft.watch.suggestedTarget.value}`
+                      : ""}{" "}
+                    on the Watchlist.
+                  </span>
+                </span>
+              </label>
+            )}
 
             <Field label="Notes">
               <textarea

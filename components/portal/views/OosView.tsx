@@ -17,6 +17,7 @@ import FilterBar, {
 import StatTile from "@/components/portal/charts/StatTile";
 import RankedBar from "@/components/portal/charts/RankedBar";
 import ChartStory from "@/components/portal/ChartStory";
+import { brandShareWatchTarget } from "@/lib/watchTargets";
 import { useViewInsights } from "@/components/portal/useViewInsights";
 import DistrictMap, {
   type DistrictDatum,
@@ -46,6 +47,7 @@ export default function OosView() {
     [filters, visitData]
   );
   const insights = useViewInsights(view);
+
 
   /* One derivation, so the compiler can see the whole chain and the
      three views can never describe different slices. */
@@ -159,6 +161,22 @@ export default function OosView() {
           .sort((a, b) => b.lostFacingDays - a.lostFacingDays),
       };
     }, [view, urgency]);
+
+  const takerWatchTargets = useMemo(
+    () =>
+      Object.fromEntries(
+        takers.map((r) => [
+          r.id,
+          brandShareWatchTarget({
+            brandId: r.id,
+            brandLabel: r.label,
+            value: r.value,
+            visit: view.visit,
+          }),
+        ])
+      ),
+    [takers, view.visit]
+  );
 
   return (
     <div
@@ -296,7 +314,12 @@ export default function OosView() {
               allClear="No dominant substitute here"
               actionLabel="Create defence action"
             >
-              <RankedBar rows={takers} unit="" labelWidth={104} />
+              <RankedBar
+                rows={takers}
+                unit=""
+                labelWidth={104}
+                watchTargets={takerWatchTargets}
+              />
             </ChartStory>
           ) : (
             <section className="rounded-[18px] border border-line bg-white p-5 sm:p-6">

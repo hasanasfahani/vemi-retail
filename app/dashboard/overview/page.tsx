@@ -8,6 +8,7 @@ import DecisionBlock from "@/components/portal/DecisionBlock";
 import ChartFrame from "@/components/portal/ChartFrame";
 import DecisionAction from "@/components/portal/DecisionAction";
 import DivergingBar from "@/components/portal/charts/DivergingBar";
+import { districtWatchTarget } from "@/lib/watchTargets";
 import { scope } from "@/lib/portal";
 import { EMPTY_FILTERS, applyFilters } from "@/lib/portalFilters";
 import { generateInsights } from "@/lib/insights";
@@ -83,6 +84,20 @@ export default function CommandCenterPage() {
       ? `${d.outlets} outlets · in the cluster`
       : `${d.outlets} outlets`,
   }));
+
+  /* Watch pins as plain data, keyed by row id — this page is a Server
+     Component, so a render callback could not cross to the chart. */
+  const districtWatchTargets = Object.fromEntries(
+    districtRows.map((d) => [
+      d.id,
+      districtWatchTarget({
+        area: d.label,
+        value: Math.round((headline.shelfShare + d.delta) * 10) / 10,
+        cityAverage: headline.shelfShare,
+        visit: view.visit,
+      }),
+    ])
+  );
 
   return (
     <>
@@ -203,7 +218,7 @@ export default function CommandCenterPage() {
             }}
             action={
               <DecisionAction
-                draft={routeDraft(concentration)}
+                draft={routeDraft(concentration, view.visit)}
                 label="Plan the route"
               />
             }
@@ -212,6 +227,7 @@ export default function CommandCenterPage() {
               rows={districtRows}
               baselineLabel={`your citywide ${clientBrand.name} share`}
               unit="pt"
+              watchTargets={districtWatchTargets}
             />
           </ChartFrame>
         </section>
@@ -226,6 +242,7 @@ export default function CommandCenterPage() {
               key={decision.id + i}
               decision={decision}
               rank={i + 1}
+              visit={view.visit}
               {...spec}
             />
           );

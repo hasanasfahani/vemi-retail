@@ -9,6 +9,7 @@ import FilterBar, {
 import StatTile from "@/components/portal/charts/StatTile";
 import RankedBar from "@/components/portal/charts/RankedBar";
 import ChartStory from "@/components/portal/ChartStory";
+import { brandShareWatchTarget } from "@/lib/watchTargets";
 import { useViewInsights } from "@/components/portal/useViewInsights";
 import Delta from "@/components/portal/charts/Delta";
 import { scope } from "@/lib/portal";
@@ -23,6 +24,8 @@ export default function CompetitorsView() {
     [filters, visitData]
   );
   const insights = useViewInsights(view);
+
+
   const comparable =
     view.isLatestVisit &&
     filters.areas.length + filters.channels.length + filters.brands.length === 0;
@@ -61,6 +64,39 @@ export default function CompetitorsView() {
     emphasis: c.isClient,
     meta: `${c.skuCount} SKUs tracked`,
   }));
+
+  const shareWatchTargets = useMemo(
+    () =>
+      Object.fromEntries(
+        shareRows.map((r) => [
+          r.id,
+          brandShareWatchTarget({
+            brandId: r.id,
+            brandLabel: r.label,
+            value: r.value,
+            visit: view.visit,
+          }),
+        ])
+      ),
+    [shareRows, view.visit]
+  );
+  const availWatchTargets = useMemo(
+    () =>
+      Object.fromEntries(
+        availRows.map((r) => [
+          r.id,
+          {
+            metric: "availability" as const,
+            segmentType: "brand" as const,
+            segment: r.id,
+            label: `${r.label} availability · citywide`,
+            currentValue: r.value,
+            visit: view.visit,
+          },
+        ])
+      ),
+    [availRows, view.visit]
+  );
 
   return (
     <div
@@ -125,6 +161,7 @@ export default function CompetitorsView() {
             <RankedBar
               rows={shareRows}
               max={Math.max(...view.byBrand.map((c) => c.share), 1)}
+              watchTargets={shareWatchTargets}
             />
           </ChartStory>
         ) : (
@@ -144,7 +181,11 @@ export default function CompetitorsView() {
             allClear="No channel below threshold here"
             actionLabel="Create coverage action"
           >
-            <RankedBar rows={availRows} max={100} />
+            <RankedBar
+              rows={availRows}
+              max={100}
+              watchTargets={availWatchTargets}
+            />
           </ChartStory>
         ) : (
           <section className="rounded-[18px] border border-line bg-white p-5 sm:p-6">

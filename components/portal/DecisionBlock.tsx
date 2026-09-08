@@ -21,6 +21,9 @@ import type { DecisionChart, ChartSpec } from "@/lib/decisionCharts";
 type Props = ChartSpec & {
   decision: Decision;
   rank: number;
+  /* The visit these figures describe — stamped onto any monitor the
+     sheet creates, so its first reading is keyed to the right cycle. */
+  visit: string;
 };
 
 /* One element, not three conditionals — a bare `cond && <X/>` trio
@@ -60,6 +63,7 @@ function renderChart(chart: DecisionChart) {
 export default function DecisionBlock({
   decision,
   rank,
+  visit,
   chart,
   chartTitle,
   chartSubtitle,
@@ -104,7 +108,7 @@ export default function DecisionBlock({
           soWhat={soWhat}
           table={table}
           action={
-            <DecisionAction draft={draftFromDecision(decision)} />
+            <DecisionAction draft={draftFromDecision(decision, visit)} />
           }
         >
           {renderChart(chart)}

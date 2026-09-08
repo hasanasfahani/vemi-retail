@@ -12,6 +12,7 @@
    borrowed to mean "above average". */
 
 import { useState } from "react";
+import WatchButton, { type WatchTarget } from "@/components/portal/WatchButton";
 
 export type DivergingRow = {
   id: string;
@@ -30,6 +31,10 @@ type Props = {
      warning and critical thresholds. */
   thresholds?: { value: number; label: string }[];
   labelWidth?: number;
+  /* Per-row Watch pins, keyed by row id — data rather than a render
+     function, so a Server Component page can pass them. See the note
+     in RankedBar. */
+  watchTargets?: Record<string, WatchTarget>;
 };
 
 export default function DivergingBar({
@@ -38,6 +43,7 @@ export default function DivergingBar({
   unit = "pt",
   thresholds = [],
   labelWidth = 132,
+  watchTargets,
 }: Props) {
   const [hover, setHover] = useState<string | null>(null);
 
@@ -76,7 +82,7 @@ export default function DivergingBar({
           return (
             <div
               key={row.id}
-              className="flex flex-col gap-0.5 py-[5px] sm:flex-row sm:items-center sm:gap-3"
+              className="group flex flex-col gap-0.5 py-[5px] sm:flex-row sm:items-center sm:gap-3"
               style={{ "--label-w": `${labelWidth}px` } as React.CSSProperties}
               onMouseEnter={() => setHover(row.id)}
               onMouseLeave={() => setHover(null)}
@@ -129,6 +135,12 @@ export default function DivergingBar({
                   {row.delta}
                 </span>
               </div>
+
+              {watchTargets?.[row.id] && (
+                <div className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+                  <WatchButton target={watchTargets[row.id]} />
+                </div>
+              )}
             </div>
           );
         })}

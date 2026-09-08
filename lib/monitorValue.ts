@@ -57,19 +57,27 @@ export function computeMetric(
 
   if (!cells.length) return null;
 
+  /* Which brand the monitor is about. Every metric defaults to the
+     client, but a brand-scoped monitor watches a rival — and getting
+     this wrong would be the worst kind of bug on this page: a card
+     labelled "Coca-Cola shelf share" quietly recording Pepsi's. */
+  const subjectBrand =
+    scope.segmentType === "brand" ? scope.segment : clientBrand.id;
+  const isSubject = (skuId: string) => skuOf(skuId)?.brandId === subjectBrand;
+
   switch (scope.metric) {
     case "shelf-share": {
       const stocked = cells.filter((c) => c.state === "in-stock");
       const total = stocked.reduce((s, c) => s + c.facings, 0);
       if (!total) return null;
       const mine = stocked
-        .filter((c) => skuOf(c.skuId)?.brandId === clientBrand.id)
+        .filter((c) => isSubject(c.skuId))
         .reduce((s, c) => s + c.facings, 0);
       return round1((mine / total) * 100);
     }
     case "availability": {
       const listed = cells.filter(
-        (c) => c.state !== "not-listed" && isClient(c.skuId)
+        (c) => c.state !== "not-listed" && isSubject(c.skuId)
       );
       if (!listed.length) return null;
       const onShelf = listed.filter((c) => c.state === "in-stock").length;
@@ -79,10 +87,10 @@ export function computeMetric(
       const outlets = new Set(cells.map((c) => c.posId)).size;
       if (!outlets) return null;
       const listedPairs = cells.filter(
-        (c) => c.state !== "not-listed" && isClient(c.skuId)
+        (c) => c.state !== "not-listed" && isSubject(c.skuId)
       );
       const clientSkus = new Set(
-        cells.filter((c) => isClient(c.skuId)).map((c) => c.skuId)
+        cells.filter((c) => isSubject(c.skuId)).map((c) => c.skuId)
       ).size;
       if (!clientSkus) return null;
       return round1((listedPairs.length / (outlets * clientSkus)) * 100);
@@ -90,7 +98,7 @@ export function computeMetric(
     case "compliance": {
       const rows = view.priceRows.filter(
         (o) =>
-          isClient(o.skuId) &&
+          isSubject(o.skuId) &&
           (scope.segmentType !== "sku" || o.skuId === scope.segment) &&
           (scope.segmentType !== "outlet" || o.posId === scope.segment)
       );
@@ -102,13 +110,12 @@ export function computeMetric(
     }
     case "gaps": {
       return cells.filter(
-        (c) => c.state === "out-of-stock" && isClient(c.skuId)
+        (c) => c.state === "out-of-stock" && isSubject(c.skuId)
       ).length;
     }
   }
 }
 
-const isClient = (skuId: string) => skuOf(skuId)?.brandId === clientBrand.id;
 const round1 = (n: number) => Math.round(n * 10) / 10;
 
 /* A human label for the thing being watched, built once at pin time so

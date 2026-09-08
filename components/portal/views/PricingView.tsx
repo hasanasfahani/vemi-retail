@@ -10,6 +10,7 @@ import StatTile from "@/components/portal/charts/StatTile";
 import PriceBand from "@/components/portal/charts/PriceBand";
 import RankedBar from "@/components/portal/charts/RankedBar";
 import ChartStory from "@/components/portal/ChartStory";
+import { outletComplianceWatchTarget } from "@/lib/watchTargets";
 import { useViewInsights } from "@/components/portal/useViewInsights";
 import { OutletButton } from "@/components/portal/OutletDrawer";
 import { scope } from "@/lib/portal";
@@ -17,6 +18,18 @@ import { applyFilters } from "@/lib/portalFilters";
 import { clientBrand, brandName, skuName, skuOf, posOf } from "@/lib/portalData";
 
 const iqd = (n: number) => `${n.toLocaleString()} IQD`;
+
+/* The compliance figure for one outlet, computed the same way the
+   monitor will recompute it later — within RRP ±5%. */
+function complianceAtOutlet(
+  rows: { posId: string; variance: number }[],
+  posId: string
+) {
+  const mine = rows.filter((r) => r.posId === posId);
+  if (!mine.length) return 0;
+  const within = mine.filter((r) => Math.abs(r.variance) <= 5).length;
+  return Math.round((within / mine.length) * 1000) / 10;
+}
 const round1 = (n: number) => Math.round(n * 10) / 10;
 
 export default function PricingView() {
@@ -28,6 +41,7 @@ export default function PricingView() {
   );
 
   const insights = useViewInsights(view);
+
 
   /* Concentration: which SKUs actually drive the compliance figure.
      Deliberately NOT a Pareto with a cumulative line — that needs a
@@ -152,6 +166,22 @@ export default function PricingView() {
 
   const outletsFlagged = new Set(outliers.map((o) => o.posId));
 
+  const outletWatchTargets = useMemo(
+    () =>
+      Object.fromEntries(
+        concentration.rows.map((r) => [
+          r.id,
+          outletComplianceWatchTarget({
+            posId: r.id,
+            code: r.label,
+            value: complianceAtOutlet(view.priceRows, r.id),
+            visit: view.visit,
+          }),
+        ])
+      ),
+    [concentration.rows, view.priceRows, view.visit]
+  );
+
   return (
     <div
       className="transition-opacity duration-200"
@@ -219,6 +249,7 @@ export default function PricingView() {
               unit=""
               labelWidth={168}
               topN={6}
+              watchTargets={outletWatchTargets}
             />
           </ChartStory>
         ) : (

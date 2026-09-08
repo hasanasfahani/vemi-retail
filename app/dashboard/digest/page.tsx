@@ -4,6 +4,7 @@ import PrintButton from "@/components/portal/PrintButton";
 import StatTile from "@/components/portal/charts/StatTile";
 import ChartFrame from "@/components/portal/ChartFrame";
 import DivergingBar from "@/components/portal/charts/DivergingBar";
+import { districtWatchTarget } from "@/lib/watchTargets";
 import DecisionBlock from "@/components/portal/DecisionBlock";
 import { scope } from "@/lib/portal";
 import { EMPTY_FILTERS, applyFilters } from "@/lib/portalFilters";
@@ -67,6 +68,20 @@ export default async function DigestPage() {
       ? `${d.outlets} outlets · in the cluster`
       : `${d.outlets} outlets`,
   }));
+
+  /* Watch pins as plain data, keyed by row id — this page is a Server
+     Component, so a render callback could not cross to the chart. */
+  const districtWatchTargets = Object.fromEntries(
+    districtRows.map((d) => [
+      d.id,
+      districtWatchTarget({
+        area: d.label,
+        value: Math.round((headline.shelfShare + d.delta) * 10) / 10,
+        cityAverage: headline.shelfShare,
+        visit: view.visit,
+      }),
+    ])
+  );
 
   const actionsResult = await listActions();
   const actions = actionsResult.ok ? actionsResult.actions : [];
@@ -187,6 +202,7 @@ export default async function DigestPage() {
               rows={districtRows}
               baselineLabel={`your citywide ${clientBrand.name} share`}
               unit="pt"
+              watchTargets={districtWatchTargets}
             />
           </ChartFrame>
         </section>
@@ -199,6 +215,7 @@ export default async function DigestPage() {
             key={decision.id + i}
             decision={decision}
             rank={i + 1}
+            visit={view.visit}
             {...chartFor(decision, view.posCount)}
           />
         ))}
