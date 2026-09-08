@@ -115,10 +115,11 @@ function buildHeadline(
       );
       if (concentration) {
         return {
-          headline: `Route a rep through ${concentration.scope.label.replace(
-            "districts",
-            "adjacent districts"
-          )}`,
+          /* R12's scope label already reads "N adjacent districts", so
+             use it as-is. Substituting "adjacent" into it produced
+             "4 adjacent adjacent districts" on every surface that
+             renders this decision. */
+          headline: `Route a rep through ${concentration.scope.label}`,
           detail:
             "These districts are behind and next to each other, so one planned run covers all of them rather than several separate visits.",
         };

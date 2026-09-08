@@ -11,7 +11,7 @@
    here; violet means "you" everywhere else in the product and is not
    borrowed to mean "above average". */
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import WatchButton, { type WatchTarget } from "@/components/portal/WatchButton";
 
 export type DivergingRow = {
@@ -31,6 +31,14 @@ type Props = {
      warning and critical thresholds. */
   thresholds?: { value: number; label: string }[];
   labelWidth?: number;
+  /* Show both tails and fold the unremarkable middle into one
+     expandable band.
+
+     Top-N alone is the wrong tool here: it hides the BEST performers,
+     and in an audit "who is doing well" is how you find what to copy.
+     The rows worth reading are at the two ends; the ones sitting near
+     the baseline are, by definition, the ones with nothing to say. */
+  collapseMiddle?: { keepWorst: number; keepBest: number };
   /* Per-row Watch pins, keyed by row id — data rather than a render
      function, so a Server Component page can pass them. See the note
      in RankedBar. */
@@ -43,14 +51,32 @@ export default function DivergingBar({
   unit = "pt",
   thresholds = [],
   labelWidth = 132,
+  collapseMiddle,
   watchTargets,
 }: Props) {
   const [hover, setHover] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState(false);
 
   const span = Math.max(...rows.map((r) => Math.abs(r.delta)), 1) * 1.1;
   /* Zero sits proportionally, so the two sides stay on one scale. */
   const zeroPct = 50;
   const toPct = (v: number) => (v / span) * 50;
+
+  /* Rows arrive sorted worst-first, so the tails are the two ends. */
+  const folded =
+    collapseMiddle && !expanded &&
+    rows.length > collapseMiddle.keepWorst + collapseMiddle.keepBest + 2;
+  const shown = folded
+    ? [
+        ...rows.slice(0, collapseMiddle!.keepWorst),
+        ...rows.slice(rows.length - collapseMiddle!.keepBest),
+      ]
+    : rows;
+  const hiddenCount = rows.length - shown.length;
+  const hiddenSpread = folded
+    ? rows.slice(collapseMiddle!.keepWorst, rows.length - collapseMiddle!.keepBest)
+    : [];
+  const foldAfter = folded ? collapseMiddle!.keepWorst : -1;
 
   const colorFor = (row: DivergingRow) =>
     row.severity === "critical"
@@ -75,13 +101,16 @@ export default function DivergingBar({
           />
         ))}
 
-        {rows.map((row) => {
+        {shown.map((row, index) => {
           const active = hover === row.id;
           const w = Math.abs(toPct(row.delta));
           const behind = row.delta < 0;
+          /* 44 of a 50-point half leaves roughly six points of plot for
+             a three-character number — below that it clips. */
+          const labelInside = w > 44;
           return (
+            <Fragment key={row.id}>
             <div
-              key={row.id}
               className="group flex flex-col gap-0.5 py-[5px] sm:flex-row sm:items-center sm:gap-3"
               style={{ "--label-w": `${labelWidth}px` } as React.CSSProperties}
               onMouseEnter={() => setHover(row.id)}
@@ -123,12 +152,33 @@ export default function DivergingBar({
                     background: colorFor(row),
                   }}
                 />
+                {/* A bar that reaches the end of its half leaves no room
+                    outside for its own number — the label lands off the
+                    plot and gets clipped. Past that point the value goes
+                    INSIDE the bar, where there is always room, rather
+                    than half-disappearing. */}
                 <span
                   className="mono absolute top-[-1px] text-[11.5px] font-semibold"
                   style={{
-                    left: behind ? undefined : `calc(${zeroPct + w}% + 6px)`,
-                    right: behind ? `calc(${100 - zeroPct + w}% + 6px)` : undefined,
-                    color: row.severity ? "var(--color-ink-900)" : "var(--color-ink-400)",
+                    left: labelInside
+                      ? behind
+                        ? `calc(${zeroPct - w}% + 6px)`
+                        : undefined
+                      : behind
+                        ? undefined
+                        : `calc(${zeroPct + w}% + 6px)`,
+                    right: labelInside
+                      ? behind
+                        ? undefined
+                        : `calc(${100 - zeroPct - w}% + 6px)`
+                      : behind
+                        ? `calc(${100 - zeroPct + w}% + 6px)`
+                        : undefined,
+                    color: labelInside
+                      ? "#fff"
+                      : row.severity
+                        ? "var(--color-ink-900)"
+                        : "var(--color-ink-400)",
                   }}
                 >
                   {row.delta >= 0 ? "+" : ""}
@@ -142,8 +192,44 @@ export default function DivergingBar({
                 </div>
               )}
             </div>
+
+            {folded && index === foldAfter - 1 && (
+              <button
+                type="button"
+                onClick={() => setExpanded(true)}
+                className="my-1 flex w-full items-center gap-3 text-left"
+              >
+                <span
+                  className="shrink-0 text-right text-[12px] text-ink-400"
+                  style={{ width: labelWidth }}
+                >
+                  {hiddenCount} more
+                </span>
+                <span className="flex min-w-0 flex-1 items-center gap-2">
+                  <span
+                    className="h-px flex-1"
+                    style={{
+                      background:
+                        "repeating-linear-gradient(90deg, var(--color-line-strong) 0 3px, transparent 3px 7px)",
+                    }}
+                  />
+                  <span className="shrink-0 text-[11.5px] font-medium text-violet-ink">
+                    within {formatSpread(hiddenSpread)} — show all
+                  </span>
+                  <span
+                    className="h-px flex-1"
+                    style={{
+                      background:
+                        "repeating-linear-gradient(90deg, var(--color-line-strong) 0 3px, transparent 3px 7px)",
+                    }}
+                  />
+                </span>
+              </button>
+            )}
+            </Fragment>
           );
         })}
+
       </div>
 
       <div
@@ -156,4 +242,15 @@ export default function DivergingBar({
       </div>
     </div>
   );
+}
+
+/* The band's caption states the range it hides, so folding never
+   conceals how big the hidden values are. */
+function formatSpread(rows: DivergingRow[]) {
+  if (!rows.length) return "range";
+  const deltas = rows.map((r) => r.delta);
+  const lo = Math.min(...deltas);
+  const hi = Math.max(...deltas);
+  const fmt = (n: number) => `${n >= 0 ? "+" : ""}${Math.round(n * 10) / 10}`;
+  return `${fmt(lo)} to ${fmt(hi)}pt`;
 }

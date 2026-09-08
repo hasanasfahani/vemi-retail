@@ -50,6 +50,13 @@ type Props = {
   /* Names the ghost series in the legend — only rendered when at least
      one row carries a `previous`. */
   previousLabel?: string;
+  /* Mark style. A filled bar is a lot of ink; past roughly fifteen
+     rows a list of them becomes a wall. A 2px rule ending in a dot
+     carries the same length at a quarter of the visual weight, so
+     forty rows stay legible where forty bars do not. Defaults by row
+     count rather than by taste; override when a short list needs to
+     match a long one beside it. */
+  mark?: "bar" | "lollipop";
   /* Per-row Watch pins, keyed by row id. Deliberately DATA, not a
      render function: Command Center and Digest are Server Components,
      and a function prop cannot cross that boundary — the same
@@ -67,6 +74,7 @@ export default function RankedBar({
   topN,
   reference,
   previousLabel = "previous visit",
+  mark,
   watchTargets,
 }: Props) {
   const [hover, setHover] = useState<string | null>(null);
@@ -77,6 +85,7 @@ export default function RankedBar({
     reference?.value ?? 0
   );
   const hasGhost = rows.some((r) => r.previous !== undefined);
+  const style = mark ?? (rows.length > 15 ? "lollipop" : "bar");
   const collapsed = topN !== undefined && !expanded && rows.length > topN;
   const shown = collapsed ? rows.slice(0, topN) : rows;
   const hidden = rows.length - shown.length;
@@ -168,16 +177,46 @@ export default function RankedBar({
                     aria-hidden
                   />
                 )}
-                <div
-                  className="relative h-[14px] rounded-r-[4px] transition-opacity"
-                  style={{
-                    width: `${width}%`,
-                    background: row.emphasis
-                      ? "var(--color-violet)"
-                      : "var(--color-chart-context)",
-                    opacity: hover && !active ? 0.55 : 1,
-                  }}
-                />
+                {style === "bar" ? (
+                  <div
+                    className="relative h-[14px] rounded-r-[4px] transition-opacity"
+                    style={{
+                      width: `${width}%`,
+                      background: row.emphasis
+                        ? "var(--color-violet)"
+                        : "var(--color-chart-context)",
+                      opacity: hover && !active ? 0.55 : 1,
+                    }}
+                  />
+                ) : (
+                  <div
+                    className="relative h-[14px]"
+                    style={{ opacity: hover && !active ? 0.55 : 1 }}
+                  >
+                    <span
+                      className="absolute top-1/2 left-0 block h-[2px] -translate-y-1/2"
+                      style={{
+                        width: `${width}%`,
+                        background: row.emphasis
+                          ? "var(--color-violet)"
+                          : "var(--color-context-prior)",
+                      }}
+                    />
+                    <span
+                      className="absolute top-1/2 block rounded-full"
+                      style={{
+                        left: `${width}%`,
+                        width: 9,
+                        height: 9,
+                        marginLeft: -9,
+                        marginTop: -4.5,
+                        background: row.emphasis
+                          ? "var(--color-violet)"
+                          : "var(--color-chart-context)",
+                      }}
+                    />
+                  </div>
+                )}
                 {reference && (
                   <span
                     className="pointer-events-none absolute top-[-3px] h-[20px] w-[2px]"

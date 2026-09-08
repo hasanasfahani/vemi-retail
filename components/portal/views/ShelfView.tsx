@@ -22,6 +22,8 @@ import StoreTable from "@/components/portal/charts/StoreTable";
 import ChartStory from "@/components/portal/ChartStory";
 import { useViewInsights } from "@/components/portal/useViewInsights";
 import { brandShareWatchTarget, kpiWatchTarget } from "@/lib/watchTargets";
+import QuadrantScatter from "@/components/portal/charts/QuadrantScatter";
+import DivergingBar from "@/components/portal/charts/DivergingBar";
 import DistrictMap, {
   type DistrictDatum,
 } from "@/components/portal/charts/DistrictMap";
@@ -41,6 +43,17 @@ import {
 
 type Mode = "availability" | "share";
 const COOLER_PACKS = new Set(["can-330", "pet-500", "glass-300"]);
+
+/* Pack codes are how the audit records a format; these are how a
+   person says them. */
+const PACK_LABEL: Record<string, string> = {
+  "can-330": "330ml can",
+  "pet-500": "500ml PET",
+  "pet-1000": "1L PET",
+  "pet-1500": "1.5L PET",
+  "pet-2250": "2.25L PET",
+  "glass-300": "300ml glass",
+};
 
 export default function ShelfView() {
   const searchParams = useSearchParams();
@@ -146,6 +159,60 @@ export default function ShelfView() {
       emphasis: row.isClient,
     };
   });
+
+  /* Pack mix — your share of each pack format against your citywide
+     share. The portal could say "you hold 27.3%" but never which
+     formats that average is made of, and the answer turns out to be
+     the sharpest range finding in the panel: dominant in one pack,
+     absent from others entirely. */
+  const packMix = useMemo(() => {
+    const acc = new Map<string, { mine: number; total: number }>();
+    for (const cell of view.cells) {
+      if (cell.state !== "in-stock") continue;
+      const sku = skuOf(cell.skuId)!;
+      const e = acc.get(sku.pack) ?? { mine: 0, total: 0 };
+      e.total += cell.facings;
+      if (sku.brandId === clientBrand.id) e.mine += cell.facings;
+      acc.set(sku.pack, e);
+    }
+    const overall = view.client?.share ?? 0;
+    return [...acc.entries()]
+      .filter(([, e]) => e.total > 0)
+      .map(([pack, e]) => {
+        const share = Math.round((e.mine / e.total) * 1000) / 10;
+        return {
+          id: pack,
+          label: PACK_LABEL[pack] ?? pack,
+          delta: Math.round((share - overall) * 10) / 10,
+          severity: (share === 0 ? "critical" : null) as "critical" | null,
+          meta: `${share}% of ${Math.round(e.total).toLocaleString()} facings`,
+        };
+      })
+      .sort((a, b) => a.delta - b.delta);
+  }, [view]);
+
+  /* Distribution against availability, every SKU in the category.
+     Two numbers the page already shows as separate bars, plotted
+     together so the DIAGNOSIS is the position: listed everywhere but
+     empty is a replenishment problem; well-stocked but barely listed
+     is a range problem. Opposite fixes, same two figures. */
+  const skuQuadrant = useMemo(() => {
+    const points = view.bySku.map((row) => ({
+      id: row.skuId,
+      label: skuName(row.skuId),
+      x: row.distribution,
+      y: row.onShelfAvailability,
+      emphasis: row.brandId === clientBrand.id,
+      meta: brandName(row.brandId),
+    }));
+    const avg = (ns: number[]) =>
+      ns.length ? Math.round((ns.reduce((s, n) => s + n, 0) / ns.length) * 10) / 10 : 0;
+    return {
+      points,
+      xDivider: avg(points.map((p) => p.x)),
+      yDivider: avg(points.map((p) => p.y)),
+    };
+  }, [view]);
 
   /* ---------------- one district map, metric follows the tab ---------------- */
 
@@ -424,7 +491,7 @@ export default function ShelfView() {
             />
           </div>
 
-          <div className="mt-4 grid gap-4 xl:grid-cols-2">
+          <div className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-4 xl:grid-cols-2">
             {shareRows.length ? (
               <ChartStory
                 title="Category shelf share"
@@ -450,6 +517,35 @@ export default function ShelfView() {
                 <Empty />
               </section>
             )}
+
+            {packMix.length ? (
+              <ChartStory
+                title="Where your share actually comes from"
+                subtitle={`Your share of each pack format against your ${view.client?.share ?? 0}% overall`}
+                howToRead={`Each row is a pack format. The centre line is your overall shelf share; bars to the right mean you over-index in that format, to the left you under-index. Red marks a format you hold none of.`}
+                findings={insights.forRules("r7-fixture-imbalance")}
+                clean="Your share is evenly spread across the formats you compete in."
+                allClear="Format mix in balance"
+                soWhat={packMixSoWhat(packMix)}
+                actionLabel="Create range action"
+                visit={view.visit}
+                table={{
+                  columns: ["Pack", "Your share", "vs overall"],
+                  rows: packMix.map((p) => [
+                    p.label,
+                    p.meta ?? "—",
+                    `${p.delta >= 0 ? "+" : ""}${p.delta}pt`,
+                  ]),
+                }}
+              >
+                <DivergingBar
+                  rows={packMix}
+                  baselineLabel={`your overall ${view.client?.share ?? 0}% share`}
+                  unit="pt"
+                  labelWidth={118}
+                />
+              </ChartStory>
+            ) : null}
 
             {splitRows.length ? (
               <ChartStory
@@ -501,6 +597,35 @@ export default function ShelfView() {
       {mode === "availability" ? (
         <>
           <div className="mt-4">
+            {skuQuadrant.points.length ? (
+              <ChartStory
+                title="Listed, or on the shelf?"
+                subtitle={`Every SKU in the selection · ${scope.dataAsOf}`}
+                howToRead={`Each dot is a SKU. Across is how many outlets list it; up is how often it is actually on shelf where listed. The lines are the panel averages (${skuQuadrant.xDivider}% and ${skuQuadrant.yDivider}%). Violet is ${clientBrand.name}.`}
+                findings={insights.forRules("r3-distribution-gap")}
+                clean="Your range sits with the category on both measures — no listing push needed."
+                allClear="No SKU behind its peers here"
+                soWhat="Bottom-right is a replenishment problem; top-left is a listing conversation. They look identical on a bar chart and need opposite fixes."
+                visit={view.visit}
+              >
+                <QuadrantScatter
+                  points={skuQuadrant.points}
+                  xLabel="Distribution"
+                  yLabel="On-shelf availability"
+                  xDivider={skuQuadrant.xDivider}
+                  yDivider={skuQuadrant.yDivider}
+                  quadrants={{
+                    topLeft: "Few stores, well stocked — list it wider",
+                    topRight: "Wide and well stocked",
+                    bottomLeft: "Few stores, often empty",
+                    bottomRight: "Everywhere, often empty — replenish",
+                  }}
+                />
+              </ChartStory>
+            ) : null}
+          </div>
+
+          <div className="mt-4">
             {view.posCount && view.skuCount ? (
               <ChartStory
                 title="Outlet × SKU"
@@ -529,7 +654,7 @@ export default function ShelfView() {
             )}
           </div>
 
-          <section className="mt-4 overflow-hidden rounded-[18px] border border-line bg-white">
+          <section className="mt-4 min-w-0 overflow-hidden rounded-[18px] border border-line bg-white">
             <div className="border-b border-line p-5 sm:p-6">
               <h2 className="t-h3">Outlet performance</h2>
               <p className="mt-1 text-sm text-ink-500">
@@ -540,7 +665,7 @@ export default function ShelfView() {
           </section>
         </>
       ) : (
-        <section className="mt-4 overflow-hidden rounded-[18px] border border-line bg-white">
+        <section className="mt-4 min-w-0 overflow-hidden rounded-[18px] border border-line bg-white">
           <div className="border-b border-line p-5 sm:p-6">
             <h2 className="t-h3">Full breakdown</h2>
             <p className="mt-1 text-sm text-ink-500">
@@ -618,4 +743,19 @@ function Empty() {
       Nothing matches the current filters.
     </p>
   );
+}
+
+/* The move a pack-mix chart implies, stated from the data rather than
+   written once and left to go stale. */
+function packMixSoWhat(rows: { label: string; delta: number }[]) {
+  const absent = rows.filter((r) => /0% of/.test(String((r as { meta?: string }).meta ?? "")));
+  const worst = rows[0];
+  if (absent.length) {
+    return `You hold none of ${absent
+      .map((a) => a.label)
+      .join(" or ")} — a listing decision, not a replenishment one.`;
+  }
+  return worst && worst.delta < -5
+    ? `${worst.label} runs ${Math.abs(worst.delta)}pt below your own average — the format worth arguing for.`
+    : "No format is far enough off your average to act on this cycle.";
 }

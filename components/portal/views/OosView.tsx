@@ -17,6 +17,8 @@ import FilterBar, {
 import StatTile from "@/components/portal/charts/StatTile";
 import RankedBar from "@/components/portal/charts/RankedBar";
 import ChartStory from "@/components/portal/ChartStory";
+import Histogram from "@/components/portal/charts/Histogram";
+import MatrixChart from "@/components/portal/charts/MatrixChart";
 import { brandShareWatchTarget, kpiWatchTarget } from "@/lib/watchTargets";
 import { useViewInsights } from "@/components/portal/useViewInsights";
 import DistrictMap, {
@@ -35,6 +37,15 @@ import {
 
 type Grouping = "gap" | "outlet";
 type Urgency = "all" | "mine" | "persistent";
+
+const PACK_LABEL: Record<string, string> = {
+  "can-330": "330ml can",
+  "pet-500": "500ml PET",
+  "pet-1000": "1L PET",
+  "pet-1500": "1.5L PET",
+  "pet-2250": "2.25L PET",
+  "glass-300": "300ml glass",
+};
 
 export default function OosView() {
   const [filters, setFilters] = useFilters();
@@ -162,6 +173,68 @@ export default function OosView() {
       };
     }, [view, urgency]);
 
+  /* How OLD the gaps are. lostFacingDays already multiplies space by
+     time, but the shape of that time has never been shown — and the
+     difference between a shelf that emptied last week and one that
+     has been empty for a month is the difference between a delivery
+     problem and a neglected account. */
+  const ageing = useMemo(() => {
+    const bands = [
+      { id: "1-7", label: "1–7 days", max: 7 },
+      { id: "8-14", label: "8–14", max: 14 },
+      { id: "15-28", label: "15–28", max: 28 },
+      { id: "29+", label: "29+", max: Infinity },
+    ];
+    const counts = new Map(bands.map((b) => [b.id, 0]));
+    for (const row of mine) {
+      const band = bands.find((b) => row.daysOut <= b.max)!;
+      counts.set(band.id, (counts.get(band.id) ?? 0) + 1);
+    }
+    return bands.map((b) => ({
+      id: b.id,
+      label: b.label,
+      count: counts.get(b.id) ?? 0,
+      /* Past a full audit cycle a gap is no longer a stockout — it is
+         a listing nobody is replenishing. */
+      flagged: b.id === "15-28" || b.id === "29+",
+    }));
+  }, [mine]);
+
+  /* Which rival pack stands in which of your gaps. rivalsInStock has
+     always held this; it has only ever been summed to a single winner,
+     which hides that the answer differs by pack. */
+  const substitution = useMemo(() => {
+    const packs = new Map<string, string>();
+    const rivals = new Map<string, string>();
+    const cellMap = new Map<string, number>();
+    for (const row of mine) {
+      const myPack = skuOf(row.skuId)?.pack;
+      if (!myPack) continue;
+      packs.set(myPack, PACK_LABEL[myPack] ?? myPack);
+      for (const r of row.rivalsInStock) {
+        rivals.set(r.brandId, brandName(r.brandId));
+        const key = `${myPack}|${r.brandId}`;
+        cellMap.set(key, (cellMap.get(key) ?? 0) + r.facings);
+      }
+    }
+    const rivalTotals = new Map<string, number>();
+    for (const [key, v] of cellMap) {
+      const brand = key.split("|")[1];
+      rivalTotals.set(brand, (rivalTotals.get(brand) ?? 0) + v);
+    }
+    return {
+      rows: [...packs.entries()].map(([id, label]) => ({ id, label })),
+      cols: [...rivals.entries()]
+        .map(([id, label]) => ({ id, label }))
+        .sort((a, b) => (rivalTotals.get(b.id) ?? 0) - (rivalTotals.get(a.id) ?? 0)),
+      cells: [...cellMap.entries()].map(([key, value]) => {
+        const [row, col] = key.split("|");
+        return { row, col, value };
+      }),
+      top: [...cellMap.entries()].sort((a, b) => b[1] - a[1])[0],
+    };
+  }, [mine]);
+
   const takerWatchTargets = useMemo(
     () =>
       Object.fromEntries(
@@ -282,8 +355,8 @@ export default function OosView() {
         )}
       </section>
 
-      <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
-        <section className="overflow-hidden rounded-[18px] border border-line bg-white">
+      <div className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <section className="min-w-0 overflow-hidden rounded-[18px] border border-line bg-white">
           <div className="flex items-center justify-between gap-3 border-b border-line p-5 sm:p-6">
             <div>
               <h2 className="t-h3">
@@ -301,7 +374,7 @@ export default function OosView() {
             </span>
           </div>
 
-          <div className="max-h-[620px] overflow-y-auto">
+          <div className="max-h-[620px] overflow-auto">
             {grouping === "gap" ? (
               <GapTable rows={rows} />
             ) : (
@@ -311,6 +384,65 @@ export default function OosView() {
         </section>
 
         <div className="flex flex-col gap-4">
+          {mine.length ? (
+            <ChartStory
+              title="How long these have been empty"
+              subtitle={`${mine.length} ${clientBrand.name} gaps by age`}
+              howToRead="Each column is an age band and its height is how many of your gaps fall in it. Red marks gaps older than a fortnight — past that a shelf is not waiting on a delivery."
+              findings={insights.forRules("r1-persistent-gap", "r9-dark-outlet")}
+              clean="Nothing has been empty long enough to escalate."
+              allClear="No gap older than a cycle"
+              soWhat={ageingSoWhat(ageing)}
+              actionLabel="Create replenishment action"
+              visit={view.visit}
+              table={{
+                columns: ["Age", "Gaps"],
+                rows: ageing.map((b) => [b.label, b.count]),
+              }}
+            >
+              <Histogram
+                bins={ageing}
+                unitNoun="gaps"
+                bandLabel="Within one audit cycle"
+                bandIds={["1-7", "8-14"]}
+              />
+            </ChartStory>
+          ) : null}
+
+          {substitution.cells.length ? (
+            <ChartStory
+              title="Which rival takes which pack"
+              subtitle="Rival facings standing in your gaps, by your pack format"
+              howToRead="Rows are your pack formats; columns are the rival brands holding that space when you are empty. Darker means more facings taken. A brand can lead overall and still lose a particular pack."
+              findings={insights.forRules("r4-rival-substitution")}
+              clean="No rival is consistently taking a particular format."
+              allClear="No pattern by pack"
+              soWhat={substitutionSoWhat(substitution)}
+              actionLabel="Create defence action"
+              visit={view.visit}
+              table={{
+                columns: ["Your pack", "Rival", "Facings taken"],
+                rows: substitution.cells
+                  .slice()
+                  .sort((a, b) => b.value - a.value)
+                  .map((c) => [
+                    substitution.rows.find((r) => r.id === c.row)?.label ?? c.row,
+                    substitution.cols.find((x) => x.id === c.col)?.label ?? c.col,
+                    c.value,
+                  ]),
+              }}
+            >
+              <MatrixChart
+                rows={substitution.rows}
+                cols={substitution.cols}
+                cells={substitution.cells}
+                unitNoun="facings"
+                rowNoun="pack formats"
+                colNoun="rival brands"
+              />
+            </ChartStory>
+          ) : null}
+
           {takers.length ? (
             <ChartStory
               title="Who took the space"
@@ -543,4 +675,26 @@ function Toggle({
       </div>
     </div>
   );
+}
+
+function ageingSoWhat(bins: { id: string; count: number }[]) {
+  const old = bins
+    .filter((b) => b.id === "15-28" || b.id === "29+")
+    .reduce((s, b) => s + b.count, 0);
+  const total = bins.reduce((s, b) => s + b.count, 0);
+  if (!old) return "Every gap is inside one audit cycle — this is replenishment, not neglect.";
+  return `${old} of ${total} gaps have been open longer than a fortnight. Those are not waiting on a delivery; they need an account conversation.`;
+}
+
+function substitutionSoWhat(sub: {
+  top?: [string, number];
+  rows: { id: string; label: string }[];
+  cols: { id: string; label: string }[];
+}) {
+  if (!sub.top) return "No rival is taking a meaningful share of your gaps.";
+  const [key, facings] = sub.top;
+  const [pack, brand] = key.split("|");
+  const packLabel = sub.rows.find((r) => r.id === pack)?.label ?? pack;
+  const brandLabel = sub.cols.find((c) => c.id === brand)?.label ?? brand;
+  return `${brandLabel} takes the most space in your ${packLabel} gaps — ${facings} facings. Defend that format first, whoever leads the category overall.`;
 }

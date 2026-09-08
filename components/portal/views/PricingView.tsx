@@ -10,6 +10,7 @@ import StatTile from "@/components/portal/charts/StatTile";
 import PriceBand from "@/components/portal/charts/PriceBand";
 import RankedBar from "@/components/portal/charts/RankedBar";
 import ChartStory from "@/components/portal/ChartStory";
+import Histogram from "@/components/portal/charts/Histogram";
 import { outletComplianceWatchTarget, kpiWatchTarget } from "@/lib/watchTargets";
 import { useViewInsights } from "@/components/portal/useViewInsights";
 import { OutletButton } from "@/components/portal/OutletDrawer";
@@ -166,6 +167,34 @@ export default function PricingView() {
 
   const outletsFlagged = new Set(outliers.map((o) => o.posId));
 
+  /* The SHAPE of the pricing, not per-SKU ranges. The band chart shows
+     each SKU's spread; only a distribution can say which SIDE of RRP
+     the market sits on — and if nothing is ever priced below list,
+     that is a trade-terms conversation rather than eleven separate
+     retailer ones. */
+  const variance = useMemo(() => {
+    const bands = [
+      { id: "under-10", label: "−10% or less", test: (v: number) => v < -10 },
+      { id: "under-5", label: "−10 to −5%", test: (v: number) => v >= -10 && v < -5 },
+      { id: "within", label: "Within ±5%", test: (v: number) => Math.abs(v) <= 5 },
+      { id: "over-5", label: "+5 to +10%", test: (v: number) => v > 5 && v <= 10 },
+      { id: "over-10", label: "Over +10%", test: (v: number) => v > 10 },
+    ];
+    const rows = view.priceRows.filter(
+      (o) => skuOf(o.skuId)?.brandId === clientBrand.id
+    );
+    const bins = bands.map((b) => ({
+      id: b.id,
+      label: b.label,
+      count: rows.filter((o) => b.test(o.variance)).length,
+      flagged: b.id === "over-10" || b.id === "under-10",
+    }));
+    const above = rows.filter((o) => o.variance > 0).length;
+    const below = rows.filter((o) => o.variance < 0).length;
+    const floor = rows.length ? Math.min(...rows.map((o) => o.variance)) : 0;
+    return { bins, total: rows.length, above, below, floor };
+  }, [view.priceRows]);
+
   const outletWatchTargets = useMemo(
     () =>
       Object.fromEntries(
@@ -232,6 +261,33 @@ export default function PricingView() {
       </div>
 
       <div className="mt-4">
+        {variance.total ? (
+          <ChartStory
+            title="Which side of list price the market sits on"
+            subtitle={`${variance.total} ${clientBrand.name} shelf prices · ${scope.dataAsOf}`}
+            howToRead="Each column is a band of distance from RRP and its height is how many readings fall in it. The grey columns are the compliant middle; red marks readings more than 10% out."
+            findings={insights.forRules("r5-price-cluster")}
+            clean="Pricing sits within RRP across this selection."
+            allClear="No breaches in this selection"
+            soWhat={varianceSoWhat(variance)}
+            actionLabel="Create pricing action"
+            visit={view.visit}
+            table={{
+              columns: ["Distance from RRP", "Readings"],
+              rows: variance.bins.map((b) => [b.label, b.count]),
+            }}
+          >
+            <Histogram
+              bins={variance.bins}
+              unitNoun="readings"
+              bandLabel="Compliant — within RRP ±5%"
+              bandIds={["within"]}
+            />
+          </ChartStory>
+        ) : null}
+      </div>
+
+      <div className="mt-4">
         {concentration.rows.length ? (
           <ChartStory
             title="What drives the compliance number"
@@ -280,8 +336,8 @@ export default function PricingView() {
         {bands.length ? <PriceBand rows={bands} /> : <Empty />}
       </section>
 
-      <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
-        <section className="overflow-hidden rounded-[18px] border border-line bg-white">
+      <div className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
+        <section className="min-w-0 overflow-hidden rounded-[18px] border border-line bg-white">
           <div className="border-b border-line p-5 sm:p-6">
             <h2 className="t-h3">Outliers</h2>
             <p className="mt-1 text-sm text-ink-500">
@@ -386,4 +442,29 @@ function Empty() {
       Nothing matches the current filters.
     </p>
   );
+}
+
+/* One-directional pricing is a different problem from scattered
+   non-compliance, so the sentence says which this is — measured from
+   the actual asymmetry rather than asserted.
+
+   Care is needed with "nothing is below list": readings can sit
+   fractionally under RRP and still fall inside the compliant band, so
+   the claim has to come from counting variances, not from reading the
+   bins. Getting that wrong overstates a real finding into a false
+   one. */
+function varianceSoWhat(v: {
+  total: number;
+  above: number;
+  below: number;
+  floor: number;
+}) {
+  const pct = v.total ? Math.round((v.above / v.total) * 100) : 0;
+  const belowShare = v.total ? Math.round((v.below / v.total) * 100) : 0;
+  if (pct >= 60 && belowShare <= 5) {
+    return `${pct}% of readings sit above list and nothing falls more than ${Math.abs(
+      Math.round(v.floor)
+    )}% below it. That asymmetry is a systematic markup, not scattered non-compliance — it is a trade-terms conversation before it is eleven retailer ones.`;
+  }
+  return `${pct}% of readings sit above RRP. Worth checking whether the pressure is coming from a few retailers or the whole trade.`;
 }
