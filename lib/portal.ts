@@ -11,16 +11,28 @@ import { meta, pos } from "./portalData";
 
 /* Scope reads from the audit payload, so the badge, the page headers
    and the numbers can never disagree. */
-const currentVisit = meta.snapshots.find((s) => s.id === meta.currentSnapshot)!;
-const previousVisit = meta.snapshots.find((s) => s.id === meta.previousSnapshot)!;
+const currentWindow = meta.windows.find((w) => w.id === meta.currentWindow)!;
+const previousWindow = meta.windows.find((w) => w.id === meta.previousWindow)!;
 
 export const scope = {
   country: "Iraq",
   city: meta.city,
   category: meta.category,
-  dataAsOf: currentVisit.label,
-  previousVisit: previousVisit.label,
-  posCount: meta.posCount,
+  /* "As of" is now a window, not a day. The short form is for places
+     that were already tight on space; the long form states the trailing
+     period, which is what the figure actually describes. */
+  dataAsOf: currentWindow.shortLabel,
+  windowLabel: currentWindow.label,
+  windowStart: currentWindow.start,
+  windowEnd: currentWindow.end,
+  windowDays: meta.windowDays,
+  previousVisit: previousWindow.shortLabel,
+  previousWindowLabel: previousWindow.label,
+  /* Audited in the current window vs the universe. Two different
+     numbers, and the gap between them is the coverage story. */
+  posCount: currentWindow.outletsAudited,
+  posUniverse: meta.posUniverse,
+  previousPosCount: previousWindow.outletsAudited,
   skuCount: meta.skuCount,
 };
 

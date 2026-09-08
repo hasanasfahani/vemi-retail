@@ -50,7 +50,7 @@ export function useFilters(): [Filters, (next: Filters) => void] {
 /* The visit's cells, gaps and prices.
 
    The latest visit ships with the page; any other is fetched the first
-   time it is asked for. While it is in flight the previous visit's
+   time it is asked for. While it is in flight the previous window's
    render is held at reduced opacity rather than replaced by a skeleton
    — no layout jump, and the reader keeps something to read. */
 export function useVisitData(visit: string): {
@@ -109,11 +109,15 @@ export default function FilterBar({
   return (
     <div className="mb-4 rounded-[14px] border border-line bg-white p-3">
       <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
-        {/* Field visit — always shown: every figure on the page is read
-            off one audit, and which one is the first thing to know. */}
+        {/* Collection window — always shown. Every figure on the page is
+            a composite across one trailing window, not a reading from
+            one day, and which window is the first thing to know. The
+            control used to be labelled "Visit", which implied a single
+            date the whole panel shares; it never did under rolling
+            collection. */}
         <div className="flex items-center gap-2">
           <span className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
-            Visit
+            Window
           </span>
           <div className="flex gap-1 rounded-lg bg-canvas p-1">
             {visits.map((visit) => (
@@ -128,7 +132,7 @@ export default function FilterBar({
                     : "text-ink-500 hover:text-ink-900"
                 }`}
               >
-                {visit.label}
+                {visit.shortLabel}
                 {visit.id === currentVisit && (
                   <span className="ml-1.5 text-[10px] uppercase tracking-wide text-ink-400">
                     latest

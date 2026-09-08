@@ -181,7 +181,7 @@ function Panel({ posId, onClose }: { posId: string; onClose: () => void }) {
           {gaps.length > 0 && (
             <Section title={`Open gaps (${gaps.length})`}>
               {gaps
-                .sort((a, b) => b.lostFacingDays - a.lostFacingDays)
+                .sort((a, b) => b.facingDaysAtRisk - a.facingDaysAtRisk)
                 .map((gap) => (
                   <div
                     key={gap.skuId}
@@ -206,11 +206,13 @@ function Panel({ posId, onClose }: { posId: string; onClose: () => void }) {
                         </span>
                       )}
                     </div>
+                    {/* Was days-out. A single audit sees an empty slot,
+                        never how long it has been empty. */}
                     <span
                       className="mono shrink-0 text-[13px] font-semibold"
                       style={{ color: "var(--color-critical)" }}
                     >
-                      {gap.daysOut}d
+                      {gap.normalFacings} facings
                     </span>
                   </div>
                 ))}

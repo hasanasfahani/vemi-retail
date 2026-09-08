@@ -19,15 +19,36 @@ import currentVisitJson from "./data/visit-current.json";
 
 /* ---------- shapes ---------- */
 
-export type Snapshot = { id: string; label: string; current: boolean };
+/* A trailing collection window, not a field visit.
+
+   The audit runs a rolling daily schedule over a ROTATING panel, so
+   there is no day on which the whole city was measured at once. A
+   window is a period with its own set of audited outlets, each carrying
+   its own audit date — and `outletsAudited` is deliberately less than
+   the universe, because a rotating schedule does not reach everything
+   and a portal that hides that cannot tell a client what they got. */
+export type Window = {
+  id: string;
+  label: string;
+  shortLabel: string;
+  start: string;
+  end: string;
+  current: boolean;
+  outletsAudited: number;
+};
 
 export type Meta = {
   city: string;
   category: string;
-  snapshots: Snapshot[];
-  currentSnapshot: string;
-  previousSnapshot: string;
-  posCount: number;
+  windows: Window[];
+  currentWindow: string;
+  previousWindow: string;
+  windowDays: number;
+  /* Planned days between audits of the same outlet — the basis of every
+     forward loss estimate in the product. */
+  revisitIntervalDays: number;
+  /* The outlet universe. Distinct from how many any one window reached. */
+  posUniverse: number;
   skuCount: number;
 };
 
@@ -73,6 +94,9 @@ export type SkuAvailability = {
 
 export type PosAvailability = {
   posId: string;
+  /* When this outlet was actually seen inside the window. Under rolling
+     collection freshness is a property of the outlet, never the panel. */
+  auditedAt: string;
   skusListed: number;
   skusInStock: number;
   availability: number;
@@ -98,14 +122,22 @@ export type RivalInStock = {
 export type OosRow = {
   posId: string;
   skuId: string;
-  daysOut: number;
-  persistent: boolean;
   /* Facings that outlet gives the SKU when it is stocked — the space
-     actually lost, and what makes the gap costable on either visit. */
+     actually lost, observed on the visit that found the gap. */
   normalFacings: number;
-  /* Shelf space × time: the one number that ranks gaps by what they
-     are costing rather than by how long they have been open. */
-  lostFacingDays: number;
+  /* Shelf space × the days until someone is next in that store.
+
+     Deliberately AT RISK rather than "lost". A rotating panel observes
+     a gap once; it cannot know how long the shelf has been empty,
+     because that needs a previous observation of the same outlet. What
+     it can say is that the gap keeps costing until the next audit, so
+     the figure projects forward from a stated interval instead of
+     measuring backwards from a date nobody recorded.
+
+     The old `lostFacingDays` multiplied facings by an invented
+     `daysOut`. Same unit, opposite direction, and only one of them is
+     collectable. */
+  facingDaysAtRisk: number;
   /* Same pack, same outlet, competitor brands on shelf — the
      substitution the shopper makes when you are absent. */
   rivalsInStock: RivalInStock[];
@@ -184,13 +216,14 @@ export const pricing = {
 export const competitors = competitorsJson.rows as CompetitorRow[];
 export const photos = photosJson.rows as Photo[];
 
-/* ---------- visits ----------
+/* ---------- windows ----------
 
-   One bundle per field visit holds that day's cells, gaps and shelf
-   prices. The latest is imported statically because every page needs
-   it on arrival; any earlier visit is fetched only when the reader
-   moves the date filter to it, so the default load carries one visit
-   rather than the whole history.
+   One bundle per collection window holds the cells, gaps and shelf
+   prices recorded across it, plus WHICH outlets were reached and when.
+   The latest is imported statically because every page needs it on
+   arrival; earlier windows are fetched only when the reader moves the
+   date filter, so the default load carries one window rather than the
+   whole history.
 
    The bundles store index tuples against the master lists — the same
    fact repeated 2,000 times as a string is what made the payload
@@ -198,13 +231,19 @@ export const photos = photosJson.rows as Photo[];
 
 type RawVisit = {
   visit: string;
+  audited: [number, string][];
   matrix: [number, number, number, number][];
-  oos: [number, number, number, number, number, [number, number][]][];
+  oos: [number, number, number, [number, number][]][];
   observations: [number, number, number][];
 };
 
 export type VisitData = {
   visit: string;
+  /* Outlets actually reached inside this window, with the date each was
+     seen. An outlet absent from here was NOT AUDITED — which is not the
+     same as an outlet with nothing on its shelf, and conflating the two
+     is the headline risk of a rotating panel. */
+  audited: { posId: string; auditedAt: string }[];
   matrix: MatrixCell[];
   oos: OosRow[];
   observations: PriceObservation[];
@@ -218,19 +257,22 @@ function hydrate(raw: RawVisit): VisitData {
 
   return {
     visit: raw.visit,
+    audited: raw.audited.map(([p, auditedAt]) => ({
+      posId: posIds[p],
+      auditedAt,
+    })),
     matrix: raw.matrix.map(([p, k, state, facings]) => ({
       posId: posIds[p],
       skuId: skuList[k].id,
       state: CELL_STATE[state],
       facings,
     })),
-    oos: raw.oos.map(([p, k, daysOut, persistent, normalFacings, rivals]) => ({
+    oos: raw.oos.map(([p, k, normalFacings, rivals]) => ({
       posId: posIds[p],
       skuId: skuList[k].id,
-      daysOut,
-      persistent: persistent === 1,
       normalFacings,
-      lostFacingDays: normalFacings * daysOut,
+      /* Forward from the audit, not backward from an unrecorded date. */
+      facingDaysAtRisk: normalFacings * meta.revisitIntervalDays,
       rivalsInStock: rivals.map(([rk, facings]) => ({
         brandId: skuList[rk].brandId,
         skuId: skuList[rk].id,
@@ -252,8 +294,13 @@ function hydrate(raw: RawVisit): VisitData {
   };
 }
 
-export const visits = meta.snapshots;
-export const currentVisit = meta.currentSnapshot;
+export const visits = meta.windows;
+export const currentVisit = meta.currentWindow;
+export const REVISIT_INTERVAL_DAYS = meta.revisitIntervalDays;
+
+/* Outlets in the universe vs outlets this window reached. Kept apart on
+   purpose — coverage is a number the client bought and can check. */
+export const posUniverse = meta.posUniverse;
 
 export const isKnownVisit = (id: string) => visits.some((v) => v.id === id);
 
@@ -333,9 +380,12 @@ export const headline = {
   activeOos: latest.oos.filter((r) => brandOf(skuOf(r.skuId)!.brandId)!.client)
     .length,
   totalOos: latest.oos.length,
-  oosDays: latest.oos
+  /* Shelf space standing empty until the next audit — forward from the
+     visit, not backward from a date nobody recorded. The old figure
+     summed `daysOut`, which a rotating panel cannot observe. */
+  facingDaysAtRisk: latest.oos
     .filter((r) => skuOf(r.skuId)!.brandId === clientBrand.id)
-    .reduce((sum, r) => sum + r.daysOut, 0),
+    .reduce((sum, r) => sum + r.facingDaysAtRisk, 0),
   priceCompliance: round1(
     pricing.bySku
       .filter((p) => p.brandId === clientBrand.id)

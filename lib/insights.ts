@@ -53,19 +53,24 @@ import {
   clientBrand,
   skus,
   pos as allPos,
-  visits,
-  currentVisit,
-  visitLabel,
   competitors,
 } from "./portalData";
 import { districtPoints, ERBIL_CITADEL, type DistrictPoint } from "./portal";
+import { REVISIT_INTERVAL_DAYS } from "./portalData";
 import type { FilteredView } from "./portalFilters";
+
+/* When an outlet was actually seen. Under a rotating panel this is a
+   property of the outlet, not the window, so every outlet-level finding
+   states its own date rather than implying a shared audit day. */
+function auditDateOf(view: FilteredView, posId: string): string {
+  return view.auditedAt.get(posId) ?? "in this window";
+}
 
 export type Severity = "critical" | "warning" | "watch";
 export type Trend = "worsening" | "new";
 
 export type RuleId =
-  | "r1-persistent-gap"
+  | "r1-outlet-gaps"
   | "r2-district-deficit"
   | "r3-distribution-gap"
   | "r4-rival-substitution"
@@ -73,7 +78,6 @@ export type RuleId =
   | "r6-channel-gap"
   | "r7-fixture-imbalance"
   | "r9-dark-outlet"
-  | "r10-new-gap-cluster"
   | "r11-assortment-gap"
   | "r12-geographic-concentration";
 
@@ -149,11 +153,19 @@ export type InsightReport = {
    universal retail-audit standard.
    ------------------------------------------------------------------ */
 export const THRESHOLDS = {
-  /* Persistent (2-visit-confirmed) client gaps, by outlet.
-     Observed: 3 outlets qualified, 116–140 facing-days each (p50 132).
-     Any persistent gap is already the strongest signal in the data —
-     it gets at least "warning"; the observed cluster clears 120. */
-  r1PersistentGap: { criticalFacingDays: 120 },
+  /* Client SKUs listed but empty at one outlet, observed on the visit
+     that found them.
+
+     Recalibrated from facing-days to a COUNT, because the facing-day
+     figure is now a forward projection with a constant interval —
+     ranking on it would just be ranking on facings, and a threshold in
+     that unit would drift every time the revisit interval changed. A
+     count is what the auditor actually saw.
+
+     Observed: 33 of 100 outlets carry at least one client gap, but only
+     6 carry two or more, and 3 is the ceiling this dataset produces. A
+     single gap is the norm here, not a signal. */
+  r1OutletGaps: { warningCount: 2, criticalCount: 3 },
 
   /* District client-share deficit vs citywide share.
      Observed: 18 districts, worst deficit 5.4pt (Bakhtiari), p75≈3.2,
@@ -215,7 +227,7 @@ export const THRESHOLDS = {
   r7FixtureImbalance: { warningPt: 5 },
 
   /* Momentum: client losing share while some rival gains ≥1pt.
-     Observed: Pepsi −2.1pt this cycle, Coca-Cola +1.8pt — the rule
+     Observed: Pepsi −2.1pt in this window, Coca-Cola +1.8pt — the rule
      fires on the real cycle in this dataset. */
   r8Momentum: { rivalGainPt: 1 },
 
@@ -223,14 +235,6 @@ export const THRESHOLDS = {
      in-stock among whatever it does carry, which is a binary fact,
      not a calibrated cutoff. */
 
-  /* New (non-persistent) client stockouts clustering at one outlet in
-     a single visit — the early-warning signal before R1 confirms a
-     gap on a second visit.
-     Observed: 33 of 100 outlets carried ≥1 new gap this cycle, but
-     only 6 carried ≥2 (max observed: 3). A single new gap is the
-     norm here, not a signal; 2 is already a real cluster, 3 is the
-     ceiling this dataset has produced. */
-  r10NewGapCluster: { warningCount: 2, criticalCount: 3 },
 
   /* Client SKUs listed at an outlet vs that outlet's own channel
      median — a range-selling gap, not a stock gap (R3 measures the
@@ -278,17 +282,11 @@ const PACK_LABEL: Record<string, string> = {
 /* The interval the "deficit × time" formulas treat as the exposure
    window — the literal number of days between the two field visits,
    read from their ids (which are ISO dates), never hardcoded. */
-const sortedVisits = [...visits].sort((a, b) => a.id.localeCompare(b.id));
-const previousVisitId =
-  sortedVisits.length > 1
-    ? sortedVisits[sortedVisits.length - 2].id
-    : currentVisit;
-const DAYS_BETWEEN_VISITS = Math.max(
-  1,
-  Math.round(
-    (Date.parse(currentVisit) - Date.parse(previousVisitId)) / 86_400_000
-  )
-);
+/* The deficit rules project a shortfall forward over the days until an
+   outlet is next audited. That is the revisit interval — a property of
+   the collection plan — not the gap between two snapshot dates, which
+   under a rotating schedule describes nothing an outlet experiences. */
+const DAYS_BETWEEN_VISITS = REVISIT_INTERVAL_DAYS;
 
 const round1 = (n: number) => Math.round(n * 10) / 10;
 
@@ -326,53 +324,72 @@ const median = (values: number[]) => {
   return sorted.length % 2 ? sorted[mid] : (sorted[mid] + sorted[mid + 1]) / 2;
 };
 
-/* ---------- R1 · persistent gap cluster ---------- */
+/* ---------- R1 · outlet gap cluster ----------
 
-function r1PersistentGaps(view: FilteredView): Insight[] {
+   THIS RULE ABSORBED R10.
+
+   The two used to split the same shelf fact by a test the collection
+   model can no longer make. R1 reported gaps "confirmed at both
+   visits"; R10 reported gaps "new this visit". Both need a previous
+   observation OF THE SAME OUTLET, and a rotating panel does not
+   revisit — so the split was not merely unavailable, it was decided by
+   a `persistent` flag the generator invented.
+
+   What a single visit genuinely sees is this: at this outlet, N of your
+   SKUs have a slot and the slot is empty. That is one finding, and it
+   is the one an auditor could actually stand behind. Severity comes
+   from how many, because the count is observed; it no longer comes from
+   accumulated facing-days, because those are now projected forward at a
+   constant interval and would rank identically to facings.
+
+   Outlets where EVERY listed client SKU is empty are left to R9 — a
+   fully dark shelf is a stronger statement than a cluster, and firing
+   both was double-counting even under the old model. */
+
+function r1OutletGaps(view: FilteredView, darkOutlets: Set<string>): Insight[] {
   const byOutlet = new Map<string, FilteredView["oosRows"]>();
   for (const row of view.oosRows) {
-    if (!row.persistent) continue;
     if (skuOf(row.skuId)?.brandId !== clientBrand.id) continue;
+    if (darkOutlets.has(row.posId)) continue;
     byOutlet.set(row.posId, [...(byOutlet.get(row.posId) ?? []), row]);
   }
 
   const insights: Insight[] = [];
   for (const [posId, rows] of byOutlet) {
+    if (rows.length < THRESHOLDS.r1OutletGaps.warningCount) continue;
     const outlet = posOf(posId);
     if (!outlet) continue;
-    const impactValue = Math.round(
-      rows.reduce((s, r) => s + r.lostFacingDays, 0)
-    );
+
     const severity: Severity =
-      impactValue >= THRESHOLDS.r1PersistentGap.criticalFacingDays
-        ? "critical"
-        : "warning";
+      rows.length >= THRESHOLDS.r1OutletGaps.criticalCount ? "critical" : "warning";
+    const impactValue = Math.round(
+      rows.reduce((s, r) => s + r.facingDaysAtRisk, 0)
+    );
 
     insights.push({
       id: `r1:${posId}`,
-      rule: "r1-persistent-gap",
+      rule: "r1-outlet-gaps",
       confidence: "measured",
       severity,
-      headline: `${outlet.code} has ${rows.length} ${clientBrand.name} SKU${rows.length > 1 ? "s" : ""} empty since the last visit`,
+      headline: `${outlet.code} has ${rows.length} ${clientBrand.name} SKU${rows.length > 1 ? "s" : ""} listed but empty`,
       detail:
-        "Confirmed at both visits — a listing that stopped being replenished, not a one-off stockout.",
+        "Shelf space this outlet gives you, holding nothing. Every one is a slot a rival can take before the next audit.",
       impact: {
         value: impactValue,
         unit: "facing-days",
-        label: `${impactValue} facing-days lost`,
+        label: `${impactValue} facing-days at risk`,
       },
       scope: { outlets: 1, label: outlet.code },
-      trend: "worsening",
+      trend: "new",
       evidence: {
         href: `/dashboard/oos-alerts?area=${encodeURIComponent(outlet.area)}`,
-        formula: `Σ normalFacings × daysOut, for each ${clientBrand.name} SKU out of stock at both ${visitLabel(previousVisitId)} and ${visitLabel(currentVisit)} at ${outlet.code}.`,
+        formula: `${rows.length} ${clientBrand.name} SKUs listed and empty at ${outlet.code}, audited ${auditDateOf(view, posId)}. Σ normalFacings × ${REVISIT_INTERVAL_DAYS} days to the next audit.`,
         table: {
-          columns: ["SKU", "Days out", "Normal facings", "Facing-days"],
+          columns: ["SKU", "Normal facings", "Facing-days at risk"],
           rows: rows.map((r) => [
             skuName(r.skuId),
-            r.daysOut,
             r.normalFacings,
-            r.lostFacingDays,
+            r.facingDaysAtRisk,
           ]),
         },
       },
@@ -538,7 +555,7 @@ function r4RivalSubstitution(view: FilteredView): Insight[] {
     const pack = skuOf(row.skuId)?.pack;
     outletsAffected.add(row.posId);
     for (const rival of row.rivalsInStock) {
-      const value = rival.facings * row.daysOut;
+      const value = rival.facings * REVISIT_INTERVAL_DAYS;
       tally.set(rival.brandId, (tally.get(rival.brandId) ?? 0) + value);
       if (pack) {
         const key = `${pack}|${rival.brandId}`;
@@ -869,15 +886,10 @@ function r9DarkOutlets(view: FilteredView): Insight[] {
   for (const [posId, e] of byOutlet) {
     if (e.listed === 0 || e.oosRows.length < e.listed) continue; // something is in stock
 
-    /* R1 already tells the whole story when every contributing row is
-       persistent — firing here too would be the same fact twice. Only
-       report a dark outlet when at least one row is new this cycle. */
-    if (e.oosRows.every((r) => r.persistent)) continue;
-
     const outlet = posOf(posId);
     if (!outlet) continue;
     const impactValue = Math.round(
-      e.oosRows.reduce((s, r) => s + r.lostFacingDays, 0)
+      e.oosRows.reduce((s, r) => s + r.facingDaysAtRisk, 0)
     );
 
     insights.push({
@@ -890,75 +902,19 @@ function r9DarkOutlets(view: FilteredView): Insight[] {
       impact: {
         value: impactValue,
         unit: "facing-days",
-        label: `${impactValue} facing-days lost`,
-      },
-      scope: { outlets: 1, label: outlet.code },
-      trend: e.oosRows.some((r) => r.persistent) ? "worsening" : "new",
-      evidence: {
-        href: `/dashboard/oos-alerts?area=${encodeURIComponent(outlet.area)}`,
-        formula: `Every listed ${clientBrand.name} SKU at ${outlet.code} is currently out of stock (${e.oosRows.length} of ${e.listed}); Σ normalFacings × daysOut across them.`,
-        table: {
-          columns: ["SKU", "Days out", "Confirmed twice", "Facing-days"],
-          rows: e.oosRows.map((r) => [
-            skuName(r.skuId),
-            r.daysOut,
-            r.persistent ? "Yes" : "No",
-            r.lostFacingDays,
-          ]),
-        },
-      },
-      entities: { posId, area: outlet.area, brandId: clientBrand.id },
-    });
-  }
-  return insights.sort(byIntensity);
-}
-
-/* ---------- R10 · new stockout cluster (early warning) ---------- */
-
-function r10NewGapCluster(view: FilteredView): Insight[] {
-  const byOutlet = new Map<string, FilteredView["oosRows"]>();
-  for (const row of view.oosRows) {
-    if (row.persistent) continue; // R1's territory — this rule is the cycle before that
-    if (skuOf(row.skuId)?.brandId !== clientBrand.id) continue;
-    byOutlet.set(row.posId, [...(byOutlet.get(row.posId) ?? []), row]);
-  }
-
-  const insights: Insight[] = [];
-  for (const [posId, rows] of byOutlet) {
-    if (rows.length < THRESHOLDS.r10NewGapCluster.warningCount) continue;
-    const outlet = posOf(posId);
-    if (!outlet) continue;
-    const severity: Severity =
-      rows.length >= THRESHOLDS.r10NewGapCluster.criticalCount
-        ? "critical"
-        : "warning";
-    const impactValue = Math.round(rows.reduce((s, r) => s + r.lostFacingDays, 0));
-
-    insights.push({
-      id: `r10:${posId}`,
-      rule: "r10-new-gap-cluster",
-      confidence: "measured",
-      severity,
-      headline: `${outlet.code} went out of stock on ${rows.length} ${clientBrand.name} SKUs this visit`,
-      detail:
-        "New this cycle, not yet confirmed twice — worth a check before the next visit turns it into a persistent gap.",
-      impact: {
-        value: impactValue,
-        unit: "facing-days",
-        label: `${impactValue} facing-days lost so far`,
+        label: `${impactValue} facing-days at risk`,
       },
       scope: { outlets: 1, label: outlet.code },
       trend: "new",
       evidence: {
         href: `/dashboard/oos-alerts?area=${encodeURIComponent(outlet.area)}`,
-        formula: `${clientBrand.name} SKUs newly out of stock at ${outlet.code} this visit (not yet seen on a prior visit); Σ normalFacings × daysOut.`,
+        formula: `Every listed ${clientBrand.name} SKU at ${outlet.code} was out of stock when audited ${auditDateOf(view, posId)} (${e.oosRows.length} of ${e.listed}); Σ normalFacings × ${REVISIT_INTERVAL_DAYS} days to the next audit.`,
         table: {
-          columns: ["SKU", "Days out", "Normal facings", "Facing-days"],
-          rows: rows.map((r) => [
+          columns: ["SKU", "Normal facings", "Facing-days at risk"],
+          rows: e.oosRows.map((r) => [
             skuName(r.skuId),
-            r.daysOut,
             r.normalFacings,
-            r.lostFacingDays,
+            r.facingDaysAtRisk,
           ]),
         },
       },
@@ -1206,16 +1162,22 @@ export function generateInsights(view: FilteredView): InsightReport {
      disagree about which districts are behind. */
   const districts = r2DistrictDeficit(view);
 
+  /* R9 runs first: a fully dark outlet is the stronger statement, and
+     R1 must not also report it as a cluster. */
+  const dark = r9DarkOutlets(view);
+  const darkOutlets = new Set(
+    dark.map((i) => i.entities.posId).filter((p): p is string => Boolean(p))
+  );
+
   const presence = [
-    ...r1PersistentGaps(view),
+    ...r1OutletGaps(view, darkOutlets),
     ...districts,
     ...r12GeographicConcentration(districts),
     ...r3DistributionGap(view),
     ...r4RivalSubstitution(view),
     ...r6ChannelGap(view),
     ...r7FixtureImbalance(view),
-    ...r9DarkOutlets(view),
-    ...r10NewGapCluster(view),
+    ...dark,
     ...r11AssortmentGap(view),
   ]
     /* A finding worth nothing is not a finding.

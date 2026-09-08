@@ -15,14 +15,14 @@ import { meta } from "./portalData";
 
 const DAY = 86_400_000;
 
-const sorted = [...meta.snapshots].map((s) => s.id).sort();
+const sorted = [...meta.windows].map((w) => w.id).sort();
 const current = sorted[sorted.length - 1];
-const previous = sorted.length > 1 ? sorted[sorted.length - 2] : current;
 
-export const VISIT_INTERVAL_DAYS = Math.max(
-  1,
-  Math.round((Date.parse(current) - Date.parse(previous)) / DAY)
-);
+/* The planned gap between audits of the SAME outlet, which under a
+   rotating schedule is a property of the collection plan rather than
+   something you can measure off two snapshot dates. It is the same
+   figure every forward loss estimate uses, read from one place. */
+export const VISIT_INTERVAL_DAYS = meta.revisitIntervalDays;
 
 /* The next visit, as an ISO date. If that date has already passed —
    the panel is overdue for an audit — fall back to a week out rather

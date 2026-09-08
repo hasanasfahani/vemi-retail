@@ -33,9 +33,8 @@ export type DecisionId =
    one decision — if a rule ever needs two, that is a sign the rule is
    measuring two things and should be split instead. */
 const RULE_DECISION: Record<RuleId, DecisionId | "reprice"> = {
-  "r1-persistent-gap": "replenish",
+  "r1-outlet-gaps": "replenish",
   "r9-dark-outlet": "replenish",
-  "r10-new-gap-cluster": "replenish",
   "r2-district-deficit": "cover",
   "r6-channel-gap": "cover",
   "r12-geographic-concentration": "cover",
@@ -97,16 +96,18 @@ function buildHeadline(
   switch (id) {
     case "replenish": {
       const dark = findings.filter((f) => f.rule === "r9-dark-outlet").length;
-      const persistent = findings.filter((f) => f.rule === "r1-persistent-gap").length;
+      const clusters = findings.filter((f) => f.rule === "r1-outlet-gaps").length;
       return {
         headline: `Get stock back on shelf at ${stores}`,
+        /* No "empty at both visits" clause any more: a rotating panel
+           cannot confirm a gap twice, so the sentence describes what
+           was actually seen — a shelf slot with nothing in it. */
         detail: [
           dark ? `${dark} carrying nothing of yours at all` : null,
-          persistent ? `${persistent} empty at both visits` : null,
-          "the rest opened this cycle",
+          clusters ? `${clusters} with several lines empty at once` : null,
         ]
           .filter(Boolean)
-          .join(", ") + ".",
+          .join(", ") + ", found on the visit that audited them.",
       };
     }
     case "cover": {
@@ -150,7 +151,7 @@ function buildHeadline(
     case "defend": {
       /* R4's own rival, not the share-mover.
 
-         Momentum names whoever gained share this cycle; R4 names
+         Momentum names whoever gained share in this window; R4 names
          whoever is standing in your gaps, by pack. They are different
          questions and often different brands, and the DEFENCE decision
          is about the second — you defend a fixture, not a league

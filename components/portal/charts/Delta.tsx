@@ -1,4 +1,4 @@
-/* Signed movement against the previous visit. Direction is carried by
+/* Signed movement against the previous window. Direction is carried by
    the sign glyph as well as the status colour, never colour alone. */
 
 export default function Delta({

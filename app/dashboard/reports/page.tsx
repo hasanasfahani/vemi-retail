@@ -108,12 +108,12 @@ export default async function ReportsPage() {
                   ? `${decisions.length - 1} further decision${
                       decisions.length > 2 ? "s" : ""
                     } follow, ranked by confirmed evidence first.`
-                  : "It is the only decision flagged this cycle."}
+                  : "It is the only decision flagged in this window."}
               </p>
               {momentum?.conceding && momentum.rivalBrandId && (
                 <p className="mt-2.5 text-sm text-ink-700">
                   Momentum: {clientBrand.name} lost{" "}
-                  {Math.abs(momentum.clientDelta)}pt of shelf share this cycle
+                  {Math.abs(momentum.clientDelta)}pt of shelf share in this window
                   while {brandName(momentum.rivalBrandId)} gained{" "}
                   {momentum.rivalDelta}pt.
                 </p>
@@ -123,7 +123,7 @@ export default async function ReportsPage() {
           ) : (
             <p className="text-sm text-ink-500">
               No district, channel, SKU or outlet fell outside its expected
-              range this cycle. We looked — that is the result.
+              range in this window. We looked — that is the result.
             </p>
           )}
         </Band>
@@ -132,7 +132,7 @@ export default async function ReportsPage() {
     {
       id: "kpis",
       label: "Headline numbers",
-      hint: "The four figures, each against the previous visit.",
+      hint: "The four figures, each against the previous window.",
       node: (
         <Band title="Headline numbers" eyebrow={`vs ${scope.previousVisit}`}>
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -158,7 +158,7 @@ export default async function ReportsPage() {
               label="Active out-of-stocks"
               value={`${headline.activeOos}`}
               goodDirection="down"
-              footnote={`${headline.oosDays} lost shelf-days this cycle`}
+              footnote={`${headline.facingDaysAtRisk.toLocaleString()} facing-days at risk`}
             />
           </div>
         </Band>
@@ -183,7 +183,7 @@ export default async function ReportsPage() {
           ) : (
             <Band title="The decisions">
               <p className="text-sm text-ink-400">
-                No decision cleared the reporting threshold this cycle.
+                No decision cleared the reporting threshold in this window.
               </p>
             </Band>
           )}
@@ -266,7 +266,7 @@ export default async function ReportsPage() {
               ? `${
                   districtRows.filter((d) => d.severity).length
                 } districts sit below your own citywide average — coverage is uneven before it is insufficient.`
-              : "No district falls materially behind your citywide average this cycle."
+              : "No district falls materially behind your citywide average in this window."
           }
           /* ChartFrame's control band falls back to its all-clear
              whenever no action is passed — correct on a working page,
@@ -348,7 +348,7 @@ export default async function ReportsPage() {
           <p className="text-sm text-ink-500">
             {reprice
               ? reprice.detail
-              : "No outlet is clustering price breaches this cycle."}
+              : "No outlet is clustering price breaches in this window."}
           </p>
           {reprice && (
             <ul className="mt-3 flex flex-col gap-1.5">

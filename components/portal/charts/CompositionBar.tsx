@@ -2,10 +2,10 @@
 
 /* One bar, split into where a total actually comes from.
 
-   Used for a single question: of everything at stake this cycle, how
+   Used for a single question: of everything at stake in this window, how
    much is replenishment versus range versus pricing? A ranked list of
    decisions answers "which is biggest"; this answers "what KIND of
-   problem is this cycle", which is the thing an executive decides
+   problem is in this window", which is the thing an executive decides
    against.
 
    Capped at six segments by construction — past that a stacked bar

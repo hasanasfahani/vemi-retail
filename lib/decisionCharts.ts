@@ -95,10 +95,10 @@ export function chartFor(decision: Decision, posCount: number): ChartSpec {
         bLabel: scope.dataAsOf,
         unit: "%",
       },
-      chartTitle: "Shelf share, previous visit to this visit",
+      chartTitle: "Shelf share, window over window",
       chartSubtitle: `All ${competitors.length} brands · ${scope.previousVisit} → ${scope.dataAsOf}`,
       howToRead:
-        "Each row is a brand. The hollow dot is the previous visit, the solid dot is this one, and the line between them is the move. Violet is you; grey is everyone else.",
+        "Each row is a brand. The hollow dot is the previous window, the solid dot is this one, and the line between them is the move. Violet is you; grey is everyone else. Both are trailing composites over DIFFERENT samples of outlets, so read the direction rather than the decimal.",
       soWhat: `${
         rows.find((r) => r.emphasis)?.label ?? clientBrand.name
       } is the only brand giving up ground at this scale — decide now whether to defend the space or concede it.`,

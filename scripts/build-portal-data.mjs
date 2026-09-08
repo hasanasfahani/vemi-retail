@@ -35,14 +35,62 @@ const between = (lo, hi) => lo + rand() * (hi - lo);
 const intBetween = (lo, hi) => Math.round(between(lo, hi));
 
 /* ------------------------------------------------------------------
-   SNAPSHOTS — two field visits, so movement is real rather than drawn.
+   COLLECTION WINDOWS — not field visits.
+
+   THIS IS THE LOAD-BEARING CHANGE. The audit does not sweep a fixed
+   panel on one day and sweep it again a month later. Auditors work a
+   rolling daily schedule, and the outlets on any given day are not the
+   outlets from last month — the panel ROTATES.
+
+   Two consequences the old model got wrong, both of which produced
+   numbers the operation cannot collect:
+
+     1. No outlet is guaranteed a second observation, so "out of stock
+        at both visits" and "days out" are unknowable. A single visit
+        tells you a SKU is listed and empty RIGHT NOW; it cannot tell
+        you for how long, or whether it was empty last time.
+
+     2. Aggregates are trailing-window composites, not snapshots. A
+        citywide figure is "the market as sampled across these 28
+        days", and comparing two windows is comparing two samples —
+        legitimate, but never a same-outlet before/after.
+
+   So the unit here is a WINDOW: a trailing period with its own set of
+   audited outlets, each carrying its own audit date. Window-over-window
+   aggregate comparison is valid and labelled as such. Outlet-level
+   comparison is not modelled at all, because it cannot be collected.
 ------------------------------------------------------------------ */
-const SNAPSHOTS = [
-  { id: "2026-07-15", label: "15 Jul 2026", current: false },
-  { id: "2026-08-12", label: "12 Aug 2026", current: true },
+const WINDOW_DAYS = 28;
+
+const WINDOWS = [
+  {
+    id: "2026-07-15",
+    label: "Trailing 28 days to 15 Jul 2026",
+    shortLabel: "to 15 Jul",
+    end: "2026-07-15",
+    current: false,
+  },
+  {
+    id: "2026-08-12",
+    label: "Trailing 28 days to 12 Aug 2026",
+    shortLabel: "to 12 Aug",
+    end: "2026-08-12",
+    current: true,
+  },
 ];
-const PREV = SNAPSHOTS[0].id;
-const CURR = SNAPSHOTS[1].id;
+const PREV = WINDOWS[0].id;
+const CURR = WINDOWS[1].id;
+
+const DAY = 86_400_000;
+const startOf = (win) =>
+  new Date(Date.parse(win.end) - (WINDOW_DAYS - 1) * DAY).toISOString().slice(0, 10);
+for (const win of WINDOWS) win.start = startOf(win);
+
+/* How much of the universe one window reaches. Below 100% by design:
+   a rotating schedule means some outlets are simply not visited inside
+   any given window, and a portal that cannot show that gap cannot tell
+   a client whether they got the coverage they bought. */
+const WINDOW_COVERAGE = 0.78;
 
 /* ------------------------------------------------------------------
    BRANDS — the carbonated set actually facing each other in Erbil
@@ -184,7 +232,41 @@ const brandOf = (skuId) => SKUS.find((s) => s.id === skuId).brandId;
 const brandById = (id) => BRANDS.find((b) => b.id === id);
 
 /* ------------------------------------------------------------------
-   THE MATRIX — outlet × SKU × snapshot.
+   THE ROTATION — who gets audited, in which window, on what day.
+
+   Each window reaches WINDOW_COVERAGE of the universe, and the outlets
+   it reaches are drawn independently per window. Overlap between two
+   windows is therefore incidental rather than designed, which is the
+   whole point: nothing downstream may assume an outlet appears twice.
+
+   Every audited outlet carries its own date inside the window, because
+   under rolling collection "when was this seen" is a property of the
+   outlet, never of the panel.
+------------------------------------------------------------------ */
+const schedule = new Map(); // `${windowId}|${posId}` -> auditedAt ISO date
+
+for (const win of WINDOWS) {
+  const start = Date.parse(win.start);
+  for (const pos of POS) {
+    if (!pick(WINDOW_COVERAGE)) continue;
+    const dayOffset = intBetween(0, WINDOW_DAYS - 1);
+    schedule.set(
+      `${win.id}|${pos.id}`,
+      new Date(start + dayOffset * DAY).toISOString().slice(0, 10)
+    );
+  }
+}
+
+const auditedAt = (windowId, posId) => schedule.get(`${windowId}|${posId}`) ?? null;
+const auditedIn = (windowId) =>
+  POS.filter((pos) => schedule.has(`${windowId}|${pos.id}`));
+
+/* ------------------------------------------------------------------
+   THE MATRIX — outlet × SKU, per window, for AUDITED outlets only.
+
+   An outlet not visited inside a window produces no cells at all. It is
+   not a zero and not a gap; it is an absence of observation, and the
+   difference matters more than anything else in this file.
 ------------------------------------------------------------------ */
 const cells = [];
 
@@ -196,7 +278,10 @@ for (const pos of POS) {
       CHANNEL_LISTING_INDEX[pos.channel] *
       PACK_LISTING_INDEX[sku.pack];
 
-    for (const snap of SNAPSHOTS) {
+    for (const snap of WINDOWS) {
+      /* Not on this window's schedule — no observation exists. */
+      if (!schedule.has(`${snap.id}|${pos.id}`)) continue;
+
       const listed = pick(Math.min(0.97, listingOdds));
       if (!listed) {
         cells.push({
@@ -240,7 +325,7 @@ for (const pos of POS) {
   }
 }
 
-const at = (snapshot) => cells.filter((c) => c.snapshot === snapshot);
+const at = (windowId) => cells.filter((c) => c.snapshot === windowId);
 const pct = (n, d) => (d === 0 ? 0 : Math.round((n / d) * 1000) / 10);
 
 /* ------------------------------------------------------------------
@@ -249,10 +334,22 @@ const pct = (n, d) => (d === 0 ? 0 : Math.round((n / d) * 1000) / 10);
 const meta = {
   city: "Erbil",
   category: "Carbonated Beverages",
-  snapshots: SNAPSHOTS,
-  currentSnapshot: CURR,
-  previousSnapshot: PREV,
-  posCount: POS.length,
+  /* Windows, not visits. Each carries the outlets it actually reached,
+     so the portal can always separate "we looked and it was fine" from
+     "we did not look". */
+  windows: WINDOWS.map((w) => ({
+    ...w,
+    outletsAudited: auditedIn(w.id).length,
+  })),
+  currentWindow: CURR,
+  previousWindow: PREV,
+  windowDays: WINDOW_DAYS,
+  /* The planned gap between audits of the same outlet — the basis for
+     every forward loss estimate. */
+  revisitIntervalDays: WINDOW_DAYS,
+  /* The universe. Distinct from how many were audited in a window,
+     which is the whole point of tracking coverage. */
+  posUniverse: POS.length,
   skuCount: SKUS.length,
 };
 
@@ -265,8 +362,14 @@ const master = {
 };
 
 /* --- availability: per SKU, per outlet, per snapshot --- */
-function availabilityFor(snapshot) {
-  const rows = at(snapshot);
+function availabilityFor(windowId) {
+  const rows = at(windowId);
+  /* The denominator is outlets AUDITED IN THIS WINDOW, never the
+     universe. Dividing by the universe would report an outlet nobody
+     visited as one that does not stock you — turning missing
+     observation into a distribution problem, which is the exact
+     failure mode a rotating panel introduces. */
+  const audited = auditedIn(windowId);
   return {
     bySku: SKUS.map((sku) => {
       const forSku = rows.filter((c) => c.skuId === sku.id);
@@ -275,18 +378,19 @@ function availabilityFor(snapshot) {
       return {
         skuId: sku.id,
         brandId: sku.brandId,
-        distribution: pct(listed, POS.length),
-        availability: pct(inStock, POS.length),
+        distribution: pct(listed, audited.length),
+        availability: pct(inStock, audited.length),
         onShelfAvailability: pct(inStock, listed),
       };
     }),
-    byPos: POS.map((pos) => {
+    byPos: audited.map((pos) => {
       const forPos = rows.filter((c) => c.posId === pos.id);
       const listed = forPos.filter((c) => c.listed).length;
       const inStock = forPos.filter((c) => c.inStock).length;
       const clientRows = forPos.filter((c) => brandById(brandOf(c.skuId)).client);
       return {
         posId: pos.id,
+        auditedAt: auditedAt(windowId, pos.id),
         skusListed: listed,
         skusInStock: inStock,
         availability: pct(inStock, listed),
@@ -319,8 +423,8 @@ function availabilityFor(snapshot) {
 const posIndexOf = new Map(POS.map((p, i) => [p.id, i]));
 const skuIndexOf = new Map(SKUS.map((s, i) => [s.id, i]));
 
-const matrixFor = (snapshot) =>
-  at(snapshot).map((c) => [
+const matrixFor = (windowId) =>
+  at(windowId).map((c) => [
     posIndexOf.get(c.posId),
     skuIndexOf.get(c.skuId),
     !c.listed ? 0 : c.inStock ? 1 : 2,
@@ -334,8 +438,8 @@ const availability = {
 };
 
 /* --- shelf share: facings-based, split by fixture --- */
-function shareFor(snapshot) {
-  const rows = at(snapshot).filter((c) => c.inStock);
+function shareFor(windowId) {
+  const rows = at(windowId).filter((c) => c.inStock);
   const total = rows.reduce((s, c) => s + c.facings, 0);
   return BRANDS.map((brand) => {
     const forBrand = rows.filter((c) => brandOf(c.skuId) === brand.id);
@@ -362,15 +466,32 @@ const shelfShare = {
 };
 
 /* --- out of stock: listed but empty, with the context needed to act ---
-   Days out alone tells you something is wrong; it doesn't tell you how
-   much it costs or who is taking the space. These rows carry the shelf
-   space the SKU normally holds in that outlet, the resulting lost
-   facing-days, and which rival packs are sitting in stock alongside —
-   the substitution the shopper actually makes.
 
-   "Normally holds" is the facings that outlet gives that SKU on a visit
-   where it is in stock; it is a property of the shelf, not of a single
-   visit, which is what lets both visits be costed the same way. */
+   What a single visit can observe: this SKU has a slot at this outlet
+   and the slot is empty today. What it CANNOT observe, and what this
+   file no longer pretends to know:
+
+     daysOut      how long it has been empty. Requires a previous
+                  observation of this outlet, which a rotating panel
+                  does not provide.
+     persistent   whether it was also empty last time. Same problem.
+
+   Both were previously invented here — `persistent` from a lookup
+   against the prior snapshot, `daysOut` from a random range keyed off
+   it. Under a rotating schedule that lookup finds nothing for most
+   outlets, so the fields were not merely unavailable but fictional.
+
+   What replaces them is a FORWARD estimate. A gap found today keeps
+   costing until someone is next in that store, so the loss is the
+   shelf space multiplied by the planned revisit interval. That is an
+   assumption, but it is a stated one about the future rather than a
+   fabricated measurement of the past — and it is the same direction
+   the deficit rules already project in, so the whole product finally
+   runs on one time basis instead of two.
+
+   "Normally holds" is the facings that outlet gives that SKU when it
+   is in stock — a property of the shelf, observable on the visit that
+   found the gap. */
 const packOf = (skuId) => SKUS.find((s) => s.id === skuId).pack;
 
 const normalFacings = new Map();
@@ -390,29 +511,16 @@ for (const sku of SKUS) {
   medianFacings.set(sku.id, seen.length ? seen[Math.floor(seen.length / 2)] : 2);
 }
 
-function oosFor(snapshot) {
-  const previousOf = snapshot === CURR ? PREV : null;
-  return at(snapshot)
+function oosFor(windowId) {
+  return at(windowId)
     .filter((c) => c.listed && !c.inStock)
     .map((c) => {
-      const before = previousOf
-        ? cells.find(
-            (p) =>
-              p.snapshot === previousOf &&
-              p.posId === c.posId &&
-              p.skuId === c.skuId
-          )
-        : null;
-      /* Out at both visits means it has been gone at least the 28 days
-         between them; otherwise it went in the current cycle. */
-      const persistent = Boolean(before?.listed && !before?.inStock);
-      const daysOut = persistent ? intBetween(28, 41) : intBetween(2, 21);
       const holds =
         normalFacings.get(`${c.posId}|${c.skuId}`) ??
         medianFacings.get(c.skuId) ??
         2;
 
-      const rivals = at(snapshot)
+      const rivals = at(windowId)
         .filter(
           (r) =>
             r.posId === c.posId &&
@@ -424,32 +532,30 @@ function oosFor(snapshot) {
         .slice(0, 3)
         .map((r) => ({ brandId: brandOf(r.skuId), skuId: r.skuId, facings: r.facings }));
 
-      /* [posIndex, skuIndex, daysOut, persistent, normalFacings,
-          [[rivalSkuIndex, facings], ...]] — brand and lost facing-days
-          are both derived on the client. */
+      /* [posIndex, skuIndex, normalFacings, [[rivalSkuIndex, facings], ...]]
+         Four fields, not six. Lost facing-days is derived on the client
+         from normalFacings x the revisit interval. */
       return [
         posIndexOf.get(c.posId),
         skuIndexOf.get(c.skuId),
-        daysOut,
-        persistent ? 1 : 0,
         holds,
         rivals.map((r) => [skuIndexOf.get(r.skuId), r.facings]),
       ];
     })
-    .sort((a, b) => a[4] * a[2] < b[4] * b[2] ? 1 : -1);
+    .sort((a, b) => b[2] - a[2]);
 }
 
-const oosBySnapshot = Object.fromEntries(
-  SNAPSHOTS.map((s) => [s.id, oosFor(s.id)])
+const oosByWindow = Object.fromEntries(
+  WINDOWS.map((w) => [w.id, oosFor(w.id)])
 );
-const oosRows = oosBySnapshot[CURR];
+const oosRows = oosByWindow[CURR];
 const oosSkuIndex = (row) => row[1];
 
 /* [posIndex, skuIndex, price]. RRP, variance and the outlier flag all
    fall out of the price and the SKU, so shipping them would be sending
    the same fact three times. */
-const observationsFor = (snapshot) =>
-  at(snapshot)
+const observationsFor = (windowId) =>
+  at(windowId)
     .filter((c) => c.price !== null)
     .map((c) => [posIndexOf.get(c.posId), skuIndexOf.get(c.skuId), c.price]);
 
@@ -532,20 +638,28 @@ const photos = {
 
 /* ------------------------------------------------------------------ */
 mkdirSync(OUT, { recursive: true });
-/* One bundle per field visit: the cells, the gaps and the shelf prices
-   recorded on that day. The latest is also written as visit-current so
-   the client can import it statically; every other visit is fetched on
-   demand when the reader actually asks for that date. */
+/* One bundle per collection window: which outlets were reached and
+   when, plus the cells, gaps and shelf prices recorded across it. The
+   latest is also written as visit-current so the client can import it
+   statically; earlier windows are fetched on demand.
+
+   `audited` is new and load-bearing: [posIndex, auditedAt]. Without it
+   an outlet missing from the matrix is indistinguishable from an outlet
+   with nothing on its shelf. */
 const visitFiles = {};
-for (const snap of SNAPSHOTS) {
+for (const win of WINDOWS) {
   const payload = {
-    visit: snap.id,
-    matrix: matrixFor(snap.id),
-    oos: oosBySnapshot[snap.id],
-    observations: observationsFor(snap.id),
+    visit: win.id,
+    audited: auditedIn(win.id).map((pos) => [
+      posIndexOf.get(pos.id),
+      auditedAt(win.id, pos.id),
+    ]),
+    matrix: matrixFor(win.id),
+    oos: oosByWindow[win.id],
+    observations: observationsFor(win.id),
   };
-  visitFiles[`visit-${snap.id}.json`] = payload;
-  if (snap.id === CURR) visitFiles["visit-current.json"] = payload;
+  visitFiles[`visit-${win.id}.json`] = payload;
+  if (win.id === CURR) visitFiles["visit-current.json"] = payload;
 }
 
 const files = {
@@ -570,9 +684,13 @@ for (const [name, payload] of Object.entries(files)) {
 /* Console summary so the numbers can be sanity-checked at a glance. */
 const clientShare = currShare.find((s) => s.brandId === client.id);
 console.log(`Wrote ${Object.keys(files).length} payloads to lib/data/`);
-console.log(`  outlets ${POS.length} · SKUs ${SKUS.length} · cells ${cells.length}`);
+console.log(`  universe ${POS.length} outlets · SKUs ${SKUS.length} · cells ${cells.length}`);
 console.log(`  ${client.name} share ${clientShare.share}% · availability ${currAvail.find((a) => a.brandId === client.id).availability}%`);
-console.log(`  active out-of-stocks ${oosRows.length} (${oosRows.filter((r) => r[3]).length} persistent)`);
+console.log(`  active out-of-stocks ${oosRows.length}`);
+console.log(
+  `  coverage:`,
+  WINDOWS.map((w) => `${w.shortLabel} ${auditedIn(w.id).length}/${POS.length}`).join(" · ")
+);
 console.log(
   `  brand share:`,
   currShare.map((s) => `${brandById(s.brandId).name} ${s.share}%`).join(", ")

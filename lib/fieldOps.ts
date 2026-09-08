@@ -45,13 +45,11 @@ export type Stop = {
   mine: number;
   /* Shelf space × time, the same currency the rest of the product
      ranks by, so a stop's worth here matches its worth everywhere. */
-  lostFacingDays: number;
-  /* Longest-running gap, in days. */
-  worst: number;
-  /* Gaps that were also open at the previous visit. A stop with these
-     is not a delivery that slipped; it is an account nobody is
-     working. */
-  persistent: number;
+  facingDaysAtRisk: number;
+  /* When this outlet was last seen. Under a rotating schedule that is
+     the honest substitute for "how long has this been wrong" — we know
+     when we looked, and nothing about the days before it. */
+  auditedAt: string;
   clientAvailability: number;
 };
 
@@ -72,7 +70,7 @@ export function buildStops(view: FilteredView): Stop[] {
       const outlet = posOf(posId)!;
       const gaps = rows
         .filter((g) => skuOf(g.skuId)?.brandId === clientBrand.id)
-        .sort((a, b) => b.lostFacingDays - a.lostFacingDays);
+        .sort((a, b) => b.facingDaysAtRisk - a.facingDaysAtRisk);
       return {
         posId,
         code: outlet.code,
@@ -81,16 +79,15 @@ export function buildStops(view: FilteredView): Stop[] {
         channel: outlet.channel,
         gaps,
         mine: gaps.length,
-        lostFacingDays: gaps.reduce((s, g) => s + g.lostFacingDays, 0),
-        worst: gaps.length ? Math.max(...gaps.map((g) => g.daysOut)) : 0,
-        persistent: gaps.filter((g) => g.persistent).length,
+        facingDaysAtRisk: gaps.reduce((s, g) => s + g.facingDaysAtRisk, 0),
+        auditedAt: view.auditedAt.get(posId) ?? "",
         clientAvailability: availability.get(posId) ?? 0,
       };
     })
     /* Only outlets where the client is actually missing something.
        A store full of rival gaps is not a stop on this brand's run. */
     .filter((s) => s.mine > 0)
-    .sort((a, b) => b.lostFacingDays - a.lostFacingDays);
+    .sort((a, b) => b.facingDaysAtRisk - a.facingDaysAtRisk);
 }
 
 /* ---------- step 2: what order to drive them ---------- */
@@ -139,7 +136,7 @@ export function pickStops(
   const areas = [...byArea.entries()]
     .map(([area, list]) => ({
       area,
-      value: list.reduce((s, x) => s + x.lostFacingDays, 0),
+      value: list.reduce((s, x) => s + x.facingDaysAtRisk, 0),
     }))
     .sort((a, b) => b.value - a.value);
   if (!areas.length) return [];
@@ -185,7 +182,7 @@ export type Route = {
      the van covers more, and a figure dressed up as a driving estimate
      would be the kind of false precision this product avoids. */
   km: number;
-  lostFacingDays: number;
+  facingDaysAtRisk: number;
   gaps: number;
 };
 
@@ -246,7 +243,7 @@ export function orderRoute(selected: Stop[]): Route {
 
   const stops = legs.flatMap((leg) =>
     [...byArea.get(leg.area)!].sort(
-      (a, b) => b.lostFacingDays - a.lostFacingDays
+      (a, b) => b.facingDaysAtRisk - a.facingDaysAtRisk
     )
   );
 
@@ -254,7 +251,7 @@ export function orderRoute(selected: Stop[]): Route {
     stops,
     legs,
     km: Math.round(km * 10) / 10,
-    lostFacingDays: stops.reduce((s, x) => s + x.lostFacingDays, 0),
+    facingDaysAtRisk: stops.reduce((s, x) => s + x.facingDaysAtRisk, 0),
     gaps: stops.reduce((s, x) => s + x.mine, 0),
   };
 }

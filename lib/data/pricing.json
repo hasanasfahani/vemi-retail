@@ -2,21 +2,31 @@
   "meta": {
     "city": "Erbil",
     "category": "Carbonated Beverages",
-    "snapshots": [
+    "windows": [
       {
         "id": "2026-07-15",
-        "label": "15 Jul 2026",
-        "current": false
+        "label": "Trailing 28 days to 15 Jul 2026",
+        "shortLabel": "to 15 Jul",
+        "end": "2026-07-15",
+        "current": false,
+        "start": "2026-06-18",
+        "outletsAudited": 79
       },
       {
         "id": "2026-08-12",
-        "label": "12 Aug 2026",
-        "current": true
+        "label": "Trailing 28 days to 12 Aug 2026",
+        "shortLabel": "to 12 Aug",
+        "end": "2026-08-12",
+        "current": true,
+        "start": "2026-07-16",
+        "outletsAudited": 73
       }
     ],
-    "currentSnapshot": "2026-08-12",
-    "previousSnapshot": "2026-07-15",
-    "posCount": 100,
+    "currentWindow": "2026-08-12",
+    "previousWindow": "2026-07-15",
+    "windowDays": 28,
+    "revisitIntervalDays": 28,
+    "posUniverse": 100,
     "skuCount": 20
   },
   "bySku": [
@@ -26,39 +36,39 @@
       "rrp": 1000,
       "min": 1000,
       "max": 1200,
-      "avg": 1062,
-      "observations": 66,
-      "compliance": 65.2
+      "avg": 1048,
+      "observations": 55,
+      "compliance": 76.4
     },
     {
       "skuId": "pepsi-pet-500",
       "brandId": "pepsi",
       "rrp": 1000,
-      "min": 950,
-      "max": 1200,
-      "avg": 1055,
-      "observations": 69,
-      "compliance": 75.4
+      "min": 1000,
+      "max": 1150,
+      "avg": 1056,
+      "observations": 44,
+      "compliance": 75
     },
     {
       "skuId": "pepsi-pet-1000",
       "brandId": "pepsi",
       "rrp": 1500,
-      "min": 1500,
-      "max": 1800,
-      "avg": 1582,
-      "observations": 71,
-      "compliance": 45.1
+      "min": 1450,
+      "max": 1850,
+      "avg": 1584,
+      "observations": 58,
+      "compliance": 44.8
     },
     {
       "skuId": "pepsi-pet-2250",
       "brandId": "pepsi",
       "rrp": 2500,
-      "min": 2450,
-      "max": 3050,
-      "avg": 2658,
-      "observations": 52,
-      "compliance": 40.4
+      "min": 2400,
+      "max": 2850,
+      "avg": 2622,
+      "observations": 43,
+      "compliance": 58.1
     },
     {
       "skuId": "coca-cola-can-330",
@@ -66,69 +76,69 @@
       "rrp": 1000,
       "min": 1000,
       "max": 1200,
-      "avg": 1060,
-      "observations": 62,
-      "compliance": 71
+      "avg": 1055,
+      "observations": 52,
+      "compliance": 73.1
     },
     {
       "skuId": "coca-cola-pet-500",
       "brandId": "coca-cola",
       "rrp": 1000,
-      "min": 1000,
+      "min": 950,
       "max": 1200,
-      "avg": 1053,
-      "observations": 63,
-      "compliance": 74.6
+      "avg": 1048,
+      "observations": 47,
+      "compliance": 83
     },
     {
       "skuId": "coca-cola-pet-1000",
       "brandId": "coca-cola",
       "rrp": 1500,
       "min": 1450,
-      "max": 1800,
-      "avg": 1577,
-      "observations": 63,
-      "compliance": 50.8
+      "max": 1850,
+      "avg": 1580,
+      "observations": 52,
+      "compliance": 51.9
     },
     {
       "skuId": "coca-cola-pet-2250",
       "brandId": "coca-cola",
       "rrp": 2500,
       "min": 2450,
-      "max": 3100,
+      "max": 2900,
       "avg": 2629,
-      "observations": 60,
-      "compliance": 50
+      "observations": 40,
+      "compliance": 57.5
     },
     {
       "skuId": "7up-can-330",
       "brandId": "7up",
       "rrp": 1000,
-      "min": 950,
+      "min": 1000,
       "max": 1250,
-      "avg": 1057,
-      "observations": 57,
-      "compliance": 63.2
+      "avg": 1051,
+      "observations": 45,
+      "compliance": 77.8
     },
     {
       "skuId": "7up-pet-1000",
       "brandId": "7up",
       "rrp": 1500,
-      "min": 1500,
-      "max": 1850,
-      "avg": 1588,
-      "observations": 58,
-      "compliance": 44.8
+      "min": 1450,
+      "max": 1750,
+      "avg": 1572,
+      "observations": 37,
+      "compliance": 56.8
     },
     {
       "skuId": "7up-pet-2250",
       "brandId": "7up",
       "rrp": 2500,
       "min": 2400,
-      "max": 2950,
-      "avg": 2643,
-      "observations": 48,
-      "compliance": 43.8
+      "max": 3100,
+      "avg": 2632,
+      "observations": 39,
+      "compliance": 51.3
     },
     {
       "skuId": "mirinda-can-330",
@@ -136,39 +146,39 @@
       "rrp": 1000,
       "min": 1000,
       "max": 1200,
-      "avg": 1057,
-      "observations": 52,
-      "compliance": 73.1
+      "avg": 1048,
+      "observations": 45,
+      "compliance": 86.7
     },
     {
       "skuId": "mirinda-pet-1000",
       "brandId": "mirinda",
       "rrp": 1500,
-      "min": 1500,
+      "min": 1450,
       "max": 1850,
-      "avg": 1585,
-      "observations": 53,
-      "compliance": 49.1
+      "avg": 1579,
+      "observations": 50,
+      "compliance": 56
     },
     {
       "skuId": "mirinda-pet-2250",
       "brandId": "mirinda",
       "rrp": 2500,
-      "min": 2400,
+      "min": 2450,
       "max": 3000,
-      "avg": 2647,
-      "observations": 56,
-      "compliance": 51.8
+      "avg": 2630,
+      "observations": 42,
+      "compliance": 59.5
     },
     {
       "skuId": "fanta-can-330",
       "brandId": "fanta",
       "rrp": 1000,
-      "min": 950,
-      "max": 1200,
-      "avg": 1054,
-      "observations": 53,
-      "compliance": 73.6
+      "min": 1000,
+      "max": 1150,
+      "avg": 1053,
+      "observations": 37,
+      "compliance": 73
     },
     {
       "skuId": "fanta-pet-1000",
@@ -176,9 +186,9 @@
       "rrp": 1500,
       "min": 1450,
       "max": 1800,
-      "avg": 1581,
-      "observations": 53,
-      "compliance": 45.3
+      "avg": 1583,
+      "observations": 40,
+      "compliance": 52.5
     },
     {
       "skuId": "sprite-can-330",
@@ -186,39 +196,39 @@
       "rrp": 1000,
       "min": 1000,
       "max": 1200,
-      "avg": 1053,
-      "observations": 46,
-      "compliance": 78.3
+      "avg": 1050,
+      "observations": 41,
+      "compliance": 78
     },
     {
       "skuId": "sprite-pet-1000",
       "brandId": "sprite",
       "rrp": 1500,
-      "min": 1450,
-      "max": 1800,
-      "avg": 1586,
-      "observations": 49,
-      "compliance": 51
+      "min": 1500,
+      "max": 1700,
+      "avg": 1571,
+      "observations": 41,
+      "compliance": 56.1
     },
     {
       "skuId": "zamzam-glass-300",
       "brandId": "zamzam",
       "rrp": 750,
       "min": 750,
-      "max": 950,
-      "avg": 802,
-      "observations": 26,
-      "compliance": 30.8
+      "max": 800,
+      "avg": 781,
+      "observations": 21,
+      "compliance": 38.1
     },
     {
       "skuId": "zamzam-pet-1500",
       "brandId": "zamzam",
       "rrp": 2000,
-      "min": 1950,
-      "max": 2350,
-      "avg": 2097,
-      "observations": 31,
-      "compliance": 74.2
+      "min": 2000,
+      "max": 2300,
+      "avg": 2112,
+      "observations": 26,
+      "compliance": 57.7
     }
   ]
 }

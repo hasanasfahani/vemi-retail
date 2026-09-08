@@ -103,7 +103,19 @@ export type FilteredView = ReturnType<typeof applyFilters>;
 /* The caller supplies the visit's data — pages hold it in state so a
    date change can await the bundle without blocking the first paint. */
 export function applyFilters(f: Filters, data: VisitData) {
-  const posIds = new Set(matchingPos(f).map((p) => p.id));
+  /* Two different populations, kept apart deliberately.
+
+     `inScope` is every outlet the filter selects — the universe the
+     reader is asking about. `posIds` is the subset the audit actually
+     REACHED inside this window. Under a rotating panel those differ,
+     and every rate in this function divides by the second: an outlet
+     nobody visited must never be counted as one with an empty shelf.
+
+     The difference between the two is the coverage figure. */
+  const inScope = matchingPos(f);
+  const auditedAt = new Map(data.audited.map((a) => [a.posId, a.auditedAt]));
+  const audited = inScope.filter((p) => auditedAt.has(p.id));
+  const posIds = new Set(audited.map((p) => p.id));
   const skuIds = new Set(matchingSkus(f).map((s) => s.id));
 
   const cells = data.matrix.filter(
@@ -208,7 +220,18 @@ export function applyFilters(f: Filters, data: VisitData) {
     oosRows,
     priceRows,
     client,
-    outlets: matchingPos(f),
+    outlets: audited,
+    /* Outlet -> the date it was seen. Findings state their own audit
+       date rather than implying the whole panel shares one. */
+    auditedAt,
+    /* Coverage: what the filter asked for vs what was actually reached.
+       A rate computed over `posCount` while the reader assumes
+       `inScopeCount` is the quiet way a rotating panel misleads. */
+    inScopeCount: inScope.length,
+    notAuditedCount: inScope.length - audited.length,
+    coveragePct: inScope.length
+      ? Math.round((audited.length / inScope.length) * 1000) / 10
+      : 0,
     visit: data.visit,
     /* Deltas are only meaningful when an earlier visit exists and no
        slice is applied — the stored movement is panel-wide. */

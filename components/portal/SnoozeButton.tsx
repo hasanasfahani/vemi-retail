@@ -43,7 +43,7 @@ export default function SnoozeButton({ insight, visit, onSnoozed }: Props) {
         disabled={done}
         className="text-[12px] font-medium text-ink-400 hover:text-ink-700 disabled:text-ink-400"
       >
-        {done ? "Parked ✓" : "Not this cycle"}
+        {done ? "Parked ✓" : "Not in this window"}
       </button>
       {open && (
         <SnoozeSheet
@@ -181,7 +181,7 @@ function SnoozeSheet({
         aria-label="Park this finding"
         className="max-h-[90vh] w-full max-w-[480px] overflow-y-auto rounded-t-[18px] bg-white p-5 shadow-[var(--shadow-lift)] sm:rounded-[18px] sm:p-6"
       >
-        <h2 className="t-h3 !text-[16px]">Not this cycle</h2>
+        <h2 className="t-h3 !text-[16px]">Not in this window</h2>
         <p className="mt-1 text-[13px] leading-snug text-ink-500">
           {insight.headline}
         </p>
@@ -198,7 +198,7 @@ function SnoozeSheet({
               checked={until === "next-visit"}
               onChange={() => setUntil("next-visit")}
               title="At the next visit"
-              hint="Sleeps through this cycle. Back when the shelf is next audited."
+              hint="Sleeps through in this window. Back when the shelf is next audited."
             />
             <Choice
               checked={until === "worsens"}
@@ -214,7 +214,7 @@ function SnoozeSheet({
             htmlFor={reasonId}
             className="text-[11px] font-semibold uppercase tracking-wide text-ink-400"
           >
-            Why not this cycle
+            Why not in this window
           </label>
           <textarea
             id={reasonId}

@@ -553,7 +553,7 @@ export default function ShelfView() {
                 subtitle="Chilled space drives impulse purchase; ambient drives take-home"
                 howToRead="Each row is a brand and the bar splits its facings between the two fixture types. A brand leaning right is winning take-home space; leaning left, the cold shelf."
                 findings={insights.forRules("r7-fixture-imbalance")}
-                clean="Your split between chilled and ambient is in line — no space renegotiation needed this cycle."
+                clean="Your split between chilled and ambient is in line — no space renegotiation needed in this window."
                 allClear="Fixture split within range"
                 actionLabel="Create space action"
               >
@@ -629,15 +629,11 @@ export default function ShelfView() {
             {view.posCount && view.skuCount ? (
               <ChartStory
                 title="Outlet × SKU"
-                subtitle={`${(view.posCount * view.skuCount).toLocaleString()} combinations audited on ${scope.dataAsOf}`}
+                subtitle={`${(view.posCount * view.skuCount).toLocaleString()} combinations across ${view.posCount} outlets audited ${scope.dataAsOf}`}
                 howToRead="Opens by district: each row is a district, each column a SKU, and the deeper the red the larger the share of that district's listings currently empty. Select a district to drop into its outlets, where colour switches to facings held and red marks a gap."
-                findings={insights.forRules(
-                  "r1-persistent-gap",
-                  "r9-dark-outlet",
-                  "r10-new-gap-cluster"
-                )}
-                clean="Nothing in this selection is empty on a second visit — no replenishment escalation needed."
-                allClear="No confirmed gap in this selection"
+                findings={insights.forRules("r1-outlet-gaps", "r9-dark-outlet")}
+                clean="Every listed SKU in this selection was on the shelf when its outlet was audited."
+                allClear="No gap in this selection"
                 actionLabel="Create replenishment action"
               >
                 <AvailabilityHeatmap
@@ -757,5 +753,5 @@ function packMixSoWhat(rows: { label: string; delta: number }[]) {
   }
   return worst && worst.delta < -5
     ? `${worst.label} runs ${Math.abs(worst.delta)}pt below your own average — the format worth arguing for.`
-    : "No format is far enough off your average to act on this cycle.";
+    : "No format is far enough off your average to act on in this window.";
 }

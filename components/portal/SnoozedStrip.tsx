@@ -92,7 +92,7 @@ export default function SnoozedStrip({
               <span className="font-semibold text-ink-700">
                 {visible.length} finding{visible.length === 1 ? "" : "s"} parked
               </span>{" "}
-              — considered this cycle and deliberately not actioned.
+              — considered in this window and deliberately not actioned.
             </p>
             <button
               type="button"
