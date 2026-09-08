@@ -20,9 +20,7 @@ import ChartStory from "@/components/portal/ChartStory";
 import MatrixChart from "@/components/portal/charts/MatrixChart";
 import { brandShareWatchTarget, kpiWatchTarget } from "@/lib/watchTargets";
 import { useViewInsights } from "@/components/portal/useViewInsights";
-import DistrictMap, {
-  type DistrictDatum,
-} from "@/components/portal/charts/DistrictMap";
+import DistrictHeat from "@/components/portal/DistrictHeat";
 import { OutletButton } from "@/components/portal/OutletDrawer";
 import { applyFilters } from "@/lib/portalFilters";
 import {
@@ -63,7 +61,6 @@ export default function OosView() {
      three views can never describe different slices. */
   const {
     rows,
-    districts,
     mine,
     takers,
     byOutlet,
@@ -97,52 +94,13 @@ export default function OosView() {
         grouped.set(row.posId, [...(grouped.get(row.posId) ?? []), row]);
       }
 
-      /* District rollup. Colour carries facing-days at risk — the measure
-         this page ranks everything else by — while circle size stays
-         outlets audited, same as the Availability map. It follows the
-         urgency toggle too, so "Pepsi only" recolours the city. */
-      const areaGaps = new Map<
-        string,
-        { gaps: number; lost: number; mine: number }
-      >();
-      for (const row of sorted) {
-        const area = posOf(row.posId)!.area;
-        const e = areaGaps.get(area) ?? { gaps: 0, lost: 0, mine: 0 };
-        e.gaps += 1;
-        e.lost += row.facingDaysAtRisk;
-        if (skuOf(row.skuId)?.brandId === clientBrand.id) e.mine += 1;
-        areaGaps.set(area, e);
-      }
-      const areaOutlets = new Map<string, Set<string>>();
-      for (const cell of view.cells) {
-        const area = posOf(cell.posId)!.area;
-        const set = areaOutlets.get(area) ?? new Set<string>();
-        set.add(cell.posId);
-        areaOutlets.set(area, set);
-      }
-      const districts: DistrictDatum[] = [...areaOutlets.entries()].map(
-        ([name, outlets]) => {
-          const e = areaGaps.get(name) ?? { gaps: 0, lost: 0, mine: 0 };
-          return {
-            name,
-            outlets: outlets.size,
-            value: e.lost,
-            rows: [
-              { label: "Open gaps", value: `${e.gaps}` },
-              {
-                label: "Facing-days at risk",
-                value: e.lost.toLocaleString(),
-                tone: "critical" as const,
-              },
-              { label: `${clientBrand.name} gaps`, value: `${e.mine}` },
-            ],
-          };
-        }
-      );
+      /* The district rollup used to be computed here, and again on
+         Shelf, and again on Field Ops — three derivations of the same
+         geography, each colouring by whatever its host page happened
+         to be about. DistrictHeat owns all of it now. */
 
       return {
         rows: sorted,
-        districts,
         mine: ours,
         facingDaysAtRisk: sorted.reduce((s, r) => s + r.facingDaysAtRisk, 0),
         myFacingDaysAtRisk: ours.reduce((s, r) => s + r.facingDaysAtRisk, 0),
@@ -320,34 +278,19 @@ export default function OosView() {
         />
       </div>
 
-      <section className="mt-4 rounded-[18px] border border-line bg-white p-5 sm:p-6">
-        <h2 className="t-h3">Erbil by district</h2>
-        <p className="mt-1 mb-5 text-sm text-ink-500">
-          Where the cost concentrates across the city. Darker is more
-          facing-days at risk; circle size is outlets audited. Click a district to
-          filter this page to it.
-        </p>
-        {districts.length ? (
-          <DistrictMap
-            data={districts}
-            selected={filters.areas}
-            onSelect={(name) =>
-              setFilters({
-                ...filters,
-                areas: filters.areas.includes(name)
-                  ? filters.areas.filter((a) => a !== name)
-                  : [...filters.areas, name],
-              })
-            }
-            legendLabel="Facing-days at risk"
-            formatValue={(v) => v.toLocaleString()}
-          />
-        ) : (
-          <p className="py-8 text-center text-sm text-ink-400">
-            Nothing matches the current filters.
-          </p>
-        )}
-      </section>
+      <DistrictHeat
+        view={view}
+        selectedAreas={filters.areas}
+        defaultMeasure="at-risk"
+        onSelectArea={(name) =>
+          setFilters({
+            ...filters,
+            areas: filters.areas.includes(name)
+              ? filters.areas.filter((a) => a !== name)
+              : [...filters.areas, name],
+          })
+        }
+      />
 
       <div className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
         <section className="min-w-0 overflow-hidden rounded-[18px] border border-line bg-white">
