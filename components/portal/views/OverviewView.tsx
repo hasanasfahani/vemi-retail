@@ -24,9 +24,8 @@ import { useMemo } from "react";
 import PageHeader from "@/components/portal/PageHeader";
 import StatTile from "@/components/portal/charts/StatTile";
 import NationalMap from "@/components/portal/NationalMap";
-import FilterBar, { useFilters } from "@/components/portal/FilterBar";
 import { scope, coverage, categories } from "@/lib/portal";
-import { applyFilters } from "@/lib/portalFilters";
+import { EMPTY_FILTERS, applyFilters } from "@/lib/portalFilters";
 import { generateInsights } from "@/lib/insights";
 import { portfolioRisk, portfolioVerdict } from "@/lib/portfolio";
 import { formatImpact } from "@/lib/economics";
@@ -39,11 +38,18 @@ import {
   latest,
 } from "@/lib/portalData";
 
+/* NO FILTER BAR HERE, on purpose.
+
+   Overview reports the company: every brand it owns, every category
+   and city it is subscribed to. Filtering that to one district or one
+   brand does not produce a smaller company view — it produces an
+   operator view with a company page's furniture, which is the same
+   altitude confusion the verdict had. Anyone who wants to narrow is
+   asking an operator question and the operator pages take filters. */
 export default function OverviewView() {
-  const [filters, setFilters] = useFilters();
   const view = useMemo(
-    () => applyFilters(filters, latest),
-    [filters]
+    () => applyFilters(EMPTY_FILTERS, latest),
+    []
   );
 
   /* Company-level exposure, and the momentum line beneath it. The
@@ -88,12 +94,6 @@ export default function OverviewView() {
         title="Overview"
         lead={`${clientBrand.owner} across every brand, category and city audited`}
         posCount={view.posCount}
-      />
-
-      <FilterBar
-        filters={filters}
-        onChange={setFilters}
-        resultLabel={`${view.posCount} of ${view.inScopeCount} outlets audited · ${view.coveragePct}% covered · ${scope.corePanelSize} core outlets carry the movement figures`}
       />
 
       {/* THE VERDICT, AT COMPANY ALTITUDE.

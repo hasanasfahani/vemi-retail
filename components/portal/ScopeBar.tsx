@@ -9,18 +9,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { categories, governorates, scope, UNLOCK_MESSAGE } from "@/lib/portal";
+import { categories, scope, UNLOCK_MESSAGE } from "@/lib/portal";
 
 type Option = { id: string; label: string; sub?: string; active: boolean };
 
 export default function ScopeBar() {
-  const cityOptions: Option[] = governorates.map((g) => ({
-    id: g.name,
-    label: g.name,
-    sub: g.active ? `${g.potentialPos} outlets live` : `${g.potentialPos} outlets available`,
-    active: g.active,
-  }));
-
   const categoryOptions: Option[] = categories.map((c) => ({
     id: c.id,
     label: c.label,
@@ -35,7 +28,10 @@ export default function ScopeBar() {
       <span className="hidden text-ink-300 xl:inline" aria-hidden>
         /
       </span>
-      <Selector label="Market" value={scope.city} options={cityOptions} />
+      {/* The Market selector moved into the filter bar, where it does
+          the same job as District and Brand: narrowing what the page
+          counts. Here it read as branding, and a reader had to know
+          that changing it and changing a filter were the same act. */}
       <Selector label="Category" value={scope.category} options={categoryOptions} />
     </div>
   );

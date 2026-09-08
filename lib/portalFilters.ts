@@ -22,6 +22,11 @@ import {
 } from "./portalData";
 
 export type Filters = {
+  /* Governorate. Single-select and empty means every city the account
+     is subscribed to — which is one today. It is a real predicate
+     rather than a label so that the day a second market is sold the
+     control already works. */
+  city: string;
   areas: string[];
   channels: string[];
   brands: string[];
@@ -30,6 +35,7 @@ export type Filters = {
 };
 
 export const EMPTY_FILTERS: Filters = {
+  city: "",
   areas: [],
   channels: [],
   brands: [],
@@ -48,6 +54,7 @@ export const allChannels: Pos["channel"][] = [
    not the latest one. */
 export function filterCount(f: Filters) {
   return (
+    (f.city ? 1 : 0) +
     f.areas.length +
     f.channels.length +
     f.brands.length +
@@ -62,6 +69,7 @@ export function filtersFromParams(params: URLSearchParams): Filters {
     (params.get(key) ?? "").split(",").filter(Boolean);
   const visit = params.get("visit");
   return {
+    city: params.get("city") ?? "",
     areas: read("area"),
     channels: read("channel"),
     brands: read("brand"),
@@ -71,6 +79,7 @@ export function filtersFromParams(params: URLSearchParams): Filters {
 
 export function filtersToQuery(f: Filters): string {
   const params = new URLSearchParams();
+  if (f.city) params.set("city", f.city);
   if (f.areas.length) params.set("area", f.areas.join(","));
   if (f.channels.length) params.set("channel", f.channels.join(","));
   if (f.brands.length) params.set("brand", f.brands.join(","));
@@ -84,6 +93,7 @@ export function filtersToQuery(f: Filters): string {
 export function matchingPos(f: Filters) {
   return allPos.filter(
     (p) =>
+      (f.city === "" || p.city === f.city) &&
       (f.areas.length === 0 || f.areas.includes(p.area)) &&
       (f.channels.length === 0 || f.channels.includes(p.channel))
   );

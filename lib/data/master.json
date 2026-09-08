@@ -269,6 +269,7 @@
     {
       "id": "erb-101",
       "code": "ERB-101",
+      "city": "Erbil",
       "area": "Ankawa",
       "channel": "Hypermarket",
       "core": true
@@ -276,6 +277,7 @@
     {
       "id": "erb-102",
       "code": "ERB-102",
+      "city": "Erbil",
       "area": "Ankawa",
       "channel": "Supermarket",
       "core": true
@@ -283,12 +285,14 @@
     {
       "id": "erb-103",
       "code": "ERB-103",
+      "city": "Erbil",
       "area": "Ankawa",
       "channel": "Supermarket"
     },
     {
       "id": "erb-104",
       "code": "ERB-104",
+      "city": "Erbil",
       "area": "Ankawa",
       "channel": "Mini-market",
       "core": true
@@ -296,6 +300,7 @@
     {
       "id": "erb-105",
       "code": "ERB-105",
+      "city": "Erbil",
       "area": "Ankawa",
       "channel": "Mini-market",
       "priceBias": 1.12
@@ -303,6 +308,7 @@
     {
       "id": "erb-106",
       "code": "ERB-106",
+      "city": "Erbil",
       "area": "Ankawa",
       "channel": "Grocery",
       "core": true
@@ -310,12 +316,14 @@
     {
       "id": "erb-107",
       "code": "ERB-107",
+      "city": "Erbil",
       "area": "Ankawa",
       "channel": "Grocery"
     },
     {
       "id": "erb-201",
       "code": "ERB-201",
+      "city": "Erbil",
       "area": "Downtown / Qaysari",
       "channel": "Supermarket",
       "core": true
@@ -323,12 +331,14 @@
     {
       "id": "erb-202",
       "code": "ERB-202",
+      "city": "Erbil",
       "area": "Downtown / Qaysari",
       "channel": "Supermarket"
     },
     {
       "id": "erb-203",
       "code": "ERB-203",
+      "city": "Erbil",
       "area": "Downtown / Qaysari",
       "channel": "Mini-market",
       "priceBias": 1.09,
@@ -337,6 +347,7 @@
     {
       "id": "erb-204",
       "code": "ERB-204",
+      "city": "Erbil",
       "area": "Downtown / Qaysari",
       "channel": "Mini-market",
       "name": "Dur Nassrawey Center"
@@ -344,12 +355,14 @@
     {
       "id": "erb-205",
       "code": "ERB-205",
+      "city": "Erbil",
       "area": "Downtown / Qaysari",
       "channel": "Mini-market"
     },
     {
       "id": "erb-206",
       "code": "ERB-206",
+      "city": "Erbil",
       "area": "Downtown / Qaysari",
       "channel": "Grocery",
       "core": true
@@ -357,18 +370,21 @@
     {
       "id": "erb-207",
       "code": "ERB-207",
+      "city": "Erbil",
       "area": "Downtown / Qaysari",
       "channel": "Grocery"
     },
     {
       "id": "erb-208",
       "code": "ERB-208",
+      "city": "Erbil",
       "area": "Downtown / Qaysari",
       "channel": "Grocery"
     },
     {
       "id": "erb-301",
       "code": "ERB-301",
+      "city": "Erbil",
       "area": "Iskan",
       "channel": "Supermarket",
       "core": true
@@ -376,6 +392,7 @@
     {
       "id": "erb-302",
       "code": "ERB-302",
+      "city": "Erbil",
       "area": "Iskan",
       "channel": "Mini-market",
       "core": true
@@ -383,12 +400,14 @@
     {
       "id": "erb-303",
       "code": "ERB-303",
+      "city": "Erbil",
       "area": "Iskan",
       "channel": "Mini-market"
     },
     {
       "id": "erb-304",
       "code": "ERB-304",
+      "city": "Erbil",
       "area": "Iskan",
       "channel": "Grocery",
       "core": true
@@ -396,12 +415,14 @@
     {
       "id": "erb-305",
       "code": "ERB-305",
+      "city": "Erbil",
       "area": "Iskan",
       "channel": "Grocery"
     },
     {
       "id": "erb-401",
       "code": "ERB-401",
+      "city": "Erbil",
       "area": "Dream City",
       "channel": "Hypermarket",
       "core": true
@@ -409,6 +430,7 @@
     {
       "id": "erb-402",
       "code": "ERB-402",
+      "city": "Erbil",
       "area": "Dream City",
       "channel": "Supermarket",
       "core": true
@@ -416,6 +438,7 @@
     {
       "id": "erb-403",
       "code": "ERB-403",
+      "city": "Erbil",
       "area": "Dream City",
       "channel": "Supermarket",
       "priceBias": 1.11
@@ -423,6 +446,7 @@
     {
       "id": "erb-404",
       "code": "ERB-404",
+      "city": "Erbil",
       "area": "Dream City",
       "channel": "Mini-market",
       "core": true
@@ -430,12 +454,14 @@
     {
       "id": "erb-405",
       "code": "ERB-405",
+      "city": "Erbil",
       "area": "Dream City",
       "channel": "Mini-market"
     },
     {
       "id": "erb-501",
       "code": "ERB-501",
+      "city": "Erbil",
       "area": "Minara",
       "channel": "Supermarket",
       "core": true
@@ -443,6 +469,7 @@
     {
       "id": "erb-502",
       "code": "ERB-502",
+      "city": "Erbil",
       "area": "Minara",
       "channel": "Mini-market",
       "core": true
@@ -450,12 +477,14 @@
     {
       "id": "erb-503",
       "code": "ERB-503",
+      "city": "Erbil",
       "area": "Minara",
       "channel": "Mini-market"
     },
     {
       "id": "erb-504",
       "code": "ERB-504",
+      "city": "Erbil",
       "area": "Minara",
       "channel": "Grocery",
       "core": true
@@ -463,18 +492,21 @@
     {
       "id": "erb-505",
       "code": "ERB-505",
+      "city": "Erbil",
       "area": "Minara",
       "channel": "Grocery"
     },
     {
       "id": "erb-506",
       "code": "ERB-506",
+      "city": "Erbil",
       "area": "Minara",
       "channel": "Grocery"
     },
     {
       "id": "erb-601",
       "code": "ERB-601",
+      "city": "Erbil",
       "area": "Shorsh",
       "channel": "Supermarket",
       "core": true
@@ -482,6 +514,7 @@
     {
       "id": "erb-602",
       "code": "ERB-602",
+      "city": "Erbil",
       "area": "Shorsh",
       "channel": "Mini-market",
       "core": true
@@ -489,12 +522,14 @@
     {
       "id": "erb-603",
       "code": "ERB-603",
+      "city": "Erbil",
       "area": "Shorsh",
       "channel": "Mini-market"
     },
     {
       "id": "erb-604",
       "code": "ERB-604",
+      "city": "Erbil",
       "area": "Shorsh",
       "channel": "Grocery",
       "core": true
@@ -502,18 +537,21 @@
     {
       "id": "erb-605",
       "code": "ERB-605",
+      "city": "Erbil",
       "area": "Shorsh",
       "channel": "Grocery"
     },
     {
       "id": "erb-606",
       "code": "ERB-606",
+      "city": "Erbil",
       "area": "Shorsh",
       "channel": "Grocery"
     },
     {
       "id": "erb-701",
       "code": "ERB-701",
+      "city": "Erbil",
       "area": "Setaqan",
       "channel": "Mini-market",
       "core": true
@@ -521,6 +559,7 @@
     {
       "id": "erb-702",
       "code": "ERB-702",
+      "city": "Erbil",
       "area": "Setaqan",
       "channel": "Mini-market",
       "priceBias": 1.14
@@ -528,6 +567,7 @@
     {
       "id": "erb-703",
       "code": "ERB-703",
+      "city": "Erbil",
       "area": "Setaqan",
       "channel": "Grocery",
       "core": true
@@ -535,18 +575,21 @@
     {
       "id": "erb-704",
       "code": "ERB-704",
+      "city": "Erbil",
       "area": "Setaqan",
       "channel": "Grocery"
     },
     {
       "id": "erb-705",
       "code": "ERB-705",
+      "city": "Erbil",
       "area": "Setaqan",
       "channel": "Grocery"
     },
     {
       "id": "erb-801",
       "code": "ERB-801",
+      "city": "Erbil",
       "area": "Naz City",
       "channel": "Supermarket",
       "core": true
@@ -554,12 +597,14 @@
     {
       "id": "erb-802",
       "code": "ERB-802",
+      "city": "Erbil",
       "area": "Naz City",
       "channel": "Supermarket"
     },
     {
       "id": "erb-803",
       "code": "ERB-803",
+      "city": "Erbil",
       "area": "Naz City",
       "channel": "Mini-market",
       "core": true
@@ -567,12 +612,14 @@
     {
       "id": "erb-804",
       "code": "ERB-804",
+      "city": "Erbil",
       "area": "Naz City",
       "channel": "Mini-market"
     },
     {
       "id": "erb-805",
       "code": "ERB-805",
+      "city": "Erbil",
       "area": "Naz City",
       "channel": "Grocery",
       "core": true
@@ -580,6 +627,7 @@
     {
       "id": "erb-901",
       "code": "ERB-901",
+      "city": "Erbil",
       "area": "Zanko",
       "channel": "Supermarket",
       "core": true
@@ -587,6 +635,7 @@
     {
       "id": "erb-902",
       "code": "ERB-902",
+      "city": "Erbil",
       "area": "Zanko",
       "channel": "Mini-market",
       "core": true
@@ -594,12 +643,14 @@
     {
       "id": "erb-903",
       "code": "ERB-903",
+      "city": "Erbil",
       "area": "Zanko",
       "channel": "Mini-market"
     },
     {
       "id": "erb-904",
       "code": "ERB-904",
+      "city": "Erbil",
       "area": "Zanko",
       "channel": "Grocery",
       "core": true
@@ -607,12 +658,14 @@
     {
       "id": "erb-905",
       "code": "ERB-905",
+      "city": "Erbil",
       "area": "Zanko",
       "channel": "Grocery"
     },
     {
       "id": "erb-1001",
       "code": "ERB-1001",
+      "city": "Erbil",
       "area": "Bakhtiari",
       "channel": "Supermarket",
       "core": true
@@ -620,6 +673,7 @@
     {
       "id": "erb-1002",
       "code": "ERB-1002",
+      "city": "Erbil",
       "area": "Bakhtiari",
       "channel": "Mini-market",
       "core": true
@@ -627,12 +681,14 @@
     {
       "id": "erb-1003",
       "code": "ERB-1003",
+      "city": "Erbil",
       "area": "Bakhtiari",
       "channel": "Mini-market"
     },
     {
       "id": "erb-1004",
       "code": "ERB-1004",
+      "city": "Erbil",
       "area": "Bakhtiari",
       "channel": "Grocery",
       "core": true
@@ -640,6 +696,7 @@
     {
       "id": "erb-1005",
       "code": "ERB-1005",
+      "city": "Erbil",
       "area": "Bakhtiari",
       "channel": "Grocery",
       "priceBias": 1.1
@@ -647,12 +704,14 @@
     {
       "id": "erb-1006",
       "code": "ERB-1006",
+      "city": "Erbil",
       "area": "Bakhtiari",
       "channel": "Grocery"
     },
     {
       "id": "erb-1101",
       "code": "ERB-1101",
+      "city": "Erbil",
       "area": "Brayati",
       "channel": "Supermarket",
       "core": true
@@ -660,6 +719,7 @@
     {
       "id": "erb-1102",
       "code": "ERB-1102",
+      "city": "Erbil",
       "area": "Brayati",
       "channel": "Mini-market",
       "core": true
@@ -667,12 +727,14 @@
     {
       "id": "erb-1103",
       "code": "ERB-1103",
+      "city": "Erbil",
       "area": "Brayati",
       "channel": "Mini-market"
     },
     {
       "id": "erb-1104",
       "code": "ERB-1104",
+      "city": "Erbil",
       "area": "Brayati",
       "channel": "Grocery",
       "core": true
@@ -680,12 +742,14 @@
     {
       "id": "erb-1105",
       "code": "ERB-1105",
+      "city": "Erbil",
       "area": "Brayati",
       "channel": "Grocery"
     },
     {
       "id": "erb-1201",
       "code": "ERB-1201",
+      "city": "Erbil",
       "area": "Havalan",
       "channel": "Supermarket",
       "core": true
@@ -693,6 +757,7 @@
     {
       "id": "erb-1202",
       "code": "ERB-1202",
+      "city": "Erbil",
       "area": "Havalan",
       "channel": "Mini-market",
       "core": true
@@ -700,6 +765,7 @@
     {
       "id": "erb-1203",
       "code": "ERB-1203",
+      "city": "Erbil",
       "area": "Havalan",
       "channel": "Mini-market",
       "priceBias": 1.13
@@ -707,6 +773,7 @@
     {
       "id": "erb-1204",
       "code": "ERB-1204",
+      "city": "Erbil",
       "area": "Havalan",
       "channel": "Grocery",
       "core": true
@@ -714,18 +781,21 @@
     {
       "id": "erb-1205",
       "code": "ERB-1205",
+      "city": "Erbil",
       "area": "Havalan",
       "channel": "Grocery"
     },
     {
       "id": "erb-1206",
       "code": "ERB-1206",
+      "city": "Erbil",
       "area": "Havalan",
       "channel": "Grocery"
     },
     {
       "id": "erb-1301",
       "code": "ERB-1301",
+      "city": "Erbil",
       "area": "Runaki",
       "channel": "Mini-market",
       "core": true
@@ -733,18 +803,21 @@
     {
       "id": "erb-1302",
       "code": "ERB-1302",
+      "city": "Erbil",
       "area": "Runaki",
       "channel": "Mini-market"
     },
     {
       "id": "erb-1303",
       "code": "ERB-1303",
+      "city": "Erbil",
       "area": "Runaki",
       "channel": "Mini-market"
     },
     {
       "id": "erb-1304",
       "code": "ERB-1304",
+      "city": "Erbil",
       "area": "Runaki",
       "channel": "Grocery",
       "core": true
@@ -752,12 +825,14 @@
     {
       "id": "erb-1305",
       "code": "ERB-1305",
+      "city": "Erbil",
       "area": "Runaki",
       "channel": "Grocery"
     },
     {
       "id": "erb-1401",
       "code": "ERB-1401",
+      "city": "Erbil",
       "area": "Gulan",
       "channel": "Hypermarket",
       "core": true
@@ -765,6 +840,7 @@
     {
       "id": "erb-1402",
       "code": "ERB-1402",
+      "city": "Erbil",
       "area": "Gulan",
       "channel": "Supermarket",
       "core": true
@@ -772,36 +848,42 @@
     {
       "id": "erb-1403",
       "code": "ERB-1403",
+      "city": "Erbil",
       "area": "Gulan",
       "channel": "Mini-market"
     },
     {
       "id": "erb-1404",
       "code": "ERB-1404",
+      "city": "Erbil",
       "area": "Gulan",
       "channel": "Mini-market"
     },
     {
       "id": "erb-1405",
       "code": "ERB-1405",
+      "city": "Erbil",
       "area": "Gulan",
       "channel": "Grocery"
     },
     {
       "id": "erb-1501",
       "code": "ERB-1501",
+      "city": "Erbil",
       "area": "Baharka",
       "channel": "Supermarket"
     },
     {
       "id": "erb-1502",
       "code": "ERB-1502",
+      "city": "Erbil",
       "area": "Baharka",
       "channel": "Mini-market"
     },
     {
       "id": "erb-1503",
       "code": "ERB-1503",
+      "city": "Erbil",
       "area": "Baharka",
       "channel": "Grocery",
       "priceBias": 1.09
@@ -809,72 +891,84 @@
     {
       "id": "erb-1504",
       "code": "ERB-1504",
+      "city": "Erbil",
       "area": "Baharka",
       "channel": "Grocery"
     },
     {
       "id": "erb-1505",
       "code": "ERB-1505",
+      "city": "Erbil",
       "area": "Baharka",
       "channel": "Grocery"
     },
     {
       "id": "erb-1601",
       "code": "ERB-1601",
+      "city": "Erbil",
       "area": "Kasnazan",
       "channel": "Supermarket"
     },
     {
       "id": "erb-1602",
       "code": "ERB-1602",
+      "city": "Erbil",
       "area": "Kasnazan",
       "channel": "Mini-market"
     },
     {
       "id": "erb-1603",
       "code": "ERB-1603",
+      "city": "Erbil",
       "area": "Kasnazan",
       "channel": "Mini-market"
     },
     {
       "id": "erb-1604",
       "code": "ERB-1604",
+      "city": "Erbil",
       "area": "Kasnazan",
       "channel": "Grocery"
     },
     {
       "id": "erb-1605",
       "code": "ERB-1605",
+      "city": "Erbil",
       "area": "Kasnazan",
       "channel": "Grocery"
     },
     {
       "id": "erb-1606",
       "code": "ERB-1606",
+      "city": "Erbil",
       "area": "Kasnazan",
       "channel": "Grocery"
     },
     {
       "id": "erb-1701",
       "code": "ERB-1701",
+      "city": "Erbil",
       "area": "Daratu",
       "channel": "Mini-market"
     },
     {
       "id": "erb-1702",
       "code": "ERB-1702",
+      "city": "Erbil",
       "area": "Daratu",
       "channel": "Mini-market"
     },
     {
       "id": "erb-1703",
       "code": "ERB-1703",
+      "city": "Erbil",
       "area": "Daratu",
       "channel": "Grocery"
     },
     {
       "id": "erb-1704",
       "code": "ERB-1704",
+      "city": "Erbil",
       "area": "Daratu",
       "channel": "Grocery",
       "priceBias": 1.12
@@ -882,36 +976,42 @@
     {
       "id": "erb-1705",
       "code": "ERB-1705",
+      "city": "Erbil",
       "area": "Daratu",
       "channel": "Grocery"
     },
     {
       "id": "erb-1801",
       "code": "ERB-1801",
+      "city": "Erbil",
       "area": "Kurdistan",
       "channel": "Supermarket"
     },
     {
       "id": "erb-1802",
       "code": "ERB-1802",
+      "city": "Erbil",
       "area": "Kurdistan",
       "channel": "Supermarket"
     },
     {
       "id": "erb-1803",
       "code": "ERB-1803",
+      "city": "Erbil",
       "area": "Kurdistan",
       "channel": "Mini-market"
     },
     {
       "id": "erb-1804",
       "code": "ERB-1804",
+      "city": "Erbil",
       "area": "Kurdistan",
       "channel": "Mini-market"
     },
     {
       "id": "erb-1805",
       "code": "ERB-1805",
+      "city": "Erbil",
       "area": "Kurdistan",
       "channel": "Grocery"
     }

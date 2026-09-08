@@ -24,6 +24,7 @@ import {
   latest,
   type VisitData,
 } from "@/lib/portalData";
+import { governorates, scope, UNLOCK_MESSAGE } from "@/lib/portal";
 
 export function useFilters(): [Filters, (next: Filters) => void] {
   const router = useRouter();
@@ -106,7 +107,7 @@ export default function FilterBar({
 
   return (
     <div className="mb-4 rounded-[14px] border border-line bg-white p-3">
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {/* THE WINDOW SELECTOR WAS REMOVED HERE.
 
             It let a reader switch between the two collection windows.
@@ -119,6 +120,24 @@ export default function FilterBar({
 
             The previous window is still in the payload and still does
             its job: it is the other half of every core-panel delta. */}
+
+        {/* CITY — moved here from the top bar's Market selector.
+
+            It belongs with the other filters because it does the same
+            job: it narrows what the page counts. Sitting in the shell
+            it read as branding, and a reader had to know that changing
+            "Erbil" up there and "District" down here were the same
+            kind of act.
+
+            Locked governorates stay in the list rather than being
+            hidden. A reader deciding whether to expand needs to see
+            what expanding buys, and eighteen absent names say that
+            better than a marketing line. They are disabled, not
+            silently inert. */}
+        <CitySelect
+          value={filters.city}
+          onChange={(city) => onChange({ ...filters, city })}
+        />
 
         {show.includes("brands") && (
           <Group
@@ -159,6 +178,131 @@ export default function FilterBar({
           </button>
         )}
       </div>
+    </div>
+  );
+}
+
+function CitySelect({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (city: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const box = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (box.current && !box.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  const live = governorates.filter((g) => g.active);
+  const summary = value || `All cities (${live.length} live)`;
+
+  return (
+    <div className="relative min-w-0" ref={box}>
+      <span className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+        City
+      </span>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-haspopup="listbox"
+        className={`flex w-full items-center justify-between gap-2 rounded-[10px] border px-3 py-2 text-left text-[13px] transition-colors ${
+          value
+            ? "border-violet-100 bg-violet-050 font-semibold text-violet-ink"
+            : "border-line-strong bg-white text-ink-700 hover:border-ink-400"
+        }`}
+      >
+        <span className="min-w-0 truncate">{summary}</span>
+        <svg
+          viewBox="0 0 16 16"
+          className="h-3.5 w-3.5 shrink-0 opacity-60"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{ transform: open ? "rotate(180deg)" : "none" }}
+          aria-hidden
+        >
+          <path d="M4 6.5 8 10.5 12 6.5" />
+        </svg>
+      </button>
+
+      {open && (
+        <div
+          role="listbox"
+          className="absolute left-0 right-0 z-30 mt-1 max-h-[260px] overflow-y-auto rounded-[10px] border border-line bg-white p-1 shadow-[var(--shadow-pop)]"
+        >
+          <button
+            type="button"
+            role="option"
+            aria-selected={value === ""}
+            onClick={() => {
+              onChange("");
+              setOpen(false);
+            }}
+            className={`flex w-full items-center justify-between gap-2 rounded-md px-2 py-[6px] text-left text-[13px] hover:bg-canvas ${
+              value === "" ? "font-semibold text-ink-900" : "text-ink-700"
+            }`}
+          >
+            All cities
+            <span className="mono text-[11px] text-ink-400">{live.length} live</span>
+          </button>
+
+          <div className="my-1 h-px bg-line" />
+
+          {governorates.map((g) => (
+            <button
+              key={g.name}
+              type="button"
+              role="option"
+              aria-selected={value === g.name}
+              disabled={!g.active}
+              onClick={() => {
+                if (!g.active) return;
+                onChange(g.name);
+                setOpen(false);
+              }}
+              title={g.active ? undefined : UNLOCK_MESSAGE}
+              className={`flex w-full items-center justify-between gap-2 rounded-md px-2 py-[6px] text-left text-[13px] ${
+                g.active
+                  ? `hover:bg-canvas ${value === g.name ? "font-semibold text-ink-900" : "text-ink-700"}`
+                  : "cursor-not-allowed text-ink-400"
+              }`}
+            >
+              <span className="min-w-0 truncate">{g.name}</span>
+              {g.active ? (
+                <span className="mono shrink-0 text-[11px] text-ink-400">
+                  {scope.posUniverse} outlets
+                </span>
+              ) : (
+                <span className="flex shrink-0 items-center gap-1 text-[11px] text-ink-400">
+                  {g.potentialPos} available
+                  <svg viewBox="0 0 16 16" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+                    <rect x="3.5" y="7" width="9" height="6.5" rx="1.5" />
+                    <path d="M5.75 7V5.25a2.25 2.25 0 0 1 4.5 0V7" />
+                  </svg>
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

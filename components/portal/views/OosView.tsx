@@ -198,16 +198,16 @@ export default function OosView() {
 
   return (
     <div>
-      <PageHeader
-        title="Out-of-Stock Alerts"
-        lead="Where you are missing from the shelf, and what it is costing"
-        posCount={view.posCount}
-      />
-
       <FilterBar
         filters={filters}
         onChange={setFilters}
         resultLabel={`${rows.length} open gaps across ${byOutlet.length} outlets`}
+      />
+
+      <PageHeader
+        title="Out-of-Stock Alerts"
+        lead="Where you are missing from the shelf, and what it is costing"
+        posCount={view.posCount}
       />
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">

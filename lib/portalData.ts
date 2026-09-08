@@ -73,6 +73,8 @@ export type Sku = {
 export type Pos = {
   id: string;
   code: string;
+  /* The governorate this outlet sits in. */
+  city: string;
   area: string;
   channel: "Hypermarket" | "Supermarket" | "Mini-market" | "Grocery";
   name?: string;

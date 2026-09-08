@@ -145,16 +145,16 @@ export default function CompetitorsView() {
 
   return (
     <div>
-      <PageHeader
-        title="Competitor Watch"
-        lead="How the rest of the category is performing"
-        posCount={view.posCount}
-      />
-
       <FilterBar
         filters={filters}
         onChange={setFilters}
         resultLabel={`${view.byBrand.length} brands · ${view.posCount} outlets · ${view.totalFacings.toLocaleString()} facings`}
+      />
+
+      <PageHeader
+        title="Competitor Watch"
+        lead="How the rest of the category is performing"
+        posCount={view.posCount}
       />
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">

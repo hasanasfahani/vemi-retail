@@ -257,16 +257,16 @@ export default function ShelfView() {
 
   return (
     <div>
-      <PageHeader
-        title="Shelf"
-        lead="Availability and shelf share, in one view"
-        posCount={view.posCount}
-      />
-
       <FilterBar
         filters={filters}
         onChange={setFilters}
         resultLabel={`${view.posCount} outlets · ${view.totalFacings.toLocaleString()} facings counted`}
+      />
+
+      <PageHeader
+        title="Shelf"
+        lead="Availability and shelf share, in one view"
+        posCount={view.posCount}
       />
 
       {/* mode toggle — same segmented-control pattern used on OOS */}

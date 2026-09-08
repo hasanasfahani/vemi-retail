@@ -217,16 +217,16 @@ export default function PricingView() {
 
   return (
     <div>
-      <PageHeader
-        title="Price Intelligence"
-        lead="Shelf pricing and compliance by SKU"
-        posCount={view.posCount}
-      />
-
       <FilterBar
         filters={filters}
         onChange={setFilters}
         resultLabel={`${view.priceRows.length.toLocaleString()} shelf prices recorded across ${view.posCount} outlets`}
+      />
+
+      <PageHeader
+        title="Price Intelligence"
+        lead="Shelf pricing and compliance by SKU"
+        posCount={view.posCount}
       />
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">

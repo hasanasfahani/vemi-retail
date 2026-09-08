@@ -17,6 +17,8 @@ import { writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+const CITY = "Erbil";
+
 const OUT = join(dirname(fileURLToPath(import.meta.url)), "..", "lib", "data");
 
 /* Deterministic PRNG — same input, same dataset, every run. */
@@ -250,6 +252,11 @@ const POS = DISTRICTS.flatMap((district) =>
     return {
       id: code.toLowerCase(),
       code,
+      /* Every outlet carries its city. One value today, because one
+         governorate is subscribed — but the field exists so the city
+         filter is a real predicate rather than a decorative control
+         that starts filtering the day a second market is sold. */
+      city: CITY,
       area: district.area,
       channel,
       ...(NAMED[code] ? { name: NAMED[code] } : {}),
@@ -464,7 +471,7 @@ const pct = (n, d) => (d === 0 ? 0 : Math.round((n / d) * 1000) / 10);
    DOMAIN PAYLOADS
 ------------------------------------------------------------------ */
 const meta = {
-  city: "Erbil",
+  city: CITY,
   category: "Carbonated Beverages",
   /* Windows, not visits. Each carries the outlets it actually reached,
      so the portal can always separate "we looked and it was fine" from
