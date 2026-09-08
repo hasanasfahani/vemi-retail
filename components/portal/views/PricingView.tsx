@@ -252,11 +252,18 @@ export default function PricingView() {
           value={`${avgOver > 0 ? "+" : ""}${avgOver}%`}
           footnote={`${clientBrand.name} shelf price against list`}
         />
+        {/* Category-wide, and now says so. The tile beside it and the
+            histogram below are client-only, and R5 became client-only
+            too in Phase 16 — leaving this one unlabelled put two
+            different populations under one heading with nothing to
+            tell them apart. The measure is deliberately unchanged: a
+            retailer ignoring list price across every brand is exactly
+            the signal this page exists to surface. */}
         <StatTile
           label="Outlets breaching"
           value={`${outletsFlagged.size}`}
           goodDirection="down"
-          footnote={`${outliers.length} readings over 10% off RRP`}
+          footnote={`${outliers.length} readings over 10% off RRP, all brands`}
         />
       </div>
 
@@ -291,7 +298,7 @@ export default function PricingView() {
         {concentration.rows.length ? (
           <ChartStory
             title="What drives the compliance number"
-            subtitle={`${concentration.headCount} of the ${view.posCount} outlets audited carry ${concentration.headShare}% of every breach`}
+            subtitle={`${concentration.headCount} of the ${view.posCount} outlets audited carry ${concentration.headShare}% of every breach in the category`}
             howToRead="Each bar is one outlet and its length is how many of its shelf prices were more than 10% off RRP. Violet marks the few that carry most of the problem."
             findings={insights.forRules("r5-price-cluster")}
             soWhat={

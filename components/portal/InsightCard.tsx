@@ -12,6 +12,7 @@ import { intensityOf, type Insight } from "@/lib/insights";
 import { readAccessSnapshot } from "@/lib/demoAccess";
 import ActionSheet from "@/components/portal/ActionSheet";
 import { draftFromInsight } from "@/lib/actionDrafts";
+import SnoozeButton from "@/components/portal/SnoozeButton";
 
 const noopSubscribe = () => () => {};
 
@@ -33,13 +34,20 @@ const SEVERITY_CLASS: Record<Insight["severity"], string> = {
 export default function InsightCard({
   insight,
   rank,
+  /* The visit these figures describe, stamped onto a snooze so its
+     "back at the next visit" clause means a real cycle. Absent on
+     surfaces that predate the control; the button hides rather than
+     writing a snooze that could never expire. */
+  visit,
 }: {
   insight: Insight;
   rank?: number;
+  visit?: string;
 }) {
   const [open, setOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [added, setAdded] = useState(false);
+  const [parked, setParked] = useState(false);
   const session = useSyncExternalStore(noopSubscribe, readAccessSnapshot, () => null);
 
   return (
@@ -112,7 +120,21 @@ export default function InsightCard({
             >
               {added ? "Added ✓" : "Turn into action"}
             </button>
+            {visit && (
+              <SnoozeButton
+                insight={insight}
+                visit={visit}
+                onSnoozed={() => setParked(true)}
+              />
+            )}
           </div>
+
+          {parked && (
+            <p className="mt-2 text-[12px] text-ink-400">
+              Parked — it drops off this list on the next load, and returns
+              at the next visit or sooner if it gets worse.
+            </p>
+          )}
 
           {open && (
             <div className="mt-3 rounded-[10px] bg-canvas p-3">

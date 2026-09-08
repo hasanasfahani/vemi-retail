@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "data:build": "node scripts/build-portal-data.mjs",
-    "data:check": "node scripts/check-portal-data.mjs"
+    "data:check": "node scripts/check-portal-data.mjs && vitest run",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "framer-motion": "^12.42.2",
@@ -18,12 +20,13 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/node": "^24.13.3",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^5.0.0"
   }
 }

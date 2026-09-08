@@ -7,6 +7,7 @@ import RankedBar from "@/components/portal/charts/RankedBar";
 import SegmentedMeter from "@/components/portal/charts/SegmentedMeter";
 import type { Decision } from "@/lib/decisions";
 import { draftFromDecision } from "@/lib/actionDrafts";
+import SnoozeButton from "@/components/portal/SnoozeButton";
 import type { DecisionChart, ChartSpec } from "@/lib/decisionCharts";
 
 /* One decision, rendered as a Story Block: the move as the headline,
@@ -131,12 +132,21 @@ export default function DecisionBlock({
                 {" "}
                 — {f.impact.label} at {f.scope.label}
               </span>
-              <Link
-                href={f.evidence.href}
-                className="ml-2 text-[12px] font-semibold text-violet-ink hover:underline"
-              >
-                evidence →
-              </Link>
+              <span className="ml-2 inline-flex flex-wrap items-baseline gap-x-3">
+                <Link
+                  href={f.evidence.href}
+                  className="text-[12px] font-semibold text-violet-ink hover:underline"
+                >
+                  evidence →
+                </Link>
+                {/* Parking is offered per FINDING, not per decision.
+                    "Ignore ERB-105, it is a kiosk" is a real judgement
+                    about one store; "ignore replenishment" is not a
+                    judgement anyone makes. Removing findings also lets
+                    the rollup above re-derive its own impact, which a
+                    decision-level hide could not. */}
+                <SnoozeButton insight={f} visit={visit} />
+              </span>
             </li>
           ))}
         </ul>

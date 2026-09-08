@@ -176,17 +176,37 @@ export const THRESHOLDS = {
      dominance is already a real, single-name story. */
   r4RivalSubstitution: { criticalSharePct: 25, warningSharePct: 15 },
 
-  /* Price-breach cluster, by outlet (>10% off RRP).
-     Observed: 11 of 100 outlets carried ≥1 breach; among the 8 with
-     ≥3 (the reporting floor), counts ran 5–14 (p50 7, p75 10). */
-  r5PriceCluster: { minReadings: 3, criticalCount: 10, warningCount: 5 },
+  /* Price-breach cluster, by outlet (>10% off RRP), counting only the
+     CLIENT's lines — see the rule for why that scope changed.
+
+     Recalibrated on the client distribution, which is an order of
+     magnitude smaller than the category-wide one these thresholds
+     were originally sized against. Observed: 9 of 100 outlets carry
+     ≥1 client breach, 7 carry ≥2, 4 carry ≥3, and exactly one carries
+     4 — the ceiling this dataset produces. A single mispriced line is
+     a reading, not a cluster; two at one store is a pattern worth one
+     phone call. Keeping the old 5/10 bars against client-only counts
+     would have silenced the rule completely. */
+  r5PriceCluster: { minReadings: 2, criticalCount: 4, warningCount: 2 },
 
   /* Client availability in one channel vs the client's own overall
      average (only channels performing worse are flagged).
      Observed: Mini-market −6.5pt (n=112, the single biggest channel
      by volume) and Hypermarket −4.2pt (n=11) were the only channels
-     underperforming the 86.0% overall figure. */
-  r6ChannelGap: { criticalPt: 6, warningPt: 3 },
+     underperforming the 86.0% overall figure.
+
+     `minListings` is a sample-size floor, and it exists because
+     without it this rule reported noise as strategy. Hypermarket
+     carries 11 client listings across 3 outlets, so ONE stockout
+     moves its availability by 9.1pt — three times the warning
+     threshold. The rule duly fired "Hypermarket availability is
+     4.2pt behind your overall average", a channel-wide claim resting
+     on a single empty shelf, and its impact then rounded to zero
+     listings. The floor is set where one listing moves the channel
+     figure by less than the threshold that judges it: below
+     100/warningPt ≈ 33 listings, this rule cannot tell a channel
+     problem from a rounding error, so it declines to speak. */
+  r6ChannelGap: { criticalPt: 6, warningPt: 3, minListings: 33 },
 
   /* Client share gap between chilled-cooler and ambient-shelf facings
      (bidirectional — either fixture type can be the weak one).
@@ -591,10 +611,35 @@ function r4RivalSubstitution(view: FilteredView): Insight[] {
 
 /* ---------- R5 · price breach cluster (own currency: readings) ---------- */
 
+/* Counts the CLIENT's mispriced lines, not the category's.
+
+   This rule was the one exception in the engine — every other rule
+   filters to the client, and R5 counted every brand's breaching
+   reading at an outlet. The consequence was not cosmetic. It ranked
+   ERB-1005 critical on 10 breaching SKUs of which exactly ONE was the
+   client's, and pushed ERB-203 — the outlet with the most client
+   breaches in the panel — down to sixth and a warning. A commercial
+   team reading that page was being sent to argue with a retailer
+   about a rival's shelf price, which is not a conversation they have
+   standing to have, while the store actually mispricing their own
+   lines sat below the fold.
+
+   It also disagreed with the KPI tile directly above it, which has
+   always reported compliance across client SKUs only. Two pricing
+   numbers on one page, different populations, no label saying so.
+
+   The category-wide count survives as CONTEXT rather than as the
+   ranked number: a retailer off RRP on fourteen lines across the
+   category is a different conversation from one off on three, and the
+   rep should know that walking in — it just isn't the measure of what
+   the client can fix. */
 function r5PriceCluster(view: FilteredView): Insight[] {
   const byOutlet = new Map<string, FilteredView["priceRows"]>();
+  const categoryBreaches = new Map<string, number>();
   for (const row of view.priceRows) {
     if (!row.outlier) continue;
+    categoryBreaches.set(row.posId, (categoryBreaches.get(row.posId) ?? 0) + 1);
+    if (skuOf(row.skuId)?.brandId !== clientBrand.id) continue;
     byOutlet.set(row.posId, [...(byOutlet.get(row.posId) ?? []), row]);
   }
 
@@ -612,13 +657,22 @@ function r5PriceCluster(view: FilteredView): Insight[] {
           : "watch";
     if (severity === "watch") continue;
 
+    const category = categoryBreaches.get(posId) ?? rows.length;
+    const wider = category - rows.length;
+
     insights.push({
       id: `r5:${posId}`,
       rule: "r5-price-cluster",
       confidence: "measured",
       severity,
-      headline: `${outlet.code} is pricing ${rows.length} SKUs well off RRP`,
-      detail: `Average deviation ${Math.round(meanDev)}% — one retailer conversation fixes every line at once.`,
+      headline: `${outlet.code} is pricing ${rows.length} of your lines well off RRP`,
+      detail:
+        `Average deviation ${Math.round(meanDev)}% — one retailer conversation fixes every line at once.` +
+        (wider > 0
+          ? ` This store is also off RRP on ${wider} competitor line${
+              wider === 1 ? "" : "s"
+            }, so it is not following list pricing at all.`
+          : ""),
       impact: {
         value: rows.length,
         unit: "readings",
@@ -628,7 +682,7 @@ function r5PriceCluster(view: FilteredView): Insight[] {
       trend: "new",
       evidence: {
         href: `/dashboard/pricing?area=${encodeURIComponent(outlet.area)}`,
-        formula: `Count of shelf-price readings at ${outlet.code} more than 10% off each SKU's RRP.`,
+        formula: `Count of ${clientBrand.name} shelf-price readings at ${outlet.code} more than 10% off RRP (${rows.length} of ${category} breaching readings at this outlet across all brands).`,
         table: {
           columns: ["SKU", "Shelf price", "RRP", "Variance"],
           rows: rows.map((r) => [
@@ -639,7 +693,7 @@ function r5PriceCluster(view: FilteredView): Insight[] {
           ]),
         },
       },
-      entities: { posId, area: outlet.area },
+      entities: { posId, area: outlet.area, brandId: clientBrand.id },
     });
   }
   /* Scope is always one outlet here, so this is equivalent to sorting
@@ -662,7 +716,10 @@ function r6ChannelGap(view: FilteredView): Insight[] {
   const insights: Insight[] = [];
   for (const channel of channels) {
     const chCells = clientListed.filter((c) => posOf(c.posId)?.channel === channel);
-    if (!chCells.length) continue;
+    /* Too small a base to carry a channel-level claim — see the
+       threshold comment. Skipped silently rather than reported as a
+       clean channel, because "we cannot tell" is not "it is fine". */
+    if (chCells.length < THRESHOLDS.r6ChannelGap.minListings) continue;
     const chAvail = (chCells.filter((c) => c.state === "in-stock").length / chCells.length) * 100;
     const deficit = overallAvail - chAvail;
     if (deficit < THRESHOLDS.r6ChannelGap.warningPt) continue;
@@ -1160,9 +1217,29 @@ export function generateInsights(view: FilteredView): InsightReport {
     ...r9DarkOutlets(view),
     ...r10NewGapCluster(view),
     ...r11AssortmentGap(view),
-  ].sort(byIntensity);
+  ]
+    /* A finding worth nothing is not a finding.
 
-  const pricing = r5PriceCluster(view).sort(byIntensity);
+       Every rule states an impact, and the whole product ranks, rolls
+       up and prices findings by that number — so one that arrives at
+       zero is telling the reader "here is a problem costing you
+       nothing", which is either a threshold firing on noise or a
+       formula that has lost its units. R6 shipped exactly that for
+       three releases: a channel-wide warning whose own arithmetic
+       resolved to 0 facing-days.
+
+       R6's real fix is the sample-size floor above; this is the net
+       under it, because the same shape can appear in any rule whose
+       impact is a percentage applied to a small base. Kept as a
+       filter rather than an assertion so a live page degrades by
+       showing one finding fewer rather than by crashing — and
+       asserted in the test suite, where it is allowed to be loud. */
+    .filter((insight) => insight.impact.value > 0)
+    .sort(byIntensity);
+
+  const pricing = r5PriceCluster(view)
+    .filter((insight) => insight.impact.value > 0)
+    .sort(byIntensity);
 
   return { presence, pricing, momentum: computeMomentum() };
 }
