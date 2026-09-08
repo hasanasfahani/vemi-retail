@@ -28,6 +28,8 @@ import { scope, coverage, categories } from "@/lib/portal";
 import { EMPTY_FILTERS, applyFilters } from "@/lib/portalFilters";
 import { generateInsights } from "@/lib/insights";
 import { portfolioRisk, portfolioVerdict } from "@/lib/portfolio";
+import { useActions } from "@/components/portal/useActions";
+import { useVerification } from "@/components/portal/useVerification";
 import { formatImpact } from "@/lib/economics";
 import ImpactBasis from "@/components/portal/ImpactBasis";
 import {
@@ -47,6 +49,10 @@ import {
    altitude confusion the verdict had. Anyone who wants to narrow is
    asking an operator question and the operator pages take filters. */
 export default function OverviewView() {
+  /* Follow-through, from the same derivation Priorities renders — the
+     two surfaces cannot disagree about whether work landed. */
+  const { actions } = useActions();
+  const { summary: follow } = useVerification(actions);
   const view = useMemo(
     () => applyFilters(EMPTY_FILTERS, latest),
     []
@@ -155,6 +161,53 @@ export default function OverviewView() {
               We looked — that is the result.
             </p>
           </>
+        )}
+
+        {/* FOLLOW-THROUGH.
+
+            The verdict says what to do. This says whether the last
+            round of doing it reached the shelf — and it is the half a
+            company-level reader has never been able to see, because
+            the queue could only ever report that someone ticked a box.
+
+            Rendered only once something has actually been re-audited.
+            A 0% with nothing checked would read as total failure when
+            the truth is that we have not been back yet. */}
+        {follow.confirmationRate !== null && (
+          <p className="mt-3 flex items-start gap-1.5 border-t border-line pt-3 text-[13px] text-ink-700">
+            <span
+              className="mt-[6px] inline-block h-[7px] w-[7px] shrink-0 rounded-full"
+              style={{
+                background:
+                  follow.confirmationRate >= 60
+                    ? "var(--color-good)"
+                    : "var(--color-warn)",
+              }}
+              aria-hidden
+            />
+            <span>
+              Of {follow.checkable} closed action
+              {follow.checkable === 1 ? "" : "s"} we could re-check,{" "}
+              <strong className="text-ink-900">
+                {follow.held} {follow.held === 1 ? "was" : "were"} confirmed on
+                shelf
+              </strong>
+              {follow.slipped > 0 &&
+                ` and ${follow.slipped} ${
+                  follow.slipped === 1 ? "was" : "were"
+                } still open`}
+              .
+              {follow.recovered > 0 && (
+                <> {formatImpact(follow.recovered)} back in place.</>
+              )}
+              {follow.awaiting > 0 && (
+                <span className="text-ink-400">
+                  {" "}
+                  {follow.awaiting} more closed but not yet re-audited.
+                </span>
+              )}
+            </span>
+          </p>
         )}
 
         {momentum?.conceding && momentum.rivalBrandId && (

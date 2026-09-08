@@ -10,6 +10,15 @@
 import { useState, useSyncExternalStore } from "react";
 import PageHeader from "@/components/portal/PageHeader";
 import { useActions } from "@/components/portal/useActions";
+import { useVerification } from "@/components/portal/useVerification";
+import { formatImpact } from "@/lib/economics";
+import {
+  OUTCOME_LABEL,
+  OUTCOME_TONE,
+  describeOutcome,
+  type ConfirmationSummary,
+  type Verification,
+} from "@/lib/verification";
 import { readAccessSnapshot } from "@/lib/demoAccess";
 import {
   ACTION_STATUSES,
@@ -41,6 +50,11 @@ export default function PrioritiesView() {
 
   const byStatus = (status: ActionStatus) =>
     (actions ?? []).filter((a) => a.status === status);
+
+  /* What the SHELF did, alongside what the person did. Derived from
+     the engine rather than stored, so it cannot drift out of step with
+     the findings it grades. */
+  const { verifications, summary } = useVerification(actions);
 
   return (
     <>
@@ -105,6 +119,8 @@ export default function PrioritiesView() {
               status={status}
               items={byStatus(status)}
               onUpdate={update}
+              verifications={verifications}
+              summary={status === "Done" ? summary : null}
             />
           ))}
         </div>
@@ -117,10 +133,14 @@ function Column({
   status,
   items,
   onUpdate,
+  verifications,
+  summary,
 }: {
   status: ActionStatus;
   items: ActionRecord[];
   onUpdate: (id: string, patch: UpdatePatch) => Promise<void>;
+  verifications: Map<string, Verification>;
+  summary: ConfirmationSummary | null;
 }) {
   const meta = COLUMN_META[status];
   return (
@@ -132,6 +152,59 @@ function Column({
       </div>
       <p className="mt-0.5 text-[12px] text-ink-400">{meta.hint}</p>
 
+      {/* THE COLUMN THIS FEATURE EXISTS FOR.
+
+          "Done" used to be a count of claims. It now leads with what
+          the shelf said about them — and with the one number that
+          cannot be raised by closing more work, only by the shelf
+          changing. */}
+      {summary && summary.closed > 0 && (
+        <div className="mt-2.5 rounded-[10px] bg-canvas px-3 py-2.5">
+          <div className="flex items-baseline justify-between gap-2">
+            <span className="text-[12px] font-semibold uppercase tracking-wide text-ink-400">
+              Confirmed on shelf
+            </span>
+            <span className="mono text-[15px] font-bold text-ink-900">
+              {summary.confirmationRate === null
+                ? "—"
+                : `${summary.confirmationRate}%`}
+            </span>
+          </div>
+          <p className="mt-1 text-[12px] leading-snug text-ink-500">
+            {summary.confirmationRate === null ? (
+              <>
+                Nothing re-audited yet. A rate here would say the work
+                failed; it has not been checked.
+              </>
+            ) : (
+              <>
+                {summary.held} confirmed
+                {summary.partial > 0 && `, ${summary.partial} partly fixed`}
+                {summary.slipped > 0 && `, ${summary.slipped} still open`} of{" "}
+                {summary.checkable} we could check.
+                {summary.recovered > 0 && (
+                  <>
+                    {" "}
+                    <span className="font-semibold text-ink-700">
+                      {formatImpact(summary.recovered)}
+                    </span>{" "}
+                    back on shelf.
+                  </>
+                )}
+              </>
+            )}
+          </p>
+          {(summary.awaiting > 0 || summary.unverifiable > 0) && (
+            <p className="mt-1 text-[11.5px] text-ink-400">
+              {summary.awaiting > 0 && `${summary.awaiting} awaiting re-audit`}
+              {summary.awaiting > 0 && summary.unverifiable > 0 && " · "}
+              {summary.unverifiable > 0 &&
+                `${summary.unverifiable} not re-audited in two windows`}
+            </p>
+          )}
+        </div>
+      )}
+
       <div className="mt-3 flex flex-col gap-2.5">
         {items.length === 0 && (
           <p className="py-6 text-center text-[13px] text-ink-400">
@@ -139,19 +212,56 @@ function Column({
           </p>
         )}
         {items.map((action) => (
-          <ActionCard key={action.id} action={action} onUpdate={onUpdate} />
+          <ActionCard
+            key={action.id}
+            action={action}
+            onUpdate={onUpdate}
+            verification={verifications.get(action.id) ?? null}
+          />
         ))}
       </div>
     </section>
   );
 }
 
+function OutcomeBand({ verification }: { verification: Verification }) {
+  const tone = OUTCOME_TONE[verification.outcome];
+  const colour =
+    tone === "good"
+      ? "var(--color-good)"
+      : tone === "warn"
+        ? "var(--color-warn)"
+        : tone === "critical"
+          ? "var(--color-critical)"
+          : "var(--color-ink-400)";
+
+  return (
+    <div className="mt-2 rounded-[8px] border border-line bg-white px-2.5 py-2">
+      <span className="flex items-center gap-1.5">
+        <span
+          className="inline-block h-[7px] w-[7px] shrink-0 rounded-full"
+          style={{ background: colour }}
+          aria-hidden
+        />
+        <span className="text-[12px] font-semibold" style={{ color: colour }}>
+          {OUTCOME_LABEL[verification.outcome]}
+        </span>
+      </span>
+      <p className="mt-1 text-[11.5px] leading-snug text-ink-500">
+        {describeOutcome(verification)}
+      </p>
+    </div>
+  );
+}
+
 function ActionCard({
   action,
   onUpdate,
+  verification,
 }: {
   action: ActionRecord;
   onUpdate: (id: string, patch: UpdatePatch) => Promise<void>;
+  verification: Verification | null;
 }) {
   const [busy, setBusy] = useState(false);
   const [ticking, setTicking] = useState<string | null>(null);
@@ -186,6 +296,12 @@ function ActionCard({
           {[action.where, action.rule].filter(Boolean).join(" · ")}
         </p>
       )}
+
+      {/* What the shelf said. Deliberately below the title and above
+          everything else: on a closed card this is the most important
+          line, and it is the only one the person who closed it did not
+          write themselves. */}
+      {verification && <OutcomeBand verification={verification} />}
       {action.notes && (
         <p className="mt-1.5 text-[12px] leading-snug text-ink-500">
           {action.notes}

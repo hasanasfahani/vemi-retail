@@ -81,6 +81,22 @@ export type RuleId =
   | "r11-assortment-gap"
   | "r12-geographic-concentration";
 
+/* The rules the engine currently has. Exported so anything holding a
+   stored rule name — an action created cycles ago — can tell "this
+   finding is gone" from "this rule is gone". */
+export const RULE_IDS: RuleId[] = [
+  "r1-outlet-gaps",
+  "r2-district-deficit",
+  "r3-distribution-gap",
+  "r4-rival-substitution",
+  "r5-price-cluster",
+  "r6-channel-gap",
+  "r7-fixture-imbalance",
+  "r9-dark-outlet",
+  "r11-assortment-gap",
+  "r12-geographic-concentration",
+];
+
 export type EvidenceTable = { columns: string[]; rows: (string | number)[][] };
 
 export type Insight = {
