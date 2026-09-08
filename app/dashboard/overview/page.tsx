@@ -18,6 +18,9 @@ import { chartFor, districtShares } from "@/lib/decisionCharts";
 import { routeDraft } from "@/lib/actionDrafts";
 import { formatImpact } from "@/lib/economics";
 import ImpactBasis from "@/components/portal/ImpactBasis";
+import SnoozedStrip from "@/components/portal/SnoozedStrip";
+import { listSnoozes } from "@/lib/snoozeServer";
+import { splitBySnooze } from "@/lib/snoozeShared";
 import {
   headline,
   clientBrand,
@@ -41,9 +44,47 @@ export const metadata = {
 
    The test this page is built against: an executive who reads only
    this page can name the three decisions they need to make this week. */
-export default function CommandCenterPage() {
+export default async function CommandCenterPage() {
   const view = applyFilters(EMPTY_FILTERS, latest);
-  const report = generateInsights(view);
+  const raw = generateInsights(view);
+
+  /* Parked findings come out BEFORE the rollup, not after.
+
+     Filtering decisions would leave a decision claiming 9 findings
+     while showing 7, and its impact figure would still include the
+     two the reader parked. Removing findings first means the rollup
+     re-derives impact, outlet count and severity from what is
+     actually in play — and a decision whose every finding is parked
+     stops existing rather than rendering empty. */
+  const snoozes = await listSnoozes();
+  const presenceSplit = splitBySnooze(raw.presence, snoozes, view.visit);
+  const pricingSplit = splitBySnooze(raw.pricing, snoozes, view.visit);
+  const report = {
+    ...raw,
+    presence: presenceSplit.visible,
+    pricing: pricingSplit.visible,
+  };
+
+  const parked = [...presenceSplit.asleep, ...pricingSplit.asleep].map(
+    ({ insight, snooze }) => ({
+      snoozeId: snooze.id,
+      headline: snooze.headline || insight.headline,
+      reason: snooze.reason,
+      owner: snooze.owner,
+      snoozedAt: snooze.snoozedAt,
+      impactLabel: insight.impact.label,
+      scopeLabel: insight.scope.label,
+      untilVisit: snooze.untilVisit,
+    })
+  );
+  const woken = [...presenceSplit.woken, ...pricingSplit.woken].map(
+    ({ insight, snooze, reason }) => ({
+      headline: insight.headline,
+      owner: snooze.owner,
+      wake: reason,
+    })
+  );
+
   const { decisions, reprice } = buildDecisions(report);
   const { momentum, pricing } = report;
 
@@ -178,6 +219,8 @@ export default function CommandCenterPage() {
           </p>
         )}
       </section>
+
+      <SnoozedStrip parked={parked} woken={woken} />
 
       {/* KPI row — unchanged, still the fastest orientation on the page */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -375,7 +418,7 @@ export default function CommandCenterPage() {
           {pricing.length ? (
             <ul>
               {pricing.slice(0, 3).map((insight) => (
-                <InsightCard key={insight.id} insight={insight} />
+                <InsightCard key={insight.id} insight={insight} visit={view.visit} />
               ))}
             </ul>
           ) : (
