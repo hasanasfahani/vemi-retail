@@ -214,7 +214,16 @@ export default function OosView() {
       for (const r of row.rivalsInStock) {
         rivals.set(r.brandId, brandName(r.brandId));
         const key = `${myPack}|${r.brandId}`;
-        cellMap.set(key, (cellMap.get(key) ?? 0) + r.facings);
+        /* Facing-DAYS, not facings.
+
+           Raw facings answers "how much space right now"; the rest of
+           this product counts space multiplied by the time it was
+           held, and two charts on one page using different units is
+           how they end up contradicting each other. Measured in
+           facings this matrix named 7UP; measured the way R4 measures,
+           it names Fanta. Same data, and only one of them agreed with
+           the engine. */
+        cellMap.set(key, (cellMap.get(key) ?? 0) + r.facings * row.daysOut);
       }
     }
     const rivalTotals = new Map<string, number>();
@@ -413,7 +422,7 @@ export default function OosView() {
             <ChartStory
               title="Which rival takes which pack"
               subtitle="Rival facings standing in your gaps, by your pack format"
-              howToRead="Rows are your pack formats; columns are the rival brands holding that space when you are empty. Darker means more facings taken. A brand can lead overall and still lose a particular pack."
+              howToRead="Rows are your pack formats; columns are the rival brands holding that space when you are empty. Darker means more facing-days taken — space multiplied by how long you were out. A brand can lead the category overall and still not be the one taking a given pack."
               findings={insights.forRules("r4-rival-substitution")}
               clean="No rival is consistently taking a particular format."
               allClear="No pattern by pack"
@@ -421,7 +430,7 @@ export default function OosView() {
               actionLabel="Create defence action"
               visit={view.visit}
               table={{
-                columns: ["Your pack", "Rival", "Facings taken"],
+                columns: ["Your pack", "Rival", "Facing-days taken"],
                 rows: substitution.cells
                   .slice()
                   .sort((a, b) => b.value - a.value)
@@ -436,7 +445,7 @@ export default function OosView() {
                 rows={substitution.rows}
                 cols={substitution.cols}
                 cells={substitution.cells}
-                unitNoun="facings"
+                unitNoun="facing-days"
                 rowNoun="pack formats"
                 colNoun="rival brands"
               />
@@ -696,5 +705,7 @@ function substitutionSoWhat(sub: {
   const [pack, brand] = key.split("|");
   const packLabel = sub.rows.find((r) => r.id === pack)?.label ?? pack;
   const brandLabel = sub.cols.find((c) => c.id === brand)?.label ?? brand;
-  return `${brandLabel} takes the most space in your ${packLabel} gaps — ${facings} facings. Defend that format first, whoever leads the category overall.`;
+  return `${brandLabel} takes the most space in your ${packLabel} gaps — ${Math.round(
+    facings
+  ).toLocaleString()} facing-days. Defend that format first, whoever leads the category overall.`;
 }

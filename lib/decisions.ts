@@ -148,18 +148,25 @@ function buildHeadline(
           "Your share of one fixture type trails the other, which is a space negotiation rather than a replenishment problem.",
       };
     case "defend": {
+      /* R4's own rival, not the share-mover.
+
+         Momentum names whoever gained share this cycle; R4 names
+         whoever is standing in your gaps, by pack. They are different
+         questions and often different brands, and the DEFENCE decision
+         is about the second — you defend a fixture, not a league
+         table. The momentum line keeps its own place on the page. */
       const rival =
-        momentum?.rivalBrandId ??
         findings[0]?.entities.brandId ??
+        momentum?.rivalBrandId ??
         null;
       const name = rival ? brandName(rival) : "a rival";
       return {
         headline: `Defend your position against ${name}`,
-        detail: momentum?.conceding
-          ? `${name} gained ${momentum.rivalDelta}pt of shelf share this cycle while you lost ${Math.abs(
-              momentum.clientDelta
-            )}pt, and is taking space where you run out.`
-          : `${name} is taking the space where you go out of stock.`,
+        /* The finding already states which pack and how much; repeating
+           a share statistic here would answer a question the decision
+           is not about. */
+        detail:
+          findings[0]?.detail ?? `${name} is taking the space where you go out of stock.`,
       };
     }
   }
