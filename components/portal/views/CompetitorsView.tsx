@@ -9,12 +9,20 @@ import FilterBar, {
 import StatTile from "@/components/portal/charts/StatTile";
 import RankedBar from "@/components/portal/charts/RankedBar";
 import ChartStory from "@/components/portal/ChartStory";
+import DivergingBar from "@/components/portal/charts/DivergingBar";
 import { brandShareWatchTarget } from "@/lib/watchTargets";
 import { useViewInsights } from "@/components/portal/useViewInsights";
 import Delta from "@/components/portal/charts/Delta";
 import { scope } from "@/lib/portal";
 import { applyFilters } from "@/lib/portalFilters";
-import { brands, brandName, clientBrand, competitors } from "@/lib/portalData";
+import {
+  brands,
+  brandName,
+  clientBrand,
+  competitors,
+  posOf,
+  skuOf,
+} from "@/lib/portalData";
 
 export default function CompetitorsView() {
   const [filters, setFilters] = useFilters();
@@ -64,6 +72,46 @@ export default function CompetitorsView() {
     emphasis: c.isClient,
     meta: `${c.skuCount} SKUs tracked`,
   }));
+
+  /* You against the brand actually beating you, district by district.
+     Citywide share says who is ahead; this says WHERE, which is the
+     form a sales director can act on — territory is how reps are
+     deployed. */
+  const headToHead = useMemo(() => {
+    const rival = view.byBrand.find((b) => !b.isClient);
+    if (!rival || !view.client) return null;
+    const acc = new Map<string, { mine: number; theirs: number; total: number; outlets: Set<string> }>();
+    for (const cell of view.cells) {
+      if (cell.state !== "in-stock") continue;
+      const area = posOf(cell.posId)?.area;
+      if (!area) continue;
+      const brandId = skuOf(cell.skuId)?.brandId;
+      const e = acc.get(area) ?? { mine: 0, theirs: 0, total: 0, outlets: new Set<string>() };
+      e.total += cell.facings;
+      e.outlets.add(cell.posId);
+      if (brandId === clientBrand.id) e.mine += cell.facings;
+      if (brandId === rival.brandId) e.theirs += cell.facings;
+      acc.set(area, e);
+    }
+    const rows = [...acc.entries()]
+      .filter(([, e]) => e.total > 0)
+      .map(([area, e]) => {
+        const gap =
+          ((e.mine - e.theirs) / e.total) * 100;
+        return {
+          id: area,
+          label: area,
+          delta: Math.round(gap * 10) / 10,
+          severity: (gap < -5 ? "critical" : gap < 0 ? "warning" : null) as
+            | "critical"
+            | "warning"
+            | null,
+          meta: `${e.outlets.size} outlets`,
+        };
+      })
+      .sort((a, b) => a.delta - b.delta);
+    return { rows, rivalName: brandName(rival.brandId), losing: rows.filter((r) => r.delta < 0).length };
+  }, [view]);
 
   const shareWatchTargets = useMemo(
     () =>
@@ -194,6 +242,41 @@ export default function CompetitorsView() {
           </section>
         )}
       </div>
+
+      {headToHead && headToHead.rows.length ? (
+        <div className="mt-4">
+          <ChartStory
+            title={`You against ${headToHead.rivalName}, district by district`}
+            subtitle={`Your facings minus theirs, as a share of each district · ${scope.dataAsOf}`}
+            howToRead={`Each row is a district. The centre line is level pegging; bars to the right mean you hold more facings than ${headToHead.rivalName} there, to the left they hold more. Colour marks where the gap has opened widest.`}
+            findings={insights.forRules("r2-district-deficit", "r4-rival-substitution")}
+            clean={`You are ahead of ${headToHead.rivalName} in every district in this selection.`}
+            allClear="Ahead everywhere here"
+            soWhat={
+              headToHead.losing
+                ? `${headToHead.rivalName} is ahead of you in ${headToHead.losing} district${headToHead.losing === 1 ? "" : "s"}. Territory is how reps are deployed, so this is the map that decides where they go.`
+                : `You lead ${headToHead.rivalName} across the board — worth knowing which districts are closest before that changes.`
+            }
+            actionLabel="Create defence action"
+            visit={view.visit}
+            table={{
+              columns: ["District", `vs ${headToHead.rivalName}`, "Outlets"],
+              rows: headToHead.rows.map((r) => [
+                r.label,
+                `${r.delta >= 0 ? "+" : ""}${r.delta}pt`,
+                r.meta ?? "",
+              ]),
+            }}
+          >
+            <DivergingBar
+              rows={headToHead.rows}
+              baselineLabel="level pegging"
+              unit="pt"
+              collapseMiddle={{ keepWorst: 5, keepBest: 3 }}
+            />
+          </ChartStory>
+        </div>
+      ) : null}
 
       <section className="mt-4 overflow-hidden rounded-[18px] border border-line bg-white">
         <div className="border-b border-line p-5 sm:p-6">

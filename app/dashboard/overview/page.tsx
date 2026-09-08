@@ -8,6 +8,7 @@ import DecisionBlock from "@/components/portal/DecisionBlock";
 import ChartFrame from "@/components/portal/ChartFrame";
 import DecisionAction from "@/components/portal/DecisionAction";
 import DivergingBar from "@/components/portal/charts/DivergingBar";
+import CompositionBar from "@/components/portal/charts/CompositionBar";
 import { districtWatchTarget, kpiWatchTarget } from "@/lib/watchTargets";
 import { scope } from "@/lib/portal";
 import { EMPTY_FILTERS, applyFilters } from "@/lib/portalFilters";
@@ -218,6 +219,33 @@ export default function CommandCenterPage() {
         />
       </div>
 
+      {/* What KIND of cycle this is, before any card is read. The
+          decision list answers "which is biggest"; this answers
+          "is this a replenishment problem or a range problem", which
+          is the question an executive actually decides against. */}
+      {decisions.length > 1 && (
+        <section className="mt-4 rounded-[18px] border border-line bg-white p-5 sm:p-6">
+          <h2 className="t-h3">What kind of cycle this is</h2>
+          <p className="mt-1 mb-4 text-sm text-ink-500">
+            Every facing-day at stake, split by the move that would
+            recover it.
+          </p>
+          <CompositionBar
+            segments={decisions.map((d) => ({
+              id: d.id,
+              label: d.headline,
+              value: d.impact.value,
+            }))}
+            unitNoun="facing-days"
+          />
+          <p className="mt-3 border-t border-line pt-3 text-[12.5px] text-ink-500">
+            <span className="font-semibold text-ink-700">How to read this. </span>
+            One bar, split by decision type — the widest band is the kind of
+            problem this cycle mostly is.
+          </p>
+        </section>
+      )}
+
       {/* Market shape — R12, given its own slot rather than a place in
           the decision ranking.
 
@@ -249,6 +277,7 @@ export default function CommandCenterPage() {
               rows={districtRows}
               baselineLabel={`your citywide ${clientBrand.name} share`}
               unit="pt"
+              collapseMiddle={{ keepWorst: 6, keepBest: 3 }}
               watchTargets={districtWatchTargets}
             />
           </ChartFrame>
@@ -277,7 +306,7 @@ export default function CommandCenterPage() {
         </p>
       )}
 
-      <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
         {/* pricing keeps its own currency and its own block */}
         <section className="min-w-0 rounded-[18px] border border-line bg-white p-5 sm:p-6">
           <div className="mb-1 flex flex-wrap items-baseline justify-between gap-2">

@@ -224,6 +224,7 @@ export default async function DigestPage() {
               rows={districtRows}
               baselineLabel={`your citywide ${clientBrand.name} share`}
               unit="pt"
+              collapseMiddle={{ keepWorst: 6, keepBest: 3 }}
               watchTargets={districtWatchTargets}
             />
           </ChartFrame>
@@ -243,7 +244,7 @@ export default async function DigestPage() {
         ))}
       </div>
 
-      <div className="mt-4 grid gap-4 xl:grid-cols-2">
+      <div className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-4 xl:grid-cols-2">
         {/* pricing — its own currency, kept to a line in the digest */}
         <section className="min-w-0 rounded-[18px] border border-line bg-white p-5 sm:p-6">
           <h2 className="t-h3">{reprice ? reprice.headline : "Pricing watch"}</h2>

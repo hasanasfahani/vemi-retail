@@ -68,7 +68,7 @@ function gapFill(rate: number) {
 }
 
 type Hover = { posId: string; skuId: string; state: CellState; facings: number };
-type AreaHover = { area: string; skuId: string; out: number; listed: number };
+type AreaHover = { area: string; skuId: string; label: string; out: number; listed: number };
 
 export default function AvailabilityHeatmap({
   cells,
@@ -83,6 +83,13 @@ export default function AvailabilityHeatmap({
   const [areaHover, setAreaHover] = useState<AreaHover | null>(null);
   const [drilled, setDrilled] = useState<string | null>(null);
   const [problemsOnly, setProblemsOnly] = useState(false);
+  /* Aggregate-then-drill, applied to the OTHER axis. The district
+     rollup fixed 100 rows; twenty SKU columns in arbitrary order have
+     the same problem in miniature — you cannot find the worst pack
+     without reading every column header. Rolling columns up to brands
+     turns 20 into 7, and sorting by problem density puts the worst on
+     the left where reading starts. */
+  const [byBrand, setByBrand] = useState(false);
 
   /* One lookup pass rather than a find() per cell: at 100 × 20 the
      nested scan is 2,000 linear searches on every render. */
@@ -95,6 +102,39 @@ export default function AvailabilityHeatmap({
     [outlets]
   );
 
+  /* Columns: either every SKU, or one per brand — in both cases
+     ordered worst-first, so the eye lands on the problem. */
+  const columns = useMemo(() => {
+    const gapRate = new Map<string, { out: number; listed: number }>();
+    for (const cell of cells) {
+      if (cell.state === "not-listed") continue;
+      const key = byBrand ? skuOf(cell.skuId)?.brandId ?? "" : cell.skuId;
+      const e = gapRate.get(key) ?? { out: 0, listed: 0 };
+      e.listed += 1;
+      if (cell.state === "out-of-stock") e.out += 1;
+      gapRate.set(key, e);
+    }
+    const base = byBrand
+      ? [...new Set(skus.map((s) => s.brandId))].map((id) => ({
+          id,
+          label: brandOf(id)?.name ?? id,
+          skuIds: skus.filter((s) => s.brandId === id).map((s) => s.id),
+        }))
+      : skus.map((s) => ({ id: s.id, label: s.name, skuIds: [s.id] }));
+
+    return base.sort((a, b) => {
+      const ra = gapRate.get(a.id);
+      const rb = gapRate.get(b.id);
+      const va = ra?.listed ? ra.out / ra.listed : -1;
+      const vb = rb?.listed ? rb.out / rb.listed : -1;
+      return vb - va;
+    });
+  }, [cells, skus, byBrand]);
+
+  /* Drilling into outlets always shows individual SKUs: at that level
+     a cell is a stock state and a facing count, and averaging those
+     across a brand would invent a number the audit never recorded. */
+
   /* District × SKU: out of the listings this district holds for a SKU,
      how many are empty right now. */
   const rollup = useMemo(() => {
@@ -102,14 +142,15 @@ export default function AvailabilityHeatmap({
     for (const cell of cells) {
       const area = areaOf.get(cell.posId);
       if (!area || cell.state === "not-listed") continue;
-      const key = `${area}|${cell.skuId}`;
+      const colId = byBrand ? skuOf(cell.skuId)?.brandId ?? "" : cell.skuId;
+      const key = `${area}|${colId}`;
       const entry = map.get(key) ?? { out: 0, listed: 0 };
       entry.listed += 1;
       if (cell.state === "out-of-stock") entry.out += 1;
       map.set(key, entry);
     }
     return map;
-  }, [cells, areaOf]);
+  }, [cells, areaOf, byBrand]);
 
   const areas = useMemo(() => {
     const counts = new Map<string, number>();
@@ -118,8 +159,8 @@ export default function AvailabilityHeatmap({
       .map(([area, count]) => {
         let out = 0;
         let listed = 0;
-        for (const sku of skus) {
-          const e = rollup.get(`${area}|${sku.id}`);
+        for (const col of columns) {
+          const e = rollup.get(`${area}|${col.id}`);
           if (!e) continue;
           out += e.out;
           listed += e.listed;
@@ -127,7 +168,7 @@ export default function AvailabilityHeatmap({
         return { area, outlets: count, out, listed };
       })
       .sort((a, b) => b.out / (b.listed || 1) - a.out / (a.listed || 1));
-  }, [outlets, skus, rollup]);
+  }, [outlets, columns, rollup]);
 
   const hasGap = useMemo(
     () => (posId: string) =>
@@ -152,6 +193,7 @@ export default function AvailabilityHeatmap({
     : scopedOutlets;
   const visibleAreas = problemsOnly ? areas.filter((a) => a.out > 0) : areas;
   const inOutletMode = drilled !== null;
+  const outletColumns = skus;
 
   return (
     <div>
@@ -178,6 +220,20 @@ export default function AvailabilityHeatmap({
               {inOutletMode ? scopedOutlets.length : areas.length})
             </span>
           </label>
+          {!inOutletMode && (
+          <label className="flex items-center gap-1.5 text-[12.5px] text-ink-700">
+            <input
+              type="checkbox"
+              checked={byBrand}
+              onChange={(e) => setByBrand(e.target.checked)}
+              className="h-[14px] w-[14px] accent-[var(--color-violet)]"
+            />
+            Group SKUs by brand{" "}
+            <span className="text-ink-400">
+              ({columns.length} columns)
+            </span>
+          </label>
+          )}
           {inOutletMode && (
             <button
               type="button"
@@ -209,18 +265,21 @@ export default function AvailabilityHeatmap({
           <thead>
             <tr>
               <th className="sticky left-0 top-0 z-20 bg-white" />
-              {skus.map((sku) => (
+              {(inOutletMode
+                ? outletColumns.map((s) => ({ id: s.id, label: s.name }))
+                : columns
+              ).map((col) => (
                 <th
-                  key={sku.id}
+                  key={col.id}
                   className="sticky top-0 z-10 h-[92px] w-[22px] bg-white p-0 align-bottom"
-                  title={sku.name}
+                  title={col.label}
                 >
                   <div className="flex h-full items-end justify-center">
                     <span
                       className="whitespace-nowrap text-[11px] font-medium text-ink-500"
                       style={{ writingMode: "vertical-rl", rotate: "180deg" }}
                     >
-                      {sku.name}
+                      {col.label}
                     </span>
                   </div>
                 </th>
@@ -237,7 +296,7 @@ export default function AvailabilityHeatmap({
                     >
                       <OutletButton posId={outlet.id} className="!text-[12px]" />
                     </th>
-                    {skus.map((sku) => {
+                    {outletColumns.map((sku) => {
                       const cell = index.get(`${outlet.id}|${sku.id}`);
                       if (!cell) return <td key={sku.id} />;
                       const isHover =
@@ -307,27 +366,28 @@ export default function AvailabilityHeatmap({
                         </span>
                       </button>
                     </th>
-                    {skus.map((sku) => {
-                      const e = rollup.get(`${area.area}|${sku.id}`);
+                    {columns.map((col) => {
+                      const e = rollup.get(`${area.area}|${col.id}`);
                       const rate = e && e.listed ? e.out / e.listed : 0;
                       const isHover =
                         areaHover?.area === area.area &&
-                        areaHover?.skuId === sku.id;
+                        areaHover?.skuId === col.id;
                       return (
-                        <td key={sku.id} className="p-0">
+                        <td key={col.id} className="p-0">
                           <div
                             tabIndex={0}
                             role="img"
-                            aria-label={`${area.area}, ${sku.name}: ${
+                            aria-label={`${area.area}, ${col.label}: ${
                               e
                                 ? `${e.out} of ${e.listed} listings out of stock`
                                 : "not listed"
                             }`}
-                            title={`${area.area} · ${sku.name}`}
+                            title={`${area.area} · ${col.label}`}
                             onMouseEnter={() =>
                               setAreaHover({
                                 area: area.area,
-                                skuId: sku.id,
+                                skuId: col.id,
+                                label: col.label,
                                 out: e?.out ?? 0,
                                 listed: e?.listed ?? 0,
                               })
@@ -336,7 +396,8 @@ export default function AvailabilityHeatmap({
                             onFocus={() =>
                               setAreaHover({
                                 area: area.area,
-                                skuId: sku.id,
+                                skuId: col.id,
+                                label: col.label,
                                 out: e?.out ?? 0,
                                 listed: e?.listed ?? 0,
                               })
@@ -396,7 +457,7 @@ export default function AvailabilityHeatmap({
           <div className="text-[13px]">
             <span className="font-semibold text-ink-900">{areaHover.area}</span>
             <span className="text-ink-400"> · </span>
-            <span className="text-ink-700">{skuName(areaHover.skuId)}</span>
+            <span className="text-ink-700">{areaHover.label}</span>
             <span className="text-ink-400"> · </span>
             <span
               className="font-semibold"

@@ -54,8 +54,12 @@ export default function ChartFrame({
 }: Props) {
   const [showTable, setShowTable] = useState(false);
 
+  /* min-w-0 on the frame matters: these sit inside grids and flex
+     columns, and a track sized by its content rather than by the page
+     is how a chart ends up clipped twenty pixels off-screen on a
+     phone. */
   return (
-    <section className="overflow-hidden rounded-[18px] border border-line bg-white">
+    <section className="min-w-0 overflow-hidden rounded-[18px] border border-line bg-white">
       <div className="flex flex-wrap items-start justify-between gap-3 px-5 pt-5 sm:px-6">
         <div className="min-w-0">
           <h3 className="t-h3 !text-[15px]">{title}</h3>
