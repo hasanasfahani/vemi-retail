@@ -1,3 +1,8 @@
+> **Superseded in part.** The Action Center and the Performance
+> heroes were redesigned after this document; see
+> [FOLLOW-UP-REDESIGN.md](./FOLLOW-UP-REDESIGN.md), which wins where
+> the two disagree.
+
 
 # Vemi Client Portal — Interactive Frontend Demo PRD
 

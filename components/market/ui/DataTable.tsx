@@ -2,7 +2,8 @@
 
 /* The one table.
 
-   POS Explorer, Performance, Competition, Action Center and Reports all
+   POS Explorer, Performance, Competition, Reports and the follow-up
+   queue all
    render lists of the same shape — an entity, some measures, a state —
    and each of them used to be a chance to invent sorting again. This is
    the shared answer: sort, search, paginate, export, and click a row

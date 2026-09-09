@@ -252,7 +252,7 @@ export default function PosDrawer({
                 href="/portal/actions"
                 className="mt-2.5 inline-block text-[12px] font-semibold text-violet-ink hover:underline"
               >
-                Track these in the Action Center
+                Track these in the Follow-up Audit Center
               </Link>
             </section>
 

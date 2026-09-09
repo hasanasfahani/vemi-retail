@@ -246,9 +246,9 @@ function Explorer({ view, query }: { view: MarketView; query: string }) {
           footnote="At least one threshold breached on the visit"
         />
         <StatCard
-          label="Queued for revisit"
+          label="In a follow-up"
           value={flagged.size}
-          footnote="Flagged here or scheduled from the Action Center"
+          footnote="Flagged here or requested from a Performance tab"
         />
         <StatCard label="In this view" value={shown.length} footnote="After the filters below" />
       </div>
@@ -293,7 +293,7 @@ function Explorer({ view, query }: { view: MarketView; query: string }) {
               onChange={(e) => setOnlyFlagged(e.target.checked)}
               className="h-3.5 w-3.5 accent-[color:var(--color-violet)]"
             />
-            Queued for revisit
+            In a follow-up
           </label>
         </div>
 

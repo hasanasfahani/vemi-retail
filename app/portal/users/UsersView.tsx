@@ -3,11 +3,10 @@
 /* PAGE 11 · Users & Settings.
 
    Two lists and a set of switches. The users are the same people the
-   Action Center assigns work to — one list of who exists, so a name on
-   a card and a name in this table cannot drift apart — and each row
-   states how many open actions that person is actually carrying,
-   because a users page that cannot answer "who is busy?" is a
-   directory rather than a settings page.
+   workspace knows. Follow-up requests are not assigned to a person —
+   a request is the company asking Vemi to go back, not a task someone
+   owns — so this page lists who has access and what each role covers,
+   and does not invent an assignee.
 
    The auditors are separate and come from the audit data itself: they
    are Vemi's field team, not the client's staff, and conflating the
@@ -17,7 +16,7 @@ import { useEffect, useMemo, useState } from "react";
 import PageShell from "@/components/market/PageShell";
 import { Card, DataTable, StatCard, Toasts, useToasts, type Column } from "@/components/market/ui";
 import Badge from "@/components/market/ui/Badge";
-import { useActions } from "@/components/market/useActions";
+import { useFollowUps } from "@/components/market/useFollowUps";
 import {
   DEFAULT_NOTIFICATIONS, NOTIFICATIONS, USERS, loadNotifications, saveNotifications,
   type NotificationId, type User,
@@ -30,7 +29,7 @@ export default function UsersView() {
 }
 
 function Users({ view }: { view: MarketView }) {
-  const board = useActions();
+  const queue = useFollowUps();
   const { toasts, push, dismiss } = useToasts();
   const [notifications, setNotifications] =
     useState<Record<NotificationId, boolean>>(DEFAULT_NOTIFICATIONS);
@@ -56,18 +55,16 @@ function Users({ view }: { view: MarketView }) {
     push(`${meta.label} ${next[id] ? "on" : "off"}.`, "info");
   };
 
-  /* Open work per person, read straight off the board. */
-  const load = useMemo(() => {
-    const counts = new Map<string, { open: number; critical: number }>();
-    for (const action of board.actions ?? []) {
-      if (action.stage === "resolved" || action.stage === "verified") continue;
-      const held = counts.get(action.owner) ?? { open: 0, critical: 0 };
-      held.open += 1;
-      if (action.priority === "high") held.critical += 1;
-      counts.set(action.owner, held);
-    }
-    return counts;
-  }, [board.actions]);
+  /* Follow-up requests live in flight. They are not assigned to a
+     person — a request is the company asking Vemi to go back, not a
+     task somebody owns — so this counts the queue rather than
+     apportioning it. The Kanban that used to hand every finding an
+     owner and a due date is gone, and inventing an assignee here would
+     bring it back through the side door. */
+  const live = useMemo(
+    () => (queue.requests ?? []).filter((r) => !r.cancelled),
+    [queue.requests]
+  );
 
   const columns: Column<User>[] = [
     {
@@ -101,27 +98,6 @@ function Users({ view }: { view: MarketView }) {
       ),
     },
     {
-      id: "open",
-      header: "Open actions",
-      align: "right",
-      sortValue: (u) => load.get(u.role)?.open ?? 0,
-      csv: (u) => load.get(u.role)?.open ?? 0,
-      render: (u) => {
-        const held = load.get(u.role);
-        if (!held) return <span className="text-[11.5px] text-ink-400">None</span>;
-        return (
-          <span className="mono text-ink-900">
-            {held.open}
-            {held.critical > 0 && (
-              <span className="ml-1.5 text-[11px] text-[color:var(--color-critical)]">
-                {held.critical} critical
-              </span>
-            )}
-          </span>
-        );
-      },
-    },
-    {
       id: "status",
       header: "Status",
       sortValue: (u) => u.status,
@@ -139,9 +115,9 @@ function Users({ view }: { view: MarketView }) {
         <StatCard label="Client users" value={USERS.length} footnote="People with access to this workspace" />
         <StatCard label="Field auditors" value={auditors.length} footnote={`Covering ${governorates.length} governorates on this contract`} />
         <StatCard
-          label="Open actions"
-          value={[...load.values()].reduce((s, v) => s + v.open, 0)}
-          footnote="Across every owner"
+          label="Follow-up requests"
+          value={live.length}
+          footnote="Raised and not cancelled, across the workspace"
         />
         <StatCard label="Alerts on" value={`${on} of ${NOTIFICATIONS.length}`} footnote="Notification types enabled in this browser" />
       </div>
@@ -150,13 +126,13 @@ function Users({ view }: { view: MarketView }) {
         title="Users"
         lead="Everyone with access to the Pepsi Iraq workspace, and what each is carrying."
         padded={false}
-        footnote="Ownership on the Action Center points at this list, so a name on a card and a name here cannot drift apart."
+        footnote="The one list of people this workspace knows. Follow-up requests are raised by the company rather than assigned to an individual, so nothing here carries a task queue."
       >
         <DataTable
           rows={USERS}
           columns={columns}
           rowKey={(u) => u.id}
-          defaultSort={{ id: "open", dir: "desc" }}
+          defaultSort={{ id: "name", dir: "asc" }}
           exportName="workspace-users"
           pageSize={10}
         />

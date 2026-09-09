@@ -15,7 +15,6 @@ import {
 import { generateInsights, THRESHOLDS } from "./insights";
 import { posRows, kpiTargetsForDrawer } from "./pos";
 import { buildReport } from "./report";
-import { OWNERS, seedActions } from "./actions";
 
 const view = applyFilters(EMPTY_FILTERS, current);
 
@@ -96,17 +95,14 @@ describe("targets", () => {
 });
 
 describe("users", () => {
-  it("is the one list ownership points at", async () => {
-    const roles = USERS.map((u) => u.role);
-    expect(OWNERS).toEqual(roles);
-
-    const { loadMonth } = await import("./index");
-    const actions = seedActions(await loadMonth("2026-08"));
-    for (const action of actions) {
-      expect(roles).toContain(action.owner);
-      /* And every owner resolves to a person, not a bare role. */
-      expect(userName(action.owner)).not.toBe(action.owner);
-    }
+  it("is the one list of people the workspace knows", () => {
+    /* Ownership used to point here from the Kanban's owner column. The
+       Kanban is gone — a follow-up request is the company asking Vemi
+       to go back, not a task somebody owns — so the list stands on its
+       own and nothing invents an assignee. */
+    expect(USERS.length).toBeGreaterThanOrEqual(4);
+    expect(new Set(USERS.map((u) => u.role)).size).toBe(USERS.length);
+    for (const user of USERS) expect(userName(user.role)).toBe(user.name);
   });
 
   it("gives every user an access level and a status", () => {

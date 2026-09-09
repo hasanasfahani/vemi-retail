@@ -9,7 +9,7 @@ export type NavGroup = { label: string; items: NavItem[] };
 
 export type IconName =
   | "dashboard" | "performance" | "competition" | "insights"
-  | "actions" | "pos" | "revisit" | "report" | "trends"
+  | "actions" | "pos" | "report" | "trends"
   | "setup" | "users";
 
 export const NAV: NavGroup[] = [

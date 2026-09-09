@@ -135,7 +135,7 @@ function Insights({ view }: { view: MarketView }) {
           <p className="mt-2.5 text-[12px] text-ink-500">
             Showing the 9 highest-ranked of {shown.length.toLocaleString()}.{" "}
             <Link href="/portal/actions" className="font-semibold text-violet-ink hover:underline">
-              Work the full queue in the Action Center
+              Raise a follow-up audit from the Performance tabs
             </Link>
             .
           </p>

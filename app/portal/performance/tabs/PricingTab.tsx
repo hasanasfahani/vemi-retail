@@ -15,7 +15,7 @@ import RequestFollowUp from "@/components/market/RequestFollowUp";
 import { RankedBars, brandColor } from "@/components/market/charts";
 import Badge from "@/components/market/ui/Badge";
 import { pricing } from "@/lib/market/performance";
-import { brandOf, governorateName, clientBrand, contract } from "@/lib/market";
+import { brandOf, governorateName, contract } from "@/lib/market";
 import { useTargets } from "@/components/market/useTargets";
 import { issuesFor, scopeOf } from "@/lib/market/issues";
 import type { MarketView } from "@/lib/market/filters";
