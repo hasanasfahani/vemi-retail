@@ -1,5 +1,7 @@
 "use client";
 
+import { useMemo } from "react";
+
 /* POSM — is the brand supported at the point of sale.
 
    The weakest KPI in this market, and the cheapest to fix: the product
@@ -7,22 +9,28 @@
    with a boot full of material closes the gap in one visit. */
 
 import { Card, StatCard } from "@/components/market/ui";
-import Headline from "@/components/market/Headline";
+import KpiGapBar from "@/components/market/KpiGapBar";
+import DownloadGaps from "@/components/market/DownloadGaps";
 import ShelfCard from "@/components/market/ShelfCard";
 import { RankedBars } from "@/components/market/charts";
 import Badge from "@/components/market/ui/Badge";
-import { posm, movement } from "@/lib/market/performance";
+import { posm } from "@/lib/market/performance";
 import { posmTypes } from "@/lib/market";
 import { rateBand } from "@/components/market/ui/health";
 import { useTargets } from "@/components/market/useTargets";
+import { issuesFor, scopeOf } from "@/lib/market/issues";
 import type { MarketView } from "@/lib/market/filters";
 
 export default function PosmTab({ view }: { view: MarketView }) {
   const targets = useTargets();
   const p = posm(view);
-  const move = movement(view, "posm");
+
+  /* The gaps this tab is about, under whatever filter is active —
+     the same records the export writes and a follow-up request will
+     carry, so the header, the file and the request cannot disagree. */
+  const issues = useMemo(() => issuesFor(view, "posm"), [view]);
+  const scope = useMemo(() => scopeOf(issues), [issues]);
   const worstType = p.byType[p.byType.length - 1];
-  const worstCity = p.byGovernorate[0];
 
   const cardFor = (row: { posId: string; value: number }, caption: string) => {
     const outlet = view.outlets.find((o) => o.id === row.posId);
@@ -41,29 +49,14 @@ export default function PosmTab({ view }: { view: MarketView }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <Headline
+      <KpiGapBar
         label="POSM compliance"
         value={p.compliance}
         target={targets.posm}
-        delta={move.delta}
-        deltaFloor={move.floor}
-        problem={
-          worstType ? (
-            <>
-              <strong className="font-semibold text-ink-900">{worstType.label}</strong> present in
-              only {worstType.value}% of the outlets where they were checked
-            </>
-          ) : null
-        }
-        location={
-          worstCity ? (
-            <>
-              Weakest in <strong className="font-semibold text-ink-900">{worstCity.label}</strong> at{" "}
-              {worstCity.value}%, {worstCity.missing.toLocaleString()} items missing
-            </>
-          ) : null
-        }
-        action={{ href: "/portal/actions", label: "Plan a deployment" }}
+        affectedPos={scope.affectedPos}
+        issues={scope.issues}
+        issueNoun="missing material"
+        actions={<DownloadGaps kpi="posm" issues={issues} view={view} full={view} />}
       />
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

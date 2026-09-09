@@ -1,5 +1,7 @@
 "use client";
 
+import { useMemo } from "react";
+
 /* AVAILABILITY — is the product on the shelf where it is listed.
 
    Listings are the denominator throughout, never outlets: an outlet
@@ -7,50 +9,37 @@
    it as a failure would make the range look like a supply problem. */
 
 import { Card, StatCard } from "@/components/market/ui";
-import Headline from "@/components/market/Headline";
+import KpiGapBar from "@/components/market/KpiGapBar";
+import DownloadGaps from "@/components/market/DownloadGaps";
 import { ChartLegend, Heatmap, RankedBars, ShareDonut, StackedBars, brandColor, MEASURE } from "@/components/market/charts";
 import { scoreBand } from "@/components/market/ui/health";
-import { availability, movement } from "@/lib/market/performance";
+import { availability } from "@/lib/market/performance";
 import { governorates, governorateName } from "@/lib/market";
 import { useTargets } from "@/components/market/useTargets";
+import { issuesFor, scopeOf } from "@/lib/market/issues";
 import type { MarketView } from "@/lib/market/filters";
 
 export default function AvailabilityTab({ view }: { view: MarketView }) {
   const targets = useTargets();
   const a = availability(view);
-  const move = movement(view, "availability");
 
-  const worstCity = a.byGovernorate[a.byGovernorate.length - 1];
+  /* The gaps this tab is about, under whatever filter is active —
+     the same records the export writes and a follow-up request will
+     carry, so the header, the file and the request cannot disagree. */
+  const issues = useMemo(() => issuesFor(view, "availability"), [view]);
+  const scope = useMemo(() => scopeOf(issues), [issues]);
+
 
   return (
     <div className="flex flex-col gap-4">
-      <Headline
-        label="On-shelf availability"
+      <KpiGapBar
+        label="Availability"
         value={a.rate}
         target={targets.availability}
-        delta={move.delta}
-        deltaFloor={move.floor}
-        problem={
-          a.worstSku ? (
-            <>
-              <strong className="font-semibold text-ink-900">{a.worstSku.label}</strong> at{" "}
-              {a.worstSku.value}% — {a.worstSku.shareOfGaps}% of every detected gap
-            </>
-          ) : null
-        }
-        location={
-          worstCity ? (
-            <>
-              Weakest in <strong className="font-semibold text-ink-900">{worstCity.label}</strong> at{" "}
-              {worstCity.value}%, across {worstCity.outlets.toLocaleString()} audited outlets
-            </>
-          ) : null
-        }
-        action={
-          a.worstSku
-            ? { href: `/portal/pos?sku=${a.worstSku.id}`, label: "View affected outlets" }
-            : undefined
-        }
+        affectedPos={scope.affectedPos}
+        issues={scope.issues}
+        issueNoun="SKU availability gaps"
+        actions={<DownloadGaps kpi="availability" issues={issues} view={view} full={view} />}
       />
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

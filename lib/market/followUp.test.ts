@@ -10,6 +10,7 @@ import { describe, expect, it } from "vitest";
 import { EMPTY_FILTERS, applyFilters } from "./filters";
 import { current, loadMonth, followUps, clientBrand } from "./index";
 import { issuesFor, scopeOf, rankedPos, expectedRange } from "./issues";
+import { gapReportCsv } from "./gapReport";
 import {
   canCancel, cohortFloor, compareCohort, createRequest, posKpi, resultAcross,
   resultOf, seededRequests, statusOf, type FollowUpRequest,
@@ -241,5 +242,37 @@ describe("storage and seeding", () => {
     const wide = issuesFor(sep, "availability");
     expect(request.posIds.length).toBeLessThan(new Set(wide.map((i) => i.posId)).size);
     for (const id of request.issueIds) expect(id).toContain(sku);
+  });
+});
+
+describe("gap reports", () => {
+  it("exports one row per issue, with the evidence and the target on it", () => {
+    const issues = issuesFor(sep, "availability");
+    const csv = gapReportCsv(issues, "availability", sep, sep);
+    const lines = csv.split("\n");
+    /* Four lines of preamble, a header, then the issues. */
+    expect(lines.length).toBe(issues.length + 5);
+    expect(csv).toContain("Evidence reference");
+    expect(csv).toContain("KPI target");
+    expect(csv).toContain("Governorate");
+  });
+
+  it("carries the filter it was downloaded under", () => {
+    /* A file that quietly differs from the screen wins the argument in
+       somebody's inbox a week later. */
+    const filtered = applyFilters({ ...EMPTY_FILTERS, skus: ["pepsi-pet-500"] }, current);
+    const issues = issuesFor(filtered, "availability");
+    const csv = gapReportCsv(issues, "availability", filtered, sep);
+    expect(csv).not.toContain("Pepsi 1L");
+    expect(csv.split("\n").length).toBeLessThan(
+      gapReportCsv(issuesFor(sep, "availability"), "availability", sep, sep).split("\n").length
+    );
+  });
+
+  it("escapes every field that would otherwise break the file", () => {
+    const csv = gapReportCsv(issuesFor(sep, "price"), "price", sep, sep);
+    for (const line of csv.split("\n")) {
+      expect((line.match(/"/g) ?? []).length % 2).toBe(0);
+    }
   });
 });

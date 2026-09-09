@@ -1,5 +1,7 @@
 "use client";
 
+import { useMemo } from "react";
+
 /* PRICING — is the brand sold at the price it is supposed to be.
 
    Compliance is ±5% of RRP, and the direction matters: a line 12%
@@ -7,12 +9,14 @@
    and an average that mixes them says neither. */
 
 import { Card, DataTable, StatCard, type Column, type Facet } from "@/components/market/ui";
-import Headline from "@/components/market/Headline";
+import KpiGapBar from "@/components/market/KpiGapBar";
+import DownloadGaps from "@/components/market/DownloadGaps";
 import { RankedBars, brandColor } from "@/components/market/charts";
 import Badge from "@/components/market/ui/Badge";
-import { pricing, movement } from "@/lib/market/performance";
+import { pricing } from "@/lib/market/performance";
 import { brandOf, governorateName, clientBrand, contract } from "@/lib/market";
 import { useTargets } from "@/components/market/useTargets";
+import { issuesFor, scopeOf } from "@/lib/market/issues";
 import type { MarketView } from "@/lib/market/filters";
 
 const iqd = (n: number) => `${n.toLocaleString()} ${contract.currency}`;
@@ -20,10 +24,13 @@ const iqd = (n: number) => `${n.toLocaleString()} ${contract.currency}`;
 export default function PricingTab({ view }: { view: MarketView }) {
   const targets = useTargets();
   const p = pricing(view);
-  const move = movement(view, "price");
+
+  /* The gaps this tab is about, under whatever filter is active —
+     the same records the export writes and a follow-up request will
+     carry, so the header, the file and the request cannot disagree. */
+  const issues = useMemo(() => issuesFor(view, "price"), [view]);
+  const scope = useMemo(() => scopeOf(issues), [issues]);
   const clientSkus = p.bySku.filter((s) => s.brandId === clientBrand.id);
-  const worstSku = [...clientSkus].sort((a, b) => a.compliance - b.compliance)[0];
-  const worstCity = p.byGovernorate[p.byGovernorate.length - 1];
   const overs = p.distribution.filter((d) => d.id.startsWith("over")).reduce((s, d) => s + d.value, 0);
   const unders = p.distribution.filter((d) => d.id.startsWith("under")).reduce((s, d) => s + d.value, 0);
 
@@ -72,30 +79,14 @@ export default function PricingTab({ view }: { view: MarketView }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <Headline
+      <KpiGapBar
         label="Price compliance"
         value={p.compliance}
         target={targets.price}
-        delta={move.delta}
-        deltaFloor={move.floor}
-        problem={
-          worstSku ? (
-            <>
-              <strong className="font-semibold text-ink-900">{worstSku.name}</strong> at{" "}
-              {worstSku.compliance}% compliant — averaging {iqd(worstSku.average)} against a{" "}
-              {iqd(worstSku.rrp)} list price
-            </>
-          ) : null
-        }
-        location={
-          worstCity ? (
-            <>
-              Weakest in <strong className="font-semibold text-ink-900">{worstCity.label}</strong> at{" "}
-              {worstCity.compliance}% across {worstCity.readings.toLocaleString()} readings
-            </>
-          ) : null
-        }
-        action={{ href: "/portal/actions", label: "Raise with the retailer" }}
+        affectedPos={scope.affectedPos}
+        issues={scope.issues}
+        issueNoun="readings off list"
+        actions={<DownloadGaps kpi="price" issues={issues} view={view} full={view} />}
       />
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

@@ -1,5 +1,7 @@
 "use client";
 
+import { useMemo } from "react";
+
 /* ASSORTMENT — is the right range listed, format by format.
 
    Compliance is measured against what each CHANNEL is expected to
@@ -9,54 +11,38 @@
    cannot fix. */
 
 import { Card, StatCard } from "@/components/market/ui";
-import Headline from "@/components/market/Headline";
+import KpiGapBar from "@/components/market/KpiGapBar";
+import DownloadGaps from "@/components/market/DownloadGaps";
 import { Heatmap, RankedBars, brandColor } from "@/components/market/charts";
 import Badge from "@/components/market/ui/Badge";
-import { assortment, movement } from "@/lib/market/performance";
+import { assortment } from "@/lib/market/performance";
 import { governorates, governorateName, clientBrand, requiredSkus, skus } from "@/lib/market";
 import { useTargets } from "@/components/market/useTargets";
+import { issuesFor, scopeOf } from "@/lib/market/issues";
 import type { MarketView } from "@/lib/market/filters";
 
 export default function AssortmentTab({ view }: { view: MarketView }) {
   const targets = useTargets();
   const a = assortment(view);
-  const move = movement(view, "assortment");
-  const worstSku = a.penetration[a.penetration.length - 1];
-  const worstChannel = a.byChannel[a.byChannel.length - 1];
+
+  /* The gaps this tab is about, under whatever filter is active —
+     the same records the export writes and a follow-up request will
+     carry, so the header, the file and the request cannot disagree. */
+  const issues = useMemo(() => issuesFor(view, "assortment"), [view]);
+  const scope = useMemo(() => scopeOf(issues), [issues]);
   const clientSkus = skus.filter((s) => s.brandId === clientBrand.id);
+  const worstSku = a.penetration[a.penetration.length - 1];
 
   return (
     <div className="flex flex-col gap-4">
-      <Headline
+      <KpiGapBar
         label="Assortment compliance"
         value={a.compliance}
         target={targets.assortment}
-        delta={move.delta}
-        deltaFloor={move.floor}
-        problem={
-          worstSku ? (
-            <>
-              <strong className="font-semibold text-ink-900">{worstSku.label}</strong> reaches only{" "}
-              {worstSku.value}% of audited outlets — {worstSku.missing.toLocaleString()} doors do not
-              list it
-            </>
-          ) : null
-        }
-        location={
-          worstChannel ? (
-            <>
-              Thinnest in{" "}
-              <strong className="font-semibold text-ink-900">{worstChannel.label}</strong>: {worstChannel.listed}{" "}
-              client SKUs listed on average against {worstChannel.required} expected, across{" "}
-              {worstChannel.outlets.toLocaleString()} outlets
-            </>
-          ) : null
-        }
-        action={
-          worstSku
-            ? { href: `/portal/pos?sku=${worstSku.id}`, label: "Find the gaps" }
-            : undefined
-        }
+        affectedPos={scope.affectedPos}
+        issues={scope.issues}
+        issueNoun="missing listings"
+        actions={<DownloadGaps kpi="assortment" issues={issues} view={view} full={view} />}
       />
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

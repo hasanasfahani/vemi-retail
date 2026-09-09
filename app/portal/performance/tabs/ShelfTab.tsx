@@ -1,5 +1,7 @@
 "use client";
 
+import { useMemo } from "react";
+
 /* SHELF & VISIBILITY — how much of the fixture the brand holds, and
    at what height.
 
@@ -8,29 +10,32 @@
    share figure hides completely. */
 
 import { Card, StatCard } from "@/components/market/ui";
-import Headline from "@/components/market/Headline";
+import KpiGapBar from "@/components/market/KpiGapBar";
+import DownloadGaps from "@/components/market/DownloadGaps";
 import ShelfCard from "@/components/market/ShelfCard";
 import {
   ChartLegend, RankedBars, ShareDonut, StackedBars, brandColor, orderedBrands,
 } from "@/components/market/charts";
-import { movement, shelf } from "@/lib/market/performance";
+import { shelf } from "@/lib/market/performance";
 import { clientBrand } from "@/lib/market";
 import { useTargets } from "@/components/market/useTargets";
+import { issuesFor, scopeOf } from "@/lib/market/issues";
 import type { MarketView } from "@/lib/market/filters";
 
 export default function ShelfTab({ view }: { view: MarketView }) {
   const s = shelf(view);
-  const move = movement(view, "shelfShare");
+
+  /* The gaps this tab is about, under whatever filter is active —
+     the same records the export writes and a follow-up request will
+     carry, so the header, the file and the request cannot disagree. */
+  const issues = useMemo(() => issuesFor(view, "shelfShare"), [view]);
+  const scope = useMemo(() => scopeOf(issues), [issues]);
   const targets = useTargets();
   const par = targets.shelfShare;
   const ordered = orderedBrands();
   const stack = ordered.map((b) => ({ key: b.id, name: b.name, color: brandColor(b.id) }));
-  const leader = s.byBrand[0];
-  const rival = s.byBrand.find((b) => b.id !== clientBrand.id);
 
   const eye = s.positions.find((p) => p.id === "eye");
-  const clientShareIn = (row: (typeof s.byGovernorate)[number]) => Number(row[clientBrand.id] ?? 0);
-  const weakestCity = [...s.byGovernorate].sort((a, b) => clientShareIn(a) - clientShareIn(b))[0];
 
   const cardFor = (row: { posId: string; share: number }, caption: string) => {
     const outlet = view.outlets.find((p) => p.id === row.posId);
@@ -49,32 +54,14 @@ export default function ShelfTab({ view }: { view: MarketView }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <Headline
+      <KpiGapBar
         label="Share of shelf"
         value={s.clientShare}
         target={par}
-        delta={move.delta}
-        deltaFloor={move.floor}
-        problem={
-          leader && rival && leader.id !== clientBrand.id ? (
-            <>
-              <strong className="font-semibold text-ink-900">{leader.name}</strong> leads the fixture
-              at {leader.share}% against {clientBrand.name} at {s.clientShare}%
-            </>
-          ) : (
-            <>{clientBrand.name} leads the fixture at {s.clientShare}%</>
-          )
-        }
-        location={
-          weakestCity ? (
-            <>
-              Weakest in{" "}
-              <strong className="font-semibold text-ink-900">{weakestCity.label}</strong> at{" "}
-              {clientShareIn(weakestCity)}% of measured facings
-            </>
-          ) : null
-        }
-        action={{ href: "/portal/competition", label: "Open competition" }}
+        affectedPos={scope.affectedPos}
+        issues={scope.issues}
+        issueNoun="outlets below par"
+        actions={<DownloadGaps kpi="shelfShare" issues={issues} view={view} full={view} />}
       />
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
