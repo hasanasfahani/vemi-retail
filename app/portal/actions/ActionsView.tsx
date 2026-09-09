@@ -55,7 +55,10 @@ function FollowUpCenter({ view }: { view: MarketView }) {
   const [resultFilter, setResultFilter] = useState<RevisitResult | "">("");
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [openGov, setOpenGov] = useState<Set<string>>(new Set());
-  const [openPos, setOpenPos] = useState<string | null>(null);
+  /* Which outlet is open, and the request it was opened from — the
+     drawer needs the request to know which KPI's issues to show and
+     which two cycles to compare. */
+  const [openPos, setOpenPos] = useState<{ posId: string; requestId: string } | null>(null);
 
   const requests = useMemo(() => queue.requests ?? [], [queue.requests]);
   const monthIds = useMemo(
@@ -86,6 +89,12 @@ function FollowUpCenter({ view }: { view: MarketView }) {
       ),
     [rows, kpiFilter, cycleFilter, statusFilter, resultFilter]
   );
+
+  /* The row the open outlet belongs to, so the drawer can be told
+     which case it is looking at. */
+  const openRow = openPos
+    ? rows.find((r) => r.request.id === openPos.requestId) ?? null
+    : null;
 
   const stats = summarise(shown);
   const cycles = [...new Set(rows.map((r) => r.request.cycle))].sort();
@@ -178,7 +187,7 @@ function FollowUpCenter({ view }: { view: MarketView }) {
                     onToggle={() => toggle(expanded, row.request.id, setExpanded)}
                     openGov={openGov}
                     onToggleGov={(id) => toggle(openGov, id, setOpenGov)}
-                    onOpenPos={setOpenPos}
+                    onOpenPos={(posId) => setOpenPos({ posId, requestId: row.request.id })}
                     onCancel={(reason) => {
                       queue.cancel(row.request.id, reason);
                       push(`Request cancelled — ${reason.toLowerCase()}.`, "info");
@@ -205,7 +214,22 @@ function FollowUpCenter({ view }: { view: MarketView }) {
         )}
       </Card>
 
-      <PosDrawer posId={openPos} view={view} onClose={() => setOpenPos(null)} />
+      <PosDrawer
+        posId={openPos?.posId ?? null}
+        view={openRow ? (loaded.get(openRow.request.originMonth)?.view ?? view) : view}
+        onClose={() => setOpenPos(null)}
+        followUp={
+          openRow
+            ? {
+                kpi: openRow.kpi,
+                originMonth: openRow.request.originMonth,
+                cycle: openRow.request.cycle,
+                origin: loaded.get(openRow.request.originMonth)!,
+                cyclePair: loaded.get(openRow.request.cycle) ?? null,
+              }
+            : undefined
+        }
+      />
       <Toasts toasts={toasts} onDismiss={dismiss} />
     </div>
   );

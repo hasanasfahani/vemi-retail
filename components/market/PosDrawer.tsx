@@ -20,7 +20,11 @@ import Bar from "./ui/Bar";
 import ScoreRing from "./ui/ScoreRing";
 import ShelfScene from "./ShelfScene";
 import { channelName, governorateName, contract, monthLabel, skuOf } from "@/lib/market";
+import FollowUpEvidence from "./FollowUpEvidence";
 import { kpiTargetsForDrawer, posRows, recommendationsFor, type PosRow } from "@/lib/market/pos";
+import { outletCase } from "@/lib/market/outletCase";
+import type { MonthPair } from "@/lib/market/followUpView";
+import type { IssueKpi } from "@/lib/market/issues";
 import type { MarketView } from "@/lib/market/filters";
 
 export default function PosDrawer({
@@ -31,6 +35,7 @@ export default function PosDrawer({
   flagged,
   onFlag,
   onUnflag,
+  followUp,
 }: {
   posId: string | null;
   view: MarketView;
@@ -42,6 +47,15 @@ export default function PosDrawer({
   flagged?: boolean;
   onFlag?: (posId: string, reason: string) => void;
   onUnflag?: (posId: string) => void;
+  /* Opened from a follow-up: the drawer then leads with what was
+     raised, what happened to it, and both visits' shelves. */
+  followUp?: {
+    kpi: IssueKpi;
+    originMonth: string;
+    cycle: string;
+    origin: MonthPair;
+    cyclePair: MonthPair | null;
+  };
 }) {
   const [zoom, setZoom] = useState(false);
   const [overlays, setOverlays] = useState(true);
@@ -111,6 +125,21 @@ export default function PosDrawer({
                 </div>
               ))}
             </dl>
+
+            {followUp && (
+              <FollowUpEvidence
+                outletCase={outletCase(
+                  row.pos.id,
+                  followUp.kpi,
+                  followUp.origin,
+                  followUp.cyclePair
+                )}
+                originMonth={followUp.originMonth}
+                cycle={followUp.cycle}
+                origin={followUp.origin}
+                cyclePair={followUp.cyclePair}
+              />
+            )}
 
             {/* ---------- score and KPIs ---------- */}
             <div className="flex flex-wrap items-center gap-5">

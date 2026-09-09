@@ -11,6 +11,7 @@ import { EMPTY_FILTERS, applyFilters } from "./filters";
 import { current, loadMonth, posOf } from "./index";
 import { seededRequests } from "./followUp";
 import { buildRows, summarise, isPreliminary, type MonthPair } from "./followUpView";
+import { outletCase } from "./outletCase";
 
 const octRaw = await loadMonth("2026-10");
 const novRaw = await loadMonth("2026-11");
@@ -131,5 +132,58 @@ describe("the summary", () => {
   it("narrows with the filter, so the cards cannot contradict the table", () => {
     const baghdad = summarise(buildRows(requests, monthsFor({ governorates: ["baghdad"] }), complete));
     expect(baghdad.posRequested).toBeLessThan(summarise(rows).posRequested);
+  });
+});
+
+describe("one outlet, two visits", () => {
+  const row = rows.find((r) => r.request.cycle === "2026-10" && r.kpi === "availability")!;
+  const origin = monthsFor().get(row.request.originMonth)!;
+  const cyclePair = monthsFor().get(row.request.cycle)!;
+
+  it("says what happened to each issue that was raised", () => {
+    const revisited = row.governorates.flatMap((g) => g.pos).find((p) => p.revisited)!;
+    const c = outletCase(revisited.posId, row.kpi, origin, cyclePair);
+
+    expect(c.revisited).toBe(true);
+    expect(c.issues.length).toBeGreaterThan(0);
+    for (const issue of c.issues) {
+      expect(["resolved", "unresolved"]).toContain(issue.outcome);
+    }
+    expect(c.resolved + c.unresolved).toBe(c.issues.length);
+  });
+
+  it("matches an issue across cycles by what it is, not by its id", () => {
+    /* The same problem seen twice has two ids — the month is part of
+       them — so "was it fixed?" has to compare what they describe. */
+    const revisited = row.governorates.flatMap((g) => g.pos).find((p) => p.revisited)!;
+    const c = outletCase(revisited.posId, row.kpi, origin, cyclePair);
+    const ids = c.issues.map((i) => i.issue.id);
+    for (const id of ids) expect(id).toContain(row.request.originMonth);
+  });
+
+  it("reports awaiting rather than resolved when nobody has been back", () => {
+    /* The dangerous default: an outlet nobody revisited has no issues
+       present in the later cycle, which looks exactly like every issue
+       being fixed. */
+    const waiting = rows
+      .flatMap((r) => r.governorates.flatMap((g) => g.pos.map((p) => ({ r, p }))))
+      .find(({ p }) => !p.revisited);
+    if (!waiting) return;
+    const pair = monthsFor();
+    const c = outletCase(
+      waiting.p.posId,
+      waiting.r.kpi,
+      pair.get(waiting.r.request.originMonth)!,
+      null
+    );
+    expect(c.revisited).toBe(false);
+    expect(c.resolved).toBe(0);
+    for (const issue of c.issues) expect(issue.outcome).toBe("awaiting");
+  });
+
+  it("derives the change from the two readings it shows", () => {
+    const revisited = row.governorates.flatMap((g) => g.pos).find((p) => p.revisited)!;
+    const c = outletCase(revisited.posId, row.kpi, origin, cyclePair);
+    expect(c.delta).toBeCloseTo((c.after ?? 0) - (c.before ?? 0), 1);
   });
 });

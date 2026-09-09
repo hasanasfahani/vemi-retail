@@ -230,6 +230,14 @@ export function issuesFor(view: MarketView, kpi: IssueKpi): Issue[] {
 
 /* ---------- the two counts, named ---------- */
 
+/* The same problem, seen in two different cycles, has two different
+   ids — the month is part of the id. This is what they have in common,
+   and it is how "was it fixed?" gets answered: the key that was there
+   in September and is not there in October describes a shelf that
+   changed. */
+export const issueKey = (issue: Issue) =>
+  `${issue.kpi}:${issue.posId}:${issue.skuId ?? "-"}`;
+
 export type Scope = { affectedPos: number; issues: number };
 
 export function scopeOf(issues: Issue[]): Scope {
