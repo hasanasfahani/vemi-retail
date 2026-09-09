@@ -143,24 +143,28 @@ function Explorer({ view, query }: { view: MarketView; query: string }) {
       id: "availability",
       header: "Avail.",
       align: "right",
-      sortValue: (r) => r.availability,
-      render: (r) => (
-        <span className={`mono ${r.availability < targets.availability ? "text-[color:var(--color-serious)]" : ""}`}>
-          {r.availability}%
-        </span>
-      ),
+      /* Nulls sort last rather than as zero: "nothing listed here" is
+         not the worst availability in the market, it is a different
+         fact. */
+      sortValue: (r) => r.availability ?? 999,
+      csv: (r) => r.availability ?? "",
+      render: (r) => <Rate value={r.availability} target={targets.availability} />,
     },
-    { id: "share", header: "Shelf", align: "right", sortValue: (r) => r.shelfShare, render: (r) => <span className="mono">{r.shelfShare}%</span> },
+    {
+      id: "share",
+      header: "Shelf",
+      align: "right",
+      sortValue: (r) => r.shelfShare ?? 999,
+      csv: (r) => r.shelfShare ?? "",
+      render: (r) => <Rate value={r.shelfShare} />,
+    },
     {
       id: "posm",
       header: "POSM",
       align: "right",
-      sortValue: (r) => r.posm,
-      render: (r) => (
-        <span className={`mono ${r.posm < targets.posm ? "text-[color:var(--color-serious)]" : ""}`}>
-          {r.posm}%
-        </span>
-      ),
+      sortValue: (r) => r.posm ?? 999,
+      csv: (r) => r.posm ?? "",
+      render: (r) => <Rate value={r.posm} target={targets.posm} />,
     },
     {
       id: "issues",
@@ -283,10 +287,11 @@ function Explorer({ view, query }: { view: MarketView; query: string }) {
             <div className="mb-2.5">
               <MapLegend counts={bandCounts} />
             </div>
-            <MarketMap points={points} onSelect={setOpenPos} height={520} />
+            <MarketMap points={points} onSelect={setOpenPos} height={520} bandOf={scoreBand} />
             <p className="mt-2 text-[11px] leading-snug text-ink-400">
-              Outlets are placed within their district rather than surveyed to the street. Clusters
-              take the colour of the worst outlet inside them.
+              Outlets are placed within their district rather than surveyed to the street. A
+              cluster shows how its outlets typically score, with a red ring where any of them is
+              critical.
             </p>
           </div>
         )}
@@ -302,5 +307,20 @@ function Explorer({ view, query }: { view: MarketView; query: string }) {
         onUnflag={revisits.unflag}
       />
     </div>
+  );
+}
+
+/* A rate, or an honest dash where there was nothing to measure. */
+function Rate({ value, target }: { value: number | null; target?: number }) {
+  if (value === null) {
+    return (
+      <span className="mono text-ink-400" title="Nothing to measure at this outlet">
+        —
+      </span>
+    );
+  }
+  const short = target !== undefined && value < target;
+  return (
+    <span className={`mono ${short ? "text-[color:var(--color-serious)]" : ""}`}>{value}%</span>
   );
 }

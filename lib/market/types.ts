@@ -162,15 +162,22 @@ export type PromoReading = {
 };
 
 /* Per-outlet execution, computed in the generator so every surface
-   reads the same number rather than each recomputing the composite. */
+   reads the same number rather than each recomputing the composite.
+
+   Three components are NULLABLE, and the null is load-bearing: an
+   outlet that lists none of the client's range has no availability to
+   report, and one where no price was recorded has no compliance. The
+   composite reweights over whatever does apply. Anything averaging
+   these must skip the nulls — treating "nothing to measure" as zero is
+   how a store ends up reading "availability 0%, price 100%". */
 export type PosScore = {
   posId: string;
   score: number;
-  availability: number;
-  shelfShare: number;
+  availability: number | null;
+  shelfShare: number | null;
   assortment: number;
-  price: number;
-  posm: number;
+  price: number | null;
+  posm: number | null;
 };
 
 export type MonthData = {

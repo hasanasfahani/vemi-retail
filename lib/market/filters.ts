@@ -14,7 +14,7 @@
    ============================================================ */
 
 import {
-  brands, current, months, pos, skus,
+  brands, clientBrand, current, months, pos, skus,
   type MonthData, type Pos,
 } from "./index";
 
@@ -174,8 +174,23 @@ export function applyFilters(f: Filters, data: MonthData) {
     })
     .sort((a, b) => b.share - a.share);
 
-  const mean = (pickValue: (s: (typeof scores)[number]) => number) =>
-    scores.length ? r1(scores.reduce((s, x) => s + pickValue(x), 0) / scores.length) : 0;
+  /* Skips outlets where the component did not apply. Averaging a null
+     as zero is how "no client lines listed here" becomes "availability
+     0%" and drags a market figure down with a store that never had the
+     range. */
+  const mean = (pickValue: (s: (typeof scores)[number]) => number | null) => {
+    const held = scores.map(pickValue).filter((v): v is number => v !== null);
+    return held.length ? r1(held.reduce((a, b) => a + b, 0) / held.length) : 0;
+  };
+
+  /* The rate KPIs are computed from the ROWS, not from a mean of
+     per-outlet rates, because those are different statistics and the
+     portal was quoting both: the dashboard read 87.2% availability
+     while the Performance tab read 87.6% from the same month. A rate
+     over listings is the one anybody would check by hand, so it wins,
+     and now both surfaces read it. */
+  const clientCells = cells.filter((c) => skuBrand.get(c.skuId) === clientBrand.id);
+  const clientPrices = prices.filter((p) => skuBrand.get(p.skuId) === clientBrand.id);
 
   return {
     filters: f,
@@ -196,12 +211,22 @@ export function applyFilters(f: Filters, data: MonthData) {
     totalFacings,
     /* headline KPIs, all from the same filtered rows */
     kpi: {
+      /* Composites and per-outlet ratios stay outlet-means; rates are
+         weighted by what was actually observed. */
       score: Math.round(mean((s) => s.score)),
-      availability: mean((s) => s.availability),
-      shelfShare: mean((s) => s.shelfShare),
       assortment: mean((s) => s.assortment),
-      price: mean((s) => s.price),
-      posm: mean((s) => s.posm),
+      availability: pct(
+        clientCells.filter((c) => c.state === "in-stock").length,
+        clientCells.length
+      ),
+      shelfShare: pct(
+        inStock
+          .filter((c) => skuBrand.get(c.skuId) === clientBrand.id)
+          .reduce((s, c) => s + c.facings, 0),
+        totalFacings
+      ),
+      price: pct(clientPrices.filter((p) => p.compliant).length, clientPrices.length),
+      posm: pct(posmRows.filter((p) => p.present).length, posmRows.length),
     },
   };
 }

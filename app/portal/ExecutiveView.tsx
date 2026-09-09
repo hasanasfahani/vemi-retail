@@ -189,7 +189,12 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
     return view.outlets.flatMap((outlet) => {
       const score = scoreById.get(outlet.id);
       if (!score) return [];
+      /* An outlet with nothing to measure on this metric is left OFF
+         the map rather than pinned at zero — a red marker for "we have
+         no reading here" is a lie in the most visible place on the
+         page. */
       const value = score[mapMetric];
+      if (value === null) return [];
       const metric = METRICS.find((m) => m.id === mapMetric)!;
       return [
         {
@@ -220,7 +225,8 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
         const outlets = view.outlets.filter((p) => p.cityId === city.id);
         const values = outlets.flatMap((p) => {
           const s = scoreById.get(p.id);
-          return s ? [s[cityMetric]] : [];
+          const v = s ? s[cityMetric] : null;
+          return v === null || v === undefined ? [] : [v];
         });
         const mean = values.length
           ? Math.round((values.reduce((a, b) => a + b, 0) / values.length) * 10) / 10
@@ -417,7 +423,7 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
         action={
           <MetricSwitch value={mapMetric} onChange={setMapMetric} metrics={METRICS} />
         }
-        footnote="Outlets are placed within their district rather than surveyed to the street. Clusters take the colour of the worst outlet inside them, so a problem cannot be averaged out of view."
+        footnote="Outlets are placed within their district rather than surveyed to the street. A cluster is coloured by how its outlets typically score and ringed in red when any of them is critical — hover it for the count."
       >
         <div className="mb-2.5">
           <MapLegend counts={bandCounts} />
@@ -427,6 +433,11 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
           unit={metricOf(mapMetric).unit}
           onSelect={setOpenPos}
           height={440}
+          bandOf={(value) =>
+            mapMetric === "score"
+              ? scoreBand(value)
+              : rateBand(value, metricOf(mapMetric).target)
+          }
         />
       </Card>
 

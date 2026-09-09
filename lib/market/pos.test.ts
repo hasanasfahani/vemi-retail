@@ -10,6 +10,7 @@ import { EMPTY_FILTERS, applyFilters } from "./filters";
 import { current, loadMonth, clientBrand, skuOf, requiredSkus } from "./index";
 import { THRESHOLDS } from "./insights";
 import { posRows, recommendationsFor } from "./pos";
+import { availability, posm, pricing } from "./performance";
 import { seedActions } from "./actions";
 import { comparisons, nextCycle, seedRevisits, type Candidate } from "./revisits";
 
@@ -145,5 +146,52 @@ describe("before and after", () => {
       expect(pair.delta.score).toBeCloseTo(pair.after.score - pair.before.score, 1);
       expect(pair.improved).toBe(pair.delta.score > 0);
     }
+  });
+});
+
+describe("components with nothing to measure", () => {
+  it("reports null rather than zero where the client has no listings", () => {
+    /* An outlet that lists none of the range has no availability to
+       report. Scoring it as 0% punished the store twice for one fact —
+       assortment already says it carries none of the expected range —
+       and printed "availability 0%, price 100%" side by side. */
+    const bare = rows.filter((r) => r.listed === 0);
+    expect(bare.length).toBeGreaterThan(0);
+    for (const row of bare) {
+      expect(row.availability).toBeNull();
+      expect(row.assortment).toBe(0);
+      /* And the composite is not dragged to the floor by a component
+         that never applied. */
+      expect(row.score).toBeGreaterThan(0);
+    }
+  });
+
+  it("keeps every measured outlet on a real number", () => {
+    for (const row of rows) {
+      if (row.listed > 0) expect(row.availability).not.toBeNull();
+    }
+  });
+
+  it("never averages a missing component into a market figure", () => {
+    /* The market rate is computed over listings, so the five outlets
+       with nothing listed cannot move it. */
+    const listed = view.cells.filter(
+      (c) => skuOf(c.skuId)?.brandId === clientBrand.id
+    );
+    const onShelf = listed.filter((c) => c.state === "in-stock").length;
+    expect(view.kpi.availability).toBeCloseTo(
+      Math.round((onShelf / listed.length) * 1000) / 10,
+      1
+    );
+  });
+
+  it("agrees with the Performance tab, which reads the same rows", () => {
+    /* The dashboard used to read 87.2% while Performance read 87.6%
+       from the same month: a mean of per-outlet rates against a rate
+       over listings. One of them had to win, and it is the one anybody
+       could check by hand. */
+    expect(view.kpi.availability).toBe(availability(view).rate);
+    expect(view.kpi.posm).toBe(posm(view).compliance);
+    expect(view.kpi.price).toBe(pricing(view).compliance);
   });
 });

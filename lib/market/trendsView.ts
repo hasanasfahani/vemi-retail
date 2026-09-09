@@ -17,8 +17,8 @@ export type RepeatedRow = {
   before: number;
   after: number;
   delta: number;
-  availabilityBefore: number;
-  availabilityAfter: number;
+  availabilityBefore: number | null;
+  availabilityAfter: number | null;
   availabilityDelta: number;
 };
 
@@ -40,7 +40,13 @@ export function repeated(before: MarketView, after: MarketView): RepeatedRow[] {
           delta: second.score - first.score,
           availabilityBefore: first.availability,
           availabilityAfter: second.availability,
-          availabilityDelta: r1(second.availability - first.availability),
+          /* Zero rather than a number built from a missing one: a
+             component that did not apply at either visit has no
+             movement to report. */
+          availabilityDelta:
+            first.availability === null || second.availability === null
+              ? 0
+              : r1(second.availability - first.availability),
         },
       ];
     })

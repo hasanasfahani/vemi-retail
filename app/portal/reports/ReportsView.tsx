@@ -306,7 +306,7 @@ function Reports({ view }: { view: MarketView }) {
           <div className="mb-2.5">
             <MapLegend />
           </div>
-          <MarketMap points={points} height={420} />
+          <MarketMap points={points} height={420} bandOf={scoreBand} />
           <ul className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {report.cities.map((city) => (
               <li key={city.id} className="flex items-center gap-2">

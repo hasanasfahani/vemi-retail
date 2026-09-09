@@ -27,6 +27,9 @@ export type MapPoint = {
   value: number;
   band: Band;
   meta?: string;
+  /* Numeric value behind the marker, so a cluster can report what its
+     members typically look like rather than only their worst. */
+  metric?: number;
   /* Aggregate points — a district rather than an outlet — carry their
      own size and colour: size says how much evidence sits under the
      bubble, colour says which brand leads it, and neither is a health
@@ -43,6 +46,7 @@ export default function MarketMap({
   center,
   zoom,
   cluster = true,
+  bandOf,
 }: {
   points: MapPoint[];
   onSelect?: (id: string) => void;
@@ -54,6 +58,11 @@ export default function MarketMap({
      for twelve outlets must not be merged into a bubble standing for
      forty — the reader would have no idea what the number meant. */
   cluster?: boolean;
+  /* How the caller turns a value into a band. A cluster needs it to
+     band its own average the same way its members were banded — the
+     rule differs per metric (a score band is not a rate against a
+     target), and only the caller knows which is in play. */
+  bandOf?: (value: number) => Band;
 }) {
   const host = useRef<HTMLDivElement>(null);
   const map = useRef<import("leaflet").Map | null>(null);
@@ -145,27 +154,55 @@ export default function MarketMap({
           ).markerClusterGroup({
         showCoverageOnHover: false,
         maxClusterRadius: 46,
-        /* A cluster is coloured by the WORST state inside it. A bubble
-           averaging four critical outlets into "average" would hide
-           exactly what the reader opened the map to find. */
-        iconCreateFunction: (c: { getAllChildMarkers: () => { options: { band?: Band } }[] }) => {
-          const bands = c.getAllChildMarkers().map((m) => m.options.band ?? "average");
-          const worst: Band = bands.includes("critical")
-            ? "critical"
-            : bands.includes("attention")
-              ? "attention"
-              : bands.includes("average")
-                ? "average"
-                : "strong";
+        /* A cluster is coloured by what its members TYPICALLY look
+           like, and ringed in red when any of them is critical.
+
+           It used to take the colour of the worst outlet inside it.
+           The intention was sound — a problem must not be averaged out
+           of view — but at country zoom every bubble holds 130 to 237
+           outlets, at least one of which is always critical, so all
+           four painted red and the colour carried no information at
+           all. The average says how the group is doing; the ring says
+           somebody in there needs attention; and the bubble's tooltip
+           counts them. Nothing is hidden and the map means something
+           before you zoom in. */
+        iconCreateFunction: (c: {
+          getAllChildMarkers: () => { options: { band?: Band; metric?: number } }[];
+        }) => {
+          const kids = c.getAllChildMarkers();
+          const bands = kids.map((m) => m.options.band ?? "average");
+          const values = kids
+            .map((m) => m.options.metric)
+            .filter((v): v is number => typeof v === "number");
+
+          const mean = values.length
+            ? values.reduce((a, b) => a + b, 0) / values.length
+            : null;
+          /* Without a banding rule from the caller, fall back to the
+             most common band among the members rather than the worst. */
+          const typical: Band =
+            mean !== null && bandOf
+              ? bandOf(mean)
+              : (["critical", "attention", "average", "strong"] as Band[])
+                  .map((band) => ({ band, n: bands.filter((b) => b === band).length }))
+                  .sort((a, b) => b.n - a.n)[0].band;
+
+          const criticals = bands.filter((b) => b === "critical").length;
           const n = bands.length;
           const size = n > 200 ? 46 : n > 50 ? 40 : n > 10 ? 34 : 28;
+          const ring = criticals
+            ? `0 0 0 3px rgba(255,255,255,.9), 0 0 0 5px ${BAND_COLOR.critical}`
+            : `0 0 0 3px rgba(255,255,255,.85)`;
+
           return L.divIcon({
-            html: `<span style="
+            html: `<span title="${n} outlets${
+              mean === null ? "" : `, averaging ${Math.round(mean)}`
+            }${criticals ? ` · ${criticals} critical` : ""}" style="
               display:flex;align-items:center;justify-content:center;
               width:${size}px;height:${size}px;border-radius:999px;
-              background:${BAND_COLOR[worst]};color:#fff;
+              background:${BAND_COLOR[typical]};color:#fff;
               font:600 ${size > 34 ? 13 : 11.5}px/1 var(--font-body,system-ui);
-              box-shadow:0 0 0 3px rgba(255,255,255,.85), 0 2px 8px rgba(20,21,26,.28);
+              box-shadow:${ring}, 0 2px 8px rgba(20,21,26,.28);
             ">${n}</span>`,
             className: "vemi-cluster",
             iconSize: [size, size],
@@ -181,8 +218,11 @@ export default function MarketMap({
           color: "#ffffff",
           fillColor: p.color ?? BAND_COLOR[p.band],
           fillOpacity: p.color ? 0.85 : 1,
-        }) as import("leaflet").CircleMarker & { options: { band?: Band } };
+        }) as import("leaflet").CircleMarker & {
+          options: { band?: Band; metric?: number };
+        };
         marker.options.band = p.band;
+        marker.options.metric = p.metric ?? p.value;
         marker.bindTooltip(
           `<strong>${p.name}</strong><br>${p.color ? "" : `${BAND_LABEL[p.band]} · `}${p.value}${unit}${
             p.meta ? `<br>${p.meta}` : ""
@@ -200,7 +240,7 @@ export default function MarketMap({
     return () => {
       live = false;
     };
-  }, [points, ready, onSelect, unit, cluster]);
+  }, [points, ready, onSelect, unit, cluster, bandOf]);
 
   return (
     <div className="relative overflow-hidden rounded-[12px] border border-line">

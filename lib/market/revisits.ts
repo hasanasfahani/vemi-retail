@@ -173,12 +173,24 @@ export function clearRevisits(): void {
    the queue is honestly "awaiting its revisit" rather than a
    comparison nobody can make. */
 
+type Side = {
+  month: string;
+  score: number;
+  /* Null where the component did not apply at that visit. */
+  availability: number | null;
+  shelfShare: number | null;
+  posm: number | null;
+  gaps: number;
+  auditedAt: string;
+  collector: string;
+};
+
 export type Comparison = {
   posId: string;
   name: string;
   location: string;
-  before: { month: string; score: number; availability: number; shelfShare: number; posm: number; gaps: number; auditedAt: string; collector: string };
-  after: { month: string; score: number; availability: number; shelfShare: number; posm: number; gaps: number; auditedAt: string; collector: string };
+  before: Side;
+  after: Side;
   delta: { score: number; availability: number; shelfShare: number; posm: number; gaps: number };
   /* Whether the thing that got it flagged actually moved. */
   improved: boolean;
@@ -212,11 +224,17 @@ export function comparisons(
       const outlet = after.outlets.find((p) => p.id === revisit.posId);
       if (!first || !second || !outlet) return [];
 
+      /* A movement needs both ends. Where either visit had nothing to
+         measure, the change is zero rather than a number invented from
+         a missing one. */
+      const moved = (a: number | null, b: number | null) =>
+        a === null || b === null ? 0 : r1(b - a);
+
       const delta = {
         score: r1(second.score - first.score),
-        availability: r1(second.availability - first.availability),
-        shelfShare: r1(second.shelfShare - first.shelfShare),
-        posm: r1(second.posm - first.posm),
+        availability: moved(first.availability, second.availability),
+        shelfShare: moved(first.shelfShare, second.shelfShare),
+        posm: moved(first.posm, second.posm),
         gaps: gapsOf(after, revisit.posId) - gapsOf(before, revisit.posId),
       };
 

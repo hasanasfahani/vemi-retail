@@ -135,15 +135,19 @@ function hydrate(raw: RawMonth): MonthData {
     display: display === 1,
   }));
 
+  /* -1 is the payload's "not applicable"; it becomes null here so no
+     consumer can average it by accident. */
+  const applicable = (v: number) => (v < 0 ? null : v);
+
   const scores: PosScore[] = raw.scores.map(
     ([p, score, availability, shelfShare, assortment, price, posmPct]) => ({
       posId: posId(p),
       score,
-      availability,
-      shelfShare,
+      availability: applicable(availability),
+      shelfShare: applicable(shelfShare),
       assortment,
-      price,
-      posm: posmPct,
+      price: applicable(price),
+      posm: applicable(posmPct),
     })
   );
 

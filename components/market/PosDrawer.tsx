@@ -118,6 +118,21 @@ export default function PosDrawer({
               <dl className="min-w-[240px] flex-1 flex-col gap-2">
                 {kpiTargetsForDrawer().map((kpi) => {
                   const value = row[kpi.key];
+                  /* Nothing to measure reads as a dash. This outlet
+                     lists none of the range, so "0%" would be a
+                     failure it never had the chance to have. */
+                  if (value === null) {
+                    return (
+                      <div key={kpi.key} className="flex items-center gap-2 py-[3px]">
+                        <dt className="w-[86px] shrink-0 text-[11.5px] text-ink-500">
+                          {kpi.label}
+                        </dt>
+                        <dd className="mono flex-1 text-[11.5px] text-ink-400">
+                          nothing to measure here
+                        </dd>
+                      </div>
+                    );
+                  }
                   return (
                     <div key={kpi.key} className="flex items-center gap-2 py-[3px]">
                       <dt className="w-[86px] shrink-0 text-[11.5px] text-ink-500">{kpi.label}</dt>

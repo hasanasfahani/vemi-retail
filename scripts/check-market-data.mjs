@@ -71,7 +71,14 @@ check("every OOS row matches an empty cell", (() => {
 
 console.log("\nHEADLINE KPIs");
 const scores = cur.scores;
-const mean = (i) => scores.reduce((s, r) => s + r[i], 0) / scores.length;
+/* -1 means the component had nothing to measure at that outlet — no
+   client lines listed, no price readings taken. Averaging the sentinel
+   in would report "not applicable" as catastrophic failure, which is
+   the same mistake the generator used to make. */
+const mean = (i) => {
+  const held = scores.map((r) => r[i]).filter((v) => v >= 0);
+  return held.length ? held.reduce((a, b) => a + b, 0) / held.length : 0;
+};
 const facings = new Map();
 for (const [, si, state, f] of cur.matrix) {
   if (state !== 1) continue;

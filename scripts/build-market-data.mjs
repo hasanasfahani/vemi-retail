@@ -672,13 +672,8 @@ function scoreVisit(v, pos) {
   const listed = client.filter((c) => c[1] !== 0);
   const inStock = listed.filter((c) => c[1] === 1);
 
-  const availability = listed.length ? inStock.length / listed.length : 0;
-
   const totalFacings = v.cells.reduce((s, c) => s + c[2], 0);
   const mine = client.reduce((s, c) => s + c[2], 0);
-  const share = totalFacings ? mine / totalFacings : 0;
-
-  const assortment = Math.min(1, listed.length / REQUIRED_SKUS[pos.channel]);
 
   const clientPrices = v.prices.filter(
     (p) => SKUS.find((s) => s.id === p[0]).brandId === CLIENT.id
@@ -687,18 +682,44 @@ function scoreVisit(v, pos) {
     const rrp = SKUS.find((s) => s.id === p[0]).rrp;
     return Math.abs(p[1] - rrp) / rrp <= 0.05;
   });
-  const price = clientPrices.length ? compliant.length / clientPrices.length : 1;
 
-  const posm = v.posm.length ? v.posm.filter((p) => p[1]).length / v.posm.length : 1;
+  /* A COMPONENT WITH NOTHING TO MEASURE IS NOT APPLICABLE, and the
+     composite reweights over the components that do apply.
 
-  const score =
-    availability * SCORE_WEIGHTS.availability +
-    Math.min(1, share / SHARE_PAR) * SCORE_WEIGHTS.shelfShare +
-    assortment * SCORE_WEIGHTS.assortment +
-    price * SCORE_WEIGHTS.price +
-    posm * SCORE_WEIGHTS.posm;
+     This used to default availability to 0 while defaulting price and
+     POSM to 1 — the same "nothing observed" situation scored as total
+     failure in one component and as perfection in two others. At the
+     five outlets that list none of the client's range it produced a
+     store reading "availability 0%, price 100%", and a composite
+     punished twice for one fact: assortment already carries "carries
+     none of the expected range", which is the real finding.
 
-  const r1 = (n) => Math.round(n * 1000) / 10;
+     Assortment always applies — zero of the expected range is an
+     observation, not an absence — and so does shelf share wherever the
+     fixture has facings to hold. */
+  const availability = listed.length ? inStock.length / listed.length : null;
+  const share = totalFacings ? mine / totalFacings : null;
+  const assortment = Math.min(1, listed.length / REQUIRED_SKUS[pos.channel]);
+  const price = clientPrices.length ? compliant.length / clientPrices.length : null;
+  const posm = v.posm.length ? v.posm.filter((p) => p[1]).length / v.posm.length : null;
+
+  const parts = [
+    { value: availability, weight: SCORE_WEIGHTS.availability },
+    { value: share === null ? null : Math.min(1, share / SHARE_PAR), weight: SCORE_WEIGHTS.shelfShare },
+    { value: assortment, weight: SCORE_WEIGHTS.assortment },
+    { value: price, weight: SCORE_WEIGHTS.price },
+    { value: posm, weight: SCORE_WEIGHTS.posm },
+  ];
+  const applicable = parts.filter((part) => part.value !== null);
+  const weight = applicable.reduce((s, part) => s + part.weight, 0);
+  const score = weight
+    ? applicable.reduce((s, part) => s + part.value * part.weight, 0) / weight
+    : 0;
+
+  /* -1 rides through the payload as "not applicable": the bundles are
+     numeric tuples, and hydration turns the sentinel back into null. */
+  const r1 = (n) => (n === null ? -1 : Math.round(n * 1000) / 10);
+
   return {
     score: Math.round(score * 100),
     availability: r1(availability),
@@ -709,9 +730,7 @@ function scoreVisit(v, pos) {
   };
 }
 
-/* ------------------------------------------------------------------
-   BUILD EVERY MONTH.
------------------------------------------------------------------- */
+
 const skuIndex = new Map(SKUS.map((s, i) => [s.id, i]));
 const posIndex = new Map(POS.map((p, i) => [p.id, i]));
 const brandIndex = new Map(BRANDS.map((b, i) => [b.id, i]));

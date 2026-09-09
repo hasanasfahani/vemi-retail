@@ -37,11 +37,13 @@ export type PosRow = {
   auditedAt: string;
   collector: string;
   score: number;
-  availability: number;
-  shelfShare: number;
+  /* Null where the component had nothing to measure at this outlet —
+     see PosScore. Surfaces render "—" rather than a misleading 0%. */
+  availability: number | null;
+  shelfShare: number | null;
   assortment: number;
-  price: number;
-  posm: number;
+  price: number | null;
+  posm: number | null;
   /* Client lines listed at this door, and how many were empty. */
   listed: number;
   gaps: number;
