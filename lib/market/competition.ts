@@ -286,7 +286,7 @@ export const ACTIVITY_LABEL: Record<ActivityKind, string> = {
 };
 
 const CITY_FLOOR: Record<string, number> = {
-  baghdad: 3.09, basra: 4.63, erbil: 4.79, mosul: 5.05, najaf: 4.9, karbala: 5.57,
+  baghdad: 3.09, basra: 4.63, erbil: 4.79, nineveh: 5.05, najaf: 4.9, karbala: 5.57,
 };
 const MARKET_FLOOR = 1.81;
 /* Promotion presence is a count of outlets, not a share of facings, so

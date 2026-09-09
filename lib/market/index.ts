@@ -25,9 +25,16 @@ export const trends = trendsJson as unknown as Trends;
 
 export const {
   contract, months, cities, districts, channels, retailers,
-  brands, skus, auditors, posmTypes, oosReasons, scoreWeights, sharePar,
-  requiredSkus, kpiTargets, pos,
+  brands, skus, auditors, followUps, posmTypes, oosReasons, scoreWeights,
+  sharePar, requiredSkus, kpiTargets, pos,
 } = market;
+
+/* Cycles after the current one exist in the data so a follow-up audit
+   has a destination. Anything reporting on the market as it stands
+   should read `months` up to the current one; anything scheduling
+   forward reads these. */
+export const plannedMonths = months.filter((m) => m.planned);
+export const historicMonths = months.filter((m) => !m.planned);
 
 export const clientBrand = brands.find((b) => b.client)!;
 /* The company, not the lead brand. Baghdad Soft Drinks owns Pepsi,

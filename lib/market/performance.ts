@@ -43,7 +43,7 @@ const MARKET_FLOOR: Record<string, number> = {
 
 /* Bootstrapped per-city share floors, from scripts/calibrate-insights.mjs. */
 const CITY_FLOOR: Record<string, number> = {
-  baghdad: 3.09, basra: 4.63, erbil: 4.79, mosul: 5.05, najaf: 4.90, karbala: 5.57,
+  baghdad: 3.09, basra: 4.63, erbil: 4.79, nineveh: 5.05, najaf: 4.90, karbala: 5.57,
 };
 
 export function movement(

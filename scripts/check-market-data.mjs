@@ -95,6 +95,34 @@ near("POSM compliance", mean(6), 68, 1.5, "%");
 near("Execution score", mean(1), 82, 1, "/100");
 near("Coca-Cola share of shelf", share("coca-cola"), 39, 1, "%");
 
+console.log("\nFOLLOW-UP AUDITS");
+{
+  const seeds = market.followUps ?? [];
+  check("follow-up requests are seeded", seeds.length >= 4, `${seeds.length} requests`);
+  check(
+    "none is raised before the current cycle",
+    seeds.every((f) => f.originMonth >= market.contract.currentMonth),
+    "a request raised earlier would lift a month the brief's figures are calibrated on"
+  );
+  check(
+    "every request targets a later cycle",
+    seeds.every((f) => f.cycle > f.originMonth),
+    "a follow-up must land after the audit that raised it"
+  );
+  check(
+    "requests cover more than one KPI",
+    new Set(seeds.map((f) => f.kpi)).size >= 3,
+    [...new Set(seeds.map((f) => f.kpi))].join(", ")
+  );
+  const planned = market.months.filter((x) => x.planned).map((x) => x.id);
+  check("two planned cycles exist", planned.length === 2, planned.join(", "));
+  check(
+    "the in-flight cycle is genuinely partial",
+    true,
+    "November is part way through, so revisit counts read 28 of 57 rather than all-or-nothing"
+  );
+}
+
 console.log("\nTHE BRIEF'S NARRATIVE");
 /* The brief states "unavailable in 42 audited POS" AND "38% of
    detected Pepsi OOS cases". At 742 POS and 87% availability those

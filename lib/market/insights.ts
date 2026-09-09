@@ -236,7 +236,7 @@ export const THRESHOLDS = {
    than assumed uniform. */
 export const SHARE_FLOOR_PT: Record<string, number> = {
   market: 1.81, baghdad: 3.09, basra: 4.63, erbil: 4.79,
-  mosul: 5.05, najaf: 4.90, karbala: 5.57,
+  nineveh: 5.05, najaf: 4.90, karbala: 5.57,
 };
 
 /* Monthly audit cycle: the interval a deficit is projected over when a

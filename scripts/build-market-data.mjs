@@ -64,22 +64,44 @@ const MONTHS = [
   { id: "2026-07", label: "July 2026", short: "Jul", days: 31 },
   { id: "2026-08", label: "August 2026", short: "Aug", days: 31 },
   { id: "2026-09", label: "September 2026", short: "Sep", days: 30, current: true },
+  /* Two cycles past the current one, so a follow-up audit requested
+     today has somewhere to land. October is fully audited — a request
+     raised now can be seen through to a finished result — and November
+     is in flight, which is what makes the progressive states ("18 of
+     54 revisited") demonstrable rather than described. */
+  { id: "2026-10", label: "October 2026", short: "Oct", days: 31, planned: true },
+  { id: "2026-11", label: "November 2026", short: "Nov", days: 30, planned: true },
 ];
 const CURRENT = "2026-09";
+/* Cycles after the current one. The portal shows them as planned
+   rather than historical: they exist so a follow-up has a destination,
+   not because the future is known. */
+const FUTURE = ["2026-10", "2026-11"];
+const IN_FLIGHT = "2026-11";
 
 /* ---------------- geography ----------------
 
-   True lat/long, projected the same way the marketing map projects
-   them, so a city sits where it really is:
+   GOVERNORATES, not cities. Iraq's first-level administrative unit is
+   the governorate, it is the unit a commercial team plans routes and
+   accounts around, and it is what the follow-up hierarchy groups by.
+
+   Five of the six share a name with their capital. The sixth does not:
+   the audit works Mosul, and Mosul is the capital of NINEVEH. Labelling
+   that row "Mosul" while calling the column "Governorate" is the kind
+   of error an Iraqi reader spots immediately, so the governorate
+   carries its own name and the city it is audited in stays alongside.
+
+   Coordinates are the capital's, projected the way the marketing map
+   projects them:
      x = 9.591 * lon - 368.85
      y = 432.83 - 11.497 * lat                                        */
 const CITIES = [
-  { id: "baghdad", name: "Baghdad", lat: 33.31, lng: 44.36, pos: 380, tier: "capital" },
-  { id: "basra", name: "Basra", lat: 30.51, lng: 47.78, pos: 160, tier: "major" },
-  { id: "erbil", name: "Erbil", lat: 36.19, lng: 44.01, pos: 150, tier: "major" },
-  { id: "mosul", name: "Mosul", lat: 36.34, lng: 43.13, pos: 140, tier: "major" },
-  { id: "najaf", name: "Najaf", lat: 32.03, lng: 44.34, pos: 95, tier: "mid" },
-  { id: "karbala", name: "Karbala", lat: 32.61, lng: 44.02, pos: 75, tier: "mid" },
+  { id: "baghdad", name: "Baghdad", capital: "Baghdad", lat: 33.31, lng: 44.36, pos: 380, tier: "capital" },
+  { id: "basra", name: "Basra", capital: "Basra", lat: 30.51, lng: 47.78, pos: 160, tier: "major" },
+  { id: "erbil", name: "Erbil", capital: "Erbil", lat: 36.19, lng: 44.01, pos: 150, tier: "major" },
+  { id: "nineveh", name: "Nineveh", capital: "Mosul", lat: 36.34, lng: 43.13, pos: 140, tier: "major" },
+  { id: "najaf", name: "Najaf", capital: "Najaf", lat: 32.03, lng: 44.34, pos: 95, tier: "mid" },
+  { id: "karbala", name: "Karbala", capital: "Karbala", lat: 32.61, lng: 44.02, pos: 75, tier: "mid" },
 ];
 for (const c of CITIES) {
   c.x = Math.round((9.591 * c.lng - 368.85) * 100) / 100;
@@ -94,7 +116,7 @@ const DISTRICTS = {
   basra: ["Ashar", "Jubaila", "Tuwaisa", "Qibla", "Hayaniyah", "Zubair", "Maqal", "Junaina"],
   erbil: ["Ankawa", "Bakhtiari", "Downtown", "Dream City", "Gulan", "Havalan",
           "Iskan", "Kurdistan", "Minara", "Setaqan"],
-  mosul: ["Al-Zuhour", "Al-Muthanna", "Al-Noor", "Bab al-Tob", "Al-Sukkar",
+  nineveh: ["Al-Zuhour", "Al-Muthanna", "Al-Noor", "Bab al-Tob", "Al-Sukkar",
           "Al-Rashidiya", "Hay al-Arabi", "Al-Islah"],
   najaf: ["Al-Ansar", "Al-Adala", "Al-Milad", "Al-Askari", "Al-Ghadeer", "Hay al-Nasr",
           "Al-Furat", "Al-Jamea"],
@@ -166,12 +188,12 @@ function placeInDistrict(city, district) {
    changes.
 ------------------------------------------------------------------ */
 const AUDITORS = [
-  { id: "aud-1", name: "Rawa Kareem", cities: ["erbil", "mosul"] },
+  { id: "aud-1", name: "Rawa Kareem", cities: ["erbil", "nineveh"] },
   { id: "aud-2", name: "Zaid Al-Obaidi", cities: ["baghdad"] },
   { id: "aud-3", name: "Noor Hadi", cities: ["baghdad"] },
   { id: "aud-4", name: "Mustafa Jabbar", cities: ["basra"] },
   { id: "aud-5", name: "Hiba Salman", cities: ["najaf", "karbala"] },
-  { id: "aud-6", name: "Dilan Ahmed", cities: ["erbil", "mosul"] },
+  { id: "aud-6", name: "Dilan Ahmed", cities: ["erbil", "nineveh"] },
 ];
 
 /* Which auditor covers a given outlet: the ones on that city's route,
@@ -361,15 +383,38 @@ for (const p of POS) p.core = CORE.has(p.id);
 const ROTATING = POS.filter((p) => !p.core).map((p) => p.id);
 const MONTHLY_TARGET = 880;
 
+/* How far each cycle got. A completed month reaches the monthly
+   target; the current one is 21 days in; November is deliberately part
+   way through, because a follow-up audit that is half done is the
+   state the Action Center has to be able to report honestly. */
+const MONTH_TARGET = (id) => {
+  if (id === CURRENT) return CONTRACT.visitedThisMonth;
+  if (id === IN_FLIGHT) return 430;
+  return MONTHLY_TARGET;
+};
+
+/* The future cycles draw their schedule from their OWN stream.
+
+   The schedule for every month is built up front, in one loop, so
+   adding October and November to it consumed main-stream randomness
+   that the six original months used to get — and the audited set for
+   September changed, taking the brief's calibrated figures with it.
+   An isolated stream means the historical months schedule exactly as
+   they did before these two cycles existed. */
+const futureRand = mulberry32(20261001);
+
 const schedule = new Map();
 for (const month of MONTHS) {
-  const target = month.id === CURRENT ? CONTRACT.visitedThisMonth : MONTHLY_TARGET;
+  const planned = FUTURE.includes(month.id);
+  const rng = planned ? futureRand : rand;
+  const target = MONTH_TARGET(month.id);
   const pool = [...ROTATING]
-    .sort(() => rand() - 0.5)
+    .sort(() => rng() - 0.5)
     .slice(0, target - CORE.size);
-  const window = month.id === CURRENT ? CONTRACT.daysElapsed : month.days;
+  const window =
+    month.id === CURRENT ? CONTRACT.daysElapsed : month.id === IN_FLIGHT ? 12 : month.days;
   for (const posId of [...CORE, ...pool]) {
-    schedule.set(`${month.id}|${posId}`, intBetween(1, window));
+    schedule.set(`${month.id}|${posId}`, Math.round(1 + rng() * (window - 1)));
   }
 }
 
@@ -459,8 +504,16 @@ const requiredPosm = (channelId) =>
 ------------------------------------------------------------------ */
 const MONTH_INDEX = Object.fromEntries(MONTHS.map((m, i) => [m.id, i]));
 
-/* 0 at April, 1 at September. */
-const progress = (monthId) => MONTH_INDEX[monthId] / (MONTHS.length - 1);
+/* 0 at April, 1 at SEPTEMBER — anchored on the current cycle, not on
+   the last month in the list.
+
+   Dividing by MONTHS.length quietly re-scaled every drift in the file
+   the moment October and November were added: September stopped being
+   the anchor, and the calibrated figures the whole build rests on moved
+   with it. Anchoring on the current cycle keeps the past exactly as it
+   was and lets the future extrapolate past 1, which is what a trend
+   continuing into the next cycle should do. */
+const progress = (monthId) => MONTH_INDEX[monthId] / MONTH_INDEX[CURRENT];
 
 /* Where each brand stands in each city, independent of time. The
    brief puts Baghdad at Pepsi 31% / Coca-Cola 41% against a national
@@ -580,6 +633,94 @@ function promosFor(monthId, pos) {
 }
 
 /* ------------------------------------------------------------------
+   FOLLOW-UP AUDITS, AND THE LIFT THEY COINCIDE WITH.
+
+   The Action Center's whole claim is "you asked us to look again, and
+   here is what changed". That needs two things in the data: a record
+   of which outlets were asked about, and outlets that actually moved.
+
+   READ THIS BEFORE CHANGING THE LIFT.
+
+   Left to chance, a revisited outlet improves about as often as it
+   worsens, every request would report "no material change", and the
+   page would be a well-built shell. So the generator MODELS the thing
+   a follow-up audit is supposed to cause: outlets in a request get
+   attention before the next visit, and their weakest dimension
+   improves.
+
+   This is a modelled effect, not an observed one. The portal must go
+   on saying what it has always said — that a comparison shows what
+   changed between two visits, not that the request caused it. One
+   outlet, no control group. The lift is deliberately partial (some
+   outlets do not improve, a few get worse) so the demo can show Mixed
+   and Worsened results rather than a page where every request
+   succeeds, which nobody would believe.
+
+   Requests are seeded HERE rather than in the app so every count on
+   the page is derived from the same payload as the shelf itself.
+------------------------------------------------------------------ */
+const followUpRand = mulberry32(31071974);
+const followPick = (p) => followUpRand() < p;
+
+/* Which KPI a seeded request is about, and how strongly a requested
+   outlet responds. Availability answers fastest — it is a delivery —
+   while shelf space is a negotiation and moves least. */
+const FOLLOW_UP_KPIS = [
+  { kpi: "availability", strength: 0.55 },
+  { kpi: "posm", strength: 0.6 },
+  { kpi: "assortment", strength: 0.35 },
+  { kpi: "shelfShare", strength: 0.25 },
+  { kpi: "price", strength: 0.45 },
+];
+
+/* Roughly a fifth of requested outlets see nothing change, and a few
+   go backwards — a distributor misses a drop, a retailer reclaims the
+   space. Without them every request reads "Improved" and the result
+   column stops carrying information. */
+const LIFT_TAKES = 0.72;
+const LIFT_BACKFIRES = 0.08;
+
+/* posId -> { strength, direction } for the cycle being generated. */
+const liftFor = new Map();
+const FOLLOW_UPS = [];
+
+/* Seeded after a month is generated: the outlets whose gaps that cycle
+   found, carried into the next cycle as a request. */
+function seedFollowUp(originMonth, cycle, bundleRows, spec) {
+  const candidates = bundleRows
+    .filter((row) => row.issues > 0)
+    .sort((a, b) => b.issues - a.issues)
+    .slice(0, 40 + Math.floor(followUpRand() * 25));
+
+  if (candidates.length < 12) return null;
+
+  const request = {
+    id: `req-${originMonth}-${spec.kpi}`,
+    kpi: spec.kpi,
+    brand: CLIENT.id,
+    originMonth,
+    cycle,
+    createdAt: `${originMonth}-${String(22 + Math.floor(followUpRand() * 6)).padStart(2, "0")}`,
+    pos: candidates.map((row) => row.posId),
+  };
+  FOLLOW_UPS.push(request);
+
+  for (const posId of request.pos) {
+    const direction = followPick(LIFT_BACKFIRES) ? -1 : followPick(LIFT_TAKES) ? 1 : 0;
+    liftFor.set(`${cycle}|${posId}`, { kpi: spec.kpi, strength: spec.strength, direction });
+  }
+  return request;
+}
+
+/* What a requested outlet's lift does to one draw in the follow-up
+   cycle. Returns a multiplier the visit model applies. */
+function lift(monthId, posId, kpi) {
+  const held = liftFor.get(`${monthId}|${posId}`);
+  if (!held || held.kpi !== kpi || held.direction === 0) return 1;
+  return held.direction > 0 ? 1 + held.strength : 1 - held.strength * 0.5;
+}
+
+/* ------------------------------------------------------------------
    ONE VISIT.
 ------------------------------------------------------------------ */
 function visitFor(monthId, pos) {
@@ -590,8 +731,23 @@ function visitFor(monthId, pos) {
 
   for (const sku of SKUS) {
     const brand = BRANDS.find((b) => b.id === sku.brandId);
-    const listed = pick(0.045) ? !baseListed.get(`${pos.id}|${sku.id}`)
-                               : baseListed.get(`${pos.id}|${sku.id}`);
+    /* The listing draw is UNTOUCHED by the lift, and deliberately so.
+       Whether a SKU is listed decides whether the stock, facing and
+       price draws happen at all, so changing it here shifts every
+       later draw in the run — which is exactly how an earlier version
+       of this lift moved September's calibrated figures despite no
+       request targeting September.
+
+       Range still responds to a follow-up, but the adjustment is made
+       below from the follow-up generator's own stream, where it cannot
+       disturb the market. */
+    let listed = pick(0.045)
+      ? !baseListed.get(`${pos.id}|${sku.id}`)
+      : baseListed.get(`${pos.id}|${sku.id}`);
+    if (!listed && brand.client && lift(monthId, pos.id, "assortment") > 1) {
+      /* A requested outlet takes a line it was not carrying. */
+      if (followPick(0.32)) listed = true;
+    }
     if (!listed) { cells.push([sku.id, 0, 0, null]); continue; }
 
     const risk = clamp(0.02, 0.5,
@@ -599,14 +755,19 @@ function visitFor(monthId, pos) {
       (sku.pack === "pet-500" ? 1.5 : 1) *   // the brief's problem SKU
       oosDrift(monthId, sku) *
       (brand.client ? 1.06 : 0.92) /
-      keepBias.get(pos.id));
+      keepBias.get(pos.id) /
+      /* A follow-up audit's lift: the stockout risk falls at outlets
+         somebody asked us to look at again. Client lines only — a
+         request is about the client's shelf. */
+      (brand.client ? lift(monthId, pos.id, "availability") : 1));
     const inStock = !pick(risk);
 
     const facings = inStock
       ? Math.max(1, Math.round(
           SHELF_WEIGHT[brand.id] * shelfDrift(monthId, brand.id, pos.cityId) *
           26 * channel.size * 0.42 * pos.volume *
-          brandBias.get(`${pos.id}|${brand.id}`) * between(0.85, 1.15)))
+          brandBias.get(`${pos.id}|${brand.id}`) * between(0.85, 1.15) *
+          (brand.client ? lift(monthId, pos.id, "shelfShare") : 1)))
       : 0;
 
     const position = inStock
@@ -620,9 +781,10 @@ function visitFor(monthId, pos) {
       /* The brand's position multiplies the draw rather than adding a
          draw of its own, so the random stream — and every figure
          downstream of it — is untouched. */
+      const breach = brand.client ? 0.082 / lift(monthId, pos.id, "price") : 0.082;
       const price = Math.round(
         (sku.rrp * BRAND_PRICE[brand.id] *
-          between(0.985, 1.048) * (pick(0.082) ? between(1.08, 1.2) : 1)) / 25
+          between(0.985, 1.048) * (pick(breach) ? between(1.08, 1.2) : 1)) / 25
       ) * 25;
       prices.push([sku.id, price]);
     } else {
@@ -643,7 +805,14 @@ function visitFor(monthId, pos) {
      execution character. */
   const posm = requiredPosm(pos.channel).map((t) => [
     t.id,
-    pick(clamp(0.05, 0.97, 0.738 * posmDrift(monthId) * posmBias.get(pos.id) * (t.id === "cooler" ? 0.85 : 1))),
+    pick(
+      clamp(
+        0.05, 0.97,
+        0.738 * posmDrift(monthId) * posmBias.get(pos.id) *
+          (t.id === "cooler" ? 0.85 : 1) *
+          lift(monthId, pos.id, "posm")
+      )
+    ),
   ]);
 
   return { cells, oos, prices, posm, promos: promosFor(monthId, pos) };
@@ -743,6 +912,9 @@ const months = {};
 for (const month of MONTHS) {
   const audited = auditedIn(month.id);
   const bundle = { month: month.id, audited: [], matrix: [], oos: [], prices: [], posm: [], promos: [], scores: [] };
+  /* Gap counts per outlet, for the follow-up request this cycle
+     raises against the next one. */
+  const issueRows = [];
 
   for (const pos of audited) {
     const v = visitFor(month.id, pos);
@@ -773,8 +945,40 @@ for (const month of MONTHS) {
     }
     const s = scoreVisit(v, pos);
     bundle.scores.push([pi, s.score, s.availability, s.shelfShare, s.assortment, s.price, s.posm]);
+    issueRows.push({
+      posId: pos.id,
+      issues:
+        v.cells.filter((c) => c[1] === 2 && SKUS.find((x) => x.id === c[0]).brandId === CLIENT.id)
+          .length + v.posm.filter((row) => !row[1]).length,
+    });
   }
   months[month.id] = bundle;
+
+  /* Requests are raised only from the CURRENT cycle onwards, and this
+     restriction is load-bearing.
+
+     The lift moves the cycle a request targets. Seeding from April
+     would have lifted every month after it — including September,
+     whose figures the brief pins (87% availability, 34% share, 68%
+     POSM) and the whole build is calibrated against. Those numbers
+     describe a market nobody had yet intervened in, and they have to
+     stay that way.
+
+     So September raises three requests against October, which is fully
+     audited and therefore shows finished results, and October raises
+     two against November, which is part way through and shows the
+     progressive states. Five requests, two of the states the Action
+     Center has to report, and September untouched. */
+  const nextCycle = MONTHS[MONTHS.indexOf(month) + 1];
+  const raises =
+    month.id === CURRENT
+      ? FOLLOW_UP_KPIS.slice(0, 3)
+      : month.id === "2026-10"
+        ? FOLLOW_UP_KPIS.slice(3)
+        : [];
+  for (const spec of raises) {
+    if (nextCycle) seedFollowUp(month.id, nextCycle.id, issueRows, spec);
+  }
 }
 
 /* ---------------- calibration read-out ---------------- */
@@ -902,6 +1106,11 @@ const market = {
   brands: BRANDS,
   skus: SKUS,
   auditors: AUDITORS.map(({ id, name, cities }) => ({ id, name, cities })),
+  /* Follow-up audits already in flight when the portal opens. Each was
+     raised from one cycle's gaps against the next, so the Action
+     Center has completed, in-progress and pending requests to show
+     without anybody clicking anything. */
+  followUps: FOLLOW_UPS,
   posmTypes: POSM_TYPES.map(({ id, name, channels }) => ({ id, name, channels })),
   oosReasons: OOS_REASONS.map(({ id, name }) => ({ id, name })),
   shelfPositions: SHELF_POSITIONS,

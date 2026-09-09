@@ -29,11 +29,20 @@ export type Month = {
   short: string;
   days: number;
   current?: boolean;
+  /* A cycle after the current one. It carries audit data so a
+     follow-up request has somewhere to land, but the portal presents
+     it as planned rather than historical — the future is modelled, not
+     known. */
+  planned?: boolean;
 };
 
 export type City = {
   id: string;
+  /* The governorate's own name. Five of the six match their capital;
+     Nineveh does not, and calling that row "Mosul" under a column
+     headed Governorate is an error an Iraqi reader spots at once. */
   name: string;
+  capital: string;
   lat: number;
   lng: number;
   /* Projected for the map, same projection the marketing site uses. */
@@ -97,6 +106,20 @@ export type ScoreWeights = {
   posm: number;
 };
 
+/* A follow-up audit already in flight when the portal opens: one
+   cycle's gaps carried into the next as a request. Seeded in the
+   generator rather than the app so every count the Action Center shows
+   is derived from the same payload as the shelf. */
+export type FollowUpSeed = {
+  id: string;
+  kpi: "availability" | "shelfShare" | "assortment" | "price" | "posm";
+  brand: string;
+  originMonth: string;
+  cycle: string;
+  createdAt: string;
+  pos: string[];
+};
+
 export type Market = {
   contract: Contract;
   months: Month[];
@@ -107,6 +130,7 @@ export type Market = {
   brands: Brand[];
   skus: Sku[];
   auditors: Auditor[];
+  followUps: FollowUpSeed[];
   posmTypes: PosmType[];
   oosReasons: OosReason[];
   shelfPositions: string[];
