@@ -7,6 +7,7 @@ export { default as Badge } from "./Badge";
 export { default as Delta } from "./Delta";
 export { default as Bar } from "./Bar";
 export { default as Sparkline } from "./Sparkline";
+export { default as TargetSpark } from "./TargetSpark";
 export { default as ScoreRing } from "./ScoreRing";
 export { default as Tabs, type Tab } from "./Tabs";
 export { default as EmptyState } from "./EmptyState";

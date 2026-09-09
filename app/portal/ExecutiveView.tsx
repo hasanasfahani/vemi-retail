@@ -23,21 +23,24 @@ import Link from "next/link";
 import PageShell from "@/components/market/PageShell";
 import { useTargets } from "@/components/market/useTargets";
 import BrandHealthCard from "@/components/market/BrandHealthCard";
+import CityHealthCard from "@/components/market/CityHealthCard";
+import KpiCard from "@/components/market/KpiCard";
 import CoverageStrip from "@/components/market/CoverageStrip";
 import InsightCard from "@/components/market/InsightCard";
 import PosDrawer from "@/components/market/PosDrawer";
 import MarketMap, { type MapPoint } from "@/components/market/map/MarketMap";
 import MapLegend from "@/components/market/map/legend";
-import { Card, StatCard } from "@/components/market/ui";
+import { Card } from "@/components/market/ui";
 import { RankedBars } from "@/components/market/charts";
 import { scoreBand, rateBand, type Band } from "@/components/market/ui/health";
 import { generateInsights } from "@/lib/market/insights";
 import {
   isPortfolio, portfolioHealth, portfolioScore, BAND_WORD,
 } from "@/lib/market/brandHealth";
+import { cityHealth } from "@/lib/market/cityHealth";
 import { applyFilters, type MarketView } from "@/lib/market/filters";
 import {
-  cities, cityName, clientBrand, contract, loadMonth, portfolioBrands, trends,
+  cities, cityName, clientBrand, contract, loadMonth, trends,
 } from "@/lib/market";
 import type { MonthData } from "@/lib/market/types";
 import type { Targets } from "@/lib/market/settings";
@@ -109,6 +112,13 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
         : null,
     [view.filters, prior]
   );
+  /* City health is the client's own execution, so it keeps whatever
+     brand filter is set — unlike the portfolio section, which is about
+     the company's brands and cannot be narrowed to one of them. */
+  const priorView = useMemo(
+    () => (prior ? applyFilters({ ...view.filters, month: PRIOR }, prior) : null),
+    [view.filters, prior]
+  );
 
   const health = useMemo(
     () => portfolioHealth(portfolioView, priorPortfolioView),
@@ -129,6 +139,14 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
 
   const focused = focusBrand ? health.filter((h) => h.brandId === focusBrand) : health;
   const companyScore = useMemo(() => portfolioScore(health), [health]);
+
+  /* Cities take the SAME composite, but shelf is scored against the
+     contracted par rather than as conversion: this is one brand across
+     several places, so the par is exactly the right yardstick. */
+  const cityRows2 = useMemo(
+    () => cityHealth(view, priorView),
+    [view, priorView]
+  );
 
   /* Coverage is recomputed against the filter, not read off the
      contract: a Baghdad-filtered dashboard must say how much of
@@ -221,36 +239,70 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
 
   const metricOf = (id: MetricId) => METRICS.find((m) => m.id === id)!;
 
+  /* Month-over-month movement for a KPI tile, from the market trend
+     line. Each tile pairs it with the detection floor for that measure,
+     so anything the panel cannot resolve reads as flat. */
+  const move = (key: keyof (typeof trends.market)[number]) => {
+    const line = trends.market;
+    if (line.length < 2) return 0;
+    const last = line[line.length - 1][key];
+    const prior = line[line.length - 2][key];
+    if (typeof last !== "number" || typeof prior !== "number") return 0;
+    return Math.round((last - prior) * 10) / 10;
+  };
+
   return (
     <div className="flex flex-col gap-4">
       {/* ---------- coverage, demoted to a strip ---------- */}
       <CoverageStrip {...coverage} />
 
-      {/* ---------- 1 · portfolio brand health ---------- */}
+      {/* ---------- 1 · market health ---------- */}
       <section>
-        <div className="mb-2.5 flex flex-wrap items-end justify-between gap-3">
-          <div className="min-w-0">
-            <h2 className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
-              Portfolio brand health
-            </h2>
-            <p className="mt-0.5 text-[12.5px] leading-snug text-ink-500">
-              {contract.clientShort}&apos;s {portfolioBrands.length} brands in {contract.category},
-              scored on the same composite as the market:{" "}
-              <span className="mono">
-                availability 30 · shelf 25 · assortment 20 · price 15 · POSM 10
+        <div className="mb-2.5 flex flex-wrap items-baseline justify-between gap-3">
+          <h2 className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+            Market health
+          </h2>
+          <p className="text-[11.5px] text-ink-400">
+            Which execution dimension is weak, across everything audited
+          </p>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+          <KpiCard label="Availability" value={view.kpi.availability} target={targets.availability} trend={series.availability} delta={move("availability")} deltaFloor={1.73} href="/portal/performance?tab=availability" />
+          <KpiCard label="Shelf share" value={view.client?.share ?? 0} target={targets.shelfShare} trend={series.shelfShare} delta={move("shelfShare")} deltaFloor={1.81} href="/portal/performance?tab=shelf" />
+          <KpiCard label="Assortment" value={view.kpi.assortment} target={targets.assortment} trend={series.assortment} delta={move("assortment")} deltaFloor={1.8} href="/portal/performance?tab=assortment" />
+          <KpiCard label="Price compliance" value={view.kpi.price} target={targets.price} trend={series.price} delta={move("price")} deltaFloor={1.8} href="/portal/performance?tab=pricing" />
+          <KpiCard label="POSM" value={view.kpi.posm} target={targets.posm} trend={series.posm} delta={move("posm")} deltaFloor={1.8} href="/portal/performance?tab=posm" />
+          <KpiCard label="Execution score" value={view.kpi.score} unit="" target={targets.score} trend={series.score} delta={move("score")} deltaFloor={1.8} band={scoreBand(view.kpi.score)} href="/portal/performance" />
+        </div>
+      </section>
+
+      {/* ---------- 2 · portfolio brand health ---------- */}
+      <section>
+        <div className="mb-2.5 flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+            Portfolio brand health
+          </h2>
+          <div className="flex items-center gap-3">
+            <Method>
+              Each brand takes the portal&apos;s own composite — availability 30, shelf 25,
+              assortment 20, price 15, POSM 10.{" "}
+              <strong className="font-semibold text-ink-900">Shelf is scored as conversion</strong>{" "}
+              here: the share of facings a brand holds against the share of shelf slots it is
+              listed in. Judging Mountain Dew&apos;s 4% against {clientBrand.name}&apos;s 40% par
+              would rate a small brand as failing for being small, which is size rather than
+              health. POSM is recorded per outlet, not per brand, so each brand takes the material
+              compliance of the outlets that stock it.
+            </Method>
+            <p className="shrink-0 text-right">
+              <span className="mono text-[11px] uppercase tracking-wide text-ink-400">
+                Portfolio
               </span>
-              .
+              <span className="ml-2 font-display text-[22px] font-bold leading-none tracking-tight text-ink-900">
+                {companyScore}
+              </span>
+              <span className="mono ml-1 text-[11px] text-ink-400">/ 100</span>
             </p>
           </div>
-          <p className="shrink-0 text-right">
-            <span className="mono text-[11px] uppercase tracking-wide text-ink-400">
-              Portfolio
-            </span>
-            <span className="ml-2 font-display text-[22px] font-bold leading-none tracking-tight text-ink-900">
-              {companyScore}
-            </span>
-            <span className="mono ml-1 text-[11px] text-ink-400">/ 100</span>
-          </p>
         </div>
 
         {rivalSelected && (
@@ -310,34 +362,6 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
           )}
         </div>
 
-        <p className="mt-2.5 max-w-[96ch] text-[11px] leading-relaxed text-ink-400">
-          Shelf is scored as CONVERSION — the share of facings a brand holds against the share of
-          shelf slots it is listed in — rather than against {clientBrand.name}&apos;s 40% par.
-          Judging Mountain Dew&apos;s 4% against that par would rate a small brand as failing for
-          being small, which is size rather than health. POSM is recorded per outlet, not per
-          brand, so each brand takes the material compliance of the outlets that stock it.
-          {priorPortfolioView === null && " Movement appears once last cycle's rows have loaded."}
-        </p>
-      </section>
-
-      {/* ---------- 2 · market health ---------- */}
-      <section>
-        <div className="mb-2 flex flex-wrap items-baseline justify-between gap-3">
-          <h2 className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
-            Market health
-          </h2>
-          <p className="text-[11.5px] text-ink-400">
-            Which execution dimension is weak, across everything audited
-          </p>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-          <KpiTile label="Availability" value={view.kpi.availability} unit="%" target={targets.availability} trend={series.availability} href="/portal/performance?tab=availability" />
-          <KpiTile label="Shelf share" value={view.client?.share ?? 0} unit="%" target={targets.shelfShare} trend={series.shelfShare} href="/portal/performance?tab=shelf" />
-          <KpiTile label="Assortment" value={view.kpi.assortment} unit="%" target={targets.assortment} trend={series.assortment} href="/portal/performance?tab=assortment" />
-          <KpiTile label="Price compliance" value={view.kpi.price} unit="%" target={targets.price} trend={series.price} href="/portal/performance?tab=pricing" />
-          <KpiTile label="POSM" value={view.kpi.posm} unit="%" target={targets.posm} trend={series.posm} href="/portal/performance?tab=posm" />
-          <KpiTile label="Execution score" value={view.kpi.score} target={targets.score} trend={series.score} href="/portal/performance" />
-        </div>
       </section>
 
       {/* ---------- 3 · risks and opportunities ---------- */}
@@ -357,7 +381,34 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
         </div>
       </section>
 
-      {/* ---------- 4 · where it is happening ---------- */}
+      {/* ---------- 4 · market health by city ---------- */}
+      <section>
+        <div className="mb-2.5 flex flex-wrap items-center justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+              Market health by city
+            </h2>
+            <p className="mt-0.5 text-[12px] text-ink-400">
+              Which market to look at, before opening the map to find where inside it
+            </p>
+          </div>
+          <Method>
+            Cities take the same composite as the brands — availability 30, shelf 25, assortment
+            20, price 15, POSM 10 — but shelf is scored against the contracted{" "}
+            {targets.shelfShare}% par rather than as conversion. This is one brand across several
+            places, so the par is the right yardstick: {clientBrand.name} holding less than it
+            should in a city is a real shortfall, not an artefact of that city&apos;s size.
+          </Method>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+          {cityRows2.map((row) => (
+            <CityHealthCard key={row.cityId} health={row} />
+          ))}
+        </div>
+      </section>
+
+      {/* ---------- 5 · where it is happening ---------- */}
       <Card
         title="Where it is happening"
         lead={`${points.length.toLocaleString()} audited outlets, coloured by ${metricOf(mapMetric).label.toLowerCase()}.`}
@@ -377,7 +428,7 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
         />
       </Card>
 
-      {/* ---------- 4b · market comparison ---------- */}
+      {/* ---------- 6 · market comparison ---------- */}
       <Card
         title="Market comparison"
         lead={`${metricOf(cityMetric).label} by city, across audited outlets.`}
@@ -401,38 +452,6 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
   );
 }
 
-/* A KPI tile that navigates. The brief asks for click-through to the
-   matching Performance tab, and the whole tile is the target rather
-   than a link buried inside it. */
-function KpiTile({
-  label, value, unit, target, trend, href,
-}: {
-  label: string;
-  value: number;
-  unit?: string;
-  target: number;
-  trend: number[];
-  href: string;
-}) {
-  /* Movement against last month, gated by the market detection floor:
-     below it, the tile says "flat" rather than inventing a direction. */
-  const delta = trend.length > 1 ? Math.round((trend[trend.length - 1] - trend[trend.length - 2]) * 10) / 10 : 0;
-  return (
-    <Link href={href} className="rounded-[14px] outline-none transition-transform focus-visible:ring-2 focus-visible:ring-violet">
-      <StatCard
-        label={label}
-        value={value}
-        unit={unit}
-        target={target}
-        delta={delta}
-        deltaFloor={1.8}
-        deltaLabel="vs last month"
-        trend={trend}
-      />
-    </Link>
-  );
-}
-
 function MetricSwitch({
   value, onChange, metrics,
 }: {
@@ -453,5 +472,36 @@ function MetricSwitch({
         ))}
       </select>
     </label>
+  );
+}
+
+/* The working, folded away.
+
+   The method belongs on the page — a composite nobody can inspect is a
+   number nobody should trust — but it does not belong ABOVE the charts,
+   where it was the first thing a reader met and the last thing they
+   wanted. Behind a click it stays available and stops shouting. */
+function Method({ children }: { children: React.ReactNode }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <span className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="inline-flex items-center gap-1 rounded-full border border-line-strong bg-white px-2 py-[3px] text-[11px] font-semibold text-ink-500 transition-colors hover:border-ink-400 hover:text-ink-700"
+      >
+        <svg viewBox="0 0 16 16" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
+          <circle cx="8" cy="8" r="6.2" />
+          <path d="M8 7.2v4M8 5.1v.1" strokeLinecap="round" />
+        </svg>
+        How this is scored
+      </button>
+      {open && (
+        <span className="absolute right-0 top-[calc(100%+6px)] z-30 block w-[min(430px,80vw)] rounded-[12px] border border-line bg-white p-3.5 text-[11.5px] leading-relaxed text-ink-500 shadow-[var(--shadow-pop)]">
+          {children}
+        </span>
+      )}
+    </span>
   );
 }
