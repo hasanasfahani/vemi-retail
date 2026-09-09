@@ -549,3 +549,47 @@ body {
 }
 .leaflet-tooltip strong { color: var(--color-ink-900); }
 .vemi-cluster { background: none; border: 0; }
+
+/* ------------------------------------------------------------------
+   PRINT
+
+   "Export PDF" opens the browser's own print dialogue, so the printed
+   page IS the report rather than a second layout maintained alongside
+   it and free to drift. What has to go is the furniture: the sidebar,
+   the filter header, the export buttons themselves. What has to stay
+   is every figure, in ink that survives a monochrome printer.
+------------------------------------------------------------------ */
+@media print {
+  @page {
+    margin: 14mm;
+  }
+  html, body {
+    background: #ffffff;
+  }
+  .print\:hidden,
+  aside,
+  header.sticky {
+    display: none !important;
+  }
+  main {
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+  /* Cards keep their edges but lose the shadow, which prints as a
+     grey smear. */
+  section, article {
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+  /* Anything that scrolls on screen has to unroll on paper, or the
+     printed page silently loses rows. */
+  .overflow-x-auto,
+  .overflow-y-auto,
+  .overflow-auto {
+    overflow: visible !important;
+    max-height: none !important;
+  }
+  a[href]::after {
+    content: "";
+  }
+}

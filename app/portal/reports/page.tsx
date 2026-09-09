@@ -1,7 +1,10 @@
-import StubView from "@/components/market/StubView";
+import ReportsView from "./ReportsView";
 
-export const metadata = { title: "Monthly Reports" };
+export const metadata = {
+  title: "Monthly Reports",
+  description: "The month's retail execution, assembled the way a board reads it.",
+};
 
 export default function Page() {
-  return <StubView title="Monthly Reports" lead="The presentation-ready monthly story." />;
+  return <ReportsView />;
 }

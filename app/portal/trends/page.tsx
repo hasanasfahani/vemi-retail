@@ -1,7 +1,10 @@
-import StubView from "@/components/market/StubView";
+import TrendsView from "./TrendsView";
 
-export const metadata = { title: "Historical Trends" };
+export const metadata = {
+  title: "Historical Trends",
+  description: "Six cycles of execution, with the sample and the market kept apart.",
+};
 
 export default function Page() {
-  return <StubView title="Historical Trends" lead="Six months, and the repeated-POS cut." />;
+  return <TrendsView />;
 }
