@@ -1,7 +1,10 @@
-import StubView from "@/components/market/StubView";
+import ActionsView from "./ActionsView";
 
-export const metadata = { title: "Action Center" };
+export const metadata = {
+  title: "Action Center",
+  description: "Findings turned into work, and what the next audit said about it.",
+};
 
 export default function Page() {
-  return <StubView title="Action Center" lead="Turning findings into work with an owner." />;
+  return <ActionsView />;
 }
