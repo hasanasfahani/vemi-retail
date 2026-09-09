@@ -1,7 +1,10 @@
-import StubView from "@/components/market/StubView";
+import ExecutiveView from "./ExecutiveView";
 
-export const metadata = { title: "Executive Dashboard" };
+export const metadata = {
+  title: "Executive Dashboard",
+  description: "Coverage, market health, what needs attention, and where it is happening.",
+};
 
 export default function Page() {
-  return <StubView title="Executive Dashboard" lead="Coverage, market health, what needs attention, the map." />;
+  return <ExecutiveView />;
 }

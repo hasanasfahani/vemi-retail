@@ -102,6 +102,56 @@ const DISTRICTS = {
             "Hay al-Muallimeen", "Al-Wafaa", "Al-Naqib"],
 };
 
+/* ------------------------------------------------------------------
+   PUTTING OUTLETS ON THE MAP.
+
+   The audit records a district name, not a coordinate. The map needs
+   coordinates, so each district is given a deterministic centroid on a
+   ring around its city centre and each outlet a small jitter inside
+   its district.
+
+   This is SYNTHETIC PLACEMENT and the portal says so wherever the map
+   is drawn: the city is real, the district is real, the point within
+   the district is a plausible position, not a surveyed address. Ring
+   radius scales with how many outlets a city carries, so Baghdad
+   spreads wider than Karbala rather than every city occupying the same
+   disc.
+------------------------------------------------------------------ */
+/* Its own random stream. Coordinates were added after the rest of the
+   dataset was calibrated, and drawing them from the shared generator
+   would have shifted every subsequent draw — changing shelf shares,
+   stockouts and prices that the checks had already been tuned
+   against. Placement is cosmetic; it must not move the market. */
+const place = mulberry32(415926);
+
+const DISTRICT_POINT = new Map();
+for (const city of CITIES) {
+  const names = DISTRICTS[city.id];
+  /* Degrees. 0.01° ≈ 1.1km, so a 380-outlet city spreads over roughly
+     14km and a 75-outlet one over roughly 6km. */
+  const radius = 0.02 + 0.00025 * city.pos;
+  names.forEach((name, i) => {
+    /* Golden-angle spacing, so districts don't line up in spokes. */
+    const angle = i * 2.39996;
+    const r = radius * Math.sqrt((i + 0.6) / names.length);
+    DISTRICT_POINT.set(`${city.id}|${name}`, {
+      lat: city.lat + r * Math.cos(angle),
+      /* Longitude degrees shrink with latitude; at 33°N a degree of
+         longitude is about 0.84 of a degree of latitude. */
+      lng: city.lng + (r * Math.sin(angle)) / Math.cos((city.lat * Math.PI) / 180),
+    });
+  });
+}
+
+function placeInDistrict(city, district) {
+  const centre = DISTRICT_POINT.get(`${city.id}|${district}`);
+  const spread = 0.006;
+  return {
+    lat: Math.round((centre.lat + (place() - 0.5) * spread) * 100000) / 100000,
+    lng: Math.round((centre.lng + (place() - 0.5) * spread * 1.2) * 100000) / 100000,
+  };
+}
+
 const CHANNELS = [
   { id: "hypermarket", name: "Hypermarket", share: 0.05, size: 9 },
   { id: "supermarket", name: "Supermarket", share: 0.22, size: 6 },
@@ -230,6 +280,7 @@ for (const city of CITIES) {
       /* Rough footfall weight — drives how much the outlet matters and
          how many facings it has to give. */
       volume: Math.round(clamp(0.4, 2.2, normal(channel.size / 4, 0.35)) * 100) / 100,
+      ...placeInDistrict(city, district),
     });
   }
 }

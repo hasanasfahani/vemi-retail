@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/* Leaflet's own stylesheet, plus the cluster plugin's. Imported here
+   rather than in the map component so the CSS ships once, and placed
+   above the design system so our tokens win any collision. */
+@import "leaflet/dist/leaflet.css";
+@import "leaflet.markercluster/dist/MarkerCluster.css";
+
 /* ============================================================
    VEMI — PRODUCT-LED DESIGN SYSTEM
    Restraint + one accent + credible data. No gradients, no glows.
@@ -509,3 +515,37 @@ body {
     background: #fff;
   }
 }
+
+/* ------------------------------------------------------------------
+   MAP CHROME
+
+   Leaflet ships a look of its own — heavy panel borders, blue focus
+   rings, a white tooltip with a hard shadow. These pull it onto the
+   portal's own surfaces so a map reads as one more panel rather than
+   an embedded widget from another product.
+------------------------------------------------------------------ */
+.leaflet-container {
+  font-family: var(--font-body), system-ui, sans-serif;
+  background: var(--color-canvas);
+}
+.leaflet-control-attribution {
+  background: rgba(255, 255, 255, 0.86);
+  color: var(--color-ink-400);
+  font-size: 10.5px;
+}
+.leaflet-control-attribution a { color: var(--color-ink-500); }
+.leaflet-bar a {
+  border-color: var(--color-line);
+  color: var(--color-ink-700);
+}
+.leaflet-tooltip {
+  border: 1px solid var(--color-line);
+  border-radius: 9px;
+  box-shadow: var(--shadow-pop);
+  color: var(--color-ink-700);
+  font-size: 12px;
+  line-height: 1.35;
+  padding: 6px 9px;
+}
+.leaflet-tooltip strong { color: var(--color-ink-900); }
+.vemi-cluster { background: none; border: 0; }

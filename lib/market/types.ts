@@ -71,6 +71,11 @@ export type Pos = {
   channel: string;
   retailer: string;
   volume: number;
+  /* Synthetic placement: the city and district are real, the point
+     inside the district is plausible rather than surveyed. Every
+     surface that draws a marker says so. */
+  lat: number;
+  lng: number;
   /* Audited every month — the only population where a store-level
      month-over-month comparison means anything. */
   core: boolean;
