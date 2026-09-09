@@ -24,6 +24,7 @@ import {
   brands, channelName, cityName, clientBrand, monthLabel, portfolioBrands, skuOf,
   skus, trends,
 } from "./index";
+import { moneyOf } from "./economics";
 import type { MarketView } from "./filters";
 import type { Cell, Sku } from "./types";
 
@@ -94,6 +95,24 @@ export type Insight = {
   /* Where to go to act on it, and what the reader should be looking
      at when they get there. */
   cta: { href: string; label: string };
+  /* The outlets the finding actually touches. Rules supply it; the
+     entry point turns it into geographic concentration, so no rule has
+     to know about cities to say where its problem lives. */
+  affected: string[];
+  /* Derived at the entry point, never by a rule. */
+  concentration?: { cityId: string; outlets: number; share: number };
+  /* Facing-days converted to dinars, where that conversion is
+     meaningful. Null on rules counted in readings or outlets —
+     inventing a dinar figure for "three mispriced lines" would be
+     making one up — and null wherever the facing-days are not the
+     CLIENT'S OWN space: see `monetisable`. */
+  money: number | null;
+  /* False on findings measured in someone else's facings. R4 counts
+     the rival shelf standing where the client is out; pricing that as
+     client revenue would claim the client could capture a competitor's
+     entire fixture, and at 849m IQD it dominated every money-ranked
+     list on the first run. */
+  monetisable?: boolean;
   evidence: { formula: string; table: EvidenceTable };
   entities: {
     brandId?: string;
@@ -104,6 +123,11 @@ export type Insight = {
     channel?: string;
   };
 };
+
+/* What a rule returns. The two derived fields are filled in once, at
+   the entry point, so a rule never has to know about cities or money
+   to state its own finding. */
+export type RawInsight = Omit<Insight, "concentration" | "money">;
 
 export type InsightReport = {
   all: Insight[];
@@ -299,9 +323,9 @@ type Ctx = {
    nothing is projected, the auditor stood in front of the empty
    facings and counted them.
 ================================================================== */
-function r1OutletGaps(ctx: Ctx): Insight[] {
+function r1OutletGaps(ctx: Ctx): RawInsight[] {
   const { view } = ctx;
-  const out: Insight[] = [];
+  const out: RawInsight[] = [];
 
   for (const [posId, cells] of ctx.cellsByPos) {
     const own = cells.filter(isClient);
@@ -338,6 +362,7 @@ function r1OutletGaps(ctx: Ctx): Insight[] {
       confidence: "measured",
       scope: { outlets: 1, label: outlet.name },
       cta: { href: `/portal/pos?pos=${posId}`, label: "Open outlet" },
+      affected: [posId],
       evidence: {
         formula:
           "empty client facings at this outlet × 30 days to the next audit",
@@ -371,7 +396,7 @@ function r1OutletGaps(ctx: Ctx): Insight[] {
    Erbil; comparing it to its own city isolates the thing a field
    manager can actually do something about.
 ================================================================== */
-function r2DistrictDeficit(ctx: Ctx): Insight[] {
+function r2DistrictDeficit(ctx: Ctx): RawInsight[] {
   const { view } = ctx;
   const byCity = new Map<string, Cell[]>();
   const byDistrict = new Map<string, Cell[]>();
@@ -384,7 +409,7 @@ function r2DistrictDeficit(ctx: Ctx): Insight[] {
     byDistrict.set(dk, [...(byDistrict.get(dk) ?? []), cell]);
   }
 
-  const out: Insight[] = [];
+  const out: RawInsight[] = [];
   for (const [dk, cells] of byDistrict) {
     const [cityId, district] = dk.split("|");
     const outlets = new Set(cells.map((c) => c.posId));
@@ -417,6 +442,7 @@ function r2DistrictDeficit(ctx: Ctx): Insight[] {
       confidence: "estimated",
       scope: { outlets: outlets.size, label: `${district}, ${cityName(cityId)}` },
       cta: { href: `/portal/pos?city=${cityId}`, label: "See outlets" },
+      affected: [...outlets],
       evidence: {
         formula:
           "(city client share − district client share) × district facings × 30 days",
@@ -447,13 +473,13 @@ function r2DistrictDeficit(ctx: Ctx): Insight[] {
    Comparing a 250ml can to a 2.25L bottle would say nothing; packs
    compete within their own format.
 ================================================================== */
-function r3DistributionGap(ctx: Ctx): Insight[] {
+function r3DistributionGap(ctx: Ctx): RawInsight[] {
   const { view } = ctx;
   const audited = view.posCount || 1;
   const listedPct = (skuId: string) =>
     pct(new Set(view.cells.filter((c) => c.skuId === skuId).map((c) => c.posId)).size, audited);
 
-  const out: Insight[] = [];
+  const out: RawInsight[] = [];
   for (const sku of ctx.skuById.values()) {
     if (sku.brandId !== clientBrand.id) continue;
     const peers = [...ctx.skuById.values()].filter(
@@ -478,6 +504,11 @@ function r3DistributionGap(ctx: Ctx): Insight[] {
       confidence: "estimated",
       scope: { outlets: audited, label: "all audited outlets" },
       cta: { href: `/portal/performance?tab=assortment&sku=${sku.id}`, label: "See assortment" },
+      /* The outlets that do NOT carry it — the gap is the opportunity,
+         not the outlets already stocking it. */
+      affected: view.outlets
+        .filter((p) => !view.cells.some((c) => c.posId === p.id && c.skuId === sku.id))
+        .map((p) => p.id),
       evidence: {
         formula: "median(same-pack rival distribution) − client SKU distribution",
         table: {
@@ -506,7 +537,7 @@ function r3DistributionGap(ctx: Ctx): Insight[] {
    is the real cost of a stockout, and this names which competitor
    collected it.
 ================================================================== */
-function r4RivalSubstitution(ctx: Ctx): Insight[] {
+function r4RivalSubstitution(ctx: Ctx): RawInsight[] {
   const { view } = ctx;
   const oosOutlets = new Set(
     view.cells.filter((c) => isClient(c) && c.state === "out-of-stock").map((c) => c.posId)
@@ -549,8 +580,12 @@ function r4RivalSubstitution(ctx: Ctx): Insight[] {
         label: `${(topFacings * REVISIT_DAYS).toLocaleString()} contested facing-days`,
       },
       confidence: "measured",
+      /* Rival facings, not the client's — not convertible to client
+         money. See the note on `monetisable`. */
+      monetisable: false,
       scope: { outlets: oosOutlets.size, label: "outlets with a client stockout" },
       cta: { href: "/portal/competition", label: "Open competition" },
+      affected: [...oosOutlets],
       evidence: {
         formula: "rival facings at client-stockout outlets ÷ all competing facings there",
         table: {
@@ -576,7 +611,7 @@ function r4RivalSubstitution(ctx: Ctx): Insight[] {
    mixing the two produced rankings dominated by outlets that were
    only remarkable for somebody else's promotion.
 ================================================================== */
-function r5PriceCluster(ctx: Ctx): Insight[] {
+function r5PriceCluster(ctx: Ctx): RawInsight[] {
   const { view } = ctx;
   const byPos = new Map<string, typeof view.prices>();
   for (const p of view.prices) {
@@ -585,7 +620,7 @@ function r5PriceCluster(ctx: Ctx): Insight[] {
     byPos.set(p.posId, [...(byPos.get(p.posId) ?? []), p]);
   }
 
-  const out: Insight[] = [];
+  const out: RawInsight[] = [];
   for (const [posId, rows] of byPos) {
     if (rows.length < THRESHOLDS.r5PriceCluster.warningCount) continue;
     const outlet = ctx.posById.get(posId);
@@ -604,6 +639,7 @@ function r5PriceCluster(ctx: Ctx): Insight[] {
       confidence: "measured",
       scope: { outlets: 1, label: outlet.name },
       cta: { href: `/portal/pos?pos=${posId}`, label: "Open outlet" },
+      affected: [posId],
       evidence: {
         formula: "client price readings more than ±5% from RRP, counted per outlet",
         table: {
@@ -629,13 +665,13 @@ function r5PriceCluster(ctx: Ctx): Insight[] {
    only channels big enough that one stockout cannot move the rate by
    more than the threshold judging it.
 ================================================================== */
-function r6ChannelGap(ctx: Ctx): Insight[] {
+function r6ChannelGap(ctx: Ctx): RawInsight[] {
   const { view } = ctx;
   const own = view.cells.filter(isClient);
   if (own.length === 0) return [];
   const overall = pct(own.filter((c) => c.state === "in-stock").length, own.length);
 
-  const out: Insight[] = [];
+  const out: RawInsight[] = [];
   const byChannel = new Map<string, Cell[]>();
   for (const c of own) {
     const ch = ctx.posById.get(c.posId)?.channel;
@@ -665,6 +701,7 @@ function r6ChannelGap(ctx: Ctx): Insight[] {
       confidence: "estimated",
       scope: { outlets, label: channelName(channel) },
       cta: { href: `/portal/performance?channel=${channel}`, label: "See channel" },
+      affected: [...new Set(rows.map((c) => c.posId))],
       evidence: {
         formula: "client availability overall − client availability in this channel",
         table: {
@@ -689,7 +726,7 @@ function r6ChannelGap(ctx: Ctx): Insight[] {
    overall while losing the best shelf is a real, specific problem that
    an aggregate share figure hides completely.
 ================================================================== */
-function r7ShelfPosition(ctx: Ctx): Insight[] {
+function r7ShelfPosition(ctx: Ctx): RawInsight[] {
   const { view } = ctx;
   const stocked = view.cells.filter((c) => c.state === "in-stock");
   const eye = stocked.filter((c) => c.position === "eye");
@@ -718,6 +755,7 @@ function r7ShelfPosition(ctx: Ctx): Insight[] {
       confidence: "estimated",
       scope: { outlets: new Set(eye.map((c) => c.posId)).size, label: "outlets with eye-level shelf" },
       cta: { href: "/portal/performance?tab=shelf", label: "See shelf" },
+      affected: [...new Set(eye.map((c) => c.posId))],
       evidence: {
         formula: "client share of non-eye facings − client share of eye-level facings",
         table: {
@@ -741,8 +779,8 @@ function r7ShelfPosition(ctx: Ctx): Insight[] {
    carry the brand, which is the most expensive kind of stockout there
    is and the easiest to fix.
 ================================================================== */
-function r9DarkOutlets(ctx: Ctx): Insight[] {
-  const out: Insight[] = [];
+function r9DarkOutlets(ctx: Ctx): RawInsight[] {
+  const out: RawInsight[] = [];
   for (const [posId, cells] of ctx.cellsByPos) {
     const own = cells.filter(isClient);
     if (own.length === 0) continue;
@@ -770,6 +808,7 @@ function r9DarkOutlets(ctx: Ctx): Insight[] {
       confidence: "measured",
       scope: { outlets: 1, label: outlet.name },
       cta: { href: `/portal/pos?pos=${posId}`, label: "Open outlet" },
+      affected: [posId],
       evidence: {
         formula: "every listed client SKU out of stock at one outlet",
         table: {
@@ -796,7 +835,7 @@ function r9DarkOutlets(ctx: Ctx): Insight[] {
    normally does" — the same idea rotated, and the one a rep can sell
    against on the next visit.
 ================================================================== */
-function r11AssortmentGap(ctx: Ctx): Insight[] {
+function r11AssortmentGap(ctx: Ctx): RawInsight[] {
   const listed = new Map<string, number>();
   for (const [posId, cells] of ctx.cellsByPos) {
     listed.set(posId, cells.filter(isClient).length);
@@ -808,7 +847,7 @@ function r11AssortmentGap(ctx: Ctx): Insight[] {
   }
   const medians = new Map([...byChannel].map(([ch, v]) => [ch, median(v)]));
 
-  const out: Insight[] = [];
+  const out: RawInsight[] = [];
   for (const [posId, n] of listed) {
     const outlet = ctx.posById.get(posId);
     if (!outlet) continue;
@@ -828,6 +867,7 @@ function r11AssortmentGap(ctx: Ctx): Insight[] {
       confidence: "estimated",
       scope: { outlets: 1, label: outlet.name },
       cta: { href: `/portal/pos?pos=${posId}`, label: "Open outlet" },
+      affected: [posId],
       evidence: {
         formula: "channel median client SKUs listed − this outlet's client SKUs listed",
         table: {
@@ -853,7 +893,7 @@ function r11AssortmentGap(ctx: Ctx): Insight[] {
    the relationship already exists, and a rep with a boot full of
    material fixes it in one visit.
 ================================================================== */
-function r13PosmAbsent(ctx: Ctx): Insight[] {
+function r13PosmAbsent(ctx: Ctx): RawInsight[] {
   const { view } = ctx;
   const stocking = new Set(
     view.cells.filter((c) => isClient(c) && c.state === "in-stock").map((c) => c.posId)
@@ -891,6 +931,7 @@ function r13PosmAbsent(ctx: Ctx): Insight[] {
       confidence: "measured",
       scope: { outlets: bare.length, label: "outlets stocking the client" },
       cta: { href: "/portal/performance?tab=posm", label: "See POSM" },
+      affected: bare,
       evidence: {
         formula: "outlets with client stock in place and zero POSM types present",
         table: {
@@ -916,13 +957,13 @@ function r13PosmAbsent(ctx: Ctx): Insight[] {
    and the rule reports exactly that, with the window and the floor on
    the card so nobody mistakes one for the other.
 ================================================================== */
-function r14CompetitorMovement(ctx: Ctx): Insight[] {
+function r14CompetitorMovement(ctx: Ctx): RawInsight[] {
   const { view } = ctx;
   const cityIds = view.filters.cities.length
     ? view.filters.cities
     : Object.keys(trends.byCity);
 
-  const out: Insight[] = [];
+  const out: RawInsight[] = [];
   for (const cityId of cityIds) {
     const points = trends.byCity[cityId];
     if (!points || points.length < 2) continue;
@@ -957,6 +998,7 @@ function r14CompetitorMovement(ctx: Ctx): Insight[] {
       confidence: "measured",
       scope: { outlets: Math.max(1, outlets), label: cityName(cityId) },
       cta: { href: `/portal/competition?city=${cityId}`, label: "Open competition" },
+      affected: view.outlets.filter((p) => p.cityId === cityId).map((p) => p.id),
       evidence: {
         formula: `share now − share six months ago, per brand, reported only above the city's ${floor}pt detection floor (MDE = 2.8 × bootstrapped SE)`,
         table: {
@@ -984,9 +1026,9 @@ function r14CompetitorMovement(ctx: Ctx): Insight[] {
    everybody has run out of — those are opposite problems with
    opposite fixes.
 ================================================================== */
-function r15SkuStockout(ctx: Ctx): Insight[] {
+function r15SkuStockout(ctx: Ctx): RawInsight[] {
   const { view } = ctx;
-  const out: Insight[] = [];
+  const out: RawInsight[] = [];
 
   for (const skuId of clientSkuIds(view)) {
     const rows = view.cells.filter((c) => c.skuId === skuId);
@@ -1022,6 +1064,7 @@ function r15SkuStockout(ctx: Ctx): Insight[] {
       confidence: "measured",
       scope: { outlets: empty.length, label: "outlets listing this SKU" },
       cta: { href: `/portal/pos?sku=${skuId}`, label: "See outlets" },
+      affected: empty.map((c) => c.posId),
       evidence: {
         formula: "outlets where the SKU is listed and out of stock ÷ outlets listing it",
         table: {
@@ -1065,6 +1108,29 @@ export function generateInsights(view: MarketView): InsightReport {
     ...r14CompetitorMovement(ctx),
     ...r15SkuStockout(ctx),
   ]
+    /* The two derived fields, filled once. Concentration answers "and
+       where is this?" without any rule needing to know about cities;
+       money converts facing-days and REFUSES to convert anything else,
+       because a dinar figure for "three mispriced lines" would be
+       invented rather than modelled. */
+    .map((raw): Insight => {
+      const counts = new Map<string, number>();
+      for (const posId of raw.affected) {
+        const cityId = posById.get(posId)?.cityId;
+        if (cityId) counts.set(cityId, (counts.get(cityId) ?? 0) + 1);
+      }
+      const top = [...counts].sort((a, b) => b[1] - a[1])[0];
+      return {
+        ...raw,
+        concentration: top
+          ? { cityId: top[0], outlets: top[1], share: pct(top[1], raw.affected.length) }
+          : undefined,
+        money:
+          raw.impact.unit === "facing-days" && raw.monetisable !== false
+            ? moneyOf(raw.impact.value)
+            : null,
+      };
+    })
     /* A finding whose impact rounds to nothing is not a finding. */
     .filter((i) => i.impact.value > 0)
     .sort((a, b) => {

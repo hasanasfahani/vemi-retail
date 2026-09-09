@@ -1,7 +1,10 @@
-import StubView from "@/components/market/StubView";
+import InsightsView from "./InsightsView";
 
-export const metadata = { title: "Insights" };
+export const metadata = {
+  title: "Insights",
+  description: "What the month found, what it is worth, and the stories behind it.",
+};
 
 export default function Page() {
-  return <StubView title="Insights" lead="The intelligence feed: what matters and why." />;
+  return <InsightsView />;
 }
