@@ -89,15 +89,38 @@ near("Execution score", mean(1), 82, 1, "/100");
 near("Coca-Cola share of shelf", share("coca-cola"), 39, 1, "%");
 
 console.log("\nTHE BRIEF'S NARRATIVE");
-/* "Pepsi 500ml is unavailable in 42 audited POS" */
+/* The brief states "unavailable in 42 audited POS" AND "38% of
+   detected Pepsi OOS cases". At 742 POS and 87% availability those
+   cannot both hold — 38% of ~347 Pepsi gaps is ~132, not 42 — so the
+   brief's own two figures disagree by roughly 3x.
+
+   Resolved the way the client asked: every figure on screen is derived
+   from this dataset, and the brief's numbers are illustrative. What is
+   asserted here is the CLAIM the brief makes rather than the number it
+   guessed — that 500ml is the worst of the client's SKUs, which is the
+   thing the whole demo narrative hangs on. */
 const p500 = market.skus.findIndex((s) => s.id === "pepsi-pet-500");
 const p500Oos = cur.oos.filter((o) => o[1] === p500).length;
-near("Pepsi 500ml OOS, POS count", p500Oos, 42, 14);
-
-/* "Pepsi 500ml accounts for 38% of detected Pepsi OOS cases" */
 const clientOos = cur.oos.filter((o) => sku(o[1]).brandId === CLIENT.id);
-near("Pepsi 500ml as a share of Pepsi OOS",
-  (p500Oos / clientOos.length) * 100, 38, 12, "%");
+
+const rateBySku = new Map();
+for (const [, si, state] of cur.matrix) {
+  if (sku(si).brandId !== CLIENT.id) continue;
+  const e = rateBySku.get(si) ?? { listed: 0, oos: 0 };
+  e.listed += 1;
+  if (state === 2) e.oos += 1;
+  rateBySku.set(si, e);
+}
+const ranked = [...rateBySku.entries()]
+  .map(([si, e]) => ({ id: si, rate: e.oos / e.listed }))
+  .sort((a, b) => b.rate - a.rate);
+
+check("Pepsi 500ml is the worst client SKU for availability",
+  ranked[0].id === p500,
+  `${(ranked[0].rate * 100).toFixed(1)}% OOS — ${p500Oos} POS, ${((p500Oos / clientOos.length) * 100).toFixed(0)}% of Pepsi gaps`);
+check("its lead over the next SKU is visible, not a rounding artefact",
+  ranked[0].rate - ranked[1].rate > 0.03,
+  `+${((ranked[0].rate - ranked[1].rate) * 100).toFixed(1)}pt over ${sku(ranked[1].id).name}`);
 
 /* "Coca-Cola gained +4.2pp of shelf share in Basra" */
 const basra = trends.byCity.basra;
