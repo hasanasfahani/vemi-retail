@@ -12,17 +12,44 @@ import { brandColor } from "./theme";
 
 export type Slice = { id: string; name: string; value: number };
 
+/* A donut is not always about brands. Out-of-stock reasons, channel
+   mixes and POSM types are categorical too, and running them through
+   `brandColor` painted every slice the same fallback grey — a chart
+   with one colour is a chart with no encoding.
+
+   Fixed order, assigned by position and never cycled, so a reason
+   keeps its colour when another one drops out of the filter. These are
+   steps from the portal's own ramps rather than new hues, and the
+   legend carries every value in text, so nothing rests on colour
+   alone. */
+export const CATEGORY_COLORS = [
+  "var(--color-violet)",
+  "var(--color-stock-2)",
+  "var(--color-serious)",
+  "var(--color-warn)",
+  "#7c828f",
+  "var(--color-comp-1)",
+];
+
 export default function ShareDonut({
   slices,
   size = 168,
   centerLabel,
   centerValue,
+  palette = "brand",
 }: {
   slices: Slice[];
   size?: number;
   centerLabel?: string;
   centerValue?: string;
+  /* "brand" keys colour to the brand id, so Pepsi is the same violet
+     in every chart. "category" assigns from a fixed sequence, for
+     slices that are not brands. */
+  palette?: "brand" | "category";
 }) {
+  const colorOf = (id: string, index: number) =>
+    palette === "brand" ? brandColor(id) : CATEGORY_COLORS[index % CATEGORY_COLORS.length];
+
   const total = slices.reduce((s, x) => s + x.value, 0) || 1;
   const stroke = 22;
   const r = (size - stroke) / 2;
@@ -40,7 +67,7 @@ export default function ShareDonut({
       id: slice.id,
       dash: `${Math.max(0, len - gap)} ${c - Math.max(0, len - gap)}`,
       offset: -((before / total) * c),
-      color: brandColor(slice.id),
+      color: colorOf(slice.id, i),
     };
   });
 
@@ -75,11 +102,11 @@ export default function ShareDonut({
       </div>
 
       <ul className="min-w-[150px] flex-1 flex-col gap-1.5">
-        {slices.map((slice) => (
+        {slices.map((slice, i) => (
           <li key={slice.id} className="flex items-center gap-2 py-[3px] text-[12.5px]">
             <span
               className="h-2.5 w-2.5 shrink-0 rounded-[3px]"
-              style={{ background: brandColor(slice.id) }}
+              style={{ background: colorOf(slice.id, i) }}
               aria-hidden
             />
             <span className="min-w-0 truncate text-ink-700">{slice.name}</span>

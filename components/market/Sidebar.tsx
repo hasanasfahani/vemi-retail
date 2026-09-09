@@ -6,7 +6,19 @@
    page whose densest views are a 26-column assortment matrix and a
    map — and those are exactly the views where someone wants the
    width back. Collapsed state persists, because a reader who wants
-   the room usually wants it every time. */
+   the room usually wants it every time.
+
+   TWO BUGS FIXED HERE, and they were the same bug wearing two faces.
+   The rail sized itself to the whole page rather than the viewport, so
+   on a long page its footer — which held the only expand button — sat
+   thousands of pixels below the fold. Collapse the sidebar on the
+   dashboard and there was no way back short of clearing storage.
+
+   So: the rail is now `sticky` at full VIEWPORT height, which both
+   keeps the navigation in view while the page scrolls and puts its
+   controls where they can be reached. And the toggle lives in the
+   header row in BOTH states, because a control that disappears in the
+   state it is meant to undo is not a control. */
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -56,34 +68,40 @@ export default function Sidebar() {
 
   return (
     <nav
-      className={`hidden shrink-0 flex-col border-r border-line bg-white transition-[width] duration-200 lg:flex ${
+      className={`sticky top-0 hidden h-screen shrink-0 flex-col border-r border-line bg-white transition-[width] duration-200 lg:flex ${
         collapsed ? "w-[68px]" : "w-[236px]"
       }`}
       aria-label="Sections"
     >
-      <div className="flex h-[60px] items-center justify-between border-b border-line px-4">
-        <Link
-          href={withFilters("/portal")}
-          className="flex items-center font-display text-lg font-bold tracking-tight text-ink-900"
-        >
-          {collapsed ? "V" : "Vemi"}
-          <span style={{ color: "var(--color-violet)" }}>.</span>
-        </Link>
+      <div
+        className={`flex h-[60px] shrink-0 items-center border-b border-line ${
+          collapsed ? "justify-center px-2" : "justify-between px-4"
+        }`}
+      >
         {!collapsed && (
-          <button
-            type="button"
-            onClick={toggle}
-            aria-label="Collapse sidebar"
-            className="rounded-md p-1 text-ink-400 hover:bg-canvas hover:text-ink-700"
+          <Link
+            href={withFilters("/portal")}
+            className="flex items-center font-display text-lg font-bold tracking-tight text-ink-900"
           >
-            <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-              <path d="M9.5 4 5.5 8l4 4" />
-            </svg>
-          </button>
+            Vemi
+            <span style={{ color: "var(--color-violet)" }}>.</span>
+          </Link>
         )}
+        <button
+          type="button"
+          onClick={toggle}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          aria-expanded={!collapsed}
+          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          className="rounded-md p-1.5 text-ink-400 transition-colors hover:bg-canvas hover:text-ink-700"
+        >
+          <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <path d={collapsed ? "M6.5 4l4 4-4 4" : "M9.5 4 5.5 8l4 4"} />
+          </svg>
+        </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-2.5 py-3">
+      <div className="min-h-0 flex-1 overflow-y-auto px-2.5 py-3">
         {NAV.map((group, i) => (
           <div key={group.label} className={i > 0 ? "mt-4" : undefined}>
             {!collapsed && (
@@ -119,18 +137,23 @@ export default function Sidebar() {
 
       {/* Coverage lives in the rail because it is the one number that
           is true on every page — the contract, not a metric. */}
-      <div className="border-t border-line p-2.5">
+      <div className="shrink-0 border-t border-line p-2.5">
         {collapsed ? (
-          <button
-            type="button"
-            onClick={toggle}
-            aria-label="Expand sidebar"
-            className="flex w-full items-center justify-center rounded-lg p-2 text-ink-400 hover:bg-canvas hover:text-ink-700"
+          <div
+            className="flex flex-col items-center gap-1 py-1"
+            title={`${coverage.audited.toLocaleString()} of ${coverage.contracted.toLocaleString()} audited · ${coverage.pct}%`}
           >
-            <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-              <path d="M6.5 4l4 4-4 4" />
-            </svg>
-          </button>
+            <span className="mono text-[12px] font-bold text-ink-900">{coverage.pct}%</span>
+            <span className="h-1 w-8 overflow-hidden rounded-full bg-line">
+              <span
+                className="block h-full rounded-full"
+                style={{
+                  width: `${coverage.pct}%`,
+                  background: coverage.onTrack ? "var(--color-good)" : "var(--color-warn)",
+                }}
+              />
+            </span>
+          </div>
         ) : (
           <div className="rounded-lg bg-canvas p-3">
             <div className="flex items-baseline justify-between">

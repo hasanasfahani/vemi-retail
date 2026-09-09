@@ -6,7 +6,7 @@
    under list is a margin problem, one 12% over is a volume problem,
    and an average that mixes them says neither. */
 
-import { Card, DataTable, StatCard, type Column } from "@/components/market/ui";
+import { Card, DataTable, StatCard, type Column, type Facet } from "@/components/market/ui";
 import Headline from "@/components/market/Headline";
 import { RankedBars, brandColor } from "@/components/market/charts";
 import Badge from "@/components/market/ui/Badge";
@@ -61,6 +61,13 @@ export default function PricingTab({ view }: { view: MarketView }) {
         />
       ),
     },
+  ];
+
+  /* Twelve rows of the worst variances, and the first question anyone
+     asks is "which of these are mine to fix?" — a city, or a line. */
+  const outlierFacets: Facet<Outlier>[] = [
+    { id: "city", label: "City", value: (r) => (r.outlet ? cityName(r.outlet.cityId) : "—") },
+    { id: "sku", label: "SKU", value: (r) => r.sku?.name ?? r.skuId },
   ];
 
   return (
@@ -149,10 +156,15 @@ export default function PricingTab({ view }: { view: MarketView }) {
         </div>
       </div>
 
-      <Card title="Price outliers" lead="The readings furthest from list, worst first." padded={false}>
+      <Card
+        title="Price outliers"
+        lead="The readings furthest from list, worst first. Filter by city or SKU to find the ones that are yours to fix."
+        padded={false}
+      >
         <DataTable
           rows={p.outliers}
           columns={columns}
+          facets={outlierFacets}
           rowKey={(r) => `${r.posId}-${r.skuId}`}
           defaultSort={{ id: "variance", dir: "desc" }}
           exportName="price-outliers"

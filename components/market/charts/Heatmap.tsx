@@ -18,6 +18,7 @@ export default function Heatmap({
   unit = "",
   onCellClick,
   legend,
+  tone = "neutral",
 }: {
   rows: { id: string; label: string }[];
   columns: { id: string; label: string }[];
@@ -28,6 +29,13 @@ export default function Heatmap({
   unit?: string;
   onCellClick?: (rowId: string, colId: string) => void;
   legend?: ReactNode;
+  /* "neutral" ramps through the portal's accent, for a magnitude that
+     is neither good nor bad — penetration, coverage, price. "bad"
+     ramps through the critical red, for a magnitude that is a count of
+     failures: a grid of out-of-stocks drawn in the same violet as a
+     distribution map reads as ordinary volume, and a dark cell should
+     mean the same thing everywhere it appears. */
+  tone?: "neutral" | "bad";
 }) {
   const values: number[] = [];
   for (const r of rows)
@@ -42,18 +50,24 @@ export default function Heatmap({
   const lo = min ?? (values.length ? Math.min(...values) : 0);
   const hi = max ?? (values.length ? Math.max(...values) : 1);
 
-  /* One hue, five steps — the violet ramp the rest of the portal uses,
-     so a dark cell here means the same thing as a dark bar there. */
-  const fill = (v: number) => {
-    const t = hi === lo ? 1 : (v - lo) / (hi - lo);
-    const step = t < 0.2 ? 0 : t < 0.4 ? 1 : t < 0.6 ? 2 : t < 0.8 ? 3 : 4;
-    return [
+  /* One hue, five steps. Sequential means a single hue, light to dark —
+     never a rainbow — and the hue itself carries the meaning: accent
+     for a plain magnitude, red where the magnitude counts failures. */
+  const RAMP = {
+    neutral: [
       "var(--color-violet-050)",
       "var(--color-violet-100)",
       "var(--color-stock-1)",
       "var(--color-stock-3)",
       "var(--color-violet)",
-    ][step];
+    ],
+    bad: ["#fdf0ef", "#f8d4d1", "#eda9a4", "#dd6f68", "var(--color-critical)"],
+  } as const;
+
+  const fill = (v: number) => {
+    const t = hi === lo ? 1 : (v - lo) / (hi - lo);
+    const step = t < 0.2 ? 0 : t < 0.4 ? 1 : t < 0.6 ? 2 : t < 0.8 ? 3 : 4;
+    return RAMP[tone][step];
   };
   const ink = (v: number) => {
     const t = hi === lo ? 1 : (v - lo) / (hi - lo);

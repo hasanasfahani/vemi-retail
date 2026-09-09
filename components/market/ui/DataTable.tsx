@@ -20,6 +20,18 @@
 import { useMemo, useState, type ReactNode } from "react";
 import EmptyState from "./EmptyState";
 
+/* A column the reader can narrow by. Search finds one row; a facet
+   answers "show me only Basra" — a different act, and one a
+   twelve-row page of outliers needs before search is any use. */
+export type Facet<T> = {
+  id: string;
+  label: string;
+  /* The value this row falls under. Options are built from the rows
+     themselves, so a facet can never offer a filter that matches
+     nothing. */
+  value: (row: T) => string;
+};
+
 export type Column<T> = {
   id: string;
   header: ReactNode;
@@ -40,6 +52,7 @@ export default function DataTable<T>({
   searchable,
   searchPlaceholder = "Search…",
   searchText,
+  facets,
   pageSize = 25,
   defaultSort,
   onRowClick,
@@ -54,6 +67,8 @@ export default function DataTable<T>({
   searchable?: boolean;
   searchPlaceholder?: string;
   searchText?: (row: T) => string;
+  /* Dropdowns above the table, one per faceted column. */
+  facets?: Facet<T>[];
   pageSize?: number;
   defaultSort?: { id: string; dir: "asc" | "desc" };
   onRowClick?: (row: T) => void;
@@ -66,12 +81,31 @@ export default function DataTable<T>({
   const [sort, setSort] = useState(defaultSort ?? null);
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(0);
+  const [picked, setPicked] = useState<Record<string, string>>({});
+
+  /* Options come from the rows in hand, sorted, so the dropdown can
+     never offer a value that filters everything away. */
+  const facetOptions = useMemo(() => {
+    const out: Record<string, string[]> = {};
+    for (const facet of facets ?? []) {
+      out[facet.id] = [...new Set(rows.map((r) => facet.value(r)).filter(Boolean))].sort(
+        (a, b) => a.localeCompare(b)
+      );
+    }
+    return out;
+  }, [rows, facets]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q || !searchText) return rows;
-    return rows.filter((r) => searchText(r).toLowerCase().includes(q));
-  }, [rows, query, searchText]);
+    return rows.filter((row) => {
+      for (const facet of facets ?? []) {
+        const want = picked[facet.id];
+        if (want && facet.value(row) !== want) return false;
+      }
+      if (!q || !searchText) return true;
+      return searchText(row).toLowerCase().includes(q);
+    });
+  }, [rows, query, searchText, facets, picked]);
 
   const sorted = useMemo(() => {
     if (!sort) return filtered;
@@ -126,8 +160,8 @@ export default function DataTable<T>({
 
   return (
     <div className="min-w-0">
-      {(searchable || exportName) && (
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line px-3 py-2.5">
+      {(searchable || exportName || (facets && facets.length > 0)) && (
+        <div className="flex flex-wrap items-center gap-2 border-b border-line px-3 py-2.5">
           {searchable && searchText ? (
             <label className="relative min-w-0 flex-1 sm:max-w-[280px]">
               <span className="sr-only">{searchPlaceholder}</span>
@@ -145,9 +179,47 @@ export default function DataTable<T>({
                 <path d="m10.5 10.5 3 3" />
               </svg>
             </label>
-          ) : (
-            <span />
+          ) : null}
+
+          {(facets ?? []).map((facet) => (
+            <label key={facet.id} className="flex items-center gap-1.5">
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+                {facet.label}
+              </span>
+              <select
+                value={picked[facet.id] ?? ""}
+                onChange={(e) => {
+                  setPicked((held) => ({ ...held, [facet.id]: e.target.value }));
+                  setPage(0);
+                }}
+                className={`rounded-[8px] border bg-white px-2 py-1 text-[12px] outline-none transition-colors ${
+                  picked[facet.id]
+                    ? "border-violet-100 bg-violet-050 font-semibold text-violet-ink"
+                    : "border-line-strong text-ink-700 hover:border-ink-400"
+                }`}
+              >
+                <option value="">All</option>
+                {(facetOptions[facet.id] ?? []).map((option) => (
+                  <option key={option} value={option}>{option}</option>
+                ))}
+              </select>
+            </label>
+          ))}
+
+          {Object.values(picked).some(Boolean) && (
+            <button
+              type="button"
+              onClick={() => {
+                setPicked({});
+                setPage(0);
+              }}
+              className="text-[12px] font-semibold text-violet-ink hover:underline"
+            >
+              Clear
+            </button>
           )}
+
+          <span className="ml-auto" />
           {exportName && (
             <button
               type="button"

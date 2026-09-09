@@ -300,9 +300,13 @@ export function pricing(view: MarketView) {
     value: clientRows.filter((p) => band.test(p.variance)).length,
   }));
 
+  /* Deep enough that the table's city and SKU filters have something
+     to work on. Twelve rows filtered by city returns one or two, which
+     is a control that looks broken rather than a control that helps;
+     the page still shows twelve at a time, worst first. */
   const outliers = [...clientRows]
     .sort((a, b) => Math.abs(b.variance) - Math.abs(a.variance))
-    .slice(0, 12)
+    .slice(0, 120)
     .map((p) => ({
       ...p,
       outlet: posById.get(p.posId),

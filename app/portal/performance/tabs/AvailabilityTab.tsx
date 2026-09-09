@@ -127,6 +127,7 @@ export default function AvailabilityTab({ view }: { view: MarketView }) {
 
         <Card title="Why the shelf was empty" lead="Reason recorded by the auditor who found the gap.">
           <ShareDonut
+            palette="category"
             slices={a.byReason.map((row) => ({ id: row.id, name: row.name, value: row.value }))}
             centerValue={a.gaps.toLocaleString()}
             centerLabel="gaps"
@@ -140,6 +141,7 @@ export default function AvailabilityTab({ view }: { view: MarketView }) {
         footnote="Cells count listed lines found empty. A dash means no audited outlet in that city listed the SKU."
       >
         <Heatmap
+          tone="bad"
           rows={a.bySku.map((row) => ({ id: row.id, label: row.label }))}
           columns={cities.map((c) => ({ id: c.id, label: c.name }))}
           value={(skuId, cityId) => a.gapAt(skuId, cityId)}
