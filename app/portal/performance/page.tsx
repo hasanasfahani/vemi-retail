@@ -1,7 +1,10 @@
-import StubView from "@/components/market/StubView";
+import PerformanceView from "./PerformanceView";
 
-export const metadata = { title: "Performance" };
+export const metadata = {
+  title: "Performance",
+  description: "Availability, shelf, pricing, assortment and POSM across the audited market.",
+};
 
 export default function Page() {
-  return <StubView title="Performance" lead="Availability, shelf, pricing, assortment and POSM." />;
+  return <PerformanceView />;
 }
