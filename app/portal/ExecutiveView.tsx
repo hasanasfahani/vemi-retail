@@ -2,19 +2,28 @@
 
 /* PAGE 1 · Executive Dashboard.
 
-   Five sections, in the order a manager actually reads them: are we
-   collecting the data we promised, is the market healthy, what needs
-   attention, where is it, and who is winning where.
+   The order is the argument. A commercial director at Baghdad Soft
+   Drinks opens this to find out how their OWN BRANDS are doing, so
+   portfolio health leads. The market KPIs come second because they
+   answer a different question — which execution dimension is weak,
+   across everything — and a reader needs the first answer before the
+   second one means anything. Then what needs attention, then where.
 
-   Every figure comes from the same filtered view, so the KPI row, the
-   insight cards, the map and the city comparison cannot disagree about
+   Audit coverage is still here and still exact, but it is a strip
+   rather than a hero: it is what the CONTRACT is judged on, not what
+   the business is judged on, and it was taking the most valuable space
+   on the page to say so.
+
+   Every figure comes from the same filtered view, so the brand rings,
+   the KPI row, the insight cards and the map cannot disagree about
    what is in scope. */
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import PageShell from "@/components/market/PageShell";
 import { useTargets } from "@/components/market/useTargets";
-import CoverageRing from "@/components/market/CoverageRing";
+import BrandHealthCard from "@/components/market/BrandHealthCard";
+import CoverageStrip from "@/components/market/CoverageStrip";
 import InsightCard from "@/components/market/InsightCard";
 import PosDrawer from "@/components/market/PosDrawer";
 import MarketMap, { type MapPoint } from "@/components/market/map/MarketMap";
@@ -24,9 +33,13 @@ import { RankedBars } from "@/components/market/charts";
 import { scoreBand, rateBand, type Band } from "@/components/market/ui/health";
 import { generateInsights } from "@/lib/market/insights";
 import {
-  cities, cityName, contract, trends,
+  isPortfolio, portfolioHealth, portfolioScore, BAND_WORD,
+} from "@/lib/market/brandHealth";
+import { applyFilters, type MarketView } from "@/lib/market/filters";
+import {
+  cities, cityName, clientBrand, contract, loadMonth, portfolioBrands, trends,
 } from "@/lib/market";
-import type { MarketView } from "@/lib/market/filters";
+import type { MonthData } from "@/lib/market/types";
 import type { Targets } from "@/lib/market/settings";
 
 /* The measures a reader can colour the map and rank the cities by.
@@ -45,15 +58,18 @@ function metricsFor(targets: Targets) {
   ];
 }
 
+/* The cycle the health cards compare against. */
+const PRIOR = "2026-08";
+
 export default function ExecutiveView() {
   return (
     <PageShell>
-      {(view) => <Dashboard view={view} />}
+      {(view, _search, data) => <Dashboard view={view} data={data} />}
     </PageShell>
   );
 }
 
-function Dashboard({ view }: { view: MarketView }) {
+function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
   const targets = useTargets();
   const METRICS = useMemo(() => metricsFor(targets), [targets]);
   const [mapMetric, setMapMetric] = useState<MetricId>("score");
@@ -61,6 +77,58 @@ function Dashboard({ view }: { view: MarketView }) {
   const [openPos, setOpenPos] = useState<string | null>(null);
 
   const report = useMemo(() => generateInsights(view), [view]);
+
+  /* Last cycle's rows, for the movement figure on each ring. They are
+     fetched rather than shipped, so the cards state a level first and
+     gain their delta a moment later. */
+  const [prior, setPrior] = useState<MonthData | null>(null);
+  useEffect(() => {
+    let live = true;
+    loadMonth(PRIOR).then((held) => {
+      if (live) setPrior(held);
+    });
+    return () => {
+      live = false;
+    };
+  }, []);
+
+  /* Brand health is computed WITHOUT the brand and SKU filters, and
+     deliberately so: the section is the company's portfolio, and a
+     filter narrowed to one brand should focus it, not delete the other
+     three. Outlet-level filters — city, channel, retailer — still
+     apply, because narrowing WHERE you are looking is exactly what
+     they are for. */
+  const portfolioView = useMemo(
+    () => applyFilters({ ...view.filters, brands: [], skus: [] }, data),
+    [view.filters, data]
+  );
+  const priorPortfolioView = useMemo(
+    () =>
+      prior
+        ? applyFilters({ ...view.filters, brands: [], skus: [], month: PRIOR }, prior)
+        : null,
+    [view.filters, prior]
+  );
+
+  const health = useMemo(
+    () => portfolioHealth(portfolioView, priorPortfolioView),
+    [portfolioView, priorPortfolioView]
+  );
+
+  /* Which brand the global filter has singled out, if it is one of the
+     company's own. A rival selected there leaves this section alone —
+     "portfolio health" must not quietly become a competitor's, and its
+     price compliance would be judged against a list price Baghdad Soft
+     Drinks does not set. */
+  const focusBrand =
+    view.filters.brands.length === 1 && isPortfolio(view.filters.brands[0])
+      ? view.filters.brands[0]
+      : null;
+  const rivalSelected =
+    view.filters.brands.length > 0 && view.filters.brands.every((id) => !isPortfolio(id));
+
+  const focused = focusBrand ? health.filter((h) => h.brandId === focusBrand) : health;
+  const companyScore = useMemo(() => portfolioScore(health), [health]);
 
   /* Coverage is recomputed against the filter, not read off the
      contract: a Baghdad-filtered dashboard must say how much of
@@ -155,22 +223,113 @@ function Dashboard({ view }: { view: MarketView }) {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* ---------- A · coverage ---------- */}
-      <Card
-        title="This month's audit coverage"
-        lead={`${contract.category} execution across ${contract.country}, ${
-          view.filters.cities.length ? "filtered scope" : "all six cities"
-        }.`}
-        footnote="Coverage is measured against the outlets in the current filter, not the national contract, so a filtered view answers the question it appears to ask."
-      >
-        <CoverageRing {...coverage} />
-      </Card>
+      {/* ---------- coverage, demoted to a strip ---------- */}
+      <CoverageStrip {...coverage} />
 
-      {/* ---------- B · market health ---------- */}
+      {/* ---------- 1 · portfolio brand health ---------- */}
       <section>
-        <h2 className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-ink-400">
-          Market health
-        </h2>
+        <div className="mb-2.5 flex flex-wrap items-end justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+              Portfolio brand health
+            </h2>
+            <p className="mt-0.5 text-[12.5px] leading-snug text-ink-500">
+              {contract.clientShort}&apos;s {portfolioBrands.length} brands in {contract.category},
+              scored on the same composite as the market:{" "}
+              <span className="mono">
+                availability 30 · shelf 25 · assortment 20 · price 15 · POSM 10
+              </span>
+              .
+            </p>
+          </div>
+          <p className="shrink-0 text-right">
+            <span className="mono text-[11px] uppercase tracking-wide text-ink-400">
+              Portfolio
+            </span>
+            <span className="ml-2 font-display text-[22px] font-bold leading-none tracking-tight text-ink-900">
+              {companyScore}
+            </span>
+            <span className="mono ml-1 text-[11px] text-ink-400">/ 100</span>
+          </p>
+        </div>
+
+        {rivalSelected && (
+          <p className="mb-2.5 rounded-[12px] border border-violet-100 bg-violet-050 px-3.5 py-2.5 text-[12px] leading-snug text-violet-ink">
+            This section covers {contract.clientShort}&apos;s own brands, so the brand filter is not
+            applied to it — a competitor&apos;s price compliance would be judged against a list
+            price this company does not set. Everything below the KPI row still follows the filter.
+          </p>
+        )}
+
+        <div
+          className={`grid gap-3 ${
+            focusBrand ? "sm:grid-cols-2 lg:grid-cols-3" : "sm:grid-cols-2 xl:grid-cols-4"
+          }`}
+        >
+          {focused.map((row) => (
+            <BrandHealthCard
+              key={row.brandId}
+              health={row}
+              focused={focusBrand === row.brandId}
+              size={focusBrand ? 148 : 128}
+            />
+          ))}
+
+          {/* Focused on one brand: keep the rest of the house visible
+              as a compact list, because a portfolio manager narrowing
+              to Mirinda has not stopped owning the other three. */}
+          {focusBrand && (
+            <div className="flex min-w-0 flex-col rounded-[14px] border border-line bg-white p-3.5 shadow-[var(--shadow-card)] sm:col-span-1 lg:col-span-2">
+              <h3 className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+                The rest of the portfolio
+              </h3>
+              <ul className="mt-2 flex flex-col">
+                {health
+                  .filter((row) => row.brandId !== focusBrand)
+                  .map((row) => (
+                    <li
+                      key={row.brandId}
+                      className="flex items-center gap-2.5 border-b border-line py-2 last:border-0"
+                    >
+                      <span className="min-w-0 flex-1 truncate text-[12.5px] text-ink-700">
+                        {row.name}
+                      </span>
+                      <span className="mono text-[11.5px] text-ink-400">
+                        {row.weakest.label} {row.weakest.display}
+                      </span>
+                      <span className="mono w-[30px] shrink-0 text-right text-[13px] font-semibold text-ink-900">
+                        {row.score}
+                      </span>
+                      <span className="w-[92px] shrink-0 text-right text-[11px] text-ink-500">
+                        {BAND_WORD[row.band]}
+                      </span>
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          )}
+        </div>
+
+        <p className="mt-2.5 max-w-[96ch] text-[11px] leading-relaxed text-ink-400">
+          Shelf is scored as CONVERSION — the share of facings a brand holds against the share of
+          shelf slots it is listed in — rather than against {clientBrand.name}&apos;s 40% par.
+          Judging Mountain Dew&apos;s 4% against that par would rate a small brand as failing for
+          being small, which is size rather than health. POSM is recorded per outlet, not per
+          brand, so each brand takes the material compliance of the outlets that stock it.
+          {priorPortfolioView === null && " Movement appears once last cycle's rows have loaded."}
+        </p>
+      </section>
+
+      {/* ---------- 2 · market health ---------- */}
+      <section>
+        <div className="mb-2 flex flex-wrap items-baseline justify-between gap-3">
+          <h2 className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+            Market health
+          </h2>
+          <p className="text-[11.5px] text-ink-400">
+            Which execution dimension is weak, across everything audited
+          </p>
+        </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           <KpiTile label="Availability" value={view.kpi.availability} unit="%" target={targets.availability} trend={series.availability} href="/portal/performance?tab=availability" />
           <KpiTile label="Shelf share" value={view.client?.share ?? 0} unit="%" target={targets.shelfShare} trend={series.shelfShare} href="/portal/performance?tab=shelf" />
@@ -181,11 +340,11 @@ function Dashboard({ view }: { view: MarketView }) {
         </div>
       </section>
 
-      {/* ---------- C · what needs attention ---------- */}
+      {/* ---------- 3 · risks and opportunities ---------- */}
       <section>
         <div className="mb-2 flex items-baseline justify-between gap-3">
           <h2 className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
-            What needs attention
+            Risks and opportunities
           </h2>
           <Link href="/portal/insights" className="text-[12px] font-semibold text-violet-ink hover:underline">
             All {report.all.length.toLocaleString()} findings
@@ -198,7 +357,7 @@ function Dashboard({ view }: { view: MarketView }) {
         </div>
       </section>
 
-      {/* ---------- D · the map ---------- */}
+      {/* ---------- 4 · where it is happening ---------- */}
       <Card
         title="Where it is happening"
         lead={`${points.length.toLocaleString()} audited outlets, coloured by ${metricOf(mapMetric).label.toLowerCase()}.`}
@@ -218,7 +377,7 @@ function Dashboard({ view }: { view: MarketView }) {
         />
       </Card>
 
-      {/* ---------- E · city comparison ---------- */}
+      {/* ---------- 4b · market comparison ---------- */}
       <Card
         title="Market comparison"
         lead={`${metricOf(cityMetric).label} by city, across audited outlets.`}
