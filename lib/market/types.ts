@@ -81,6 +81,11 @@ export type Pos = {
   core: boolean;
 };
 
+/* The field team. Auditors are assigned to city routes, which is how
+   field work is organised and what makes a revisit routable: the
+   person who covered a door last month is the one who can go back. */
+export type Auditor = { id: string; name: string; cities: string[] };
+
 export type PosmType = { id: string; name: string; channels: string[] | null };
 export type OosReason = { id: string; name: string };
 
@@ -101,6 +106,7 @@ export type Market = {
   retailers: string[];
   brands: Brand[];
   skus: Sku[];
+  auditors: Auditor[];
   posmTypes: PosmType[];
   oosReasons: OosReason[];
   shelfPositions: string[];
@@ -169,7 +175,7 @@ export type PosScore = {
 
 export type MonthData = {
   month: string;
-  audited: { posId: string; auditedAt: string }[];
+  audited: { posId: string; auditedAt: string; auditorId: string }[];
   cells: Cell[];
   gaps: Gap[];
   prices: PriceReading[];

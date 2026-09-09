@@ -597,6 +597,53 @@
       "rrp": 750
     }
   ],
+  "auditors": [
+    {
+      "id": "aud-1",
+      "name": "Rawa Kareem",
+      "cities": [
+        "erbil",
+        "mosul"
+      ]
+    },
+    {
+      "id": "aud-2",
+      "name": "Zaid Al-Obaidi",
+      "cities": [
+        "baghdad"
+      ]
+    },
+    {
+      "id": "aud-3",
+      "name": "Noor Hadi",
+      "cities": [
+        "baghdad"
+      ]
+    },
+    {
+      "id": "aud-4",
+      "name": "Mustafa Jabbar",
+      "cities": [
+        "basra"
+      ]
+    },
+    {
+      "id": "aud-5",
+      "name": "Hiba Salman",
+      "cities": [
+        "najaf",
+        "karbala"
+      ]
+    },
+    {
+      "id": "aud-6",
+      "name": "Dilan Ahmed",
+      "cities": [
+        "erbil",
+        "mosul"
+      ]
+    }
+  ],
   "posmTypes": [
     {
       "id": "cooler",

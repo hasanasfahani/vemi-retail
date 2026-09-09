@@ -152,6 +152,39 @@ function placeInDistrict(city, district) {
   };
 }
 
+/* ------------------------------------------------------------------
+   THE FIELD TEAM.
+
+   Every visit is run by somebody, and the brief's POS detail panel
+   asks who. Auditors are assigned to city routes rather than scattered
+   at random, because that is how field work is actually organised —
+   and because it makes a revisit routable: the person who covered a
+   door last month is the one who can go back.
+
+   Names are Iraqi and fictional. The assignment is deterministic, so
+   an outlet keeps the same auditor across months unless the route
+   changes.
+------------------------------------------------------------------ */
+const AUDITORS = [
+  { id: "aud-1", name: "Rawa Kareem", cities: ["erbil", "mosul"] },
+  { id: "aud-2", name: "Zaid Al-Obaidi", cities: ["baghdad"] },
+  { id: "aud-3", name: "Noor Hadi", cities: ["baghdad"] },
+  { id: "aud-4", name: "Mustafa Jabbar", cities: ["basra"] },
+  { id: "aud-5", name: "Hiba Salman", cities: ["najaf", "karbala"] },
+  { id: "aud-6", name: "Dilan Ahmed", cities: ["erbil", "mosul"] },
+];
+
+/* Which auditor covers a given outlet: the ones on that city's route,
+   split evenly and stably by the outlet's own sequence number. */
+const auditorsFor = (cityId) => AUDITORS.filter((a) => a.cities.includes(cityId));
+
+function auditorFor(pos) {
+  const team = auditorsFor(pos.cityId);
+  if (!team.length) return AUDITORS[0];
+  const n = Number(pos.id.replace(/\D/g, "")) || 0;
+  return team[n % team.length];
+}
+
 const CHANNELS = [
   { id: "hypermarket", name: "Hypermarket", share: 0.05, size: 9 },
   { id: "supermarket", name: "Supermarket", share: 0.22, size: 6 },
@@ -682,6 +715,7 @@ function scoreVisit(v, pos) {
 const skuIndex = new Map(SKUS.map((s, i) => [s.id, i]));
 const posIndex = new Map(POS.map((p, i) => [p.id, i]));
 const brandIndex = new Map(BRANDS.map((b, i) => [b.id, i]));
+const auditorIndex = new Map(AUDITORS.map((a, i) => [a.id, i]));
 const posmIndex = new Map(POSM_TYPES.map((t, i) => [t.id, i]));
 const reasonIndex = new Map(OOS_REASONS.map((r, i) => [r.id, i]));
 const POSITION_IDX = { eye: 0, upper: 1, lower: 2 };
@@ -694,7 +728,7 @@ for (const month of MONTHS) {
   for (const pos of audited) {
     const v = visitFor(month.id, pos);
     const pi = posIndex.get(pos.id);
-    bundle.audited.push([pi, auditDate(month.id, pos.id)]);
+    bundle.audited.push([pi, auditDate(month.id, pos.id), auditorIndex.get(auditorFor(pos).id)]);
 
     for (const [skuId, state, facings, position] of v.cells) {
       if (state === 0 && facings === 0) {
@@ -848,6 +882,7 @@ const market = {
   retailers: RETAILERS,
   brands: BRANDS,
   skus: SKUS,
+  auditors: AUDITORS.map(({ id, name, cities }) => ({ id, name, cities })),
   posmTypes: POSM_TYPES.map(({ id, name, channels }) => ({ id, name, channels })),
   oosReasons: OOS_REASONS.map(({ id, name }) => ({ id, name })),
   shelfPositions: SHELF_POSITIONS,

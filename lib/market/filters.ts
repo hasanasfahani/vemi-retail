@@ -124,6 +124,9 @@ export function applyFilters(f: Filters, data: MonthData) {
      figure the contract is judged on. */
   const inScope = matchingPos(f);
   const auditedAt = new Map(data.audited.map((a) => [a.posId, a.auditedAt]));
+  /* Who ran each visit, so a drawer can name the collector and a
+     revisit can be routed back to them. */
+  const auditedBy = new Map(data.audited.map((a) => [a.posId, a.auditorId]));
   const audited = inScope.filter((p) => auditedAt.has(p.id));
   const posIds = new Set(audited.map((p) => p.id));
   const skuIds = new Set(matchingSkus(f));
@@ -180,6 +183,7 @@ export function applyFilters(f: Filters, data: MonthData) {
     /* outlets */
     outlets: audited,
     auditedAt,
+    auditedBy,
     posCount: audited.length,
     inScopeCount: inScope.length,
     notAuditedCount: inScope.length - audited.length,

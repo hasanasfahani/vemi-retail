@@ -25,7 +25,7 @@ export const trends = trendsJson as unknown as Trends;
 
 export const {
   contract, months, cities, districts, channels, retailers,
-  brands, skus, posmTypes, oosReasons, scoreWeights, sharePar,
+  brands, skus, auditors, posmTypes, oosReasons, scoreWeights, sharePar,
   requiredSkus, kpiTargets, pos,
 } = market;
 
@@ -45,6 +45,7 @@ const skuIndex = new Map(skus.map((s) => [s.id, s]));
 const posIndex = new Map(pos.map((p) => [p.id, p]));
 const channelIndex = new Map(channels.map((c) => [c.id, c]));
 const posmIndex = new Map(posmTypes.map((t) => [t.id, t]));
+const auditorIndex = new Map(auditors.map((a) => [a.id, a]));
 const reasonIndex = new Map(oosReasons.map((r) => [r.id, r]));
 
 export const cityOf = (id: string) => cityIndex.get(id);
@@ -53,6 +54,8 @@ export const skuOf = (id: string) => skuIndex.get(id);
 export const posOf = (id: string) => posIndex.get(id);
 export const channelOf = (id: string) => channelIndex.get(id);
 export const posmTypeOf = (id: string) => posmIndex.get(id);
+export const auditorOf = (id: string) => auditorIndex.get(id);
+export const auditorName = (id: string) => auditorIndex.get(id)?.name ?? "Vemi field team";
 export const reasonOf = (id: string) => reasonIndex.get(id);
 
 export const cityName = (id: string) => cityIndex.get(id)?.name ?? id;
@@ -76,7 +79,7 @@ export const monthLabel = (id: string) =>
    checked at every audited outlet, so absence is the observation. */
 type RawMonth = {
   month: string;
-  audited: [number, string][];
+  audited: [number, string, number][];
   matrix: [number, number, number, number, number][];
   oos: [number, number, number, number][];
   prices: [number, number, number][];
@@ -146,7 +149,11 @@ function hydrate(raw: RawMonth): MonthData {
 
   return {
     month: raw.month,
-    audited: raw.audited.map(([p, auditedAt]) => ({ posId: posId(p), auditedAt })),
+    audited: raw.audited.map(([p, auditedAt, a]) => ({
+      posId: posId(p),
+      auditedAt,
+      auditorId: auditors[a]?.id ?? "",
+    })),
     cells, gaps, prices, posm: posmRows, promos, scores,
   };
 }

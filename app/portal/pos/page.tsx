@@ -1,7 +1,10 @@
-import StubView from "@/components/market/StubView";
+import PosView from "./PosView";
 
-export const metadata = { title: "POS Explorer" };
+export const metadata = {
+  title: "POS Explorer",
+  description: "Every audited outlet, the evidence behind it, and what to do about it.",
+};
 
 export default function Page() {
-  return <StubView title="POS Explorer" lead="Every audited store and the evidence behind it." />;
+  return <PosView />;
 }
