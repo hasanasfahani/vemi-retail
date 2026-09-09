@@ -23,7 +23,7 @@ import { useActions } from "@/components/market/useActions";
 import { Card, DataTable, StatCard, type Column } from "@/components/market/ui";
 import Badge from "@/components/market/ui/Badge";
 import {
-  OUTCOME_LABEL, OWNERS, STAGES, cityLabel, summarise,
+  OUTCOME_LABEL, OWNERS, STAGES, cityLabel, ownerName, summarise,
   todayISO, verify, type Action, type Owner, type Priority, type StageId,
   type Verification,
 } from "@/lib/market/actions";
@@ -120,7 +120,7 @@ function Actions({ view }: { view: MarketView }) {
     {
       id: "owner",
       header: "Owner",
-      sortValue: (a) => a.owner,
+      sortValue: (a) => ownerName(a.owner),
       render: (a) => (
         <select
           value={a.owner}
@@ -130,7 +130,9 @@ function Actions({ view }: { view: MarketView }) {
           className="max-w-[150px] rounded-[7px] border border-line-strong bg-white px-1.5 py-1 text-[11.5px] text-ink-700 outline-none transition-colors hover:border-ink-400"
         >
           {OWNERS.map((owner) => (
-            <option key={owner} value={owner}>{owner}</option>
+            <option key={owner} value={owner}>
+              {ownerName(owner)} · {owner}
+            </option>
           ))}
         </select>
       ),
@@ -223,7 +225,7 @@ function Actions({ view }: { view: MarketView }) {
           columns={columns}
           rowKey={(a) => a.id}
           searchable
-          searchText={(a) => `${a.issue} ${a.recommendation} ${cityLabel(a.cityId)} ${a.owner} ${a.kpi}`}
+          searchText={(a) => `${a.issue} ${a.recommendation} ${cityLabel(a.cityId)} ${ownerName(a.owner)} ${a.owner} ${a.kpi}`}
           searchPlaceholder="Search actions…"
           defaultSort={{ id: "priority", dir: "asc" }}
           exportName="action-queue"

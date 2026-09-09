@@ -12,11 +12,13 @@ import ShelfCard from "@/components/market/ShelfCard";
 import { RankedBars } from "@/components/market/charts";
 import Badge from "@/components/market/ui/Badge";
 import { posm, movement } from "@/lib/market/performance";
-import { kpiTargets, posmTypes } from "@/lib/market";
+import { posmTypes } from "@/lib/market";
 import { rateBand } from "@/components/market/ui/health";
+import { useTargets } from "@/components/market/useTargets";
 import type { MarketView } from "@/lib/market/filters";
 
 export default function PosmTab({ view }: { view: MarketView }) {
+  const targets = useTargets();
   const p = posm(view);
   const move = movement(view, "posm");
   const worstType = p.byType[p.byType.length - 1];
@@ -42,7 +44,7 @@ export default function PosmTab({ view }: { view: MarketView }) {
       <Headline
         label="POSM compliance"
         value={p.compliance}
-        target={kpiTargets.posm}
+        target={targets.posm}
         delta={move.delta}
         deltaFloor={move.floor}
         problem={
@@ -80,14 +82,14 @@ export default function PosmTab({ view }: { view: MarketView }) {
           label="Best material"
           value={p.byType[0]?.value ?? 0}
           unit="%"
-          band={rateBand(p.byType[0]?.value ?? 0, kpiTargets.posm)}
+          band={rateBand(p.byType[0]?.value ?? 0, targets.posm)}
           footnote={p.byType[0]?.label}
         />
         <StatCard
           label="Weakest material"
           value={worstType?.value ?? 0}
           unit="%"
-          band={rateBand(worstType?.value ?? 0, kpiTargets.posm)}
+          band={rateBand(worstType?.value ?? 0, targets.posm)}
           footnote={worstType?.label}
         />
       </div>
@@ -107,10 +109,10 @@ export default function PosmTab({ view }: { view: MarketView }) {
               label: row.label,
               value: row.value,
               meta: `${row.present.toLocaleString()} present of ${row.checked.toLocaleString()} checked`,
-              trailing: <Badge band={rateBand(row.value, kpiTargets.posm)} size="sm" />,
+              trailing: <Badge band={rateBand(row.value, targets.posm)} size="sm" />,
             }))}
             max={100}
-            par={kpiTargets.posm}
+            par={targets.posm}
             unit="%"
           />
         </Card>
@@ -125,7 +127,7 @@ export default function PosmTab({ view }: { view: MarketView }) {
                 meta: `${row.missing.toLocaleString()} items missing of ${row.checked.toLocaleString()} checked`,
               }))}
               max={100}
-              par={kpiTargets.posm}
+              par={targets.posm}
               unit="%"
             />
           </Card>
@@ -139,7 +141,7 @@ export default function PosmTab({ view }: { view: MarketView }) {
                 meta: `${row.checked.toLocaleString()} items checked`,
               }))}
               max={100}
-              par={kpiTargets.posm}
+              par={targets.posm}
               unit="%"
             />
           </Card>

@@ -14,7 +14,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Badge from "./ui/Badge";
 import {
-  OUTCOME_LABEL, STAGES, cityLabel, todayISO,
+  OUTCOME_LABEL, STAGES, cityLabel, ownerName, todayISO,
   type Action, type Verification,
 } from "@/lib/market/actions";
 import { formatIqd } from "@/lib/market/economics";
@@ -81,7 +81,10 @@ export default function ActionCard({
         </dd>
       </dl>
 
-      <p className="mt-2 truncate text-[11px] text-ink-500">{action.owner}</p>
+      <p className="mt-2 truncate text-[11px] text-ink-500">
+        {ownerName(action.owner)}
+        <span className="text-ink-400"> · {action.owner}</span>
+      </p>
 
       {/* The line the whole feature exists for. */}
       <div className="mt-2 border-t border-line pt-2">

@@ -18,6 +18,7 @@
 
 import { useMemo, useState } from "react";
 import PageShell from "@/components/market/PageShell";
+import { useTargets } from "@/components/market/useTargets";
 import PosDrawer from "@/components/market/PosDrawer";
 import { Card, DataTable, EmptyState, StatCard, Tabs, type Column } from "@/components/market/ui";
 import Badge from "@/components/market/ui/Badge";
@@ -28,21 +29,27 @@ import { repeated, type RepeatedRow } from "@/lib/market/trendsView";
 import { posRows } from "@/lib/market/pos";
 import { applyFilters, EMPTY_FILTERS, type MarketView } from "@/lib/market/filters";
 import {
-  brands, clientBrand, contract, kpiTargets, loadMonth, monthLabel, trends,
+  brands, clientBrand, contract, loadMonth, monthLabel, trends,
 } from "@/lib/market";
 import type { MonthData } from "@/lib/market/types";
+import type { Targets } from "@/lib/market/settings";
 import { useEffect } from "react";
 
-const MEASURES = [
-  { id: "score", label: "Execution score", unit: "", target: kpiTargets.score },
-  { id: "availability", label: "Availability", unit: "%", target: kpiTargets.availability },
-  { id: "shelfShare", label: "Share of shelf", unit: "%", target: 40 },
-  { id: "posm", label: "POSM", unit: "%", target: kpiTargets.posm },
-  { id: "price", label: "Price compliance", unit: "%", target: kpiTargets.price },
-  { id: "assortment", label: "Assortment", unit: "%", target: kpiTargets.assortment },
-] as const;
+type MeasureId =
+  | "score" | "availability" | "shelfShare" | "posm" | "price" | "assortment";
 
-type MeasureId = (typeof MEASURES)[number]["id"];
+/* Built from the live targets, so a goal edited on the Setup page
+   moves the reference line on every chart here too. */
+function measuresFor(targets: Targets) {
+  return [
+    { id: "score" as const, label: "Execution score", unit: "", target: targets.score },
+    { id: "availability" as const, label: "Availability", unit: "%", target: targets.availability },
+    { id: "shelfShare" as const, label: "Share of shelf", unit: "%", target: targets.shelfShare },
+    { id: "posm" as const, label: "POSM", unit: "%", target: targets.posm },
+    { id: "price" as const, label: "Price compliance", unit: "%", target: targets.price },
+    { id: "assortment" as const, label: "Assortment", unit: "%", target: targets.assortment },
+  ];
+}
 
 /* One cycle back — the pair the repeated-outlet section compares. */
 const PRIOR = "2026-08";
@@ -52,6 +59,8 @@ export default function TrendsView() {
 }
 
 function Trends({ view }: { view: MarketView }) {
+  const targets = useTargets();
+  const MEASURES = useMemo(() => measuresFor(targets), [targets]);
   const [measure, setMeasure] = useState<MeasureId>("score");
   const [prior, setPrior] = useState<MonthData | null>(null);
   const [openPos, setOpenPos] = useState<string | null>(null);

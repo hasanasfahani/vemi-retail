@@ -116,7 +116,7 @@ export default function PosDrawer({
             <div className="flex flex-wrap items-center gap-5">
               <ScoreRing score={row.score} size={104} />
               <dl className="min-w-[240px] flex-1 flex-col gap-2">
-                {kpiTargetsForDrawer.map((kpi) => {
+                {kpiTargetsForDrawer().map((kpi) => {
                   const value = row[kpi.key];
                   return (
                     <div key={kpi.key} className="flex items-center gap-2 py-[3px]">

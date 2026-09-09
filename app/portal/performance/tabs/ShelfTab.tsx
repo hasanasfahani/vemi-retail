@@ -14,13 +14,15 @@ import {
   ChartLegend, RankedBars, ShareDonut, StackedBars, brandColor, orderedBrands,
 } from "@/components/market/charts";
 import { movement, shelf } from "@/lib/market/performance";
-import { clientBrand, sharePar } from "@/lib/market";
+import { clientBrand } from "@/lib/market";
+import { useTargets } from "@/components/market/useTargets";
 import type { MarketView } from "@/lib/market/filters";
 
 export default function ShelfTab({ view }: { view: MarketView }) {
   const s = shelf(view);
   const move = movement(view, "shelfShare");
-  const par = Math.round(sharePar * 100);
+  const targets = useTargets();
+  const par = targets.shelfShare;
   const ordered = orderedBrands();
   const stack = ordered.map((b) => ({ key: b.id, name: b.name, color: brandColor(b.id) }));
   const leader = s.byBrand[0];

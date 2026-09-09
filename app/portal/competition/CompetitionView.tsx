@@ -10,6 +10,7 @@
 
 import { useMemo, useState } from "react";
 import PageShell from "@/components/market/PageShell";
+import { useTargets } from "@/components/market/useTargets";
 import PosDrawer from "@/components/market/PosDrawer";
 import MarketMap, { type MapPoint } from "@/components/market/map/MarketMap";
 import { Card, StatCard, Tabs } from "@/components/market/ui";
@@ -25,7 +26,7 @@ import {
 } from "@/lib/market/competition";
 import { shelf } from "@/lib/market/performance";
 import { applyFilters, type MarketView } from "@/lib/market/filters";
-import { brandName, cityName, clientBrand, contract, kpiTargets } from "@/lib/market";
+import { brandName, cityName, clientBrand, contract } from "@/lib/market";
 import type { MonthData } from "@/lib/market/types";
 
 export default function CompetitionView() {
@@ -246,9 +247,10 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
 /* One brand's card. Every measure is computed the same way for every
    brand — the client gets no favourable denominator. */
 function ScoreCard({ row, leader }: { row: BrandRow; leader: BrandRow }) {
+  const targets = useTargets();
   const measures = [
-    { label: "Availability", value: row.availability, unit: "%", max: 100, par: kpiTargets.availability },
-    { label: "Share of shelf", value: row.share, unit: "%", max: 60, par: 40 },
+    { label: "Availability", value: row.availability, unit: "%", max: 100, par: targets.availability },
+    { label: "Share of shelf", value: row.share, unit: "%", max: 60, par: targets.shelfShare },
     { label: "Facings per outlet", value: row.perOutlet, unit: "", max: 90 },
     { label: "Eye-level share", value: row.visibility, unit: "%", max: 100 },
     { label: "Promotion presence", value: row.promo, unit: "%", max: 50 },

@@ -10,6 +10,7 @@ import Header from "./Header";
 import { useFilters } from "./useFilters";
 import { applyFilters, type MarketView } from "@/lib/market/filters";
 import { cachedMonth, current, loadMonth } from "@/lib/market";
+import { hydrateTargets } from "@/lib/market/settings";
 import { useEffect } from "react";
 import type { MonthData } from "@/lib/market/types";
 
@@ -54,6 +55,14 @@ function ShellSkeleton() {
 
 function Shell({ children, search, searchPlaceholder }: ShellProps) {
   const [filters, setFilters, clearFilters] = useFilters();
+
+  /* Stored KPI targets are read once, after mount. Reading them during
+     render would make the first client paint disagree with the
+     server's HTML, which is a hydration error rather than a feature. */
+  useEffect(() => {
+    hydrateTargets();
+  }, []);
+
   const [query, setQuery] = useState("");
   const [data, setData] = useState<MonthData>(current);
 

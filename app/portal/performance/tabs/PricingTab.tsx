@@ -11,12 +11,14 @@ import Headline from "@/components/market/Headline";
 import { RankedBars, brandColor } from "@/components/market/charts";
 import Badge from "@/components/market/ui/Badge";
 import { pricing, movement } from "@/lib/market/performance";
-import { brandOf, cityName, clientBrand, contract, kpiTargets } from "@/lib/market";
+import { brandOf, cityName, clientBrand, contract } from "@/lib/market";
+import { useTargets } from "@/components/market/useTargets";
 import type { MarketView } from "@/lib/market/filters";
 
 const iqd = (n: number) => `${n.toLocaleString()} ${contract.currency}`;
 
 export default function PricingTab({ view }: { view: MarketView }) {
+  const targets = useTargets();
   const p = pricing(view);
   const move = movement(view, "price");
   const clientSkus = p.bySku.filter((s) => s.brandId === clientBrand.id);
@@ -66,7 +68,7 @@ export default function PricingTab({ view }: { view: MarketView }) {
       <Headline
         label="Price compliance"
         value={p.compliance}
-        target={kpiTargets.price}
+        target={targets.price}
         delta={move.delta}
         deltaFloor={move.floor}
         problem={
@@ -140,7 +142,7 @@ export default function PricingTab({ view }: { view: MarketView }) {
                 meta: `average ${iqd(row.average)} · ${row.readings.toLocaleString()} readings`,
               }))}
               max={100}
-              par={kpiTargets.price}
+              par={targets.price}
               unit="%"
             />
           </Card>

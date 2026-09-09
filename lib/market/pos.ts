@@ -12,10 +12,10 @@
    ============================================================ */
 
 import {
-  auditorName, channelName, cityName, clientBrand, kpiTargets, requiredSkus,
-  skuOf, sharePar,
+  auditorName, channelName, cityName, clientBrand, requiredSkus, skuOf,
 } from "./index";
 import { THRESHOLDS } from "./insights";
+import { getTargets } from "./settings";
 import type { MarketView } from "./filters";
 import type { Cell, Pos } from "./types";
 
@@ -148,11 +148,11 @@ export function posRows(view: MarketView): PosRow[] {
     }
 
     const share = pct(clientFacings, facings);
-    if (facings > 0 && share < sharePar * 100 * 0.6) {
+    if (facings > 0 && share < getTargets().shelfShare * 0.6) {
       issues.push({
         kind: "share",
         label: `${share}% of shelf`,
-        detail: `${clientBrand.name} holds ${share}% of measured facings here against a ${Math.round(sharePar * 100)}% par.`,
+        detail: `${clientBrand.name} holds ${share}% of measured facings here against a ${getTargets().shelfShare}% par.`,
         severity: "warning",
       });
     }
@@ -197,13 +197,19 @@ export function recommendationsFor(row: PosRow): string[] {
   return out;
 }
 
-export const kpiTargetsForDrawer = [
-  { key: "availability" as const, label: "Availability", target: kpiTargets.availability },
-  { key: "shelfShare" as const, label: "Shelf share", target: Math.round(sharePar * 100) },
-  { key: "assortment" as const, label: "Assortment", target: kpiTargets.assortment },
-  { key: "price" as const, label: "Price", target: kpiTargets.price },
-  { key: "posm" as const, label: "POSM", target: kpiTargets.posm },
-];
+/* A FUNCTION, not a constant. As a module-level array this froze the
+   targets at import time, so editing one on the Setup page changed
+   every other surface and left the drawer quoting the old goal. */
+export const kpiTargetsForDrawer = () => {
+  const targets = getTargets();
+  return [
+    { key: "availability" as const, label: "Availability", target: targets.availability },
+    { key: "shelfShare" as const, label: "Shelf share", target: targets.shelfShare },
+    { key: "assortment" as const, label: "Assortment", target: targets.assortment },
+    { key: "price" as const, label: "Price", target: targets.price },
+    { key: "posm" as const, label: "POSM", target: targets.posm },
+  ];
+};
 
 export const locationOf = (outlet: Pos) =>
   `${outlet.district}, ${cityName(outlet.cityId)}`;

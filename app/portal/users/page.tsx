@@ -1,7 +1,10 @@
-import StubView from "@/components/market/StubView";
+import UsersView from "./UsersView";
 
-export const metadata = { title: "Users & Settings" };
+export const metadata = {
+  title: "Users & Settings",
+  description: "Who has access, what they are carrying, and what this workspace sends.",
+};
 
 export default function Page() {
-  return <StubView title="Users & Settings" lead="Who sees what, and what they are told about." />;
+  return <UsersView />;
 }

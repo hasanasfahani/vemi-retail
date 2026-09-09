@@ -15,6 +15,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import PageShell from "@/components/market/PageShell";
+import { useTargets } from "@/components/market/useTargets";
 import PosDrawer from "@/components/market/PosDrawer";
 import MarketMap, { type MapPoint } from "@/components/market/map/MarketMap";
 import MapLegend from "@/components/market/map/legend";
@@ -24,7 +25,7 @@ import { scoreBand, type Band } from "@/components/market/ui/health";
 import { useActions } from "@/components/market/useActions";
 import { useRevisits } from "@/components/market/useRevisits";
 import { posRows, type PosRow } from "@/lib/market/pos";
-import { channelName, cityName, kpiTargets } from "@/lib/market";
+import { channelName, cityName } from "@/lib/market";
 import type { MarketView } from "@/lib/market/filters";
 
 const SCORE_BANDS = [
@@ -44,6 +45,7 @@ export default function PosView() {
 }
 
 function Explorer({ view, query }: { view: MarketView; query: string }) {
+  const targets = useTargets();
   const [mode, setMode] = useState("table");
   const [band, setBand] = useState("all");
   const [onlyIssues, setOnlyIssues] = useState(false);
@@ -143,7 +145,7 @@ function Explorer({ view, query }: { view: MarketView; query: string }) {
       align: "right",
       sortValue: (r) => r.availability,
       render: (r) => (
-        <span className={`mono ${r.availability < kpiTargets.availability ? "text-[color:var(--color-serious)]" : ""}`}>
+        <span className={`mono ${r.availability < targets.availability ? "text-[color:var(--color-serious)]" : ""}`}>
           {r.availability}%
         </span>
       ),
@@ -155,7 +157,7 @@ function Explorer({ view, query }: { view: MarketView; query: string }) {
       align: "right",
       sortValue: (r) => r.posm,
       render: (r) => (
-        <span className={`mono ${r.posm < kpiTargets.posm ? "text-[color:var(--color-serious)]" : ""}`}>
+        <span className={`mono ${r.posm < targets.posm ? "text-[color:var(--color-serious)]" : ""}`}>
           {r.posm}%
         </span>
       ),

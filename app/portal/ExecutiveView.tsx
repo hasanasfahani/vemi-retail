@@ -13,6 +13,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import PageShell from "@/components/market/PageShell";
+import { useTargets } from "@/components/market/useTargets";
 import CoverageRing from "@/components/market/CoverageRing";
 import InsightCard from "@/components/market/InsightCard";
 import PosDrawer from "@/components/market/PosDrawer";
@@ -23,21 +24,26 @@ import { RankedBars } from "@/components/market/charts";
 import { scoreBand, rateBand, type Band } from "@/components/market/ui/health";
 import { generateInsights } from "@/lib/market/insights";
 import {
-  cities, cityName, contract, kpiTargets, sharePar, trends,
+  cities, cityName, contract, trends,
 } from "@/lib/market";
 import type { MarketView } from "@/lib/market/filters";
+import type { Targets } from "@/lib/market/settings";
 
 /* The measures a reader can colour the map and rank the cities by.
    One list, used by both, so the two sections always offer the same
-   vocabulary. */
-const METRICS = [
-  { id: "score", label: "Execution score", unit: "", target: kpiTargets.score },
-  { id: "availability", label: "Availability", unit: "%", target: kpiTargets.availability },
-  { id: "shelfShare", label: "Shelf share", unit: "%", target: sharePar * 100 },
-  { id: "posm", label: "POSM", unit: "%", target: kpiTargets.posm },
-  { id: "price", label: "Price compliance", unit: "%", target: kpiTargets.price },
-] as const;
-type MetricId = (typeof METRICS)[number]["id"];
+   vocabulary — and built from the LIVE targets, so editing a goal on
+   the Setup page rebands the map and the city bars with it. */
+type MetricId = "score" | "availability" | "shelfShare" | "posm" | "price";
+
+function metricsFor(targets: Targets) {
+  return [
+    { id: "score" as const, label: "Execution score", unit: "", target: targets.score },
+    { id: "availability" as const, label: "Availability", unit: "%", target: targets.availability },
+    { id: "shelfShare" as const, label: "Shelf share", unit: "%", target: targets.shelfShare },
+    { id: "posm" as const, label: "POSM", unit: "%", target: targets.posm },
+    { id: "price" as const, label: "Price compliance", unit: "%", target: targets.price },
+  ];
+}
 
 export default function ExecutiveView() {
   return (
@@ -48,6 +54,8 @@ export default function ExecutiveView() {
 }
 
 function Dashboard({ view }: { view: MarketView }) {
+  const targets = useTargets();
+  const METRICS = useMemo(() => metricsFor(targets), [targets]);
   const [mapMetric, setMapMetric] = useState<MetricId>("score");
   const [cityMetric, setCityMetric] = useState<MetricId>("score");
   const [openPos, setOpenPos] = useState<string | null>(null);
@@ -110,7 +118,7 @@ function Dashboard({ view }: { view: MarketView }) {
         },
       ];
     });
-  }, [view, mapMetric]);
+  }, [view, mapMetric, METRICS]);
 
   const bandCounts = useMemo(() => {
     const counts: Record<Band, number> = { strong: 0, average: 0, attention: 0, critical: 0 };
@@ -141,7 +149,7 @@ function Dashboard({ view }: { view: MarketView }) {
       })
       .filter((row) => row.outlets > 0)
       .sort((a, b) => b.value - a.value);
-  }, [view, cityMetric]);
+  }, [view, cityMetric, METRICS]);
 
   const metricOf = (id: MetricId) => METRICS.find((m) => m.id === id)!;
 
@@ -164,12 +172,12 @@ function Dashboard({ view }: { view: MarketView }) {
           Market health
         </h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-          <KpiTile label="Availability" value={view.kpi.availability} unit="%" target={kpiTargets.availability} trend={series.availability} href="/portal/performance?tab=availability" />
-          <KpiTile label="Shelf share" value={view.client?.share ?? 0} unit="%" target={Math.round(sharePar * 100)} trend={series.shelfShare} href="/portal/performance?tab=shelf" />
-          <KpiTile label="Assortment" value={view.kpi.assortment} unit="%" target={kpiTargets.assortment} trend={series.assortment} href="/portal/performance?tab=assortment" />
-          <KpiTile label="Price compliance" value={view.kpi.price} unit="%" target={kpiTargets.price} trend={series.price} href="/portal/performance?tab=pricing" />
-          <KpiTile label="POSM" value={view.kpi.posm} unit="%" target={kpiTargets.posm} trend={series.posm} href="/portal/performance?tab=posm" />
-          <KpiTile label="Execution score" value={view.kpi.score} target={kpiTargets.score} trend={series.score} href="/portal/performance" />
+          <KpiTile label="Availability" value={view.kpi.availability} unit="%" target={targets.availability} trend={series.availability} href="/portal/performance?tab=availability" />
+          <KpiTile label="Shelf share" value={view.client?.share ?? 0} unit="%" target={targets.shelfShare} trend={series.shelfShare} href="/portal/performance?tab=shelf" />
+          <KpiTile label="Assortment" value={view.kpi.assortment} unit="%" target={targets.assortment} trend={series.assortment} href="/portal/performance?tab=assortment" />
+          <KpiTile label="Price compliance" value={view.kpi.price} unit="%" target={targets.price} trend={series.price} href="/portal/performance?tab=pricing" />
+          <KpiTile label="POSM" value={view.kpi.posm} unit="%" target={targets.posm} trend={series.posm} href="/portal/performance?tab=posm" />
+          <KpiTile label="Execution score" value={view.kpi.score} target={targets.score} trend={series.score} href="/portal/performance" />
         </div>
       </section>
 
@@ -195,7 +203,7 @@ function Dashboard({ view }: { view: MarketView }) {
         title="Where it is happening"
         lead={`${points.length.toLocaleString()} audited outlets, coloured by ${metricOf(mapMetric).label.toLowerCase()}.`}
         action={
-          <MetricSwitch value={mapMetric} onChange={setMapMetric} />
+          <MetricSwitch value={mapMetric} onChange={setMapMetric} metrics={METRICS} />
         }
         footnote="Outlets are placed within their district rather than surveyed to the street. Clusters take the colour of the worst outlet inside them, so a problem cannot be averaged out of view."
       >
@@ -214,7 +222,7 @@ function Dashboard({ view }: { view: MarketView }) {
       <Card
         title="Market comparison"
         lead={`${metricOf(cityMetric).label} by city, across audited outlets.`}
-        action={<MetricSwitch value={cityMetric} onChange={setCityMetric} />}
+        action={<MetricSwitch value={cityMetric} onChange={setCityMetric} metrics={METRICS} />}
       >
         <RankedBars
           rows={cityRows.map((row) => ({
@@ -267,10 +275,11 @@ function KpiTile({
 }
 
 function MetricSwitch({
-  value, onChange,
+  value, onChange, metrics,
 }: {
   value: MetricId;
   onChange: (id: MetricId) => void;
+  metrics: { id: MetricId; label: string }[];
 }) {
   return (
     <label className="flex items-center gap-1.5">
@@ -280,7 +289,7 @@ function MetricSwitch({
         onChange={(e) => onChange(e.target.value as MetricId)}
         className="rounded-[9px] border border-line-strong bg-white px-2 py-1 text-[12px] font-semibold text-ink-700 outline-none transition-colors hover:border-ink-400"
       >
-        {METRICS.map((m) => (
+        {metrics.map((m) => (
           <option key={m.id} value={m.id}>{m.label}</option>
         ))}
       </select>

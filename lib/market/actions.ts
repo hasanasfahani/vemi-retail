@@ -20,6 +20,7 @@
    ============================================================ */
 
 import { cityName, monthLabel } from "./index";
+import { USERS, userName } from "./settings";
 import { generateInsights, type Insight, type RuleId } from "./insights";
 import { applyFilters, EMPTY_FILTERS } from "./filters";
 import { formatIqd } from "./economics";
@@ -42,17 +43,12 @@ export const STAGE_IDS = STAGES.map((s) => s.id) as StageId[];
 
 export type Priority = "high" | "medium" | "low";
 
-/* The people in the brief's Users page. Dummy, and named as roles
-   rather than as invented individuals — a demo with a fake person's
-   name on every card invites the question of who they are. */
-export const OWNERS = [
-  "Commercial Director",
-  "Sales Manager",
-  "Trade Marketing Manager",
-  "Key Account Manager",
-  "Vemi Admin",
-] as const;
-export type Owner = (typeof OWNERS)[number];
+/* Ownership points at the people on the Users page, so there is one
+   list of who exists rather than two that can drift. Roles still drive
+   the DEFAULT assignment — pricing work lands with whoever holds the
+   accounts — but the name on the card is a person somebody could ask. */
+export const OWNERS = USERS.map((u) => u.role);
+export type Owner = string;
 
 export type Action = {
   id: string;
@@ -306,9 +302,9 @@ export const OUTCOME_LABEL: Record<Outcome, string> = {
    One key, one JSON blob, and a version so a shape change clears a
    stale board instead of crashing on it. */
 
-const KEY = "vemi.actions.v1";
+const KEY = "vemi.actions.v2";
 
-export type Board = { version: 1; actions: Action[] };
+export type Board = { version: 2; actions: Action[] };
 
 export function loadBoard(): Action[] | null {
   if (typeof window === "undefined") return null;
@@ -316,7 +312,7 @@ export function loadBoard(): Action[] | null {
     const raw = window.localStorage.getItem(KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Board;
-    if (parsed.version !== 1 || !Array.isArray(parsed.actions)) return null;
+    if (parsed.version !== 2 || !Array.isArray(parsed.actions)) return null;
     return parsed.actions;
   } catch {
     /* A corrupt or blocked store is not an error worth surfacing — the
@@ -328,7 +324,7 @@ export function loadBoard(): Action[] | null {
 export function saveBoard(actions: Action[]): void {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(KEY, JSON.stringify({ version: 1, actions } satisfies Board));
+    window.localStorage.setItem(KEY, JSON.stringify({ version: 2, actions } satisfies Board));
   } catch {
     /* Private browsing, quota, disabled storage. The board keeps
        working in memory; only the reload survives being lost. */
@@ -370,3 +366,6 @@ export function todayISO(): string {
 }
 
 export const cityLabel = (id: string | null) => (id ? cityName(id) : "Market-wide");
+
+/* The person behind a role, for anywhere the board shows an owner. */
+export const ownerName = (role: string) => userName(role);

@@ -13,10 +13,12 @@ import Headline from "@/components/market/Headline";
 import { Heatmap, RankedBars, brandColor } from "@/components/market/charts";
 import Badge from "@/components/market/ui/Badge";
 import { assortment, movement } from "@/lib/market/performance";
-import { cities, cityName, clientBrand, kpiTargets, requiredSkus, skus } from "@/lib/market";
+import { cities, cityName, clientBrand, requiredSkus, skus } from "@/lib/market";
+import { useTargets } from "@/components/market/useTargets";
 import type { MarketView } from "@/lib/market/filters";
 
 export default function AssortmentTab({ view }: { view: MarketView }) {
+  const targets = useTargets();
   const a = assortment(view);
   const move = movement(view, "assortment");
   const worstSku = a.penetration[a.penetration.length - 1];
@@ -28,7 +30,7 @@ export default function AssortmentTab({ view }: { view: MarketView }) {
       <Headline
         label="Assortment compliance"
         value={a.compliance}
-        target={kpiTargets.assortment}
+        target={targets.assortment}
         delta={move.delta}
         deltaFloor={move.floor}
         problem={
@@ -117,13 +119,13 @@ export default function AssortmentTab({ view }: { view: MarketView }) {
               meta: `${row.listed} listed on average · ${row.required} expected in this format · ${row.outlets.toLocaleString()} outlets`,
               trailing: (
                 <Badge
-                  band={row.value >= kpiTargets.assortment ? "strong" : row.value >= kpiTargets.assortment - 9 ? "average" : "attention"}
+                  band={row.value >= targets.assortment ? "strong" : row.value >= targets.assortment - 9 ? "average" : "attention"}
                   size="sm"
                 />
               ),
             }))}
             max={100}
-            par={kpiTargets.assortment}
+            par={targets.assortment}
             unit="%"
           />
         </Card>

@@ -17,8 +17,9 @@
    ============================================================ */
 
 import {
-  cities, cityName, clientBrand, kpiTargets, monthLabel, sharePar, trends,
+  cities, cityName, clientBrand, monthLabel, trends,
 } from "./index";
+import { getTargets } from "./settings";
 import type { MarketView } from "./filters";
 import { availability, posm, shelf } from "./performance";
 import { scoreboard } from "./competition";
@@ -238,9 +239,9 @@ function stockedButUnsupported(view: MarketView): Story | null {
   const a = availability(view);
   const gapToTarget = (value: number, target: number) => r1(target - value);
 
-  const posmGap = gapToTarget(p.compliance, kpiTargets.posm);
-  const availGap = gapToTarget(a.rate, kpiTargets.availability);
-  const shareGap = gapToTarget(shelf(view).clientShare, sharePar * 100);
+  const posmGap = gapToTarget(p.compliance, getTargets().posm);
+  const availGap = gapToTarget(a.rate, getTargets().availability);
+  const shareGap = gapToTarget(shelf(view).clientShare, getTargets().shelfShare);
 
   /* The test: POSM is further from its target than availability or
      shelf share are from theirs, and there is a countable population
@@ -252,9 +253,9 @@ function stockedButUnsupported(view: MarketView): Story | null {
 
   return {
     id: "stocked-but-unsupported",
-    test: `POSM sits ${posmGap}pt below its ${kpiTargets.posm}% target — further than availability (${availGap}pt) or shelf share (${shareGap}pt) — with ${p.bare.length} outlets stocking the brand and carrying no material.`,
+    test: `POSM sits ${posmGap}pt below its ${getTargets().posm}% target — further than availability (${availGap}pt) or shelf share (${shareGap}pt) — with ${p.bare.length} outlets stocking the brand and carrying no material.`,
     headline: `${clientBrand.name} is on shelf in ${p.bare.length} outlets with nothing saying so`,
-    figure: { value: `${p.compliance}%`, label: `POSM compliance against an ${kpiTargets.posm}% target` },
+    figure: { value: `${p.compliance}%`, label: `POSM compliance against an ${getTargets().posm}% target` },
     body: `Point-of-sale material is the weakest thing this audit measures, and it is the cheapest to fix: in ${p.bare.length} audited outlets the product is already on the shelf and not one piece of agreed material is present. ${worstCity ? `${worstCity.label} is the weakest city at ${worstCity.value}%, with ${worstCity.missing.toLocaleString()} items missing.` : ""}`,
     recommendation: `Route a material run through the ${p.bare.length} stocked-but-bare outlets before spending anything on new listings.`,
     chart: {
@@ -266,7 +267,7 @@ function stockedButUnsupported(view: MarketView): Story | null {
       })),
       unit: "%",
       max: 100,
-      par: kpiTargets.posm,
+      par: getTargets().posm,
     },
     cta: { href: "/portal/performance?tab=posm", label: "Open POSM" },
   };

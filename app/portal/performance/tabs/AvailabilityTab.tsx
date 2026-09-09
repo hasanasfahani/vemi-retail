@@ -11,10 +11,12 @@ import Headline from "@/components/market/Headline";
 import { ChartLegend, Heatmap, RankedBars, ShareDonut, StackedBars, brandColor, MEASURE } from "@/components/market/charts";
 import { scoreBand } from "@/components/market/ui/health";
 import { availability, movement } from "@/lib/market/performance";
-import { cities, cityName, kpiTargets } from "@/lib/market";
+import { cities, cityName } from "@/lib/market";
+import { useTargets } from "@/components/market/useTargets";
 import type { MarketView } from "@/lib/market/filters";
 
 export default function AvailabilityTab({ view }: { view: MarketView }) {
+  const targets = useTargets();
   const a = availability(view);
   const move = movement(view, "availability");
 
@@ -25,7 +27,7 @@ export default function AvailabilityTab({ view }: { view: MarketView }) {
       <Headline
         label="On-shelf availability"
         value={a.rate}
-        target={kpiTargets.availability}
+        target={targets.availability}
         delta={move.delta}
         deltaFloor={move.floor}
         problem={
@@ -55,7 +57,7 @@ export default function AvailabilityTab({ view }: { view: MarketView }) {
         <StatCard label="Listings checked" value={a.listings} footnote="Client SKU × outlet pairs audited this month" />
         <StatCard label="Gaps found" value={a.gaps} band={a.gaps > 0 ? "attention" : "strong"} footnote="Listed lines standing empty on the visit" />
         <StatCard label="Outlets audited" value={view.posCount} footnote={`${view.coveragePct}% of the outlets in scope`} />
-        <StatCard label="Execution score" value={view.kpi.score} target={kpiTargets.score} band={scoreBand(view.kpi.score)} />
+        <StatCard label="Execution score" value={view.kpi.score} target={targets.score} band={scoreBand(view.kpi.score)} />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
@@ -68,7 +70,7 @@ export default function AvailabilityTab({ view }: { view: MarketView }) {
               meta: `${row.listings.toLocaleString()} listings across ${row.outlets.toLocaleString()} outlets`,
             }))}
             max={100}
-            par={kpiTargets.availability}
+            par={targets.availability}
             unit="%"
           />
         </Card>
@@ -118,7 +120,7 @@ export default function AvailabilityTab({ view }: { view: MarketView }) {
               meta: `${row.out} gaps across ${row.listed.toLocaleString()} listings`,
             }))}
             max={100}
-            par={kpiTargets.availability}
+            par={targets.availability}
             unit="%"
           />
         </Card>
