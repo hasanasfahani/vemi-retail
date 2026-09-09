@@ -31,7 +31,6 @@ export default function PricingTab({ view }: { view: MarketView }) {
      carry, so the header, the file and the request cannot disagree. */
   const issues = useMemo(() => issuesFor(view, "price"), [view]);
   const scope = useMemo(() => scopeOf(issues), [issues]);
-  const clientSkus = p.bySku.filter((s) => s.brandId === clientBrand.id);
   const overs = p.distribution.filter((d) => d.id.startsWith("over")).reduce((s, d) => s + d.value, 0);
   const unders = p.distribution.filter((d) => d.id.startsWith("under")).reduce((s, d) => s + d.value, 0);
 

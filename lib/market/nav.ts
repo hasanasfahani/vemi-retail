@@ -28,9 +28,8 @@ export const NAV: NavGroup[] = [
   {
     label: "Execution",
     items: [
-      { href: "/portal/actions", label: "Action Center", icon: "actions" },
+      { href: "/portal/actions", label: "Follow-up Audits", icon: "actions" },
       { href: "/portal/pos", label: "POS Explorer", icon: "pos" },
-      { href: "/portal/revisits", label: "Revisit Management", icon: "revisit" },
     ],
   },
   {

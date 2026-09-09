@@ -22,9 +22,10 @@ import MapLegend from "@/components/market/map/legend";
 import { Card, DataTable, StatCard, Tabs, type Column } from "@/components/market/ui";
 import Badge from "@/components/market/ui/Badge";
 import { scoreBand, type Band } from "@/components/market/ui/health";
-import { useActions } from "@/components/market/useActions";
-import { useRevisits } from "@/components/market/useRevisits";
+import { useFollowUps } from "@/components/market/useFollowUps";
 import { posRows, type PosRow } from "@/lib/market/pos";
+import { issuesFor, type IssueKpi } from "@/lib/market/issues";
+import { futureCycles } from "@/lib/market/followUp";
 import { channelName, governorateName } from "@/lib/market";
 import type { MarketView } from "@/lib/market/filters";
 
@@ -52,27 +53,22 @@ function Explorer({ view, query }: { view: MarketView; query: string }) {
   const [onlyFlagged, setOnlyFlagged] = useState(false);
   const [openPos, setOpenPos] = useState<string | null>(null);
 
-  const board = useActions();
   const rows = useMemo(() => posRows(view), [view]);
+  const queue = useFollowUps();
 
-  /* Outlets bad enough that somebody would ask for a special trip:
-     worst execution first, and only where the audit actually found
-     something. These seed the queue alongside the scheduled actions. */
-  const candidates = useMemo(
-    () =>
-      [...rows]
-        .filter((row) => row.issues.length > 0)
-        .sort((a, b) => a.score - b.score)
-        .slice(0, 30)
-        .map((row) => ({
-          posId: row.pos.id,
-          reason: row.issues[0].detail,
-          priority: (row.issues[0].severity === "critical" ? "high" : "medium") as "high" | "medium",
-        })),
-    [rows]
-  );
-
-  const revisits = useRevisits(board.actions, view.month, candidates);
+  /* Flagging one outlet raises a one-outlet follow-up audit on the KPI
+     it is weakest against — the same queue the Performance tabs write
+     to, so an outlet cannot be queued on one page and absent from the
+     other. Revisit Management used to keep its own list; two lists that
+     could disagree is worse than either. */
+  const flagged = useMemo(() => {
+    const out = new Set<string>();
+    for (const request of queue.requests ?? []) {
+      if (request.cancelled) continue;
+      for (const posId of request.posIds) out.add(posId);
+    }
+    return out;
+  }, [queue.requests]);
 
   const shown = useMemo(() => {
     const test = SCORE_BANDS.find((b) => b.id === band)?.test ?? (() => true);
@@ -81,13 +77,13 @@ function Explorer({ view, query }: { view: MarketView; query: string }) {
       (row) =>
         test(row) &&
         (!onlyIssues || row.issues.length > 0) &&
-        (!onlyFlagged || revisits.flagged.has(row.pos.id)) &&
+        (!onlyFlagged || flagged.has(row.pos.id)) &&
         (q === "" ||
           `${row.pos.name} ${row.pos.code} ${row.pos.district} ${governorateName(row.pos.governorateId)}`
             .toLowerCase()
             .includes(q))
     );
-  }, [rows, band, onlyIssues, onlyFlagged, query, revisits.flagged]);
+  }, [rows, band, onlyIssues, onlyFlagged, query, flagged]);
 
   const points = useMemo<MapPoint[]>(
     () =>
@@ -110,8 +106,41 @@ function Explorer({ view, query }: { view: MarketView; query: string }) {
   }, [points]);
 
   const flag = useCallback(
-    (posId: string, reason: string) => revisits.flag(posId, reason),
-    [revisits]
+    (posId: string) => {
+      const row = rows.find((r) => r.pos.id === posId);
+      if (!row) return;
+      /* Weakest measured component decides which follow-up it joins. */
+      const weakest = ([
+        ["availability", row.availability],
+        ["shelfShare", row.shelfShare],
+        ["assortment", row.assortment],
+        ["price", row.price],
+        ["posm", row.posm],
+      ] as const)
+        .filter((pair): pair is readonly [IssueKpi, number] => pair[1] !== null)
+        .sort((a, b) => a[1] - b[1])[0];
+      const kpi: IssueKpi = weakest ? weakest[0] : "availability";
+      const cycle = futureCycles(view.month)[0];
+      if (!cycle) return;
+      queue.create({
+        kpi,
+        originMonth: view.month,
+        cycle,
+        posIds: [posId],
+        issueIds: issuesFor(view, kpi).filter((i) => i.posId === posId).map((i) => i.id),
+      });
+    },
+    [rows, queue, view]
+  );
+
+  const unflag = useCallback(
+    (posId: string) => {
+      const next = (queue.requests ?? []).filter(
+        (r) => !(r.posIds.length === 1 && r.posIds[0] === posId)
+      );
+      queue.write(next);
+    },
+    [queue]
   );
 
   const columns: Column<PosRow>[] = [
@@ -193,10 +222,10 @@ function Explorer({ view, query }: { view: MarketView; query: string }) {
     {
       id: "revisit",
       header: "Revisit",
-      sortValue: (r) => (revisits.flagged.has(r.pos.id) ? 0 : 1),
-      csv: (r) => (revisits.flagged.has(r.pos.id) ? "queued" : ""),
+      sortValue: (r) => (flagged.has(r.pos.id) ? 0 : 1),
+      csv: (r) => (flagged.has(r.pos.id) ? "queued" : ""),
       render: (r) =>
-        revisits.flagged.has(r.pos.id) ? (
+        flagged.has(r.pos.id) ? (
           <Badge band="average" label="Queued" size="sm" />
         ) : (
           <span className="text-[11.5px] text-ink-400">—</span>
@@ -218,7 +247,7 @@ function Explorer({ view, query }: { view: MarketView; query: string }) {
         />
         <StatCard
           label="Queued for revisit"
-          value={revisits.flagged.size}
+          value={flagged.size}
           footnote="Flagged here or scheduled from the Action Center"
         />
         <StatCard label="In this view" value={shown.length} footnote="After the filters below" />
@@ -302,9 +331,9 @@ function Explorer({ view, query }: { view: MarketView; query: string }) {
         view={view}
         rows={rows}
         onClose={() => setOpenPos(null)}
-        flagged={openPos ? revisits.flagged.has(openPos) : false}
+        flagged={openPos ? flagged.has(openPos) : false}
         onFlag={flag}
-        onUnflag={revisits.unflag}
+        onUnflag={unflag}
       />
     </div>
   );
