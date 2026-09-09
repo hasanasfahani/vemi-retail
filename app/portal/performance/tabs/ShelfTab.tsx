@@ -12,6 +12,7 @@ import { useMemo } from "react";
 import { Card, StatCard } from "@/components/market/ui";
 import KpiGapBar from "@/components/market/KpiGapBar";
 import DownloadGaps from "@/components/market/DownloadGaps";
+import RequestFollowUp from "@/components/market/RequestFollowUp";
 import ShelfCard from "@/components/market/ShelfCard";
 import {
   ChartLegend, RankedBars, ShareDonut, StackedBars, brandColor, orderedBrands,
@@ -61,7 +62,12 @@ export default function ShelfTab({ view }: { view: MarketView }) {
         affectedPos={scope.affectedPos}
         issues={scope.issues}
         issueNoun="outlets below par"
-        actions={<DownloadGaps kpi="shelfShare" issues={issues} view={view} full={view} />}
+        actions={
+          <>
+            <DownloadGaps kpi="shelfShare" issues={issues} view={view} full={view} />
+            <RequestFollowUp kpi="shelfShare" issues={issues} view={view} />
+          </>
+        }
       />
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

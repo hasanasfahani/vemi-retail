@@ -11,6 +11,7 @@ import { useMemo } from "react";
 import { Card, StatCard } from "@/components/market/ui";
 import KpiGapBar from "@/components/market/KpiGapBar";
 import DownloadGaps from "@/components/market/DownloadGaps";
+import RequestFollowUp from "@/components/market/RequestFollowUp";
 import ShelfCard from "@/components/market/ShelfCard";
 import { RankedBars } from "@/components/market/charts";
 import Badge from "@/components/market/ui/Badge";
@@ -56,7 +57,12 @@ export default function PosmTab({ view }: { view: MarketView }) {
         affectedPos={scope.affectedPos}
         issues={scope.issues}
         issueNoun="missing material"
-        actions={<DownloadGaps kpi="posm" issues={issues} view={view} full={view} />}
+        actions={
+          <>
+            <DownloadGaps kpi="posm" issues={issues} view={view} full={view} />
+            <RequestFollowUp kpi="posm" issues={issues} view={view} />
+          </>
+        }
       />
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

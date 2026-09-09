@@ -11,6 +11,7 @@ import { useMemo } from "react";
 import { Card, DataTable, StatCard, type Column, type Facet } from "@/components/market/ui";
 import KpiGapBar from "@/components/market/KpiGapBar";
 import DownloadGaps from "@/components/market/DownloadGaps";
+import RequestFollowUp from "@/components/market/RequestFollowUp";
 import { RankedBars, brandColor } from "@/components/market/charts";
 import Badge from "@/components/market/ui/Badge";
 import { pricing } from "@/lib/market/performance";
@@ -86,7 +87,12 @@ export default function PricingTab({ view }: { view: MarketView }) {
         affectedPos={scope.affectedPos}
         issues={scope.issues}
         issueNoun="readings off list"
-        actions={<DownloadGaps kpi="price" issues={issues} view={view} full={view} />}
+        actions={
+          <>
+            <DownloadGaps kpi="price" issues={issues} view={view} full={view} />
+            <RequestFollowUp kpi="price" issues={issues} view={view} />
+          </>
+        }
       />
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

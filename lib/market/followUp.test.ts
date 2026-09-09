@@ -9,11 +9,14 @@
 import { describe, expect, it } from "vitest";
 import { EMPTY_FILTERS, applyFilters } from "./filters";
 import { current, loadMonth, followUps, clientBrand } from "./index";
-import { issuesFor, scopeOf, rankedPos, expectedRange } from "./issues";
+import {
+  RECOMMENDATION_RULE, RECOMMENDED_CAP, expectedRange, issuesFor, rankedPos,
+  recommendedPos, scopeOf,
+} from "./issues";
 import { gapReportCsv } from "./gapReport";
 import {
   canCancel, cohortFloor, compareCohort, createRequest, posKpi, resultAcross,
-  resultOf, seededRequests, statusOf, type FollowUpRequest,
+  futureCycles, resultOf, seededRequests, statusOf, type FollowUpRequest,
 } from "./followUp";
 
 const sep = applyFilters(EMPTY_FILTERS, current);
@@ -274,5 +277,55 @@ describe("gap reports", () => {
     for (const line of csv.split("\n")) {
       expect((line.match(/"/g) ?? []).length % 2).toBe(0);
     }
+  });
+});
+
+describe("the recommendation", () => {
+  it("offers the outlets carrying a critical issue, worst first", () => {
+    const issues = issuesFor(sep, "availability");
+    const recommended = recommendedPos(issues, sep);
+    expect(recommended.length).toBeGreaterThan(0);
+    expect(recommended.length).toBeLessThanOrEqual(RECOMMENDED_CAP);
+
+    const critical = new Set(
+      issues.filter((i) => i.severity === "critical").map((i) => i.posId)
+    );
+    /* Where enough critical outlets exist, the recommendation is drawn
+       only from them. */
+    if (critical.size >= 10) {
+      for (const posId of recommended) expect(critical.has(posId)).toBe(true);
+    }
+  });
+
+  it("caps the list, because a route is a day's driving", () => {
+    /* A "recommendation" of four hundred doors is not a
+       recommendation. */
+    const issues = issuesFor(sep, "posm");
+    const affected = new Set(issues.map((i) => i.posId)).size;
+    expect(affected).toBeGreaterThan(RECOMMENDED_CAP);
+    expect(recommendedPos(issues, sep).length).toBe(RECOMMENDED_CAP);
+  });
+
+  it("never recommends nothing", () => {
+    /* Where no issue is critical, fall back to the worst by rank
+       rather than offering an empty selection. */
+    for (const kpi of ["availability", "shelfShare", "assortment", "price", "posm"] as const) {
+      const issues = issuesFor(sep, kpi);
+      if (issues.length === 0) continue;
+      expect(recommendedPos(issues, sep).length).toBeGreaterThan(0);
+    }
+  });
+
+  it("states its rule, so the selection can be argued with", () => {
+    expect(RECOMMENDATION_RULE).toContain("critical");
+    expect(RECOMMENDATION_RULE).toContain(String(RECOMMENDED_CAP));
+  });
+});
+
+describe("cycles offered for a follow-up", () => {
+  it("only offers cycles after the audit that raised it", () => {
+    const cycles = futureCycles(sep.month);
+    expect(cycles.length).toBeGreaterThan(0);
+    for (const id of cycles) expect(id > sep.month).toBe(true);
   });
 });

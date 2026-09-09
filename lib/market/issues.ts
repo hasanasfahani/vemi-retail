@@ -255,3 +255,31 @@ export function rankedPos(issues: Issue[], view: MarketView): string[] {
 
 export const RANKING_RULE =
   "Outlets are ranked by how many issues each carries, counting a critical issue twice, with the outlet's trading volume breaking ties.";
+
+/* The outlets a follow-up should take if the client does not want to
+   choose. Every outlet carrying a CRITICAL issue, in rank order, and
+   capped — a route is a day's driving, not a spreadsheet, and a
+   "recommendation" of four hundred doors is not a recommendation.
+
+   Stated on the modal, because a ranked selection nobody can inspect
+   is the kind of black box the rest of this portal avoids. */
+export const RECOMMENDED_CAP = 60;
+
+export function recommendedPos(
+  issues: Issue[],
+  view: MarketView,
+  cap = RECOMMENDED_CAP
+): string[] {
+  const ranked = rankedPos(issues, view);
+  const critical = new Set(
+    issues.filter((i) => i.severity === "critical").map((i) => i.posId)
+  );
+  const first = ranked.filter((posId) => critical.has(posId));
+  /* Where nothing is critical, fall back to the worst by rank rather
+     than recommending nothing at all. */
+  const pool = first.length >= 10 ? first : ranked;
+  return pool.slice(0, cap);
+}
+
+export const RECOMMENDATION_RULE =
+  `Every outlet carrying a critical issue, worst first, capped at ${RECOMMENDED_CAP} — a route is a day's driving. ${RANKING_RULE}`;

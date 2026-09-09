@@ -11,6 +11,7 @@ import { useMemo } from "react";
 import { Card, StatCard } from "@/components/market/ui";
 import KpiGapBar from "@/components/market/KpiGapBar";
 import DownloadGaps from "@/components/market/DownloadGaps";
+import RequestFollowUp from "@/components/market/RequestFollowUp";
 import { ChartLegend, Heatmap, RankedBars, ShareDonut, StackedBars, brandColor, MEASURE } from "@/components/market/charts";
 import { scoreBand } from "@/components/market/ui/health";
 import { availability } from "@/lib/market/performance";
@@ -39,7 +40,12 @@ export default function AvailabilityTab({ view }: { view: MarketView }) {
         affectedPos={scope.affectedPos}
         issues={scope.issues}
         issueNoun="SKU availability gaps"
-        actions={<DownloadGaps kpi="availability" issues={issues} view={view} full={view} />}
+        actions={
+          <>
+            <DownloadGaps kpi="availability" issues={issues} view={view} full={view} />
+            <RequestFollowUp kpi="availability" issues={issues} view={view} />
+          </>
+        }
       />
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
