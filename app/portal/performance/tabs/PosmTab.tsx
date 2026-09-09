@@ -22,7 +22,7 @@ export default function PosmTab({ view }: { view: MarketView }) {
   const p = posm(view);
   const move = movement(view, "posm");
   const worstType = p.byType[p.byType.length - 1];
-  const worstCity = p.byCity[0];
+  const worstCity = p.byGovernorate[0];
 
   const cardFor = (row: { posId: string; value: number }, caption: string) => {
     const outlet = view.outlets.find((o) => o.id === row.posId);
@@ -118,9 +118,9 @@ export default function PosmTab({ view }: { view: MarketView }) {
         </Card>
 
         <div className="flex flex-col gap-4">
-          <Card title="Weakest cities" lead="Worst first — where a deployment run would pay.">
+          <Card title="Weakest governorates" lead="Worst first — where a deployment run would pay.">
             <RankedBars
-              rows={p.byCity.map((row) => ({
+              rows={p.byGovernorate.map((row) => ({
                 id: row.id,
                 label: row.label,
                 value: row.value,

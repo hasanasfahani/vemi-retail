@@ -2,7 +2,7 @@
    CITY HEALTH.
 
    The same composite as everywhere else — availability 30, shelf 25,
-   assortment 20, price 15, POSM 10 — computed per city, so a reader
+   assortment 20, price 15, POSM 10 — computed per governorate, so a reader
    can see which market is healthy before opening the map to find out
    where inside it the problem sits.
 
@@ -16,7 +16,7 @@
    sections say which is which.
    ============================================================ */
 
-import { cities, clientBrand, requiredSkus, scoreWeights, skus } from "./index";
+import { governorates, clientBrand, requiredSkus, scoreWeights, skus } from "./index";
 import { getTargets } from "./settings";
 import type { MarketView } from "./filters";
 import { scoreBand, type Band } from "@/components/market/ui/health";
@@ -27,9 +27,11 @@ const pct = (n: number, d: number) => (d === 0 ? 0 : r1((n / d) * 100));
 const skuBrand = new Map(skus.map((s) => [s.id, s.brandId]));
 const clientSkuCount = skus.filter((s) => s.brandId === clientBrand.id).length;
 
-export type CityHealth = {
-  cityId: string;
+export type GovernorateHealth = {
+  governorateId: string;
   name: string;
+  /* The city the audit actually works. Nineveh's is Mosul. */
+  capital: string;
   score: number;
   band: Band;
   delta: number | null;
@@ -51,11 +53,11 @@ const LABEL: Record<ComponentId, string> = {
   posm: "POSM",
 };
 
-function healthFor(cityId: string, view: MarketView): Omit<CityHealth, "delta"> | null {
-  const city = cities.find((c) => c.id === cityId);
+function healthFor(governorateId: string, view: MarketView): Omit<GovernorateHealth, "delta"> | null {
+  const city = governorates.find((c) => c.id === governorateId);
   if (!city) return null;
 
-  const outlets = view.outlets.filter((o) => o.cityId === cityId);
+  const outlets = view.outlets.filter((o) => o.governorateId === governorateId);
   if (outlets.length === 0) return null;
   const ids = new Set(outlets.map((o) => o.id));
 
@@ -104,8 +106,9 @@ function healthFor(cityId: string, view: MarketView): Omit<CityHealth, "delta"> 
   const weakest = [...components].sort((a, b) => a.score - b.score)[0];
 
   return {
-    cityId,
+    governorateId,
     name: city.name,
+    capital: city.capital,
     score,
     band: scoreBand(score),
     components,
@@ -116,8 +119,8 @@ function healthFor(cityId: string, view: MarketView): Omit<CityHealth, "delta"> 
   };
 }
 
-export function cityHealth(view: MarketView, previous?: MarketView | null): CityHealth[] {
-  return cities
+export function governorateHealth(view: MarketView, previous?: MarketView | null): GovernorateHealth[] {
+  return governorates
     .flatMap((city) => {
       const now = healthFor(city.id, view);
       if (!now) return [];

@@ -21,7 +21,7 @@
    ============================================================ */
 
 import {
-  brands, channelName, cityName, clientBrand, monthLabel, portfolioBrands, skuOf,
+  brands, channelName, governorateName, clientBrand, monthLabel, portfolioBrands, skuOf,
   skus, trends,
 } from "./index";
 import { moneyOf } from "./economics";
@@ -97,10 +97,10 @@ export type Insight = {
   cta: { href: string; label: string };
   /* The outlets the finding actually touches. Rules supply it; the
      entry point turns it into geographic concentration, so no rule has
-     to know about cities to say where its problem lives. */
+     to know about governorates to say where its problem lives. */
   affected: string[];
   /* Derived at the entry point, never by a rule. */
-  concentration?: { cityId: string; outlets: number; share: number };
+  concentration?: { governorateId: string; outlets: number; share: number };
   /* Facing-days converted to dinars, where that conversion is
      meaningful. Null on rules counted in readings or outlets —
      inventing a dinar figure for "three mispriced lines" would be
@@ -118,14 +118,14 @@ export type Insight = {
     brandId?: string;
     skuId?: string;
     posId?: string;
-    cityId?: string;
+    governorateId?: string;
     district?: string;
     channel?: string;
   };
 };
 
 /* What a rule returns. The two derived fields are filled in once, at
-   the entry point, so a rule never has to know about cities or money
+   the entry point, so a rule never has to know about governorates or money
    to state its own finding. */
 export type RawInsight = Omit<Insight, "concentration" | "money">;
 
@@ -213,7 +213,7 @@ export const THRESHOLDS = {
      Judged over the SIX-MONTH window, never month-over-month, and this
      is the most consequential calibration in the file. Bootstrapped
      detection floors (MDE = 2.8 × SE, 400 resamples) are 3.1pt in
-     Baghdad and 4.6–5.6pt in the smaller cities, while every observed
+     Baghdad and 4.6–5.6pt in the smaller governorates, while every observed
      month-over-month city movement is between 0.1 and 2.1pt. A
      month-over-month competitor card would therefore be manufacturing
      signal from panel noise every single month.
@@ -377,7 +377,7 @@ function r1OutletGaps(ctx: Ctx): RawInsight[] {
       },
       entities: {
         posId,
-        cityId: outlet.cityId,
+        governorateId: outlet.governorateId,
         district: outlet.district,
         channel: outlet.channel,
         brandId: clientBrand.id,
@@ -398,26 +398,26 @@ function r1OutletGaps(ctx: Ctx): RawInsight[] {
 ================================================================== */
 function r2DistrictDeficit(ctx: Ctx): RawInsight[] {
   const { view } = ctx;
-  const byCity = new Map<string, Cell[]>();
+  const byGovernorate = new Map<string, Cell[]>();
   const byDistrict = new Map<string, Cell[]>();
 
   for (const cell of view.cells) {
     const outlet = ctx.posById.get(cell.posId);
     if (!outlet) continue;
-    const dk = `${outlet.cityId}|${outlet.district}`;
-    byCity.set(outlet.cityId, [...(byCity.get(outlet.cityId) ?? []), cell]);
+    const dk = `${outlet.governorateId}|${outlet.district}`;
+    byGovernorate.set(outlet.governorateId, [...(byGovernorate.get(outlet.governorateId) ?? []), cell]);
     byDistrict.set(dk, [...(byDistrict.get(dk) ?? []), cell]);
   }
 
   const out: RawInsight[] = [];
   for (const [dk, cells] of byDistrict) {
-    const [cityId, district] = dk.split("|");
+    const [governorateId, district] = dk.split("|");
     const outlets = new Set(cells.map((c) => c.posId));
     if (outlets.size < THRESHOLDS.r2DistrictDeficit.minOutlets) continue;
 
-    const cityShare = shareOf(byCity.get(cityId) ?? []);
+    const governorateShare = shareOf(byGovernorate.get(governorateId) ?? []);
     const districtShare = shareOf(cells);
-    const deficit = r1(cityShare - districtShare);
+    const deficit = r1(governorateShare - districtShare);
     if (deficit < THRESHOLDS.r2DistrictDeficit.warningPt) continue;
 
     /* Facings the client would hold at city par, minus what it holds,
@@ -433,15 +433,15 @@ function r2DistrictDeficit(ctx: Ctx): RawInsight[] {
       severity:
         deficit >= THRESHOLDS.r2DistrictDeficit.criticalPt ? "critical" : "warning",
       headline: `${clientBrand.name} shelf share is ${deficit}pt below city par in ${district}`,
-      detail: `${district} gives ${clientBrand.name} ${districtShare}% of shelf against ${cityShare}% across ${cityName(cityId)} — ${outlets.size} audited outlets holding less than the city they sit in.`,
+      detail: `${district} gives ${clientBrand.name} ${districtShare}% of shelf against ${governorateShare}% across ${governorateName(governorateId)} — ${outlets.size} audited outlets holding less than the city they sit in.`,
       impact: {
         value: short * REVISIT_DAYS,
         unit: "facing-days",
         label: `${(short * REVISIT_DAYS).toLocaleString()} facing-days below city par`,
       },
       confidence: "estimated",
-      scope: { outlets: outlets.size, label: `${district}, ${cityName(cityId)}` },
-      cta: { href: `/portal/pos?city=${cityId}`, label: "See outlets" },
+      scope: { outlets: outlets.size, label: `${district}, ${governorateName(governorateId)}` },
+      cta: { href: `/portal/pos?governorate=${governorateId}`, label: "See outlets" },
       affected: [...outlets],
       evidence: {
         formula:
@@ -451,15 +451,15 @@ function r2DistrictDeficit(ctx: Ctx): RawInsight[] {
           rows: [
             [district, `${districtShare}%`, outlets.size, facingsOf(cells)],
             [
-              cityName(cityId),
-              `${cityShare}%`,
-              new Set((byCity.get(cityId) ?? []).map((c) => c.posId)).size,
-              facingsOf(byCity.get(cityId) ?? []),
+              governorateName(governorateId),
+              `${governorateShare}%`,
+              new Set((byGovernorate.get(governorateId) ?? []).map((c) => c.posId)).size,
+              facingsOf(byGovernorate.get(governorateId) ?? []),
             ],
           ],
         },
       },
-      entities: { cityId, district, brandId: clientBrand.id },
+      entities: { governorateId, district, brandId: clientBrand.id },
     });
   }
   return out;
@@ -652,7 +652,7 @@ function r5PriceCluster(ctx: Ctx): RawInsight[] {
           ]),
         },
       },
-      entities: { posId, cityId: outlet.cityId, channel: outlet.channel, brandId: clientBrand.id },
+      entities: { posId, governorateId: outlet.governorateId, channel: outlet.channel, brandId: clientBrand.id },
     });
   }
   return out;
@@ -820,7 +820,7 @@ function r9DarkOutlets(ctx: Ctx): RawInsight[] {
           ]),
         },
       },
-      entities: { posId, cityId: outlet.cityId, channel: outlet.channel, brandId: clientBrand.id },
+      entities: { posId, governorateId: outlet.governorateId, channel: outlet.channel, brandId: clientBrand.id },
     });
   }
   return out;
@@ -878,7 +878,7 @@ function r11AssortmentGap(ctx: Ctx): RawInsight[] {
           ],
         },
       },
-      entities: { posId, cityId: outlet.cityId, channel: outlet.channel, brandId: clientBrand.id },
+      entities: { posId, governorateId: outlet.governorateId, channel: outlet.channel, brandId: clientBrand.id },
     });
   }
   return out;
@@ -911,12 +911,12 @@ function r13PosmAbsent(ctx: Ctx): RawInsight[] {
     .map(([posId]) => posId);
   if (bare.length < THRESHOLDS.r13PosmAbsent.warningCount) return [];
 
-  const cityCounts = new Map<string, number>();
+  const governorateCounts = new Map<string, number>();
   for (const posId of bare) {
-    const city = ctx.posById.get(posId)?.cityId;
-    if (city) cityCounts.set(city, (cityCounts.get(city) ?? 0) + 1);
+    const city = ctx.posById.get(posId)?.governorateId;
+    if (city) governorateCounts.set(city, (governorateCounts.get(city) ?? 0) + 1);
   }
-  const ranked = [...cityCounts].sort((a, b) => b[1] - a[1]);
+  const ranked = [...governorateCounts].sort((a, b) => b[1] - a[1]);
 
   return [
     {
@@ -935,8 +935,8 @@ function r13PosmAbsent(ctx: Ctx): RawInsight[] {
       evidence: {
         formula: "outlets with client stock in place and zero POSM types present",
         table: {
-          columns: ["City", "Outlets stocking the client with no POSM"],
-          rows: ranked.map(([city, n]) => [cityName(city), n]),
+          columns: ["Governorate", "Outlets stocking the client with no POSM"],
+          rows: ranked.map(([city, n]) => [governorateName(city), n]),
         },
       },
       entities: { brandId: clientBrand.id },
@@ -959,17 +959,17 @@ function r13PosmAbsent(ctx: Ctx): RawInsight[] {
 ================================================================== */
 function r14CompetitorMovement(ctx: Ctx): RawInsight[] {
   const { view } = ctx;
-  const cityIds = view.filters.cities.length
-    ? view.filters.cities
-    : Object.keys(trends.byCity);
+  const cityIds = view.filters.governorates.length
+    ? view.filters.governorates
+    : Object.keys(trends.byGovernorate);
 
   const out: RawInsight[] = [];
-  for (const cityId of cityIds) {
-    const points = trends.byCity[cityId];
+  for (const governorateId of cityIds) {
+    const points = trends.byGovernorate[governorateId];
     if (!points || points.length < 2) continue;
     const first = points[0];
     const last = points[points.length - 1];
-    const floor = SHARE_FLOOR_PT[cityId] ?? SHARE_FLOOR_PT.market;
+    const floor = SHARE_FLOOR_PT[governorateId] ?? SHARE_FLOOR_PT.market;
 
     const moves = brands
       .map((b) => ({
@@ -983,22 +983,22 @@ function r14CompetitorMovement(ctx: Ctx): RawInsight[] {
     if (portfolioBrands.some((b) => b.id === gainer.brand.id)) continue;
 
     const clientMove = moves.find((m) => m.brand.id === clientBrand.id);
-    const outlets = view.outlets.filter((p) => p.cityId === cityId).length;
+    const outlets = view.outlets.filter((p) => p.governorateId === governorateId).length;
 
     out.push({
-      id: `r14-${cityId}`,
+      id: `r14-${governorateId}`,
       rule: "r14-competitor-movement",
       category: "competitor",
       severity: gainer.delta >= floor * 1.5 ? "critical" : "warning",
-      headline: `${gainer.brand.name} has gained ${gainer.delta}pt of shelf in ${cityName(cityId)}`,
-      detail: `Across ${monthLabel(first.month)} to ${monthLabel(last.month)}, ${gainer.brand.name} moved from ${first.brandShare[gainer.brand.id]}% to ${last.brandShare[gainer.brand.id]}% of ${cityName(cityId)} shelf${
+      headline: `${gainer.brand.name} has gained ${gainer.delta}pt of shelf in ${governorateName(governorateId)}`,
+      detail: `Across ${monthLabel(first.month)} to ${monthLabel(last.month)}, ${gainer.brand.name} moved from ${first.brandShare[gainer.brand.id]}% to ${last.brandShare[gainer.brand.id]}% of ${governorateName(governorateId)} shelf${
         clientMove ? `, while ${clientBrand.name} moved ${clientMove.delta > 0 ? "+" : ""}${clientMove.delta}pt` : ""
       }. The city's detection floor is ${floor}pt, so this movement is larger than the panel's own noise.`,
       impact: { value: gainer.delta, unit: "outlets", label: `${gainer.delta}pt of city shelf` },
       confidence: "measured",
-      scope: { outlets: Math.max(1, outlets), label: cityName(cityId) },
-      cta: { href: `/portal/competition?city=${cityId}`, label: "Open competition" },
-      affected: view.outlets.filter((p) => p.cityId === cityId).map((p) => p.id),
+      scope: { outlets: Math.max(1, outlets), label: governorateName(governorateId) },
+      cta: { href: `/portal/competition?governorate=${governorateId}`, label: "Open competition" },
+      affected: view.outlets.filter((p) => p.governorateId === governorateId).map((p) => p.id),
       evidence: {
         formula: `share now − share six months ago, per brand, reported only above the city's ${floor}pt detection floor (MDE = 2.8 × bootstrapped SE)`,
         table: {
@@ -1011,7 +1011,7 @@ function r14CompetitorMovement(ctx: Ctx): RawInsight[] {
           ]),
         },
       },
-      entities: { brandId: gainer.brand.id, cityId },
+      entities: { brandId: gainer.brand.id, governorateId },
     });
   }
   return out;
@@ -1042,10 +1042,10 @@ function r15SkuStockout(ctx: Ctx): RawInsight[] {
       view.gaps.filter((g) => g.skuId === skuId).reduce((s, g) => s + g.normalFacings, 0) *
       REVISIT_DAYS;
 
-    const cityCounts = new Map<string, number>();
+    const governorateCounts = new Map<string, number>();
     for (const c of empty) {
-      const city = ctx.posById.get(c.posId)?.cityId;
-      if (city) cityCounts.set(city, (cityCounts.get(city) ?? 0) + 1);
+      const city = ctx.posById.get(c.posId)?.governorateId;
+      if (city) governorateCounts.set(city, (governorateCounts.get(city) ?? 0) + 1);
     }
 
     out.push({
@@ -1068,8 +1068,8 @@ function r15SkuStockout(ctx: Ctx): RawInsight[] {
       evidence: {
         formula: "outlets where the SKU is listed and out of stock ÷ outlets listing it",
         table: {
-          columns: ["City", "Outlets out of stock"],
-          rows: [...cityCounts].sort((a, b) => b[1] - a[1]).map(([city, n]) => [cityName(city), n]),
+          columns: ["Governorate", "Outlets out of stock"],
+          rows: [...governorateCounts].sort((a, b) => b[1] - a[1]).map(([city, n]) => [governorateName(city), n]),
         },
       },
       entities: { skuId, brandId: clientBrand.id },
@@ -1109,21 +1109,21 @@ export function generateInsights(view: MarketView): InsightReport {
     ...r15SkuStockout(ctx),
   ]
     /* The two derived fields, filled once. Concentration answers "and
-       where is this?" without any rule needing to know about cities;
+       where is this?" without any rule needing to know about governorates;
        money converts facing-days and REFUSES to convert anything else,
        because a dinar figure for "three mispriced lines" would be
        invented rather than modelled. */
     .map((raw): Insight => {
       const counts = new Map<string, number>();
       for (const posId of raw.affected) {
-        const cityId = posById.get(posId)?.cityId;
-        if (cityId) counts.set(cityId, (counts.get(cityId) ?? 0) + 1);
+        const governorateId = posById.get(posId)?.governorateId;
+        if (governorateId) counts.set(governorateId, (counts.get(governorateId) ?? 0) + 1);
       }
       const top = [...counts].sort((a, b) => b[1] - a[1])[0];
       return {
         ...raw,
         concentration: top
-          ? { cityId: top[0], outlets: top[1], share: pct(top[1], raw.affected.length) }
+          ? { governorateId: top[0], outlets: top[1], share: pct(top[1], raw.affected.length) }
           : undefined,
         money:
           raw.impact.unit === "facing-days" && raw.monetisable !== false

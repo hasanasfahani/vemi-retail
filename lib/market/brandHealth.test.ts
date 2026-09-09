@@ -99,7 +99,7 @@ describe("movement", () => {
 describe("scope", () => {
   it("follows outlet filters, because narrowing WHERE is the point of them", () => {
     const baghdad = portfolioHealth(
-      applyFilters({ ...EMPTY_FILTERS, cities: ["baghdad"] }, current),
+      applyFilters({ ...EMPTY_FILTERS, governorates: ["baghdad"] }, current),
       null
     );
     expect(baghdad.length).toBe(rows.length);

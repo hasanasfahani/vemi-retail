@@ -11,7 +11,7 @@ import Headline from "@/components/market/Headline";
 import { ChartLegend, Heatmap, RankedBars, ShareDonut, StackedBars, brandColor, MEASURE } from "@/components/market/charts";
 import { scoreBand } from "@/components/market/ui/health";
 import { availability, movement } from "@/lib/market/performance";
-import { cities, cityName } from "@/lib/market";
+import { governorates, governorateName } from "@/lib/market";
 import { useTargets } from "@/components/market/useTargets";
 import type { MarketView } from "@/lib/market/filters";
 
@@ -20,7 +20,7 @@ export default function AvailabilityTab({ view }: { view: MarketView }) {
   const a = availability(view);
   const move = movement(view, "availability");
 
-  const worstCity = a.byCity[a.byCity.length - 1];
+  const worstCity = a.byGovernorate[a.byGovernorate.length - 1];
 
   return (
     <div className="flex flex-col gap-4">
@@ -61,9 +61,9 @@ export default function AvailabilityTab({ view }: { view: MarketView }) {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <Card title="Availability by city" lead="Client listings on shelf, per city.">
+        <Card title="Availability by governorate" lead="Client listings on shelf, per governorate.">
           <RankedBars
-            rows={a.byCity.map((row) => ({
+            rows={a.byGovernorate.map((row) => ({
               id: row.id,
               label: row.label,
               value: row.value,
@@ -137,16 +137,16 @@ export default function AvailabilityTab({ view }: { view: MarketView }) {
 
       <Card
         title="Where each SKU is failing"
-        lead="Out-of-stock counts by SKU and city."
-        footnote="Cells count listed lines found empty. A dash means no audited outlet in that city listed the SKU."
+        lead="Out-of-stock counts by SKU and governorate."
+        footnote="Cells count listed lines found empty. A dash means no audited outlet in that governorate listed the SKU."
       >
         <Heatmap
           tone="bad"
           rows={a.bySku.map((row) => ({ id: row.id, label: row.label }))}
-          columns={cities.map((c) => ({ id: c.id, label: c.name }))}
-          value={(skuId, cityId) => a.gapAt(skuId, cityId)}
-          cellLabel={(skuId, cityId, v) =>
-            `${a.bySku.find((s) => s.id === skuId)?.label} · ${cityName(cityId)}: ${v} out of stock`
+          columns={governorates.map((c) => ({ id: c.id, label: c.name }))}
+          value={(skuId, governorateId) => a.gapAt(skuId, governorateId)}
+          cellLabel={(skuId, governorateId, v) =>
+            `${a.bySku.find((s) => s.id === skuId)?.label} · ${governorateName(governorateId)}: ${v} out of stock`
           }
         />
       </Card>

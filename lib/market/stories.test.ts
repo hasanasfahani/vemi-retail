@@ -90,7 +90,7 @@ describe("market stories", () => {
        that no longer hold have to go quiet rather than restate a
        national claim about one city. */
     const oneCity = marketStories(
-      applyFilters({ ...EMPTY_FILTERS, cities: ["karbala"] }, current)
+      applyFilters({ ...EMPTY_FILTERS, governorates: ["karbala"] }, current)
     );
     expect(oneCity.length).toBeLessThanOrEqual(stories.length);
     for (const story of oneCity) {

@@ -69,7 +69,7 @@ export default function MarketMap({
   const layer = useRef<import("leaflet").LayerGroup | null>(null);
   const [ready, setReady] = useState(false);
 
-  /* Iraq, framed so all six cities sit in view at first paint. */
+  /* Iraq, framed so all six governorates sit in view at first paint. */
   const view = useMemo<{ center: [number, number]; zoom: number }>(
     () => ({ center: center ?? [33.2, 43.9], zoom: zoom ?? 6 }),
     [center, zoom]

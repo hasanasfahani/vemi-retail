@@ -2,7 +2,7 @@
 
 /* The one filter control, multi- or single-select.
 
-   Closed, it states its own state — "All cities", "Baghdad", "3
+   Closed, it states its own state — "All governorates", "Baghdad", "3
    selected" — because that is what a reader needs when they open a
    filtered link somebody sent them. The detail belongs behind a click:
    six filters rendered open would be a permanent block of furniture

@@ -1,4 +1,4 @@
-/* A ranked list with its magnitudes drawn in — cities by execution,
+/* A ranked list with its magnitudes drawn in — governorates by execution,
    SKUs by gap count, retailers by compliance.
 
    Hand-built rather than charted, because the row is the unit: a label

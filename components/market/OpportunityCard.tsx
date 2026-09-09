@@ -12,7 +12,7 @@ import Link from "next/link";
 import type { Insight } from "@/lib/market/insights";
 import { CATEGORY_LABEL } from "@/lib/market/insights";
 import { formatIqd, impactAssumptionShort } from "@/lib/market/economics";
-import { cityName } from "@/lib/market";
+import { governorateName } from "@/lib/market";
 import Badge from "./ui/Badge";
 import Bar from "./ui/Bar";
 import type { Band } from "./ui/health";
@@ -53,7 +53,7 @@ export default function OpportunityCard({
           </span>
           {insight.concentration && (
             <span className="mono text-[11px] text-ink-400">
-              · {insight.concentration.share}% in {cityName(insight.concentration.cityId)}
+              · {insight.concentration.share}% in {governorateName(insight.concentration.governorateId)}
             </span>
           )}
         </div>

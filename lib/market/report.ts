@@ -13,7 +13,7 @@
    ============================================================ */
 
 import {
-  clientBrand, cities, cityName, contract, monthLabel,
+  clientBrand, governorates, governorateName, contract, monthLabel,
 } from "./index";
 import { getTargets } from "./settings";
 import type { MarketView } from "./filters";
@@ -52,7 +52,7 @@ export type Report = {
   exposed: number;
   competitive: BrandRow[];
   stories: Story[];
-  cities: { id: string; label: string; score: number; outlets: number; band: Band }[];
+  governorates: { id: string; label: string; score: number; outlets: number; band: Band }[];
   recommended: Insight[];
 };
 
@@ -120,9 +120,9 @@ export function buildReport(view: MarketView): Report {
     exposed: opportunities.reduce((sum, i) => sum + (i.money ?? 0), 0),
     competitive: board,
     stories: marketStories(view),
-    cities: cities
+    governorates: governorates
       .map((city) => {
-        const outlets = view.outlets.filter((o) => o.cityId === city.id);
+        const outlets = view.outlets.filter((o) => o.governorateId === city.id);
         const scores = outlets.flatMap((o) => {
           const row = scoreById.get(o.id);
           return row ? [row.score] : [];
@@ -147,7 +147,7 @@ export function buildReport(view: MarketView): Report {
 /* ---------- the CSV ----------
 
    Sectioned rather than one flat table, because the report is not one
-   table: coverage, KPIs, cities, risks and opportunities are different
+   table: coverage, KPIs, governorates, risks and opportunities are different
    shapes, and flattening them into shared columns would produce a file
    full of empty cells. */
 export function reportCsv(report: Report): string {
@@ -178,8 +178,8 @@ export function reportCsv(report: Report): string {
     rows.push([k.label, k.value, k.unit, k.target, k.delta, k.floor]);
   }
 
-  section("Cities", ["City", "Execution score", "Outlets audited"]);
-  for (const c of report.cities) rows.push([c.label, c.score, c.outlets]);
+  section("Governorates", ["Governorate", "Execution score", "Outlets audited"]);
+  for (const c of report.governorates) rows.push([c.label, c.score, c.outlets]);
 
   section("Competitive summary", [
     "Brand", "Share of shelf %", "Availability %", "Facings per outlet",
@@ -195,7 +195,7 @@ export function reportCsv(report: Report): string {
       risk.headline,
       risk.severity,
       risk.scope.outlets,
-      risk.concentration ? cityName(risk.concentration.cityId) : "market-wide",
+      risk.concentration ? governorateName(risk.concentration.governorateId) : "market-wide",
       risk.impact.label,
     ]);
   }
@@ -205,7 +205,7 @@ export function reportCsv(report: Report): string {
     rows.push([
       item.headline,
       item.scope.outlets,
-      item.concentration ? cityName(item.concentration.cityId) : "market-wide",
+      item.concentration ? governorateName(item.concentration.governorateId) : "market-wide",
       item.money ?? "",
     ]);
   }

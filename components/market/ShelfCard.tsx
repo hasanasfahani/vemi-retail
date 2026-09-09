@@ -12,7 +12,7 @@ import { useState } from "react";
 import ShelfScene from "./ShelfScene";
 import Badge from "./ui/Badge";
 import { scoreBand } from "./ui/health";
-import { channelName, cityName } from "@/lib/market";
+import { channelName, governorateName } from "@/lib/market";
 import type { Cell, Pos } from "@/lib/market/types";
 
 export default function ShelfCard({
@@ -54,7 +54,7 @@ export default function ShelfCard({
             {score !== undefined && <Badge band={scoreBand(score)} label={`${score}`} size="sm" />}
           </div>
           <span className="truncate text-[11.5px] text-ink-500">
-            {outlet.district}, {cityName(outlet.cityId)} · {channelName(outlet.channel)}
+            {outlet.district}, {governorateName(outlet.governorateId)} · {channelName(outlet.channel)}
           </span>
           <span className="mono text-[11px] text-ink-400">
             {caption ??
@@ -85,7 +85,7 @@ export default function ShelfCard({
                   {outlet.name}
                 </h2>
                 <p className="text-[12px] text-ink-500">
-                  {outlet.district}, {cityName(outlet.cityId)} · {channelName(outlet.channel)}
+                  {outlet.district}, {governorateName(outlet.governorateId)} · {channelName(outlet.channel)}
                   {auditedAt ? ` · audited ${auditedAt}` : ""}
                 </p>
               </div>

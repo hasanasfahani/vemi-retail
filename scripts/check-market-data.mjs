@@ -41,7 +41,7 @@ function near(label, actual, target, tol, unit = "") {
 
 const sku = (i) => market.skus[i];
 const pos = (i) => market.pos[i];
-const city = (id) => market.cities.find((c) => c.id === id);
+const city = (id) => market.governorates.find((c) => c.id === id);
 const CLIENT = market.brands.find((b) => b.client);
 
 console.log("\nSTRUCTURE");
@@ -158,7 +158,7 @@ check("its lead over the next SKU is visible, not a rounding artefact",
   `+${((ranked[0].rate - ranked[1].rate) * 100).toFixed(1)}pt over ${sku(ranked[1].id).name}`);
 
 /* "Coca-Cola gained +4.2pp of shelf share in Basra" */
-const basra = trends.byCity.basra;
+const basra = trends.byGovernorate.basra;
 near("Coca-Cola gain in Basra, Apr → Sep",
   basra[basra.length - 1].brandShare["coca-cola"] - basra[0].brandShare["coca-cola"],
   4.2, 3.5, "pp");
@@ -175,7 +175,7 @@ near("POS with no POSM at all", noPosm, 64, 40);
 
 /* "Pepsi shelf share below 25% in high-volume Baghdad supermarkets" */
 const bagSuper = new Set(
-  market.pos.map((p, i) => [p, i]).filter(([p]) => p.cityId === "baghdad" && p.channel === "supermarket").map(([, i]) => i)
+  market.pos.map((p, i) => [p, i]).filter(([p]) => p.governorateId === "baghdad" && p.channel === "supermarket").map(([, i]) => i)
 );
 const perPos = new Map();
 for (const [pi, si, state, f] of cur.matrix) {

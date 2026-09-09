@@ -26,7 +26,7 @@ import {
 } from "@/lib/market/competition";
 import { shelf } from "@/lib/market/performance";
 import { applyFilters, type MarketView } from "@/lib/market/filters";
-import { brandName, cityName, clientBrand, contract } from "@/lib/market";
+import { brandName, governorateName, clientBrand, contract } from "@/lib/market";
 import type { MonthData } from "@/lib/market/types";
 
 export default function CompetitionView() {
@@ -47,7 +47,7 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
   );
   const narrowed = view.filters.brands.length > 0 || view.filters.skus.length > 0;
 
-  const [battle, setBattle] = useState("city");
+  const [battle, setBattle] = useState("governorate");
   const [openPos, setOpenPos] = useState<string | null>(null);
 
   const rows = useMemo(() => scoreboard(all), [all]);
@@ -62,13 +62,13 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
   const ordered = orderedBrands();
   const series = ordered.map((b) => ({ key: b.id, name: b.name, color: brandColor(b.id) }));
 
-  const battleData = battle === "city" ? s.byCity : battle === "channel" ? s.byChannel : retailers;
+  const battleData = battle === "governorate" ? s.byGovernorate : battle === "channel" ? s.byChannel : retailers;
 
   const points = useMemo<MapPoint[]>(
     () =>
       leads.map((lead) => ({
         id: lead.id,
-        name: `${lead.district}, ${cityName(lead.cityId)}`,
+        name: `${lead.district}, ${governorateName(lead.governorateId)}`,
         lat: lead.lat,
         lng: lead.lng,
         value: lead.leaderShare,
@@ -153,7 +153,7 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
         <div className="mb-3">
           <Tabs
             tabs={[
-              { id: "city", label: "By city" },
+              { id: "governorate", label: "By governorate" },
               { id: "channel", label: "By channel" },
               { id: "retailer", label: "By retailer group", count: retailers.length },
             ]}

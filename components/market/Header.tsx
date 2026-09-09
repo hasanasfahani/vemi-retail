@@ -17,13 +17,13 @@ import {
   FILTER_KEYS, FILTER_META, activeCount, type FilterKey, type Filters,
 } from "@/lib/market/filters";
 import {
-  brands, channels, cities, months, retailers, skus,
-  brandName, channelName, cityName, skuName, contract,
+  brands, channels, governorates, months, retailers, skus,
+  brandName, channelName, governorateName, skuName, contract,
 } from "@/lib/market";
 import Dropdown from "./Dropdown";
 
 const OPTIONS: Record<FilterKey, { value: string; label: string }[]> = {
-  cities: cities.map((c) => ({ value: c.id, label: c.name })),
+  governorates: governorates.map((c) => ({ value: c.id, label: c.name })),
   channels: channels.map((c) => ({ value: c.id, label: c.name })),
   retailers: retailers.map((r) => ({ value: r, label: r })),
   brands: brands.map((b) => ({ value: b.id, label: b.name })),
@@ -31,7 +31,7 @@ const OPTIONS: Record<FilterKey, { value: string; label: string }[]> = {
 };
 
 const LABEL: Record<FilterKey, (v: string) => string> = {
-  cities: cityName, channels: channelName, retailers: (v) => v,
+  governorates: governorateName, channels: channelName, retailers: (v) => v,
   brands: brandName, skus: skuName,
 };
 

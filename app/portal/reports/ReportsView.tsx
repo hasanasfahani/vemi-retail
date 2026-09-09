@@ -29,7 +29,7 @@ import {
 } from "@/lib/market/report";
 import { shelf } from "@/lib/market/performance";
 import { formatIqd, impactAssumption } from "@/lib/market/economics";
-import { contract, cityName, monthLabel } from "@/lib/market";
+import { contract, governorateName, monthLabel } from "@/lib/market";
 import type { MarketView } from "@/lib/market/filters";
 
 export default function ReportsView() {
@@ -55,7 +55,7 @@ function Reports({ view }: { view: MarketView }) {
             lng: outlet.lng,
             value: score.score,
             band: scoreBand(score.score),
-            meta: `${outlet.district}, ${cityName(outlet.cityId)}`,
+            meta: `${outlet.district}, ${governorateName(outlet.governorateId)}`,
           },
         ];
       }),
@@ -158,7 +158,7 @@ function Reports({ view }: { view: MarketView }) {
                 cannot move it — and it is the figure the rest of this report explains.
               </p>
               <ul className="mt-3 flex flex-col gap-1.5">
-                {report.cities.slice(0, 3).map((city) => (
+                {report.governorates.slice(0, 3).map((city) => (
                   <li key={city.id} className="flex items-center gap-2 text-[12.5px]">
                     <span className="w-[74px] shrink-0 text-ink-500">{city.label}</span>
                     <Bar value={city.score} max={100} par={report.score.target} />
@@ -222,7 +222,7 @@ function Reports({ view }: { view: MarketView }) {
                   <p className="mono truncate text-[11px] text-ink-400">
                     {item.scope.outlets.toLocaleString()} outlets ·{" "}
                     {item.concentration
-                      ? `${item.concentration.share}% in ${cityName(item.concentration.cityId)}`
+                      ? `${item.concentration.share}% in ${governorateName(item.concentration.governorateId)}`
                       : "market-wide"}{" "}
                     · {item.impact.label}
                   </p>
@@ -280,7 +280,7 @@ function Reports({ view }: { view: MarketView }) {
           </Card>
 
           <Card
-            title="Shelf battle by city"
+            title="Shelf battle by governorate"
             lead="Share of measured facings."
             action={
               <ChartLegend
@@ -289,7 +289,7 @@ function Reports({ view }: { view: MarketView }) {
             }
           >
             <StackedBars
-              data={s.byCity}
+              data={s.byGovernorate}
               series={ordered.map((b) => ({ key: b.id, name: b.name, color: brandColor(b.id) }))}
               max={100}
               height={280}
@@ -308,7 +308,7 @@ function Reports({ view }: { view: MarketView }) {
           </div>
           <MarketMap points={points} height={420} bandOf={scoreBand} />
           <ul className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            {report.cities.map((city) => (
+            {report.governorates.map((city) => (
               <li key={city.id} className="flex items-center gap-2">
                 <span className="w-[74px] shrink-0 text-[12px] text-ink-500">{city.label}</span>
                 <Bar value={city.score} max={100} par={report.score.target} />

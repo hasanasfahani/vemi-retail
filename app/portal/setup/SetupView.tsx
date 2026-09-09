@@ -21,7 +21,7 @@ import {
   DEFAULT_TARGETS, TARGET_META, resetTargets, setTarget, type Targets,
 } from "@/lib/market/settings";
 import {
-  auditors, brands, channels, cities, clientBrand, contract, monthLabel,
+  auditors, brands, channels, governorates, clientBrand, contract, monthLabel,
   requiredSkus, skus,
 } from "@/lib/market";
 import type { MarketView } from "@/lib/market/filters";
@@ -250,7 +250,7 @@ function Setup({ view }: { view: MarketView }) {
           Coverage scope
         </h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard label="Cities" value={cities.length} footnote={cities.map((c) => c.name).join(", ")} />
+          <StatCard label="Governorates" value={governorates.length} footnote={governorates.map((c) => c.name).join(", ")} />
           <StatCard label="Channels" value={channels.length} footnote={channels.map((c) => c.name).join(", ")} />
           <StatCard label="Contracted outlets" value={contract.contractedPos} footnote="Per monthly cycle" />
           <StatCard
@@ -262,15 +262,20 @@ function Setup({ view }: { view: MarketView }) {
           />
         </div>
 
-        <Card className="mt-3" title="Where the outlets sit" lead="Contracted universe by city, and how much of it this cycle has reached.">
+        <Card className="mt-3" title="Where the outlets sit" lead="Contracted universe by governorate, and how much of it this cycle has reached.">
           <ul className="flex flex-col">
-            {cities.map((city) => {
-              const audited = view.outlets.filter((o) => o.cityId === city.id).length;
+            {governorates.map((city) => {
+              const audited = view.outlets.filter((o) => o.governorateId === city.id).length;
               const pct = city.pos ? Math.round((audited / city.pos) * 1000) / 10 : 0;
               return (
                 <li key={city.id} className="border-b border-line py-2.5 last:border-0">
                   <div className="flex items-baseline justify-between gap-2">
-                    <span className="text-[12.5px] font-medium text-ink-700">{city.name}</span>
+                    <span className="text-[12.5px] font-medium text-ink-700">
+                      {city.name}
+                      {city.capital !== city.name && (
+                        <span className="ml-1.5 text-[11px] text-ink-400">{city.capital}</span>
+                      )}
+                    </span>
                     <span className="mono text-[12px] text-ink-900">
                       {audited.toLocaleString()} / {city.pos.toLocaleString()}
                       <span className="ml-1.5 text-ink-400">{pct}%</span>
@@ -307,14 +312,14 @@ function Setup({ view }: { view: MarketView }) {
       {/* ---------- field team ---------- */}
       <Card
         title="Field team"
-        lead="The auditors covering this contract, and the cities on each route."
+        lead="The auditors covering this contract, and the governorates on each route."
       >
         <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {auditors.map((auditor) => (
             <li key={auditor.id} className="rounded-[10px] border border-line px-3 py-2.5">
               <p className="text-[12.5px] font-semibold text-ink-900">{auditor.name}</p>
               <p className="mt-0.5 text-[11.5px] text-ink-500">
-                {auditor.cities.map((c) => cities.find((x) => x.id === c)?.name ?? c).join(" · ")}
+                {auditor.governorates.map((c) => governorates.find((x) => x.id === c)?.name ?? c).join(" · ")}
               </p>
             </li>
           ))}

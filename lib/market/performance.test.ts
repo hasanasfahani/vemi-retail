@@ -13,7 +13,7 @@ import {
 } from "./performance";
 
 const view = applyFilters(EMPTY_FILTERS, current);
-const baghdad = applyFilters({ ...EMPTY_FILTERS, cities: ["baghdad"] }, current);
+const baghdad = applyFilters({ ...EMPTY_FILTERS, governorates: ["baghdad"] }, current);
 
 describe("availability", () => {
   const a = availability(view);

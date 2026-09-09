@@ -19,7 +19,7 @@
    reload without pretending to be a backend.
    ============================================================ */
 
-import { cityName, monthLabel } from "./index";
+import { governorateName, monthLabel } from "./index";
 import { USERS, userName } from "./settings";
 import { generateInsights, type Insight, type RuleId } from "./insights";
 import { applyFilters, EMPTY_FILTERS } from "./filters";
@@ -62,7 +62,7 @@ export type Action = {
   recommendation: string;
   posAffected: number;
   affected: string[];
-  cityId: string | null;
+  governorateId: string | null;
   kpi: string;
   money: number | null;
   priority: Priority;
@@ -191,7 +191,7 @@ export function seedActions(previous: MonthData, limit = 34): Action[] {
       recommendation: RECOMMENDATION[insight.rule],
       posAffected: insight.scope.outlets,
       affected: insight.affected,
-      cityId: insight.concentration?.cityId ?? insight.entities.cityId ?? null,
+      governorateId: insight.concentration?.governorateId ?? insight.entities.governorateId ?? null,
       kpi: KPI[insight.rule],
       money: insight.money,
       priority: PRIORITY[insight.severity],
@@ -365,7 +365,7 @@ export function todayISO(): string {
   return "2026-09-21";
 }
 
-export const cityLabel = (id: string | null) => (id ? cityName(id) : "Market-wide");
+export const governorateLabel = (id: string | null) => (id ? governorateName(id) : "Market-wide");
 
 /* The person behind a role, for anywhere the board shows an owner. */
 export const ownerName = (role: string) => userName(role);

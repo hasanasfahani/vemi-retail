@@ -23,7 +23,7 @@ import Link from "next/link";
 import PageShell from "@/components/market/PageShell";
 import { useTargets } from "@/components/market/useTargets";
 import BrandHealthCard from "@/components/market/BrandHealthCard";
-import CityHealthCard from "@/components/market/CityHealthCard";
+import GovernorateHealthCard from "@/components/market/GovernorateHealthCard";
 import KpiCard from "@/components/market/KpiCard";
 import CoverageStrip from "@/components/market/CoverageStrip";
 import InsightCard from "@/components/market/InsightCard";
@@ -37,15 +37,15 @@ import { generateInsights } from "@/lib/market/insights";
 import {
   isPortfolio, portfolioHealth, portfolioScore, BAND_WORD,
 } from "@/lib/market/brandHealth";
-import { cityHealth } from "@/lib/market/cityHealth";
+import { governorateHealth } from "@/lib/market/governorateHealth";
 import { applyFilters, type MarketView } from "@/lib/market/filters";
 import {
-  cities, cityName, clientBrand, contract, loadMonth, trends,
+  governorates, governorateName, clientBrand, contract, loadMonth, trends,
 } from "@/lib/market";
 import type { MonthData } from "@/lib/market/types";
 import type { Targets } from "@/lib/market/settings";
 
-/* The measures a reader can colour the map and rank the cities by.
+/* The measures a reader can colour the map and rank the governorates by.
    One list, used by both, so the two sections always offer the same
    vocabulary — and built from the LIVE targets, so editing a goal on
    the Setup page rebands the map and the city bars with it. */
@@ -142,7 +142,7 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
   const targets = useTargets();
   const METRICS = useMemo(() => metricsFor(targets), [targets]);
   const [mapMetric, setMapMetric] = useState<MetricId>("score");
-  const [cityMetric, setCityMetric] = useState<MetricId>("score");
+  const [governorateMetric, setGovernorateMetric] = useState<MetricId>("score");
   const [openPos, setOpenPos] = useState<string | null>(null);
 
   const report = useMemo(() => generateInsights(view), [view]);
@@ -206,11 +206,11 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
   const focused = focusBrand ? health.filter((h) => h.brandId === focusBrand) : health;
   const companyScore = useMemo(() => portfolioScore(health), [health]);
 
-  /* Cities take the SAME composite, but shelf is scored against the
+  /* Governorates take the SAME composite, but shelf is scored against the
      contracted par rather than as conversion: this is one brand across
      several places, so the par is exactly the right yardstick. */
-  const cityRows2 = useMemo(
-    () => cityHealth(view, priorView),
+  const governorateHealthRows = useMemo(
+    () => governorateHealth(view, priorView),
     [view, priorView]
   );
 
@@ -271,7 +271,7 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
           value: Math.round(value * 10) / 10,
           band:
             mapMetric === "score" ? scoreBand(value) : rateBand(value, metric.target),
-          meta: `${outlet.district}, ${cityName(outlet.cityId)}`,
+          meta: `${outlet.district}, ${governorateName(outlet.governorateId)}`,
         },
       ];
     });
@@ -283,15 +283,15 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
     return counts;
   }, [points]);
 
-  const cityRows = useMemo(() => {
-    const metric = METRICS.find((m) => m.id === cityMetric)!;
+  const governorateRows = useMemo(() => {
+    const metric = METRICS.find((m) => m.id === governorateMetric)!;
     const scoreById = new Map(view.scores.map((s) => [s.posId, s]));
-    return cities
+    return governorates
       .map((city) => {
-        const outlets = view.outlets.filter((p) => p.cityId === city.id);
+        const outlets = view.outlets.filter((p) => p.governorateId === city.id);
         const values = outlets.flatMap((p) => {
           const s = scoreById.get(p.id);
-          const v = s ? s[cityMetric] : null;
+          const v = s ? s[governorateMetric] : null;
           return v === null || v === undefined ? [] : [v];
         });
         const mean = values.length
@@ -302,12 +302,12 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
           label: city.name,
           value: mean,
           outlets: outlets.length,
-          band: cityMetric === "score" ? scoreBand(mean) : rateBand(mean, metric.target),
+          band: governorateMetric === "score" ? scoreBand(mean) : rateBand(mean, metric.target),
         };
       })
       .filter((row) => row.outlets > 0)
       .sort((a, b) => b.value - a.value);
-  }, [view, cityMetric, METRICS]);
+  }, [view, governorateMetric, METRICS]);
 
   const metricOf = (id: MetricId) => METRICS.find((m) => m.id === id)!;
 
@@ -479,19 +479,19 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
         </div>
       </section>
 
-      {/* ---------- 4 · market health by city ---------- */}
+      {/* ---------- 4 · market health by governorate ---------- */}
       <section>
         <div className="mb-2.5 flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0">
             <h2 className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
-              Market health by city
+              Market health by governorate
             </h2>
             <p className="mt-0.5 text-[12px] text-ink-400">
               Which market to look at, before opening the map to find where inside it
             </p>
           </div>
           <InfoTip label="How this is scored">
-            Cities take the same composite as the brands — availability 30, shelf 25, assortment
+            Governorates take the same composite as the brands — availability 30, shelf 25, assortment
             20, price 15, POSM 10 — but shelf is scored against the contracted{" "}
             {targets.shelfShare}% par rather than as conversion. This is one brand across several
             places, so the par is the right yardstick: {clientBrand.name} holding less than it
@@ -500,8 +500,8 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
-          {cityRows2.map((row) => (
-            <CityHealthCard key={row.cityId} health={row} />
+          {governorateHealthRows.map((row) => (
+            <GovernorateHealthCard key={row.governorateId} health={row} />
           ))}
         </div>
       </section>
@@ -544,29 +544,29 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
       {/* ---------- 6 · market comparison ---------- */}
       <Card
         title="Market comparison"
-        lead={`${metricOf(cityMetric).label} by city, across audited outlets.`}
+        lead={`${metricOf(governorateMetric).label} by governorate, across audited outlets.`}
         action={
           <span className="flex items-center gap-2">
-            <InfoTip label="How cities are compared">
-              The mean of the chosen measure across each city&apos;s audited outlets, with the tick
-              on each bar marking the target. Coverage differs by city — Baghdad contributes 230
-              outlets and Karbala 64 — so a city with fewer audited doors carries a wider margin
+            <InfoTip label="How governorates are compared">
+              The mean of the chosen measure across each governorate&apos;s audited outlets, with the tick
+              on each bar marking the target. Coverage differs by governorate — Baghdad contributes 230
+              outlets and Karbala 64 — so a governorate with fewer audited doors carries a wider margin
               of error than its bar suggests.
             </InfoTip>
-            <MetricSwitch value={cityMetric} onChange={setCityMetric} metrics={METRICS} />
+            <MetricSwitch value={governorateMetric} onChange={setGovernorateMetric} metrics={METRICS} />
           </span>
         }
       >
         <RankedBars
-          rows={cityRows.map((row) => ({
+          rows={governorateRows.map((row) => ({
             id: row.id,
             label: row.label,
             value: row.value,
             meta: `${row.outlets.toLocaleString()} audited outlets`,
           }))}
           max={100}
-          par={metricOf(cityMetric).target}
-          unit={metricOf(cityMetric).unit}
+          par={metricOf(governorateMetric).target}
+          unit={metricOf(governorateMetric).unit}
         />
       </Card>
 

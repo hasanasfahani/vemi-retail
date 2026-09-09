@@ -25,7 +25,7 @@ import { scoreBand, type Band } from "@/components/market/ui/health";
 import { useActions } from "@/components/market/useActions";
 import { useRevisits } from "@/components/market/useRevisits";
 import { posRows, type PosRow } from "@/lib/market/pos";
-import { channelName, cityName } from "@/lib/market";
+import { channelName, governorateName } from "@/lib/market";
 import type { MarketView } from "@/lib/market/filters";
 
 const SCORE_BANDS = [
@@ -83,7 +83,7 @@ function Explorer({ view, query }: { view: MarketView; query: string }) {
         (!onlyIssues || row.issues.length > 0) &&
         (!onlyFlagged || revisits.flagged.has(row.pos.id)) &&
         (q === "" ||
-          `${row.pos.name} ${row.pos.code} ${row.pos.district} ${cityName(row.pos.cityId)}`
+          `${row.pos.name} ${row.pos.code} ${row.pos.district} ${governorateName(row.pos.governorateId)}`
             .toLowerCase()
             .includes(q))
     );
@@ -98,7 +98,7 @@ function Explorer({ view, query }: { view: MarketView; query: string }) {
         lng: row.pos.lng,
         value: row.score,
         band: scoreBand(row.score),
-        meta: `${row.pos.district}, ${cityName(row.pos.cityId)} · ${row.issues.length} issue${row.issues.length === 1 ? "" : "s"}`,
+        meta: `${row.pos.district}, ${governorateName(row.pos.governorateId)} · ${row.issues.length} issue${row.issues.length === 1 ? "" : "s"}`,
       })),
     [shown]
   );
@@ -129,7 +129,7 @@ function Explorer({ view, query }: { view: MarketView; query: string }) {
       ),
       csv: (r) => r.pos.name,
     },
-    { id: "city", header: "City", sortValue: (r) => cityName(r.pos.cityId), render: (r) => cityName(r.pos.cityId) },
+    { id: "governorate", header: "Governorate", sortValue: (r) => governorateName(r.pos.governorateId), render: (r) => governorateName(r.pos.governorateId) },
     { id: "channel", header: "Channel", sortValue: (r) => r.pos.channel, render: (r) => channelName(r.pos.channel) },
     { id: "visit", header: "Visit", sortValue: (r) => r.auditedAt, render: (r) => <span className="mono">{r.auditedAt.slice(5)}</span> },
     {

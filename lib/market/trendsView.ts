@@ -5,7 +5,7 @@
    Everything else on the Historical page is a market, city or channel
    aggregate, for exactly this reason. */
 
-import { cityName } from "./index";
+import { governorateName } from "./index";
 import type { MarketView } from "./filters";
 
 const r1 = (n: number) => Math.round(n * 10) / 10;
@@ -34,7 +34,7 @@ export function repeated(before: MarketView, after: MarketView): RepeatedRow[] {
         {
           posId: outlet.id,
           name: outlet.name,
-          location: `${outlet.district}, ${cityName(outlet.cityId)}`,
+          location: `${outlet.district}, ${governorateName(outlet.governorateId)}`,
           before: first.score,
           after: second.score,
           delta: second.score - first.score,

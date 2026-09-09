@@ -22,7 +22,7 @@ import {
   DEFAULT_NOTIFICATIONS, NOTIFICATIONS, USERS, loadNotifications, saveNotifications,
   type NotificationId, type User,
 } from "@/lib/market/settings";
-import { auditors, cities, contract } from "@/lib/market";
+import { auditors, governorates, contract } from "@/lib/market";
 import type { MarketView } from "@/lib/market/filters";
 
 export default function UsersView() {
@@ -137,7 +137,7 @@ function Users({ view }: { view: MarketView }) {
     <div className="flex flex-col gap-5">
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Client users" value={USERS.length} footnote="People with access to this workspace" />
-        <StatCard label="Field auditors" value={auditors.length} footnote={`Covering ${cities.length} cities on this contract`} />
+        <StatCard label="Field auditors" value={auditors.length} footnote={`Covering ${governorates.length} governorates on this contract`} />
         <StatCard
           label="Open actions"
           value={[...load.values()].reduce((s, v) => s + v.open, 0)}
@@ -208,7 +208,7 @@ function Users({ view }: { view: MarketView }) {
               <li key={auditor.id} className="rounded-[10px] border border-line px-3 py-2.5">
                 <p className="text-[12.5px] font-semibold text-ink-900">{auditor.name}</p>
                 <p className="mt-0.5 text-[11.5px] text-ink-500">
-                  {auditor.cities.map((c) => cities.find((x) => x.id === c)?.name ?? c).join(" · ")}
+                  {auditor.governorates.map((c) => governorates.find((x) => x.id === c)?.name ?? c).join(" · ")}
                 </p>
                 <p className="mono mt-1 text-[11px] text-ink-400">
                   {covered.toLocaleString()} visits this cycle

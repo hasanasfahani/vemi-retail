@@ -14,7 +14,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Badge from "./ui/Badge";
 import {
-  OUTCOME_LABEL, STAGES, cityLabel, ownerName, todayISO,
+  OUTCOME_LABEL, STAGES, governorateLabel, ownerName, todayISO,
   type Action, type Verification,
 } from "@/lib/market/actions";
 import { formatIqd } from "@/lib/market/economics";
@@ -73,7 +73,7 @@ export default function ActionCard({
 
       <dl className="mono mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[10.5px] text-ink-400">
         <dd>{action.posAffected.toLocaleString()} outlets</dd>
-        <dd>· {cityLabel(action.cityId)}</dd>
+        <dd>· {governorateLabel(action.governorateId)}</dd>
         {action.money !== null && <dd>· {formatIqd(action.money)} IQD</dd>}
         <dd className={overdue ? "font-semibold text-[color:var(--color-critical)]" : ""}>
           · due {action.dueDate.slice(5)}
@@ -123,8 +123,8 @@ export default function ActionCard({
         </button>
         <Link
           href={
-            action.cityId
-              ? `/portal/pos?city=${action.cityId}`
+            action.governorateId
+              ? `/portal/pos?governorate=${action.governorateId}`
               : "/portal/pos"
           }
           className="ml-auto text-[11px] font-semibold text-violet-ink hover:underline"

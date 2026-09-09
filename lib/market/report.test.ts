@@ -62,9 +62,9 @@ describe("the monthly report", () => {
   });
 
   it("summarises every city that was audited", () => {
-    const audited = new Set(view.outlets.map((o) => o.cityId));
-    expect(report.cities.length).toBe(audited.size);
-    for (const city of report.cities) expect(city.outlets).toBeGreaterThan(0);
+    const audited = new Set(view.outlets.map((o) => o.governorateId));
+    expect(report.governorates.length).toBe(audited.size);
+    for (const city of report.governorates) expect(city.outlets).toBeGreaterThan(0);
   });
 
   it("writes a headline anyone can check against the page", () => {
@@ -79,7 +79,7 @@ describe("the CSV export", () => {
 
   it("carries every section of the report, not just one table", () => {
     for (const section of [
-      "Coverage", "Market score", "KPIs", "Cities",
+      "Coverage", "Market score", "KPIs", "Governorates",
       "Competitive summary", "Biggest risks", "Biggest opportunities",
       "Recommended actions",
     ]) {

@@ -7,7 +7,7 @@
    ============================================================ */
 
 import {
-  brands, channels, cities, clientBrand, oosReasons, posmTypes,
+  brands, channels, governorates, clientBrand, oosReasons, posmTypes,
   requiredSkus, skus, trends,
 } from "./index";
 import type { MarketView } from "./filters";
@@ -42,7 +42,7 @@ const MARKET_FLOOR: Record<string, number> = {
 };
 
 /* Bootstrapped per-city share floors, from scripts/calibrate-insights.mjs. */
-const CITY_FLOOR: Record<string, number> = {
+const GOVERNORATE_FLOOR: Record<string, number> = {
   baghdad: 3.09, basra: 4.63, erbil: 4.79, nineveh: 5.05, najaf: 4.90, karbala: 5.57,
 };
 
@@ -50,15 +50,15 @@ export function movement(
   view: MarketView,
   key: "availability" | "shelfShare" | "score" | "assortment" | "price" | "posm"
 ): Movement {
-  const single = view.filters.cities.length === 1 ? view.filters.cities[0] : null;
-  const line = single ? trends.byCity[single] : trends.market;
+  const single = view.filters.governorates.length === 1 ? view.filters.governorates[0] : null;
+  const line = single ? trends.byGovernorate[single] : trends.market;
   if (!line || line.length < 2) return { delta: 0, floor: 99, scope: "no comparable month" };
   const last = line[line.length - 1];
   const prior = line[line.length - 2];
   return {
     delta: r1(last[key] - prior[key]),
-    floor: single ? (CITY_FLOOR[single] ?? 5) : (MARKET_FLOOR[key] ?? 1.8),
-    scope: single ? cities.find((c) => c.id === single)?.name ?? single : "all audited outlets",
+    floor: single ? (GOVERNORATE_FLOOR[single] ?? 5) : (MARKET_FLOOR[key] ?? 1.8),
+    scope: single ? governorates.find((c) => c.id === single)?.name ?? single : "all audited outlets",
   };
 }
 
@@ -70,9 +70,9 @@ export function availability(view: MarketView) {
 
   const rate = (rows: Cell[]) => pct(rows.filter((c) => c.state === "in-stock").length, rows.length);
 
-  const byCity = cities
+  const byGovernorate = governorates
     .map((city) => {
-      const rows = own.filter((c) => posById.get(c.posId)?.cityId === city.id);
+      const rows = own.filter((c) => posById.get(c.posId)?.governorateId === city.id);
       return {
         id: city.id,
         label: city.name,
@@ -133,9 +133,9 @@ export function availability(view: MarketView) {
   const gapGrid = new Map<string, number>();
   for (const cell of own) {
     if (cell.state !== "out-of-stock") continue;
-    const cityId = posById.get(cell.posId)?.cityId;
-    if (!cityId) continue;
-    const key = `${cell.skuId}|${cityId}`;
+    const governorateId = posById.get(cell.posId)?.governorateId;
+    if (!governorateId) continue;
+    const key = `${cell.skuId}|${governorateId}`;
     gapGrid.set(key, (gapGrid.get(key) ?? 0) + 1);
   }
 
@@ -146,11 +146,11 @@ export function availability(view: MarketView) {
     rate: rate(own),
     listings: own.length,
     gaps: totalGaps,
-    byCity,
+    byGovernorate,
     byChannel,
     bySku,
     byReason,
-    gapAt: (skuId: string, cityId: string) => gapGrid.get(`${skuId}|${cityId}`) ?? null,
+    gapAt: (skuId: string, governorateId: string) => gapGrid.get(`${skuId}|${governorateId}`) ?? null,
     /* "Pepsi 500ml accounts for 38% of detected Pepsi OOS cases" — the
        brief's own sentence, computed rather than written. */
     worstSku: worst
@@ -182,9 +182,9 @@ export function shelf(view: MarketView) {
     return total === 0 ? 0 : pct(facings(rows.filter((c) => skuBrand.get(c.skuId) === brandId)), total);
   };
 
-  const byCity: ShareRow[] = cities
+  const byGovernorate: ShareRow[] = governorates
     .map((city) => {
-      const rows = stocked.filter((c) => posById.get(c.posId)?.cityId === city.id);
+      const rows = stocked.filter((c) => posById.get(c.posId)?.governorateId === city.id);
       return {
         id: city.id,
         label: city.name,
@@ -247,7 +247,7 @@ export function shelf(view: MarketView) {
 
   return {
     clientShare: shareIn(stocked, clientBrand.id),
-    byCity,
+    byGovernorate,
     byChannel,
     byBrand,
     positions,
@@ -313,9 +313,9 @@ export function pricing(view: MarketView) {
       sku: skus.find((s) => s.id === p.skuId),
     }));
 
-  const byCity = cities
+  const byGovernorate = governorates
     .map((city) => {
-      const rows = clientRows.filter((p) => posById.get(p.posId)?.cityId === city.id);
+      const rows = clientRows.filter((p) => posById.get(p.posId)?.governorateId === city.id);
       if (!rows.length) return null;
       return {
         id: city.id,
@@ -334,7 +334,7 @@ export function pricing(view: MarketView) {
     bySku,
     distribution,
     outliers,
-    byCity,
+    byGovernorate,
   };
 }
 
@@ -382,12 +382,12 @@ export function assortment(view: MarketView) {
   const grid = new Map<string, number>();
   for (const cell of view.cells) {
     if (!isClient(cell)) continue;
-    const cityId = posById.get(cell.posId)?.cityId;
-    if (!cityId) continue;
-    grid.set(`${cell.skuId}|${cityId}`, (grid.get(`${cell.skuId}|${cityId}`) ?? 0) + 1);
+    const governorateId = posById.get(cell.posId)?.governorateId;
+    if (!governorateId) continue;
+    grid.set(`${cell.skuId}|${governorateId}`, (grid.get(`${cell.skuId}|${governorateId}`) ?? 0) + 1);
   }
-  const cityOutlets = new Map(
-    cities.map((c) => [c.id, view.outlets.filter((p) => p.cityId === c.id).length])
+  const governorateOutlets = new Map(
+    governorates.map((c) => [c.id, view.outlets.filter((p) => p.governorateId === c.id).length])
   );
 
   const byChannel = channels
@@ -410,10 +410,10 @@ export function assortment(view: MarketView) {
     compliance: mean(perOutlet.map((row) => row.compliance)),
     penetration,
     byChannel,
-    penetrationAt: (skuId: string, cityId: string) => {
-      const total = cityOutlets.get(cityId) ?? 0;
+    penetrationAt: (skuId: string, governorateId: string) => {
+      const total = governorateOutlets.get(governorateId) ?? 0;
       if (!total) return null;
-      return pct(grid.get(`${skuId}|${cityId}`) ?? 0, total);
+      return pct(grid.get(`${skuId}|${governorateId}`) ?? 0, total);
     },
   };
 }
@@ -442,11 +442,11 @@ export function posm(view: MarketView) {
     return { value: pct(rows.filter((p) => p.present).length, rows.length), checked: rows.length };
   };
 
-  const byCity = cities
+  const byGovernorate = governorates
     .map((city) => {
-      const { value, checked } = rateFor((id) => posById.get(id)?.cityId === city.id);
+      const { value, checked } = rateFor((id) => posById.get(id)?.governorateId === city.id);
       const missing = view.posm.filter(
-        (p) => !p.present && posById.get(p.posId)?.cityId === city.id
+        (p) => !p.present && posById.get(p.posId)?.governorateId === city.id
       ).length;
       return { id: city.id, label: city.name, value, checked, missing };
     })
@@ -486,7 +486,7 @@ export function posm(view: MarketView) {
     compliance: pct(view.posm.filter((p) => p.present).length, view.posm.length),
     checked: view.posm.length,
     byType,
-    byCity,
+    byGovernorate,
     byChannel,
     bare,
     best: ranked.slice(0, 3),

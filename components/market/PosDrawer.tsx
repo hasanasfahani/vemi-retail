@@ -19,7 +19,7 @@ import Badge from "./ui/Badge";
 import Bar from "./ui/Bar";
 import ScoreRing from "./ui/ScoreRing";
 import ShelfScene from "./ShelfScene";
-import { channelName, cityName, contract, monthLabel, skuOf } from "@/lib/market";
+import { channelName, governorateName, contract, monthLabel, skuOf } from "@/lib/market";
 import { kpiTargetsForDrawer, posRows, recommendationsFor, type PosRow } from "@/lib/market/pos";
 import type { MarketView } from "@/lib/market/filters";
 
@@ -58,7 +58,7 @@ export default function PosDrawer({
         title={row?.pos.name ?? ""}
         subtitle={
           row
-            ? `${row.pos.code} · ${row.pos.district}, ${cityName(row.pos.cityId)} · ${channelName(row.pos.channel)}${
+            ? `${row.pos.code} · ${row.pos.district}, ${governorateName(row.pos.governorateId)} · ${channelName(row.pos.channel)}${
                 row.pos.retailer === "Independent" ? "" : ` · ${row.pos.retailer}`
               }`
             : undefined
@@ -287,7 +287,7 @@ export default function PosDrawer({
                   {row.pos.name}
                 </h2>
                 <p className="text-[12px] text-ink-500">
-                  {row.pos.district}, {cityName(row.pos.cityId)} · audited {row.auditedAt} by{" "}
+                  {row.pos.district}, {governorateName(row.pos.governorateId)} · audited {row.auditedAt} by{" "}
                   {row.collector}
                 </p>
               </div>

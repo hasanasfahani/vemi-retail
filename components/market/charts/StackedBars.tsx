@@ -39,7 +39,7 @@ export default function StackedBars({
   max?: number;
   format?: Fmt;
   /* "vertical" = bars stand up (months across the bottom).
-     "horizontal" = bars lie down (a ranked list of cities). */
+     "horizontal" = bars lie down (a ranked list of governorates). */
   layout?: "vertical" | "horizontal";
   /* "stacked" for parts of a whole, "grouped" for measures that are
      independent of each other. */

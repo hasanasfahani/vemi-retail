@@ -17,7 +17,7 @@
    ============================================================ */
 
 import {
-  cities, cityName, clientBrand, monthLabel, trends,
+  governorates, governorateName, clientBrand, monthLabel, trends,
 } from "./index";
 import { getTargets } from "./settings";
 import type { MarketView } from "./filters";
@@ -29,7 +29,7 @@ const r1 = (n: number) => Math.round(n * 10) / 10;
 
 /* Bootstrapped floors, from scripts/calibrate-insights.mjs. */
 const MARKET_FLOOR = 1.81;
-const CITY_FLOOR: Record<string, number> = {
+const GOVERNORATE_FLOOR: Record<string, number> = {
   baghdad: 3.09, basra: 4.63, erbil: 4.79, nineveh: 5.05, najaf: 4.9, karbala: 5.57,
 };
 
@@ -64,19 +64,19 @@ function winsAvailabilityLosesShelf(view: MarketView): Story | null {
   const leader = board[0];
   if (!client || !leader || leader.isClient) return null;
 
-  const candidates = cities
+  const candidates = governorates
     .map((city) => {
-      const cityAvail = a.byCity.find((r) => r.id === city.id);
-      const cityShelf = s.byCity.find((r) => r.id === city.id);
-      if (!cityAvail || !cityShelf) return null;
-      const share = Number(cityShelf[clientBrand.id] ?? 0);
-      const rivalShare = Number(cityShelf[leader.id] ?? 0);
+      const governorateAvail = a.byGovernorate.find((r) => r.id === city.id);
+      const governorateShelf = s.byGovernorate.find((r) => r.id === city.id);
+      if (!governorateAvail || !governorateShelf) return null;
+      const share = Number(governorateShelf[clientBrand.id] ?? 0);
+      const rivalShare = Number(governorateShelf[leader.id] ?? 0);
       return {
         city,
-        availability: cityAvail.value,
+        availability: governorateAvail.value,
         share,
         rivalShare,
-        outlets: cityAvail.outlets,
+        outlets: governorateAvail.outlets,
         gap: r1(rivalShare - share),
       };
     })
@@ -86,7 +86,7 @@ function winsAvailabilityLosesShelf(view: MarketView): Story | null {
     .filter(
       (row) =>
         row.availability >= a.rate &&
-        row.gap >= (CITY_FLOOR[row.city.id] ?? MARKET_FLOOR)
+        row.gap >= (GOVERNORATE_FLOOR[row.city.id] ?? MARKET_FLOOR)
     )
     .sort((x, y) => y.gap - x.gap);
 
@@ -102,7 +102,7 @@ function winsAvailabilityLosesShelf(view: MarketView): Story | null {
 
   return {
     id: "wins-availability-loses-shelf",
-    test: `${cityName(top.city.id)} availability ≥ the market's ${a.rate}%, and ${leader.name} ahead on shelf by more than the city's ${CITY_FLOOR[top.city.id] ?? MARKET_FLOOR}pt detection floor.`,
+    test: `${governorateName(top.city.id)} availability ≥ the market's ${a.rate}%, and ${leader.name} ahead on shelf by more than the city's ${GOVERNORATE_FLOOR[top.city.id] ?? MARKET_FLOOR}pt detection floor.`,
     headline: `${clientBrand.name} ${beats ? "wins" : "holds"} availability but loses shelf in ${top.city.name}`,
     figure: { value: `${top.gap}pt`, label: `behind ${leader.name} on shelf` },
     body: `${top.city.name} keeps ${clientBrand.name} on shelf ${beats ? "better than the country manages" : "exactly as well as the country manages"} — ${top.availability}% against ${a.rate}% nationally, across ${top.outlets.toLocaleString()} audited outlets. The space it holds is another matter: ${top.share}% of measured facings against ${leader.name}'s ${top.rivalShare}%. Supply is working; the negotiation is not.`,
@@ -117,7 +117,7 @@ function winsAvailabilityLosesShelf(view: MarketView): Story | null {
       bLabel: "All audited",
       unit: "%",
     },
-    cta: { href: `/portal/performance?tab=shelf&city=${top.city.id}`, label: "Open the shelf view" },
+    cta: { href: `/portal/performance?tab=shelf&governorate=${top.city.id}`, label: "Open the shelf view" },
   };
 }
 
@@ -173,15 +173,15 @@ function oneSkuCarriesTheDamage(view: MarketView): Story | null {
    movement and the activity clear their own floors, because either
    half alone is a coincidence. */
 function activityExplainsTheGain(view: MarketView): Story | null {
-  const scope = view.filters.cities.length ? view.filters.cities : cities.map((c) => c.id);
+  const scope = view.filters.governorates.length ? view.filters.governorates : governorates.map((c) => c.id);
 
   const candidates = scope
-    .map((cityId) => {
-      const line = trends.byCity[cityId];
+    .map((governorateId) => {
+      const line = trends.byGovernorate[governorateId];
       if (!line || line.length < 2) return null;
       const first = line[0];
       const last = line[line.length - 1];
-      const floor = CITY_FLOOR[cityId] ?? MARKET_FLOOR;
+      const floor = GOVERNORATE_FLOOR[governorateId] ?? MARKET_FLOOR;
 
       const moves = Object.entries(last.brandShare)
         .filter(([id]) => id !== clientBrand.id)
@@ -196,7 +196,7 @@ function activityExplainsTheGain(view: MarketView): Story | null {
       /* The test: shelf movement above the city's floor AND promotion
          presence up by at least five points of outlet coverage. */
       if (!top || top.shelf < floor || top.promo < 5) return null;
-      return { cityId, first, last, ...top, floor };
+      return { governorateId, first, last, ...top, floor };
     })
     .filter((row): row is NonNullable<typeof row> => row !== null)
     .sort((x, y) => y.shelf - x.shelf);
@@ -210,11 +210,11 @@ function activityExplainsTheGain(view: MarketView): Story | null {
 
   return {
     id: "activity-explains-the-gain",
-    test: `${rival?.name ?? top.id} shelf up ${top.shelf}pt in ${cityName(top.cityId)} — above the city's ${top.floor}pt floor — with promotion presence up ${top.promo}pt over the same window.`,
-    headline: `${rival?.name ?? top.id} bought its ${cityName(top.cityId)} shelf gain`,
-    figure: { value: `+${top.shelf}pt`, label: `of ${cityName(top.cityId)} shelf, ${monthLabel(top.first.month)} to ${monthLabel(top.last.month)}` },
-    body: `${rival?.name ?? top.id} moved from ${top.first.brandShare[top.id]}% to ${top.last.brandShare[top.id]}% of measured facings in ${cityName(top.cityId)}, while ${clientBrand.name} moved ${clientMove > 0 ? "+" : ""}${clientMove}pt. Over the same window its promotion presence rose from ${top.first.promoShare[top.id]}% to ${top.last.promoShare[top.id]}% of audited outlets. The shelf followed the activity.`,
-    recommendation: `Decide whether to answer in ${cityName(top.cityId)} or concede the format — the gain has a mechanism behind it, so it will not reverse on its own.`,
+    test: `${rival?.name ?? top.id} shelf up ${top.shelf}pt in ${governorateName(top.governorateId)} — above the city's ${top.floor}pt floor — with promotion presence up ${top.promo}pt over the same window.`,
+    headline: `${rival?.name ?? top.id} bought its ${governorateName(top.governorateId)} shelf gain`,
+    figure: { value: `+${top.shelf}pt`, label: `of ${governorateName(top.governorateId)} shelf, ${monthLabel(top.first.month)} to ${monthLabel(top.last.month)}` },
+    body: `${rival?.name ?? top.id} moved from ${top.first.brandShare[top.id]}% to ${top.last.brandShare[top.id]}% of measured facings in ${governorateName(top.governorateId)}, while ${clientBrand.name} moved ${clientMove > 0 ? "+" : ""}${clientMove}pt. Over the same window its promotion presence rose from ${top.first.promoShare[top.id]}% to ${top.last.promoShare[top.id]}% of audited outlets. The shelf followed the activity.`,
+    recommendation: `Decide whether to answer in ${governorateName(top.governorateId)} or concede the format — the gain has a mechanism behind it, so it will not reverse on its own.`,
     chart: {
       kind: "trend",
       rows: [
@@ -225,7 +225,7 @@ function activityExplainsTheGain(view: MarketView): Story | null {
       bLabel: monthLabel(top.last.month),
       unit: "%",
     },
-    cta: { href: `/portal/competition?city=${top.cityId}`, label: "Open competition" },
+    cta: { href: `/portal/competition?governorate=${top.governorateId}`, label: "Open competition" },
   };
 }
 
@@ -249,7 +249,7 @@ function stockedButUnsupported(view: MarketView): Story | null {
   if (posmGap <= availGap || posmGap <= shareGap) return null;
   if (p.bare.length < 20) return null;
 
-  const worstCity = p.byCity[0];
+  const worstCity = p.byGovernorate[0];
 
   return {
     id: "stocked-but-unsupported",

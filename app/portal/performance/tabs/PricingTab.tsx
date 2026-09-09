@@ -11,7 +11,7 @@ import Headline from "@/components/market/Headline";
 import { RankedBars, brandColor } from "@/components/market/charts";
 import Badge from "@/components/market/ui/Badge";
 import { pricing, movement } from "@/lib/market/performance";
-import { brandOf, cityName, clientBrand, contract } from "@/lib/market";
+import { brandOf, governorateName, clientBrand, contract } from "@/lib/market";
 import { useTargets } from "@/components/market/useTargets";
 import type { MarketView } from "@/lib/market/filters";
 
@@ -23,7 +23,7 @@ export default function PricingTab({ view }: { view: MarketView }) {
   const move = movement(view, "price");
   const clientSkus = p.bySku.filter((s) => s.brandId === clientBrand.id);
   const worstSku = [...clientSkus].sort((a, b) => a.compliance - b.compliance)[0];
-  const worstCity = p.byCity[p.byCity.length - 1];
+  const worstCity = p.byGovernorate[p.byGovernorate.length - 1];
   const overs = p.distribution.filter((d) => d.id.startsWith("over")).reduce((s, d) => s + d.value, 0);
   const unders = p.distribution.filter((d) => d.id.startsWith("under")).reduce((s, d) => s + d.value, 0);
 
@@ -39,10 +39,10 @@ export default function PricingTab({ view }: { view: MarketView }) {
       csv: (r) => r.outlet?.name ?? r.posId,
     },
     {
-      id: "city",
-      header: "City",
-      render: (r) => (r.outlet ? cityName(r.outlet.cityId) : "—"),
-      sortValue: (r) => (r.outlet ? cityName(r.outlet.cityId) : ""),
+      id: "governorate",
+      header: "Governorate",
+      render: (r) => (r.outlet ? governorateName(r.outlet.governorateId) : "—"),
+      sortValue: (r) => (r.outlet ? governorateName(r.outlet.governorateId) : ""),
     },
     { id: "sku", header: "SKU", render: (r) => r.sku?.name ?? r.skuId, sortValue: (r) => r.sku?.name ?? r.skuId },
     { id: "rrp", header: "RRP", align: "right", render: (r) => iqd(r.rrp), sortValue: (r) => r.rrp },
@@ -66,7 +66,7 @@ export default function PricingTab({ view }: { view: MarketView }) {
   /* Twelve rows of the worst variances, and the first question anyone
      asks is "which of these are mine to fix?" — a city, or a line. */
   const outlierFacets: Facet<Outlier>[] = [
-    { id: "city", label: "City", value: (r) => (r.outlet ? cityName(r.outlet.cityId) : "—") },
+    { id: "governorate", label: "Governorate", value: (r) => (r.outlet ? governorateName(r.outlet.governorateId) : "—") },
     { id: "sku", label: "SKU", value: (r) => r.sku?.name ?? r.skuId },
   ];
 
@@ -140,9 +140,9 @@ export default function PricingTab({ view }: { view: MarketView }) {
             />
           </Card>
 
-          <Card title="Compliance by city" lead="Share of client readings within 5% of list.">
+          <Card title="Compliance by governorate" lead="Share of client readings within 5% of list.">
             <RankedBars
-              rows={p.byCity.map((row) => ({
+              rows={p.byGovernorate.map((row) => ({
                 id: row.id,
                 label: row.label,
                 value: row.compliance,

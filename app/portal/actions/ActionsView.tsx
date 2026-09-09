@@ -23,7 +23,7 @@ import { useActions } from "@/components/market/useActions";
 import { Card, DataTable, StatCard, type Column } from "@/components/market/ui";
 import Badge from "@/components/market/ui/Badge";
 import {
-  OUTCOME_LABEL, OWNERS, STAGES, cityLabel, ownerName, summarise,
+  OUTCOME_LABEL, OWNERS, STAGES, governorateLabel, ownerName, summarise,
   todayISO, verify, type Action, type Owner, type Priority, type StageId,
   type Verification,
 } from "@/lib/market/actions";
@@ -107,7 +107,7 @@ function Actions({ view }: { view: MarketView }) {
       sortValue: (a) => a.posAffected,
       render: (a) => a.posAffected.toLocaleString(),
     },
-    { id: "city", header: "City", sortValue: (a) => cityLabel(a.cityId), render: (a) => cityLabel(a.cityId) },
+    { id: "governorate", header: "Governorate", sortValue: (a) => governorateLabel(a.governorateId), render: (a) => governorateLabel(a.governorateId) },
     { id: "kpi", header: "KPI", sortValue: (a) => a.kpi, render: (a) => a.kpi },
     {
       id: "money",
@@ -225,7 +225,7 @@ function Actions({ view }: { view: MarketView }) {
           columns={columns}
           rowKey={(a) => a.id}
           searchable
-          searchText={(a) => `${a.issue} ${a.recommendation} ${cityLabel(a.cityId)} ${ownerName(a.owner)} ${a.owner} ${a.kpi}`}
+          searchText={(a) => `${a.issue} ${a.recommendation} ${governorateLabel(a.governorateId)} ${ownerName(a.owner)} ${a.owner} ${a.kpi}`}
           searchPlaceholder="Search actions…"
           defaultSort={{ id: "priority", dir: "asc" }}
           exportName="action-queue"

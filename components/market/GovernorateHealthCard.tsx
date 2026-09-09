@@ -14,15 +14,15 @@
 
 import Link from "next/link";
 import { BAND_WORD } from "@/lib/market/brandHealth";
-import type { CityHealth } from "@/lib/market/cityHealth";
+import type { GovernorateHealth } from "@/lib/market/governorateHealth";
 import { BAND_COLOR } from "./ui/health";
 import Delta from "./ui/Delta";
 
-export default function CityHealthCard({
+export default function GovernorateHealthCard({
   health,
   size = 108,
 }: {
-  health: CityHealth;
+  health: GovernorateHealth;
   size?: number;
 }) {
   const stroke = 10;
@@ -37,8 +37,16 @@ export default function CityHealthCard({
   return (
     <article className="flex min-w-0 flex-col rounded-[14px] border border-line bg-white p-3.5 shadow-[var(--shadow-card)]">
       <div className="flex items-baseline justify-between gap-2">
-        <h3 className="truncate font-display text-[14px] font-bold tracking-tight text-ink-900">
+        <h3 className="min-w-0 truncate font-display text-[14px] font-bold tracking-tight text-ink-900">
           {health.name}
+          {/* Five governorates share a name with their capital; Nineveh
+              does not, and a reader who knows the audit works Mosul
+              needs to see that this is the same place. */}
+          {health.capital !== health.name && (
+            <span className="ml-1.5 text-[11px] font-normal text-ink-400">
+              {health.capital}
+            </span>
+          )}
         </h3>
         <span className="mono shrink-0 text-[10.5px] text-ink-400">
           {health.outlets.toLocaleString()} audited
@@ -94,7 +102,7 @@ export default function CityHealthCard({
       <p className="mono mt-1.5 flex items-center justify-between gap-2 text-[10.5px] text-ink-400">
         <span>{covered}% of the city covered</span>
         <Link
-          href={`/portal/pos?city=${health.cityId}`}
+          href={`/portal/pos?governorate=${health.governorateId}`}
           className="font-semibold text-violet-ink hover:underline"
         >
           Outlets

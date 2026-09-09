@@ -13,7 +13,7 @@ import Headline from "@/components/market/Headline";
 import { Heatmap, RankedBars, brandColor } from "@/components/market/charts";
 import Badge from "@/components/market/ui/Badge";
 import { assortment, movement } from "@/lib/market/performance";
-import { cities, cityName, clientBrand, requiredSkus, skus } from "@/lib/market";
+import { governorates, governorateName, clientBrand, requiredSkus, skus } from "@/lib/market";
 import { useTargets } from "@/components/market/useTargets";
 import type { MarketView } from "@/lib/market/filters";
 
@@ -71,19 +71,19 @@ export default function AssortmentTab({ view }: { view: MarketView }) {
       </div>
 
       <Card
-        title="Range by SKU and city"
-        lead="Share of audited outlets in each city that list the SKU."
+        title="Range by SKU and governorate"
+        lead="Share of audited outlets in each governorate that list the SKU."
         footnote="Penetration, not stock: this says whether the door carries the line at all. Whether it was on shelf that day is the Availability tab's question."
       >
         <Heatmap
           rows={clientSkus.map((s) => ({ id: s.id, label: s.name }))}
-          columns={cities.map((c) => ({ id: c.id, label: c.name }))}
-          value={(skuId, cityId) => a.penetrationAt(skuId, cityId)}
+          columns={governorates.map((c) => ({ id: c.id, label: c.name }))}
+          value={(skuId, governorateId) => a.penetrationAt(skuId, governorateId)}
           unit="%"
           min={0}
           max={100}
-          cellLabel={(skuId, cityId, v) =>
-            `${skus.find((s) => s.id === skuId)?.name} listed in ${v}% of audited ${cityName(cityId)} outlets`
+          cellLabel={(skuId, governorateId, v) =>
+            `${skus.find((s) => s.id === skuId)?.name} listed in ${v}% of audited ${governorateName(governorateId)} outlets`
           }
           legend="Scaled 0–100%, so a pale cell is a genuine distribution gap rather than a relative one."
         />

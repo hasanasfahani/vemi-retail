@@ -95,7 +95,7 @@ const IN_FLIGHT = "2026-11";
    projects them:
      x = 9.591 * lon - 368.85
      y = 432.83 - 11.497 * lat                                        */
-const CITIES = [
+const GOVERNORATES = [
   { id: "baghdad", name: "Baghdad", capital: "Baghdad", lat: 33.31, lng: 44.36, pos: 380, tier: "capital" },
   { id: "basra", name: "Basra", capital: "Basra", lat: 30.51, lng: 47.78, pos: 160, tier: "major" },
   { id: "erbil", name: "Erbil", capital: "Erbil", lat: 36.19, lng: 44.01, pos: 150, tier: "major" },
@@ -103,7 +103,7 @@ const CITIES = [
   { id: "najaf", name: "Najaf", capital: "Najaf", lat: 32.03, lng: 44.34, pos: 95, tier: "mid" },
   { id: "karbala", name: "Karbala", capital: "Karbala", lat: 32.61, lng: 44.02, pos: 75, tier: "mid" },
 ];
-for (const c of CITIES) {
+for (const c of GOVERNORATES) {
   c.x = Math.round((9.591 * c.lng - 368.85) * 100) / 100;
   c.y = Math.round((432.83 - 11.497 * c.lat) * 100) / 100;
 }
@@ -147,26 +147,26 @@ const DISTRICTS = {
 const place = mulberry32(415926);
 
 const DISTRICT_POINT = new Map();
-for (const city of CITIES) {
-  const names = DISTRICTS[city.id];
+for (const gov of GOVERNORATES) {
+  const names = DISTRICTS[gov.id];
   /* Degrees. 0.01° ≈ 1.1km, so a 380-outlet city spreads over roughly
      14km and a 75-outlet one over roughly 6km. */
-  const radius = 0.02 + 0.00025 * city.pos;
+  const radius = 0.02 + 0.00025 * gov.pos;
   names.forEach((name, i) => {
     /* Golden-angle spacing, so districts don't line up in spokes. */
     const angle = i * 2.39996;
     const r = radius * Math.sqrt((i + 0.6) / names.length);
-    DISTRICT_POINT.set(`${city.id}|${name}`, {
-      lat: city.lat + r * Math.cos(angle),
+    DISTRICT_POINT.set(`${gov.id}|${name}`, {
+      lat: gov.lat + r * Math.cos(angle),
       /* Longitude degrees shrink with latitude; at 33°N a degree of
          longitude is about 0.84 of a degree of latitude. */
-      lng: city.lng + (r * Math.sin(angle)) / Math.cos((city.lat * Math.PI) / 180),
+      lng: gov.lng + (r * Math.sin(angle)) / Math.cos((gov.lat * Math.PI) / 180),
     });
   });
 }
 
-function placeInDistrict(city, district) {
-  const centre = DISTRICT_POINT.get(`${city.id}|${district}`);
+function placeInDistrict(gov, district) {
+  const centre = DISTRICT_POINT.get(`${gov.id}|${district}`);
   const spread = 0.006;
   return {
     lat: Math.round((centre.lat + (place() - 0.5) * spread) * 100000) / 100000,
@@ -188,20 +188,20 @@ function placeInDistrict(city, district) {
    changes.
 ------------------------------------------------------------------ */
 const AUDITORS = [
-  { id: "aud-1", name: "Rawa Kareem", cities: ["erbil", "nineveh"] },
-  { id: "aud-2", name: "Zaid Al-Obaidi", cities: ["baghdad"] },
-  { id: "aud-3", name: "Noor Hadi", cities: ["baghdad"] },
-  { id: "aud-4", name: "Mustafa Jabbar", cities: ["basra"] },
-  { id: "aud-5", name: "Hiba Salman", cities: ["najaf", "karbala"] },
-  { id: "aud-6", name: "Dilan Ahmed", cities: ["erbil", "nineveh"] },
+  { id: "aud-1", name: "Rawa Kareem", governorates: ["erbil", "nineveh"] },
+  { id: "aud-2", name: "Zaid Al-Obaidi", governorates: ["baghdad"] },
+  { id: "aud-3", name: "Noor Hadi", governorates: ["baghdad"] },
+  { id: "aud-4", name: "Mustafa Jabbar", governorates: ["basra"] },
+  { id: "aud-5", name: "Hiba Salman", governorates: ["najaf", "karbala"] },
+  { id: "aud-6", name: "Dilan Ahmed", governorates: ["erbil", "nineveh"] },
 ];
 
 /* Which auditor covers a given outlet: the ones on that city's route,
    split evenly and stably by the outlet's own sequence number. */
-const auditorsFor = (cityId) => AUDITORS.filter((a) => a.cities.includes(cityId));
+const auditorsFor = (govId) => AUDITORS.filter((a) => a.governorates.includes(govId));
 
 function auditorFor(pos) {
-  const team = auditorsFor(pos.cityId);
+  const team = auditorsFor(pos.governorateId);
   if (!team.length) return AUDITORS[0];
   const n = Number(pos.id.replace(/\D/g, "")) || 0;
   return team[n % team.length];
@@ -288,7 +288,7 @@ const OOS_REASONS = [
 const SHELF_POSITIONS = ["eye", "upper", "lower"];
 
 console.log("constants loaded:",
-  CITIES.length, "cities ·",
+  GOVERNORATES.length, "cities ·",
   Object.values(DISTRICTS).flat().length, "districts ·",
   BRANDS.length, "brands ·",
   SKUS.length, "SKUs ·",
@@ -307,9 +307,9 @@ const CHANNEL_WORD = {
 
 const POS = [];
 let seq = 0;
-for (const city of CITIES) {
-  const districts = DISTRICTS[city.id];
-  for (let i = 0; i < city.pos; i += 1) {
+for (const gov of GOVERNORATES) {
+  const districts = DISTRICTS[gov.id];
+  for (let i = 0; i < gov.pos; i += 1) {
     /* Channel mix by weight, so a city's shape is realistic rather
        than uniform. */
     let roll = rand();
@@ -323,9 +323,9 @@ for (const city of CITIES) {
     const n = String((i % 99) + 1).padStart(3, "0");
     POS.push({
       id: `pos-${seq}`,
-      code: `${city.name.slice(0, 3).toUpperCase()}-${String(seq).padStart(4, "0")}`,
+      code: `${gov.capital.slice(0, 3).toUpperCase()}-${String(seq).padStart(4, "0")}`,
       name: `${district} ${CHANNEL_WORD[channel.id]} ${n}`,
-      cityId: city.id,
+      governorateId: gov.id,
       district,
       channel: channel.id,
       retailer:
@@ -335,7 +335,7 @@ for (const city of CITIES) {
       /* Rough footfall weight — drives how much the outlet matters and
          how many facings it has to give. */
       volume: Math.round(clamp(0.4, 2.2, normal(channel.size / 4, 0.35)) * 100) / 100,
-      ...placeInDistrict(city, district),
+      ...placeInDistrict(gov, district),
     });
   }
 }
@@ -350,7 +350,7 @@ for (const city of CITIES) {
 const CORE_SIZE = 400;
 const strata = new Map();
 for (const p of POS) {
-  const key = `${p.cityId}|${p.channel}`;
+  const key = `${p.governorateId}|${p.channel}`;
   strata.set(key, [...(strata.get(key) ?? []), p.id]);
 }
 const CORE = new Set();
@@ -623,7 +623,7 @@ const DISPLAY_CHANNELS = new Set(["hypermarket", "supermarket", "mini-market"]);
 function promosFor(monthId, pos) {
   const rows = [];
   for (const brand of BRANDS) {
-    const rate = promoRate(monthId, brand.id, pos.cityId) * (0.7 + pos.volume * 0.4);
+    const rate = promoRate(monthId, brand.id, pos.governorateId) * (0.7 + pos.volume * 0.4);
     const promo = promoPick(Math.min(0.9, rate));
     const display =
       DISPLAY_CHANNELS.has(pos.channel) && promoPick(Math.min(0.6, rate * 0.45));
@@ -764,7 +764,7 @@ function visitFor(monthId, pos) {
 
     const facings = inStock
       ? Math.max(1, Math.round(
-          SHELF_WEIGHT[brand.id] * shelfDrift(monthId, brand.id, pos.cityId) *
+          SHELF_WEIGHT[brand.id] * shelfDrift(monthId, brand.id, pos.governorateId) *
           26 * channel.size * 0.42 * pos.volume *
           brandBias.get(`${pos.id}|${brand.id}`) * between(0.85, 1.15) *
           (brand.client ? lift(monthId, pos.id, "shelfShare") : 1)))
@@ -1071,9 +1071,9 @@ const trends = {
   market: MONTHS.map((m) => ({ month: m.id, ...aggregate(months[m.id]) })),
   /* The same 400 doors every month — the only honest store-level line. */
   core: MONTHS.map((m) => ({ month: m.id, ...aggregate(months[m.id], coreIdx) })),
-  byCity: Object.fromEntries(
-    CITIES.map((c) => {
-      const idx = new Set(POS.filter((p) => p.cityId === c.id).map((p) => posIndex.get(p.id)));
+  byGovernorate: Object.fromEntries(
+    GOVERNORATES.map((c) => {
+      const idx = new Set(POS.filter((p) => p.governorateId === c.id).map((p) => posIndex.get(p.id)));
       return [c.id, MONTHS.map((m) => ({ month: m.id, ...aggregate(months[m.id], idx) }))];
     })
   ),
@@ -1097,7 +1097,7 @@ const market = {
     corePanel: CORE.size,
   },
   months: MONTHS,
-  cities: CITIES,
+  governorates: GOVERNORATES,
   districts: Object.entries(DISTRICTS).flatMap(([cityId, names]) =>
     names.map((name) => ({ cityId, name }))
   ),
@@ -1105,7 +1105,7 @@ const market = {
   retailers: RETAILERS,
   brands: BRANDS,
   skus: SKUS,
-  auditors: AUDITORS.map(({ id, name, cities }) => ({ id, name, cities })),
+  auditors: AUDITORS.map(({ id, name, governorates }) => ({ id, name, governorates })),
   /* Follow-up audits already in flight when the portal opens. Each was
      raised from one cycle's gaps against the next, so the Action
      Center has completed, in-progress and pending requests to show

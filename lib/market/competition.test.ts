@@ -111,7 +111,7 @@ describe("competitor activity", () => {
   it("finds the promotion push behind the Basra shelf gain", () => {
     /* The demo's central competitive story: Coca-Cola did something,
        and the shelf moved. Both halves have to be visible. */
-    const basra = events.filter((e) => e.cityId === "basra" && e.brandId === "coca-cola");
+    const basra = events.filter((e) => e.governorateId === "basra" && e.brandId === "coca-cola");
     expect(basra.some((e) => e.kind === "shelf-gain" && e.material)).toBe(true);
     expect(basra.some((e) => e.kind === "promotion" && e.material)).toBe(true);
   });

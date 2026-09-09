@@ -12,7 +12,7 @@
    ============================================================ */
 
 import {
-  auditorName, channelName, cityName, clientBrand, requiredSkus, skuOf,
+  auditorName, channelName, governorateName, clientBrand, requiredSkus, skuOf,
 } from "./index";
 import { THRESHOLDS } from "./insights";
 import { getTargets } from "./settings";
@@ -214,4 +214,4 @@ export const kpiTargetsForDrawer = () => {
 };
 
 export const locationOf = (outlet: Pos) =>
-  `${outlet.district}, ${cityName(outlet.cityId)}`;
+  `${outlet.district}, ${governorateName(outlet.governorateId)}`;

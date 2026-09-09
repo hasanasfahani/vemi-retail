@@ -27,7 +27,7 @@ import {
   REVISIT_STAGES, comparisons, type Comparison, type Revisit, type RevisitStage,
 } from "@/lib/market/revisits";
 import { applyFilters, EMPTY_FILTERS, type MarketView } from "@/lib/market/filters";
-import { cityName, loadMonth, monthLabel, posOf } from "@/lib/market";
+import { governorateName, loadMonth, monthLabel, posOf } from "@/lib/market";
 import type { MonthData } from "@/lib/market/types";
 import type { Band } from "@/components/market/ui/health";
 
@@ -110,7 +110,7 @@ function Revisits({ view }: { view: MarketView }) {
           <div className="min-w-0">
             <p className="truncate font-medium text-ink-900">{outlet?.name ?? r.posId}</p>
             <p className="mono truncate text-[11px] text-ink-400">
-              {outlet ? `${outlet.district}, ${cityName(outlet.cityId)}` : ""}
+              {outlet ? `${outlet.district}, ${governorateName(outlet.governorateId)}` : ""}
             </p>
           </div>
         );

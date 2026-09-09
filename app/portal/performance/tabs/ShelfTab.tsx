@@ -29,8 +29,8 @@ export default function ShelfTab({ view }: { view: MarketView }) {
   const rival = s.byBrand.find((b) => b.id !== clientBrand.id);
 
   const eye = s.positions.find((p) => p.id === "eye");
-  const clientShareIn = (row: (typeof s.byCity)[number]) => Number(row[clientBrand.id] ?? 0);
-  const weakestCity = [...s.byCity].sort((a, b) => clientShareIn(a) - clientShareIn(b))[0];
+  const clientShareIn = (row: (typeof s.byGovernorate)[number]) => Number(row[clientBrand.id] ?? 0);
+  const weakestCity = [...s.byGovernorate].sort((a, b) => clientShareIn(a) - clientShareIn(b))[0];
 
   const cardFor = (row: { posId: string; share: number }, caption: string) => {
     const outlet = view.outlets.find((p) => p.id === row.posId);
@@ -92,11 +92,11 @@ export default function ShelfTab({ view }: { view: MarketView }) {
 
       <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
         <Card
-          title="Shelf battle by city"
+          title="Shelf battle by governorate"
           lead="Share of measured facings, 100% stacked."
           action={<ChartLegend items={ordered.map((b) => ({ id: b.id, name: b.name, color: brandColor(b.id) }))} />}
         >
-          <StackedBars data={s.byCity} series={stack} max={100} height={250} />
+          <StackedBars data={s.byGovernorate} series={stack} max={100} height={250} />
         </Card>
 
         <Card title="Shelf split this month" lead="Every audited facing, by brand.">

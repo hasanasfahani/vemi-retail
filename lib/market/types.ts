@@ -36,7 +36,7 @@ export type Month = {
   planned?: boolean;
 };
 
-export type City = {
+export type Governorate = {
   id: string;
   /* The governorate's own name. Five of the six match their capital;
      Nineveh does not, and calling that row "Mosul" under a column
@@ -52,7 +52,7 @@ export type City = {
   tier: "capital" | "major" | "mid";
 };
 
-export type District = { cityId: string; name: string };
+export type District = { governorateId: string; name: string };
 export type Channel = { id: string; name: string; size: number };
 
 export type Brand = {
@@ -75,7 +75,7 @@ export type Pos = {
   id: string;
   code: string;
   name: string;
-  cityId: string;
+  governorateId: string;
   district: string;
   channel: string;
   retailer: string;
@@ -93,7 +93,7 @@ export type Pos = {
 /* The field team. Auditors are assigned to city routes, which is how
    field work is organised and what makes a revisit routable: the
    person who covered a door last month is the one who can go back. */
-export type Auditor = { id: string; name: string; cities: string[] };
+export type Auditor = { id: string; name: string; governorates: string[] };
 
 export type PosmType = { id: string; name: string; channels: string[] | null };
 export type OosReason = { id: string; name: string };
@@ -123,7 +123,7 @@ export type FollowUpSeed = {
 export type Market = {
   contract: Contract;
   months: Month[];
-  cities: City[];
+  governorates: Governorate[];
   districts: District[];
   channels: Channel[];
   retailers: string[];
@@ -240,6 +240,6 @@ export type Trends = {
   market: TrendPoint[];
   /* The same 400 doors every month — the only store-level line. */
   core: TrendPoint[];
-  byCity: Record<string, TrendPoint[]>;
+  byGovernorate: Record<string, TrendPoint[]>;
   byChannel: Record<string, TrendPoint[]>;
 };

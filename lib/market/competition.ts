@@ -8,7 +8,7 @@
    ============================================================ */
 
 import {
-  brands, cities, cityName, channels, clientBrand, districts, monthLabel,
+  brands, governorates, governorateName, channels, clientBrand, districts, monthLabel,
   pos as allPos, skus, trends,
 } from "./index";
 import type { MarketView } from "./filters";
@@ -181,7 +181,7 @@ export function pricePosition(view: MarketView): PricePoint[] {
 export type DistrictLead = {
   id: string;
   district: string;
-  cityId: string;
+  governorateId: string;
   lat: number;
   lng: number;
   outlets: number;
@@ -202,13 +202,13 @@ export function districtLeads(view: MarketView, minOutlets = 3): DistrictLead[] 
     if (cell.state !== "in-stock") continue;
     const outlet = posById.get(cell.posId);
     if (!outlet) continue;
-    const key = `${outlet.cityId}|${outlet.district}`;
+    const key = `${outlet.governorateId}|${outlet.district}`;
     byDistrict.set(key, [...(byDistrict.get(key) ?? []), cell]);
   }
 
   const rows: DistrictLead[] = [];
   for (const [key, cells] of byDistrict) {
-    const [cityId, district] = key.split("|");
+    const [governorateId, district] = key.split("|");
     const outletIds = new Set(cells.map((c) => c.posId));
     if (outletIds.size < minOutlets) continue;
 
@@ -232,7 +232,7 @@ export function districtLeads(view: MarketView, minOutlets = 3): DistrictLead[] 
     rows.push({
       id: key,
       district,
-      cityId,
+      governorateId,
       lat,
       lng,
       outlets: outletIds.size,
@@ -266,7 +266,7 @@ export type Activity = {
   id: string;
   kind: ActivityKind;
   brandId: string;
-  cityId: string | null;
+  governorateId: string | null;
   headline: string;
   detail: string;
   value: number;
@@ -285,7 +285,7 @@ export const ACTIVITY_LABEL: Record<ActivityKind, string> = {
   "price-move": "Price move",
 };
 
-const CITY_FLOOR: Record<string, number> = {
+const GOVERNORATE_FLOOR: Record<string, number> = {
   baghdad: 3.09, basra: 4.63, erbil: 4.79, nineveh: 5.05, najaf: 4.9, karbala: 5.57,
 };
 const MARKET_FLOOR = 1.81;
@@ -296,25 +296,25 @@ const PROMO_FLOOR = 5;
 
 export function activity(view: MarketView): Activity[] {
   const rivals = brands.filter((b) => b.owner !== clientBrand.owner);
-  const scope = view.filters.cities.length ? view.filters.cities : cities.map((c) => c.id);
+  const scope = view.filters.governorates.length ? view.filters.governorates : governorates.map((c) => c.id);
   const events: Activity[] = [];
 
-  for (const cityId of scope) {
-    const line = trends.byCity[cityId];
+  for (const governorateId of scope) {
+    const line = trends.byGovernorate[governorateId];
     if (!line || line.length < 2) continue;
     const first = line[0];
     const last = line[line.length - 1];
-    const floor = CITY_FLOOR[cityId] ?? MARKET_FLOOR;
+    const floor = GOVERNORATE_FLOOR[governorateId] ?? MARKET_FLOOR;
 
     for (const brand of rivals) {
       const shelf = r1((last.brandShare[brand.id] ?? 0) - (first.brandShare[brand.id] ?? 0));
       if (shelf > 0.5) {
         events.push({
-          id: `shelf-${cityId}-${brand.id}`,
+          id: `shelf-${governorateId}-${brand.id}`,
           kind: "shelf-gain",
           brandId: brand.id,
-          cityId,
-          headline: `${brand.name} took ${shelf}pt of shelf in ${cityName(cityId)}`,
+          governorateId,
+          headline: `${brand.name} took ${shelf}pt of shelf in ${governorateName(governorateId)}`,
           detail: `${first.brandShare[brand.id]}% to ${last.brandShare[brand.id]}% of measured facings between ${monthLabel(first.month)} and ${monthLabel(last.month)}.`,
           value: shelf,
           unit: "pt",
@@ -325,11 +325,11 @@ export function activity(view: MarketView): Activity[] {
       const promo = r1((last.promoShare?.[brand.id] ?? 0) - (first.promoShare?.[brand.id] ?? 0));
       if (promo > 2) {
         events.push({
-          id: `promo-${cityId}-${brand.id}`,
+          id: `promo-${governorateId}-${brand.id}`,
           kind: "promotion",
           brandId: brand.id,
-          cityId,
-          headline: `${brand.name} is promoting in ${last.promoShare[brand.id]}% of audited ${cityName(cityId)} outlets`,
+          governorateId,
+          headline: `${brand.name} is promoting in ${last.promoShare[brand.id]}% of audited ${governorateName(governorateId)} outlets`,
           detail: `Up from ${first.promoShare[brand.id]}% in ${monthLabel(first.month)} — the activity behind the shelf movement.`,
           value: promo,
           unit: "pt",
@@ -340,11 +340,11 @@ export function activity(view: MarketView): Activity[] {
       const display = r1((last.displayShare?.[brand.id] ?? 0) - (first.displayShare?.[brand.id] ?? 0));
       if (display > 2) {
         events.push({
-          id: `display-${cityId}-${brand.id}`,
+          id: `display-${governorateId}-${brand.id}`,
           kind: "display",
           brandId: brand.id,
-          cityId,
-          headline: `${brand.name} added secondary displays in ${cityName(cityId)}`,
+          governorateId,
+          headline: `${brand.name} added secondary displays in ${governorateName(governorateId)}`,
           detail: `Present in ${last.displayShare[brand.id]}% of audited outlets, up from ${first.displayShare[brand.id]}%.`,
           value: display,
           unit: "pt",

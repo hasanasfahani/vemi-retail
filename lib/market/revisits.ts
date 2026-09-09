@@ -12,7 +12,7 @@
    did, nobody would trust either.
    ============================================================ */
 
-import { auditorName, cityName, clientBrand, monthLabel, months, skuOf } from "./index";
+import { auditorName, governorateName, clientBrand, monthLabel, months, skuOf } from "./index";
 import type { Action } from "./actions";
 import type { MarketView } from "./filters";
 
@@ -242,7 +242,7 @@ export function comparisons(
         {
           posId: revisit.posId,
           name: outlet.name,
-          location: `${outlet.district}, ${cityName(outlet.cityId)}`,
+          location: `${outlet.district}, ${governorateName(outlet.governorateId)}`,
           before: {
             month: monthLabel(before.month),
             score: first.score,

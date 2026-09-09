@@ -58,10 +58,10 @@ console.log(`   outlets with >=1 gap: ${gapsPerOutlet.size}, >=2: ${[...gapsPerO
 
 /* R2 — district client share vs its own city's share */
 const facingsBy = (rows) => rows.filter((c) => c.inStock).reduce((s, c) => s + c.facings, 0);
-const byCity = new Map(), byDistrict = new Map();
+const byGovernorate = new Map(), byDistrict = new Map();
 for (const c of cells) {
-  const ck = c.pos.cityId, dk = `${c.pos.cityId}|${c.pos.district}`;
-  (byCity.get(ck) ?? byCity.set(ck, []).get(ck)).push(c);
+  const ck = c.pos.governorateId, dk = `${c.pos.governorateId}|${c.pos.district}`;
+  (byGovernorate.get(ck) ?? byGovernorate.set(ck, []).get(ck)).push(c);
   (byDistrict.get(dk) ?? byDistrict.set(dk, []).get(dk)).push(c);
 }
 const sharePct = (rows) => {
@@ -70,10 +70,10 @@ const sharePct = (rows) => {
 };
 const deficits = [];
 for (const [dk, rows] of byDistrict) {
-  const cityRows = byCity.get(dk.split("|")[0]);
+  const governorateRows = byGovernorate.get(dk.split("|")[0]);
   const outlets = new Set(rows.map((r) => r.pos.id)).size;
   if (outlets < 4) continue;
-  deficits.push({ dk, outlets, deficit: sharePct(cityRows) - sharePct(rows) });
+  deficits.push({ dk, outlets, deficit: sharePct(governorateRows) - sharePct(rows) });
 }
 spread("R2 district deficit (pt)", deficits.map((d) => d.deficit));
 console.log(`   districts n>=4 outlets: ${deficits.length}; worst: ${deficits.sort((a, b) => b.deficit - a.deficit).slice(0, 3).map((d) => `${d.dk} ${d.deficit.toFixed(1)}`).join(", ")}`);
@@ -164,11 +164,11 @@ console.log(`   outlets stocking the client with ZERO POSM: ${bare}`);
 
 /* R14 — competitor share movement by city, month over month */
 console.log("R14 brand share movement, last month vs previous, by city:");
-for (const [cityId, points] of Object.entries(trends.byCity)) {
+for (const [governorateId, points] of Object.entries(trends.byGovernorate)) {
   const [prev, last] = points.slice(-2);
   const moves = brands.map((b) => ({ b: b.id, d: (last.brandShare[b.id] ?? 0) - (prev.brandShare[b.id] ?? 0) }))
     .sort((a, b) => b.d - a.d);
-  console.log(`   ${cityId.padEnd(9)} ${moves.map((x) => `${x.b} ${x.d > 0 ? "+" : ""}${x.d.toFixed(1)}`).join("  ")}`);
+  console.log(`   ${governorateId.padEnd(9)} ${moves.map((x) => `${x.b} ${x.d > 0 ? "+" : ""}${x.d.toFixed(1)}`).join("  ")}`);
 }
 
 /* ---------- detection floors ----------
@@ -218,8 +218,8 @@ console.log("\nDetection floors (MDE = 2.8 x bootstrapped SE):");
 const allIds = [...audited];
 console.log(`   market share        ${(2.8 * bootstrapSE(allIds, shareOf)).toFixed(2)}pt  (n=${allIds.length})`);
 console.log(`   market availability ${(2.8 * bootstrapSE(allIds, availOf)).toFixed(2)}pt`);
-for (const city of m.cities) {
-  const ids = allIds.filter((id) => pos.find((p) => p.id === id).cityId === city.id);
+for (const city of m.governorates) {
+  const ids = allIds.filter((id) => pos.find((p) => p.id === id).governorateId === city.id);
   console.log(`   ${city.id.padEnd(9)} share ${(2.8 * bootstrapSE(ids, shareOf)).toFixed(2)}pt   availability ${(2.8 * bootstrapSE(ids, availOf)).toFixed(2)}pt   (n=${ids.length})`);
 }
 const coreIds = allIds.filter((id) => pos.find((p) => p.id === id).core);

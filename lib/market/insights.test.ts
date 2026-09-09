@@ -79,7 +79,7 @@ describe("significance", () => {
   it("never claims a competitor movement below that city's detection floor", () => {
     for (const insight of report.all) {
       if (insight.rule !== "r14-competitor-movement") continue;
-      const floor = SHARE_FLOOR_PT[insight.entities.cityId ?? "market"];
+      const floor = SHARE_FLOOR_PT[insight.entities.governorateId ?? "market"];
       expect(insight.impact.value).toBeGreaterThanOrEqual(floor);
     }
   });
@@ -137,10 +137,10 @@ describe("individual rules against the September panel", () => {
 describe("filters", () => {
   it("recomputes against the filtered slice rather than the whole market", () => {
     const baghdad = generateInsights(
-      applyFilters({ ...EMPTY_FILTERS, cities: ["baghdad"] }, current)
+      applyFilters({ ...EMPTY_FILTERS, governorates: ["baghdad"] }, current)
     );
     for (const insight of baghdad.all) {
-      if (insight.entities.cityId) expect(insight.entities.cityId).toBe("baghdad");
+      if (insight.entities.governorateId) expect(insight.entities.governorateId).toBe("baghdad");
     }
     expect(baghdad.all.length).toBeLessThan(report.all.length);
   });

@@ -22,7 +22,7 @@ export type Filters = {
   /* Month id, or "" for the whole six-month range where a page
      supports it. Defaults to the current month. */
   month: string;
-  cities: string[];
+  governorates: string[];
   channels: string[];
   retailers: string[];
   brands: string[];
@@ -31,18 +31,18 @@ export type Filters = {
 
 export const EMPTY_FILTERS: Filters = {
   month: current.month,
-  cities: [],
+  governorates: [],
   channels: [],
   retailers: [],
   brands: [],
   skus: [],
 };
 
-export const FILTER_KEYS = ["cities", "channels", "retailers", "brands", "skus"] as const;
+export const FILTER_KEYS = ["governorates", "channels", "retailers", "brands", "skus"] as const;
 export type FilterKey = (typeof FILTER_KEYS)[number];
 
 export const FILTER_META: Record<FilterKey, { label: string; noun: string }> = {
-  cities: { label: "City", noun: "cities" },
+  governorates: { label: "Governorate", noun: "governorates" },
   channels: { label: "Channel", noun: "channels" },
   retailers: { label: "Retailer", noun: "retailers" },
   brands: { label: "Brand", noun: "brands" },
@@ -61,7 +61,7 @@ export function activeCount(f: Filters): number {
 /* ---------- URL ---------- */
 
 const PARAM: Record<FilterKey, string> = {
-  cities: "city", channels: "channel", retailers: "retailer",
+  governorates: "governorate", channels: "channel", retailers: "retailer",
   brands: "brand", skus: "sku",
 };
 
@@ -70,7 +70,7 @@ export function filtersFromParams(params: URLSearchParams): Filters {
   const month = params.get("month");
   return {
     month: month && months.some((m) => m.id === month) ? month : current.month,
-    cities: read(PARAM.cities),
+    governorates: read(PARAM.governorates),
     channels: read(PARAM.channels),
     retailers: read(PARAM.retailers),
     brands: read(PARAM.brands),
@@ -93,7 +93,7 @@ export function filtersToQuery(f: Filters): string {
 export function matchingPos(f: Filters): Pos[] {
   return pos.filter(
     (p) =>
-      (f.cities.length === 0 || f.cities.includes(p.cityId)) &&
+      (f.governorates.length === 0 || f.governorates.includes(p.governorateId)) &&
       (f.channels.length === 0 || f.channels.includes(p.channel)) &&
       (f.retailers.length === 0 || f.retailers.includes(p.retailer))
   );

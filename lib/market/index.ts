@@ -24,7 +24,7 @@ export const market = marketJson as unknown as Market;
 export const trends = trendsJson as unknown as Trends;
 
 export const {
-  contract, months, cities, districts, channels, retailers,
+  contract, months, governorates, districts, channels, retailers,
   brands, skus, auditors, followUps, posmTypes, oosReasons, scoreWeights,
   sharePar, requiredSkus, kpiTargets, pos,
 } = market;
@@ -46,7 +46,7 @@ export const currentMonth = contract.currentMonth;
 
 /* ---------- lookups ---------- */
 
-const cityIndex = new Map(cities.map((c) => [c.id, c]));
+const cityIndex = new Map(governorates.map((c) => [c.id, c]));
 const brandIndex = new Map(brands.map((b) => [b.id, b]));
 const skuIndex = new Map(skus.map((s) => [s.id, s]));
 const posIndex = new Map(pos.map((p) => [p.id, p]));
@@ -55,7 +55,7 @@ const posmIndex = new Map(posmTypes.map((t) => [t.id, t]));
 const auditorIndex = new Map(auditors.map((a) => [a.id, a]));
 const reasonIndex = new Map(oosReasons.map((r) => [r.id, r]));
 
-export const cityOf = (id: string) => cityIndex.get(id);
+export const governorateOf = (id: string) => cityIndex.get(id);
 export const brandOf = (id: string) => brandIndex.get(id);
 export const skuOf = (id: string) => skuIndex.get(id);
 export const posOf = (id: string) => posIndex.get(id);
@@ -65,13 +65,13 @@ export const auditorOf = (id: string) => auditorIndex.get(id);
 export const auditorName = (id: string) => auditorIndex.get(id)?.name ?? "Vemi field team";
 export const reasonOf = (id: string) => reasonIndex.get(id);
 
-export const cityName = (id: string) => cityIndex.get(id)?.name ?? id;
+export const governorateName = (id: string) => cityIndex.get(id)?.name ?? id;
 export const brandName = (id: string) => brandIndex.get(id)?.name ?? id;
 export const skuName = (id: string) => skuIndex.get(id)?.name ?? id;
 export const channelName = (id: string) => channelIndex.get(id)?.name ?? id;
 
-export const districtsIn = (cityId: string) =>
-  districts.filter((d) => d.cityId === cityId).map((d) => d.name);
+export const districtsIn = (governorateId: string) =>
+  districts.filter((d) => d.governorateId === governorateId).map((d) => d.name);
 
 export const monthLabel = (id: string) =>
   months.find((m) => m.id === id)?.label ?? id;
