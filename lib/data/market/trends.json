@@ -1,0 +1,1474 @@
+{
+  "months": [
+    {
+      "id": "2026-04",
+      "label": "April 2026",
+      "short": "Apr",
+      "current": false
+    },
+    {
+      "id": "2026-05",
+      "label": "May 2026",
+      "short": "May",
+      "current": false
+    },
+    {
+      "id": "2026-06",
+      "label": "June 2026",
+      "short": "Jun",
+      "current": false
+    },
+    {
+      "id": "2026-07",
+      "label": "July 2026",
+      "short": "Jul",
+      "current": false
+    },
+    {
+      "id": "2026-08",
+      "label": "August 2026",
+      "short": "Aug",
+      "current": false
+    },
+    {
+      "id": "2026-09",
+      "label": "September 2026",
+      "short": "Sep",
+      "current": true
+    }
+  ],
+  "market": [
+    {
+      "month": "2026-04",
+      "outlets": 880,
+      "score": 84,
+      "availability": 87.8,
+      "shelfShare": 35.9,
+      "assortment": 82.3,
+      "price": 93.5,
+      "posm": 75.9,
+      "brandShare": {
+        "pepsi": 36.4,
+        "coca-cola": 36.6,
+        "7up": 10.9,
+        "mirinda": 8.7,
+        "mountain-dew": 4.1,
+        "rc-cola": 3.3
+      }
+    },
+    {
+      "month": "2026-05",
+      "outlets": 880,
+      "score": 84,
+      "availability": 87.5,
+      "shelfShare": 35.5,
+      "assortment": 82.7,
+      "price": 91.8,
+      "posm": 77,
+      "brandShare": {
+        "pepsi": 36.3,
+        "coca-cola": 37.2,
+        "7up": 10.6,
+        "mirinda": 8.7,
+        "mountain-dew": 4,
+        "rc-cola": 3.2
+      }
+    },
+    {
+      "month": "2026-06",
+      "outlets": 880,
+      "score": 83,
+      "availability": 87.4,
+      "shelfShare": 34.9,
+      "assortment": 82.2,
+      "price": 91.5,
+      "posm": 72.8,
+      "brandShare": {
+        "pepsi": 35.7,
+        "coca-cola": 37.7,
+        "7up": 10.7,
+        "mirinda": 8.5,
+        "mountain-dew": 4.1,
+        "rc-cola": 3.3
+      }
+    },
+    {
+      "month": "2026-07",
+      "outlets": 880,
+      "score": 83,
+      "availability": 85.7,
+      "shelfShare": 34.1,
+      "assortment": 82.3,
+      "price": 92.8,
+      "posm": 72.6,
+      "brandShare": {
+        "pepsi": 34.6,
+        "coca-cola": 39,
+        "7up": 10.6,
+        "mirinda": 8.5,
+        "mountain-dew": 4,
+        "rc-cola": 3.3
+      }
+    },
+    {
+      "month": "2026-08",
+      "outlets": 880,
+      "score": 82,
+      "availability": 86.2,
+      "shelfShare": 33.8,
+      "assortment": 82.4,
+      "price": 92.1,
+      "posm": 70.8,
+      "brandShare": {
+        "pepsi": 34.6,
+        "coca-cola": 38.8,
+        "7up": 10.6,
+        "mirinda": 8.6,
+        "mountain-dew": 4.1,
+        "rc-cola": 3.3
+      }
+    },
+    {
+      "month": "2026-09",
+      "outlets": 742,
+      "score": 82,
+      "availability": 87.2,
+      "shelfShare": 33.9,
+      "assortment": 81.6,
+      "price": 92,
+      "posm": 68,
+      "brandShare": {
+        "pepsi": 34,
+        "coca-cola": 38.6,
+        "7up": 11.1,
+        "mirinda": 8.8,
+        "mountain-dew": 4,
+        "rc-cola": 3.4
+      }
+    }
+  ],
+  "core": [
+    {
+      "month": "2026-04",
+      "outlets": 400,
+      "score": 84,
+      "availability": 87.7,
+      "shelfShare": 36,
+      "assortment": 79,
+      "price": 92.3,
+      "posm": 77.1,
+      "brandShare": {
+        "pepsi": 37,
+        "coca-cola": 35.9,
+        "7up": 10.7,
+        "mirinda": 8.9,
+        "mountain-dew": 4.1,
+        "rc-cola": 3.4
+      }
+    },
+    {
+      "month": "2026-05",
+      "outlets": 400,
+      "score": 84,
+      "availability": 88.2,
+      "shelfShare": 35.7,
+      "assortment": 79.6,
+      "price": 91.6,
+      "posm": 78.4,
+      "brandShare": {
+        "pepsi": 36.4,
+        "coca-cola": 36.9,
+        "7up": 10.2,
+        "mirinda": 9.1,
+        "mountain-dew": 4.1,
+        "rc-cola": 3.3
+      }
+    },
+    {
+      "month": "2026-06",
+      "outlets": 400,
+      "score": 83,
+      "availability": 87.3,
+      "shelfShare": 34.8,
+      "assortment": 79.1,
+      "price": 92.3,
+      "posm": 72.7,
+      "brandShare": {
+        "pepsi": 35.8,
+        "coca-cola": 37,
+        "7up": 10.6,
+        "mirinda": 9.1,
+        "mountain-dew": 4.1,
+        "rc-cola": 3.4
+      }
+    },
+    {
+      "month": "2026-07",
+      "outlets": 400,
+      "score": 82,
+      "availability": 85.2,
+      "shelfShare": 34.3,
+      "assortment": 79.6,
+      "price": 93.3,
+      "posm": 73.1,
+      "brandShare": {
+        "pepsi": 34.9,
+        "coca-cola": 38.7,
+        "7up": 10.3,
+        "mirinda": 8.8,
+        "mountain-dew": 4,
+        "rc-cola": 3.4
+      }
+    },
+    {
+      "month": "2026-08",
+      "outlets": 400,
+      "score": 82,
+      "availability": 85.5,
+      "shelfShare": 34.2,
+      "assortment": 80.5,
+      "price": 92,
+      "posm": 73.2,
+      "brandShare": {
+        "pepsi": 34.6,
+        "coca-cola": 38.6,
+        "7up": 10.4,
+        "mirinda": 8.9,
+        "mountain-dew": 4.1,
+        "rc-cola": 3.3
+      }
+    },
+    {
+      "month": "2026-09",
+      "outlets": 400,
+      "score": 82,
+      "availability": 87.4,
+      "shelfShare": 34.3,
+      "assortment": 80.5,
+      "price": 92.3,
+      "posm": 68.4,
+      "brandShare": {
+        "pepsi": 34.1,
+        "coca-cola": 39.1,
+        "7up": 10.5,
+        "mirinda": 9,
+        "mountain-dew": 4,
+        "rc-cola": 3.4
+      }
+    }
+  ],
+  "byCity": {
+    "baghdad": [
+      {
+        "month": "2026-04",
+        "outlets": 327,
+        "score": 84,
+        "availability": 87.8,
+        "shelfShare": 33.2,
+        "assortment": 83.6,
+        "price": 94.6,
+        "posm": 76.1,
+        "brandShare": {
+          "pepsi": 33.5,
+          "coca-cola": 39.3,
+          "7up": 11.3,
+          "mirinda": 8.6,
+          "mountain-dew": 4,
+          "rc-cola": 3.4
+        }
+      },
+      {
+        "month": "2026-05",
+        "outlets": 312,
+        "score": 83,
+        "availability": 87.1,
+        "shelfShare": 32.5,
+        "assortment": 83.6,
+        "price": 91.9,
+        "posm": 76.7,
+        "brandShare": {
+          "pepsi": 33.4,
+          "coca-cola": 38.9,
+          "7up": 11.6,
+          "mirinda": 8.8,
+          "mountain-dew": 4.1,
+          "rc-cola": 3.2
+        }
+      },
+      {
+        "month": "2026-06",
+        "outlets": 324,
+        "score": 82,
+        "availability": 87.7,
+        "shelfShare": 32,
+        "assortment": 83.1,
+        "price": 91.3,
+        "posm": 73.8,
+        "brandShare": {
+          "pepsi": 32.9,
+          "coca-cola": 40.4,
+          "7up": 11.2,
+          "mirinda": 8.3,
+          "mountain-dew": 4.1,
+          "rc-cola": 3.2
+        }
+      },
+      {
+        "month": "2026-07",
+        "outlets": 326,
+        "score": 82,
+        "availability": 86.7,
+        "shelfShare": 31.6,
+        "assortment": 82.8,
+        "price": 91.8,
+        "posm": 72.7,
+        "brandShare": {
+          "pepsi": 31.5,
+          "coca-cola": 41.8,
+          "7up": 11.4,
+          "mirinda": 8.2,
+          "mountain-dew": 3.9,
+          "rc-cola": 3.3
+        }
+      },
+      {
+        "month": "2026-08",
+        "outlets": 310,
+        "score": 82,
+        "availability": 88.8,
+        "shelfShare": 31.8,
+        "assortment": 82.7,
+        "price": 91.7,
+        "posm": 70.4,
+        "brandShare": {
+          "pepsi": 32.6,
+          "coca-cola": 40.9,
+          "7up": 11,
+          "mirinda": 8.1,
+          "mountain-dew": 4.1,
+          "rc-cola": 3.2
+        }
+      },
+      {
+        "month": "2026-09",
+        "outlets": 230,
+        "score": 81,
+        "availability": 87.1,
+        "shelfShare": 30.7,
+        "assortment": 81.2,
+        "price": 90.9,
+        "posm": 70.9,
+        "brandShare": {
+          "pepsi": 31.3,
+          "coca-cola": 40.8,
+          "7up": 11.7,
+          "mirinda": 8.6,
+          "mountain-dew": 4.1,
+          "rc-cola": 3.5
+        }
+      }
+    ],
+    "basra": [
+      {
+        "month": "2026-04",
+        "outlets": 159,
+        "score": 84,
+        "availability": 87.8,
+        "shelfShare": 36.8,
+        "assortment": 81.4,
+        "price": 92,
+        "posm": 75.5,
+        "brandShare": {
+          "pepsi": 37.7,
+          "coca-cola": 35.2,
+          "7up": 10.1,
+          "mirinda": 9.1,
+          "mountain-dew": 4.3,
+          "rc-cola": 3.5
+        }
+      },
+      {
+        "month": "2026-05",
+        "outlets": 149,
+        "score": 83,
+        "availability": 86,
+        "shelfShare": 37,
+        "assortment": 81.5,
+        "price": 92.1,
+        "posm": 76.3,
+        "brandShare": {
+          "pepsi": 37,
+          "coca-cola": 36.7,
+          "7up": 9.5,
+          "mirinda": 9.1,
+          "mountain-dew": 4.2,
+          "rc-cola": 3.4
+        }
+      },
+      {
+        "month": "2026-06",
+        "outlets": 132,
+        "score": 84,
+        "availability": 88.6,
+        "shelfShare": 37.2,
+        "assortment": 81.8,
+        "price": 92.4,
+        "posm": 70.3,
+        "brandShare": {
+          "pepsi": 37.3,
+          "coca-cola": 36.5,
+          "7up": 10,
+          "mirinda": 8.9,
+          "mountain-dew": 4,
+          "rc-cola": 3.3
+        }
+      },
+      {
+        "month": "2026-07",
+        "outlets": 139,
+        "score": 83,
+        "availability": 85.9,
+        "shelfShare": 34.7,
+        "assortment": 81.8,
+        "price": 94,
+        "posm": 70.1,
+        "brandShare": {
+          "pepsi": 36,
+          "coca-cola": 37.8,
+          "7up": 9.6,
+          "mirinda": 8.9,
+          "mountain-dew": 4.2,
+          "rc-cola": 3.4
+        }
+      },
+      {
+        "month": "2026-08",
+        "outlets": 157,
+        "score": 83,
+        "availability": 86.2,
+        "shelfShare": 34.6,
+        "assortment": 83.6,
+        "price": 92.7,
+        "posm": 68.9,
+        "brandShare": {
+          "pepsi": 35.3,
+          "coca-cola": 38.4,
+          "7up": 9.6,
+          "mirinda": 9.1,
+          "mountain-dew": 4.2,
+          "rc-cola": 3.4
+        }
+      },
+      {
+        "month": "2026-09",
+        "outlets": 130,
+        "score": 83,
+        "availability": 88.6,
+        "shelfShare": 34.6,
+        "assortment": 82.3,
+        "price": 92.2,
+        "posm": 66.1,
+        "brandShare": {
+          "pepsi": 33.8,
+          "coca-cola": 39.9,
+          "7up": 10.5,
+          "mirinda": 9,
+          "mountain-dew": 3.7,
+          "rc-cola": 3.1
+        }
+      }
+    ],
+    "erbil": [
+      {
+        "month": "2026-04",
+        "outlets": 147,
+        "score": 86,
+        "availability": 88.7,
+        "shelfShare": 38.1,
+        "assortment": 84.2,
+        "price": 91.6,
+        "posm": 76.5,
+        "brandShare": {
+          "pepsi": 39.3,
+          "coca-cola": 33.2,
+          "7up": 12,
+          "mirinda": 8.3,
+          "mountain-dew": 4,
+          "rc-cola": 3.3
+        }
+      },
+      {
+        "month": "2026-05",
+        "outlets": 136,
+        "score": 86,
+        "availability": 90.7,
+        "shelfShare": 37.5,
+        "assortment": 84.3,
+        "price": 89.4,
+        "posm": 75,
+        "brandShare": {
+          "pepsi": 38.8,
+          "coca-cola": 35.1,
+          "7up": 10.1,
+          "mirinda": 8.6,
+          "mountain-dew": 4,
+          "rc-cola": 3.4
+        }
+      },
+      {
+        "month": "2026-06",
+        "outlets": 142,
+        "score": 85,
+        "availability": 87.4,
+        "shelfShare": 36.8,
+        "assortment": 82.6,
+        "price": 93.7,
+        "posm": 72.9,
+        "brandShare": {
+          "pepsi": 36.5,
+          "coca-cola": 35.3,
+          "7up": 11.8,
+          "mirinda": 8.5,
+          "mountain-dew": 4.4,
+          "rc-cola": 3.5
+        }
+      },
+      {
+        "month": "2026-07",
+        "outlets": 136,
+        "score": 84,
+        "availability": 85.2,
+        "shelfShare": 35.5,
+        "assortment": 83.8,
+        "price": 93.5,
+        "posm": 72.1,
+        "brandShare": {
+          "pepsi": 36.6,
+          "coca-cola": 36.7,
+          "7up": 10.8,
+          "mirinda": 8.6,
+          "mountain-dew": 4,
+          "rc-cola": 3.3
+        }
+      },
+      {
+        "month": "2026-08",
+        "outlets": 124,
+        "score": 83,
+        "availability": 84.8,
+        "shelfShare": 34.7,
+        "assortment": 84.1,
+        "price": 91.9,
+        "posm": 69.1,
+        "brandShare": {
+          "pepsi": 35.2,
+          "coca-cola": 36.7,
+          "7up": 11.5,
+          "mirinda": 8.7,
+          "mountain-dew": 4.5,
+          "rc-cola": 3.4
+        }
+      },
+      {
+        "month": "2026-09",
+        "outlets": 123,
+        "score": 83,
+        "availability": 87.9,
+        "shelfShare": 36,
+        "assortment": 82.8,
+        "price": 92.3,
+        "posm": 63.8,
+        "brandShare": {
+          "pepsi": 36,
+          "coca-cola": 35.7,
+          "7up": 11.7,
+          "mirinda": 9,
+          "mountain-dew": 4.2,
+          "rc-cola": 3.6
+        }
+      }
+    ],
+    "mosul": [
+      {
+        "month": "2026-04",
+        "outlets": 109,
+        "score": 83,
+        "availability": 84.4,
+        "shelfShare": 36.5,
+        "assortment": 80,
+        "price": 93.6,
+        "posm": 76.5,
+        "brandShare": {
+          "pepsi": 39.8,
+          "coca-cola": 34.6,
+          "7up": 10.4,
+          "mirinda": 8.3,
+          "mountain-dew": 4,
+          "rc-cola": 3
+        }
+      },
+      {
+        "month": "2026-05",
+        "outlets": 124,
+        "score": 85,
+        "availability": 85.8,
+        "shelfShare": 37,
+        "assortment": 81.5,
+        "price": 93.7,
+        "posm": 81.2,
+        "brandShare": {
+          "pepsi": 39.3,
+          "coca-cola": 35.5,
+          "7up": 10.6,
+          "mirinda": 7.9,
+          "mountain-dew": 3.6,
+          "rc-cola": 3.1
+        }
+      },
+      {
+        "month": "2026-06",
+        "outlets": 127,
+        "score": 83,
+        "availability": 86.1,
+        "shelfShare": 36.2,
+        "assortment": 81.7,
+        "price": 91.1,
+        "posm": 75,
+        "brandShare": {
+          "pepsi": 39.5,
+          "coca-cola": 35,
+          "7up": 9.6,
+          "mirinda": 8.2,
+          "mountain-dew": 4.1,
+          "rc-cola": 3.6
+        }
+      },
+      {
+        "month": "2026-07",
+        "outlets": 119,
+        "score": 84,
+        "availability": 86.1,
+        "shelfShare": 37.3,
+        "assortment": 81.3,
+        "price": 92.9,
+        "posm": 76.8,
+        "brandShare": {
+          "pepsi": 39.1,
+          "coca-cola": 34.5,
+          "7up": 10.6,
+          "mirinda": 8.2,
+          "mountain-dew": 4.3,
+          "rc-cola": 3.4
+        }
+      },
+      {
+        "month": "2026-08",
+        "outlets": 129,
+        "score": 83,
+        "availability": 85.9,
+        "shelfShare": 36.3,
+        "assortment": 80.2,
+        "price": 91.4,
+        "posm": 73.4,
+        "brandShare": {
+          "pepsi": 39,
+          "coca-cola": 34.7,
+          "7up": 10.5,
+          "mirinda": 8.1,
+          "mountain-dew": 4.1,
+          "rc-cola": 3.5
+        }
+      },
+      {
+        "month": "2026-09",
+        "outlets": 114,
+        "score": 83,
+        "availability": 85.4,
+        "shelfShare": 35.8,
+        "assortment": 81.2,
+        "price": 95.4,
+        "posm": 70.7,
+        "brandShare": {
+          "pepsi": 37.5,
+          "coca-cola": 35.5,
+          "7up": 11.1,
+          "mirinda": 8.2,
+          "mountain-dew": 4.2,
+          "rc-cola": 3.5
+        }
+      }
+    ],
+    "najaf": [
+      {
+        "month": "2026-04",
+        "outlets": 79,
+        "score": 86,
+        "availability": 91.6,
+        "shelfShare": 38.4,
+        "assortment": 81.9,
+        "price": 94,
+        "posm": 72.1,
+        "brandShare": {
+          "pepsi": 36.9,
+          "coca-cola": 37.3,
+          "7up": 9.8,
+          "mirinda": 9.3,
+          "mountain-dew": 3.7,
+          "rc-cola": 3
+        }
+      },
+      {
+        "month": "2026-05",
+        "outlets": 89,
+        "score": 86,
+        "availability": 89,
+        "shelfShare": 37,
+        "assortment": 83.1,
+        "price": 92.5,
+        "posm": 76.6,
+        "brandShare": {
+          "pepsi": 36.8,
+          "coca-cola": 35.8,
+          "7up": 10.5,
+          "mirinda": 9.9,
+          "mountain-dew": 3.9,
+          "rc-cola": 3.1
+        }
+      },
+      {
+        "month": "2026-06",
+        "outlets": 86,
+        "score": 83,
+        "availability": 85.5,
+        "shelfShare": 36,
+        "assortment": 82.5,
+        "price": 86.9,
+        "posm": 72.1,
+        "brandShare": {
+          "pepsi": 37.3,
+          "coca-cola": 35.8,
+          "7up": 10.2,
+          "mirinda": 10.1,
+          "mountain-dew": 3.7,
+          "rc-cola": 2.9
+        }
+      },
+      {
+        "month": "2026-07",
+        "outlets": 89,
+        "score": 83,
+        "availability": 84.3,
+        "shelfShare": 36.5,
+        "assortment": 83.7,
+        "price": 91.6,
+        "posm": 74.9,
+        "brandShare": {
+          "pepsi": 36.3,
+          "coca-cola": 37.8,
+          "7up": 9.9,
+          "mirinda": 9.3,
+          "mountain-dew": 3.8,
+          "rc-cola": 2.9
+        }
+      },
+      {
+        "month": "2026-08",
+        "outlets": 90,
+        "score": 82,
+        "availability": 80.6,
+        "shelfShare": 34.3,
+        "assortment": 83.5,
+        "price": 95.8,
+        "posm": 76.7,
+        "brandShare": {
+          "pepsi": 34.2,
+          "coca-cola": 38.3,
+          "7up": 10.4,
+          "mirinda": 10.1,
+          "mountain-dew": 4,
+          "rc-cola": 2.9
+        }
+      },
+      {
+        "month": "2026-09",
+        "outlets": 81,
+        "score": 83,
+        "availability": 86.5,
+        "shelfShare": 35,
+        "assortment": 82.1,
+        "price": 93.9,
+        "posm": 68.6,
+        "brandShare": {
+          "pepsi": 36.3,
+          "coca-cola": 37.2,
+          "7up": 9.8,
+          "mirinda": 10.2,
+          "mountain-dew": 3.7,
+          "rc-cola": 2.8
+        }
+      }
+    ],
+    "karbala": [
+      {
+        "month": "2026-04",
+        "outlets": 59,
+        "score": 84,
+        "availability": 87,
+        "shelfShare": 38.1,
+        "assortment": 77.8,
+        "price": 95.6,
+        "posm": 77.6,
+        "brandShare": {
+          "pepsi": 36,
+          "coca-cola": 36.3,
+          "7up": 10.8,
+          "mirinda": 8.7,
+          "mountain-dew": 4.4,
+          "rc-cola": 3.7
+        }
+      },
+      {
+        "month": "2026-05",
+        "outlets": 70,
+        "score": 84,
+        "availability": 87.7,
+        "shelfShare": 37.4,
+        "assortment": 79.8,
+        "price": 90.7,
+        "posm": 76.4,
+        "brandShare": {
+          "pepsi": 36.2,
+          "coca-cola": 38.9,
+          "7up": 10.1,
+          "mirinda": 7.8,
+          "mountain-dew": 4,
+          "rc-cola": 3.1
+        }
+      },
+      {
+        "month": "2026-06",
+        "outlets": 69,
+        "score": 83,
+        "availability": 88.8,
+        "shelfShare": 36.8,
+        "assortment": 78.6,
+        "price": 92.6,
+        "posm": 68.8,
+        "brandShare": {
+          "pepsi": 35.9,
+          "coca-cola": 38.9,
+          "7up": 10,
+          "mirinda": 7.3,
+          "mountain-dew": 4.3,
+          "rc-cola": 3.7
+        }
+      },
+      {
+        "month": "2026-07",
+        "outlets": 71,
+        "score": 81,
+        "availability": 83,
+        "shelfShare": 33.9,
+        "assortment": 78.9,
+        "price": 94.7,
+        "posm": 67.8,
+        "brandShare": {
+          "pepsi": 32.4,
+          "coca-cola": 41.7,
+          "7up": 10,
+          "mirinda": 8.1,
+          "mountain-dew": 4.3,
+          "rc-cola": 3.5
+        }
+      },
+      {
+        "month": "2026-08",
+        "outlets": 70,
+        "score": 80,
+        "availability": 85.3,
+        "shelfShare": 34,
+        "assortment": 78,
+        "price": 88.9,
+        "posm": 67.1,
+        "brandShare": {
+          "pepsi": 33.9,
+          "coca-cola": 41.2,
+          "7up": 9.7,
+          "mirinda": 8.1,
+          "mountain-dew": 3.8,
+          "rc-cola": 3.4
+        }
+      },
+      {
+        "month": "2026-09",
+        "outlets": 64,
+        "score": 81,
+        "availability": 87.1,
+        "shelfShare": 35.1,
+        "assortment": 79.9,
+        "price": 86.6,
+        "posm": 63.8,
+        "brandShare": {
+          "pepsi": 32.7,
+          "coca-cola": 40.2,
+          "7up": 10.6,
+          "mirinda": 8.4,
+          "mountain-dew": 4.2,
+          "rc-cola": 3.9
+        }
+      }
+    ]
+  },
+  "byChannel": {
+    "hypermarket": [
+      {
+        "month": "2026-04",
+        "outlets": 55,
+        "score": 85,
+        "availability": 91,
+        "shelfShare": 36.6,
+        "assortment": 73.9,
+        "price": 91.9,
+        "posm": 77.5,
+        "brandShare": {
+          "pepsi": 36.9,
+          "coca-cola": 35.4,
+          "7up": 11,
+          "mirinda": 9.6,
+          "mountain-dew": 3.8,
+          "rc-cola": 3.3
+        }
+      },
+      {
+        "month": "2026-05",
+        "outlets": 55,
+        "score": 84,
+        "availability": 89,
+        "shelfShare": 34.8,
+        "assortment": 74.2,
+        "price": 94.1,
+        "posm": 80,
+        "brandShare": {
+          "pepsi": 35.5,
+          "coca-cola": 37.5,
+          "7up": 10.1,
+          "mirinda": 10,
+          "mountain-dew": 3.6,
+          "rc-cola": 3.4
+        }
+      },
+      {
+        "month": "2026-06",
+        "outlets": 55,
+        "score": 84,
+        "availability": 92.6,
+        "shelfShare": 34.9,
+        "assortment": 74.8,
+        "price": 90.5,
+        "posm": 76.4,
+        "brandShare": {
+          "pepsi": 35.6,
+          "coca-cola": 36.9,
+          "7up": 10.5,
+          "mirinda": 9.9,
+          "mountain-dew": 3.7,
+          "rc-cola": 3.4
+        }
+      },
+      {
+        "month": "2026-07",
+        "outlets": 55,
+        "score": 83,
+        "availability": 91.5,
+        "shelfShare": 33.4,
+        "assortment": 72.7,
+        "price": 91.3,
+        "posm": 77.5,
+        "brandShare": {
+          "pepsi": 33.8,
+          "coca-cola": 39.4,
+          "7up": 10.3,
+          "mirinda": 9.6,
+          "mountain-dew": 3.5,
+          "rc-cola": 3.4
+        }
+      },
+      {
+        "month": "2026-08",
+        "outlets": 54,
+        "score": 82,
+        "availability": 86.9,
+        "shelfShare": 33.4,
+        "assortment": 76.2,
+        "price": 92.7,
+        "posm": 75.9,
+        "brandShare": {
+          "pepsi": 34.2,
+          "coca-cola": 39.1,
+          "7up": 10.2,
+          "mirinda": 9.5,
+          "mountain-dew": 3.7,
+          "rc-cola": 3.3
+        }
+      },
+      {
+        "month": "2026-09",
+        "outlets": 54,
+        "score": 81,
+        "availability": 89,
+        "shelfShare": 32.1,
+        "assortment": 71,
+        "price": 92.3,
+        "posm": 71.5,
+        "brandShare": {
+          "pepsi": 32.4,
+          "coca-cola": 39.9,
+          "7up": 10.9,
+          "mirinda": 9.6,
+          "mountain-dew": 3.7,
+          "rc-cola": 3.5
+        }
+      }
+    ],
+    "supermarket": [
+      {
+        "month": "2026-04",
+        "outlets": 200,
+        "score": 82,
+        "availability": 88.5,
+        "shelfShare": 35.6,
+        "assortment": 69.3,
+        "price": 92.7,
+        "posm": 77.4,
+        "brandShare": {
+          "pepsi": 36.3,
+          "coca-cola": 37,
+          "7up": 11,
+          "mirinda": 8.2,
+          "mountain-dew": 4.3,
+          "rc-cola": 3.2
+        }
+      },
+      {
+        "month": "2026-05",
+        "outlets": 194,
+        "score": 82,
+        "availability": 89.6,
+        "shelfShare": 35.5,
+        "assortment": 69.6,
+        "price": 91.4,
+        "posm": 74.9,
+        "brandShare": {
+          "pepsi": 36.4,
+          "coca-cola": 37.3,
+          "7up": 10.9,
+          "mirinda": 8.3,
+          "mountain-dew": 4.1,
+          "rc-cola": 3
+        }
+      },
+      {
+        "month": "2026-06",
+        "outlets": 207,
+        "score": 82,
+        "availability": 90.6,
+        "shelfShare": 35.7,
+        "assortment": 69.6,
+        "price": 90.4,
+        "posm": 74.5,
+        "brandShare": {
+          "pepsi": 36.1,
+          "coca-cola": 37.7,
+          "7up": 10.7,
+          "mirinda": 8,
+          "mountain-dew": 4.4,
+          "rc-cola": 3.1
+        }
+      },
+      {
+        "month": "2026-07",
+        "outlets": 203,
+        "score": 80,
+        "availability": 86.5,
+        "shelfShare": 34.6,
+        "assortment": 69.9,
+        "price": 91.4,
+        "posm": 72.9,
+        "brandShare": {
+          "pepsi": 34.9,
+          "coca-cola": 38.9,
+          "7up": 10.9,
+          "mirinda": 7.9,
+          "mountain-dew": 4.3,
+          "rc-cola": 3.1
+        }
+      },
+      {
+        "month": "2026-08",
+        "outlets": 209,
+        "score": 80,
+        "availability": 87.2,
+        "shelfShare": 34,
+        "assortment": 70,
+        "price": 90.8,
+        "posm": 70.2,
+        "brandShare": {
+          "pepsi": 34.9,
+          "coca-cola": 38.3,
+          "7up": 10.9,
+          "mirinda": 8.2,
+          "mountain-dew": 4.5,
+          "rc-cola": 3.2
+        }
+      },
+      {
+        "month": "2026-09",
+        "outlets": 181,
+        "score": 80,
+        "availability": 87.2,
+        "shelfShare": 34.5,
+        "assortment": 68.5,
+        "price": 91.6,
+        "posm": 69,
+        "brandShare": {
+          "pepsi": 35,
+          "coca-cola": 37.3,
+          "7up": 11.5,
+          "mirinda": 8.6,
+          "mountain-dew": 4.2,
+          "rc-cola": 3.3
+        }
+      }
+    ],
+    "mini-market": [
+      {
+        "month": "2026-04",
+        "outlets": 283,
+        "score": 85,
+        "availability": 88.9,
+        "shelfShare": 35.5,
+        "assortment": 84.5,
+        "price": 94.5,
+        "posm": 75.5,
+        "brandShare": {
+          "pepsi": 36,
+          "coca-cola": 37.6,
+          "7up": 10.5,
+          "mirinda": 8.6,
+          "mountain-dew": 3.9,
+          "rc-cola": 3.4
+        }
+      },
+      {
+        "month": "2026-05",
+        "outlets": 276,
+        "score": 85,
+        "availability": 88.7,
+        "shelfShare": 35.7,
+        "assortment": 85,
+        "price": 91.8,
+        "posm": 75,
+        "brandShare": {
+          "pepsi": 36.8,
+          "coca-cola": 36.6,
+          "7up": 10.7,
+          "mirinda": 8.3,
+          "mountain-dew": 4.1,
+          "rc-cola": 3.5
+        }
+      },
+      {
+        "month": "2026-06",
+        "outlets": 272,
+        "score": 83,
+        "availability": 87.8,
+        "shelfShare": 34.6,
+        "assortment": 83.7,
+        "price": 91.9,
+        "posm": 70,
+        "brandShare": {
+          "pepsi": 35.5,
+          "coca-cola": 38.4,
+          "7up": 10.4,
+          "mirinda": 8.2,
+          "mountain-dew": 4,
+          "rc-cola": 3.5
+        }
+      },
+      {
+        "month": "2026-07",
+        "outlets": 274,
+        "score": 84,
+        "availability": 87.8,
+        "shelfShare": 34.2,
+        "assortment": 84.7,
+        "price": 92.4,
+        "posm": 70.5,
+        "brandShare": {
+          "pepsi": 34.9,
+          "coca-cola": 39,
+          "7up": 10.2,
+          "mirinda": 8.3,
+          "mountain-dew": 4.1,
+          "rc-cola": 3.5
+        }
+      },
+      {
+        "month": "2026-08",
+        "outlets": 276,
+        "score": 83,
+        "availability": 87.8,
+        "shelfShare": 33.7,
+        "assortment": 84.1,
+        "price": 91.9,
+        "posm": 67.6,
+        "brandShare": {
+          "pepsi": 34.9,
+          "coca-cola": 39.3,
+          "7up": 10,
+          "mirinda": 8.4,
+          "mountain-dew": 4,
+          "rc-cola": 3.4
+        }
+      },
+      {
+        "month": "2026-09",
+        "outlets": 215,
+        "score": 82,
+        "availability": 88.2,
+        "shelfShare": 32.9,
+        "assortment": 84,
+        "price": 91.1,
+        "posm": 64.3,
+        "brandShare": {
+          "pepsi": 33.7,
+          "coca-cola": 40.1,
+          "7up": 10.4,
+          "mirinda": 8.4,
+          "mountain-dew": 4.1,
+          "rc-cola": 3.4
+        }
+      }
+    ],
+    "grocery": [
+      {
+        "month": "2026-04",
+        "outlets": 269,
+        "score": 86,
+        "availability": 86.7,
+        "shelfShare": 37.1,
+        "assortment": 92.1,
+        "price": 93,
+        "posm": 75.1,
+        "brandShare": {
+          "pepsi": 37,
+          "coca-cola": 35.7,
+          "7up": 11.3,
+          "mirinda": 8.4,
+          "mountain-dew": 4.1,
+          "rc-cola": 3.5
+        }
+      },
+      {
+        "month": "2026-05",
+        "outlets": 282,
+        "score": 85,
+        "availability": 85.4,
+        "shelfShare": 36.3,
+        "assortment": 91.6,
+        "price": 90.5,
+        "posm": 78.5,
+        "brandShare": {
+          "pepsi": 36.8,
+          "coca-cola": 37.1,
+          "7up": 10.7,
+          "mirinda": 8.3,
+          "mountain-dew": 3.9,
+          "rc-cola": 3.2
+        }
+      },
+      {
+        "month": "2026-06",
+        "outlets": 273,
+        "score": 84,
+        "availability": 84.3,
+        "shelfShare": 35.6,
+        "assortment": 92.7,
+        "price": 91.2,
+        "posm": 73.1,
+        "brandShare": {
+          "pepsi": 35.7,
+          "coca-cola": 37.8,
+          "7up": 11.1,
+          "mirinda": 7.9,
+          "mountain-dew": 4.1,
+          "rc-cola": 3.4
+        }
+      },
+      {
+        "month": "2026-07",
+        "outlets": 276,
+        "score": 85,
+        "availability": 84.6,
+        "shelfShare": 35,
+        "assortment": 92.3,
+        "price": 93.9,
+        "posm": 73.6,
+        "brandShare": {
+          "pepsi": 34.8,
+          "coca-cola": 38.2,
+          "7up": 11.3,
+          "mirinda": 8.2,
+          "mountain-dew": 4.1,
+          "rc-cola": 3.4
+        }
+      },
+      {
+        "month": "2026-08",
+        "outlets": 270,
+        "score": 84,
+        "availability": 84,
+        "shelfShare": 34.3,
+        "assortment": 91.7,
+        "price": 93.3,
+        "posm": 72,
+        "brandShare": {
+          "pepsi": 34.3,
+          "coca-cola": 38.7,
+          "7up": 11.3,
+          "mirinda": 8.4,
+          "mountain-dew": 4,
+          "rc-cola": 3.3
+        }
+      },
+      {
+        "month": "2026-09",
+        "outlets": 224,
+        "score": 85,
+        "availability": 86,
+        "shelfShare": 35.1,
+        "assortment": 92.6,
+        "price": 92.8,
+        "posm": 68.1,
+        "brandShare": {
+          "pepsi": 35,
+          "coca-cola": 37.6,
+          "7up": 11.3,
+          "mirinda": 8.5,
+          "mountain-dew": 4,
+          "rc-cola": 3.6
+        }
+      }
+    ],
+    "convenience": [
+      {
+        "month": "2026-04",
+        "outlets": 73,
+        "score": 81,
+        "availability": 83.3,
+        "shelfShare": 32.7,
+        "assortment": 79.9,
+        "price": 95,
+        "posm": 74.7,
+        "brandShare": {
+          "pepsi": 33.2,
+          "coca-cola": 37.5,
+          "7up": 12,
+          "mirinda": 8.4,
+          "mountain-dew": 4.9,
+          "rc-cola": 4
+        }
+      },
+      {
+        "month": "2026-05",
+        "outlets": 73,
+        "score": 82,
+        "availability": 84.5,
+        "shelfShare": 31.9,
+        "assortment": 80.8,
+        "price": 95.7,
+        "posm": 81.5,
+        "brandShare": {
+          "pepsi": 32.5,
+          "coca-cola": 38.2,
+          "7up": 10.8,
+          "mirinda": 9.4,
+          "mountain-dew": 4.9,
+          "rc-cola": 4.3
+        }
+      },
+      {
+        "month": "2026-06",
+        "outlets": 73,
+        "score": 81,
+        "availability": 84.7,
+        "shelfShare": 32.1,
+        "assortment": 78.5,
+        "price": 94.8,
+        "posm": 74,
+        "brandShare": {
+          "pepsi": 31.5,
+          "coca-cola": 39.3,
+          "7up": 11.2,
+          "mirinda": 8.8,
+          "mountain-dew": 4.7,
+          "rc-cola": 4.4
+        }
+      },
+      {
+        "month": "2026-07",
+        "outlets": 72,
+        "score": 76,
+        "availability": 75.2,
+        "shelfShare": 30,
+        "assortment": 77.8,
+        "price": 94.9,
+        "posm": 72.2,
+        "brandShare": {
+          "pepsi": 30.4,
+          "coca-cola": 41.1,
+          "7up": 10.4,
+          "mirinda": 8.7,
+          "mountain-dew": 4.8,
+          "rc-cola": 4.6
+        }
+      },
+      {
+        "month": "2026-08",
+        "outlets": 71,
+        "score": 81,
+        "availability": 85,
+        "shelfShare": 32.1,
+        "assortment": 81.7,
+        "price": 91.2,
+        "posm": 76.1,
+        "brandShare": {
+          "pepsi": 31.8,
+          "coca-cola": 40.1,
+          "7up": 10.2,
+          "mirinda": 8.3,
+          "mountain-dew": 5.2,
+          "rc-cola": 4.5
+        }
+      },
+      {
+        "month": "2026-09",
+        "outlets": 68,
+        "score": 82,
+        "availability": 86.1,
+        "shelfShare": 32.7,
+        "assortment": 81.9,
+        "price": 93,
+        "posm": 74.3,
+        "brandShare": {
+          "pepsi": 33.4,
+          "coca-cola": 37.4,
+          "7up": 10.4,
+          "mirinda": 9.4,
+          "mountain-dew": 5.1,
+          "rc-cola": 4.4
+        }
+      }
+    ]
+  }
+}

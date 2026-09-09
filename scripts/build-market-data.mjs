@@ -1,0 +1,720 @@
+/* ============================================================
+   VEMI MARKET DATA — Pepsi Iraq, 1,000 POS, six cities, six months.
+
+   Replaces the Erbil-only builder. The geography here is GENERIC:
+   nothing knows the name of a city, every rule reads city → district →
+   outlet, and Erbil is just the row that happens to keep its real
+   district names. The old builder hard-coded Erbil into the rules
+   themselves — district adjacency, a Citadel centroid — which is what
+   made a second city impossible to add.
+
+   Everything is deterministic: same seed, same market, every run.
+
+   Run: node scripts/build-market-data.mjs
+   ============================================================ */
+
+import { writeFileSync, mkdirSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const OUT = join(dirname(fileURLToPath(import.meta.url)), "..", "lib", "data", "market");
+
+function mulberry32(seed) {
+  return function () {
+    seed |= 0;
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const rand = mulberry32(20260909);
+const pick = (p) => rand() < p;
+const between = (lo, hi) => lo + rand() * (hi - lo);
+const intBetween = (lo, hi) => Math.round(between(lo, hi));
+const choice = (xs) => xs[Math.floor(rand() * xs.length)];
+const clamp = (lo, hi, x) => Math.min(hi, Math.max(lo, x));
+function normal(mean = 0, sd = 1) {
+  const u = Math.max(rand(), 1e-9);
+  return mean + sd * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * rand());
+}
+
+/* ---------------- the contract ---------------- */
+
+const CONTRACT = {
+  client: "Baghdad Soft Drinks Company",
+  clientShort: "Baghdad Soft Drinks",
+  brand: "Pepsi",
+  country: "Iraq",
+  category: "Soft Drinks",
+  currency: "IQD",
+  contractedPos: 1000,
+  /* September is in flight — the demo opens mid-cycle, which is what
+     makes the coverage ring worth looking at. */
+  visitedThisMonth: 742,
+  daysRemaining: 9,
+  daysElapsed: 21,
+};
+
+/* Six months, April → September 2026. Only the last is partial. */
+const MONTHS = [
+  { id: "2026-04", label: "April 2026", short: "Apr", days: 30 },
+  { id: "2026-05", label: "May 2026", short: "May", days: 31 },
+  { id: "2026-06", label: "June 2026", short: "Jun", days: 30 },
+  { id: "2026-07", label: "July 2026", short: "Jul", days: 31 },
+  { id: "2026-08", label: "August 2026", short: "Aug", days: 31 },
+  { id: "2026-09", label: "September 2026", short: "Sep", days: 30, current: true },
+];
+const CURRENT = "2026-09";
+
+/* ---------------- geography ----------------
+
+   True lat/long, projected the same way the marketing map projects
+   them, so a city sits where it really is:
+     x = 9.591 * lon - 368.85
+     y = 432.83 - 11.497 * lat                                        */
+const CITIES = [
+  { id: "baghdad", name: "Baghdad", lat: 33.31, lng: 44.36, pos: 380, tier: "capital" },
+  { id: "basra", name: "Basra", lat: 30.51, lng: 47.78, pos: 160, tier: "major" },
+  { id: "erbil", name: "Erbil", lat: 36.19, lng: 44.01, pos: 150, tier: "major" },
+  { id: "mosul", name: "Mosul", lat: 36.34, lng: 43.13, pos: 140, tier: "major" },
+  { id: "najaf", name: "Najaf", lat: 32.03, lng: 44.34, pos: 95, tier: "mid" },
+  { id: "karbala", name: "Karbala", lat: 32.61, lng: 44.02, pos: 75, tier: "mid" },
+];
+for (const c of CITIES) {
+  c.x = Math.round((9.591 * c.lng - 368.85) * 100) / 100;
+  c.y = Math.round((432.83 - 11.497 * c.lat) * 100) / 100;
+}
+
+/* Real district names per city. Erbil keeps the set the old build
+   used, so anything ported across still recognises them. */
+const DISTRICTS = {
+  baghdad: ["Karrada", "Mansour", "Zayouna", "Adhamiyah", "Kadhimiya", "Dora",
+            "Yarmouk", "Ghazaliya", "Jadriya", "Harthiya", "Palestine Street", "Sadr City"],
+  basra: ["Ashar", "Jubaila", "Tuwaisa", "Qibla", "Hayaniyah", "Zubair", "Maqal", "Junaina"],
+  erbil: ["Ankawa", "Bakhtiari", "Downtown", "Dream City", "Gulan", "Havalan",
+          "Iskan", "Kurdistan", "Minara", "Setaqan"],
+  mosul: ["Al-Zuhour", "Al-Muthanna", "Al-Noor", "Bab al-Tob", "Al-Sukkar",
+          "Al-Rashidiya", "Hay al-Arabi", "Al-Islah"],
+  najaf: ["Al-Ansar", "Al-Adala", "Al-Milad", "Al-Askari", "Al-Ghadeer", "Hay al-Nasr",
+          "Al-Furat", "Al-Jamea"],
+  karbala: ["Al-Hurr", "Al-Abbasiya", "Bab Baghdad", "Al-Eskan", "Al-Ghadeer",
+            "Hay al-Muallimeen", "Al-Wafaa", "Al-Naqib"],
+};
+
+const CHANNELS = [
+  { id: "hypermarket", name: "Hypermarket", share: 0.05, size: 9 },
+  { id: "supermarket", name: "Supermarket", share: 0.22, size: 6 },
+  { id: "mini-market", name: "Mini-market", share: 0.34, size: 4 },
+  { id: "grocery", name: "Grocery", share: 0.31, size: 3 },
+  { id: "convenience", name: "Convenience", share: 0.08, size: 2 },
+];
+
+/* Named chains give the retailer filter something real to group by;
+   the rest are independents, which is how this trade actually looks. */
+const RETAILERS = ["Miral", "Family Mall", "Carrefour", "Al Rasheed", "City Center", "Independent"];
+
+/* ---------------- brands and range ---------------- */
+
+const BRANDS = [
+  { id: "pepsi", name: "Pepsi", owner: "Baghdad Soft Drinks", client: true, strength: 0.94 },
+  { id: "coca-cola", name: "Coca-Cola", owner: "Coca-Cola Iraq", client: false, strength: 0.95 },
+  { id: "7up", name: "7UP", owner: "Baghdad Soft Drinks", client: false, strength: 0.80 },
+  { id: "mirinda", name: "Mirinda", owner: "Baghdad Soft Drinks", client: false, strength: 0.76 },
+  { id: "mountain-dew", name: "Mountain Dew", owner: "Baghdad Soft Drinks", client: false, strength: 0.62 },
+  { id: "rc-cola", name: "RC Cola", owner: "RC Bottling Iraq", client: false, strength: 0.55 },
+];
+
+const PACKS = {
+  "can-250": { label: "250ml Can", rrp: 500, cooler: true },
+  "can-330": { label: "330ml Can", rrp: 750, cooler: true },
+  "pet-500": { label: "500ml PET", rrp: 750, cooler: true },
+  "pet-1000": { label: "1L PET", rrp: 1250, cooler: false },
+  "pet-2250": { label: "2.25L PET", rrp: 2000, cooler: false },
+};
+
+/* Pepsi's six, per the brief. Rivals carry a comparable range so shelf
+   share is a fair contest rather than an artefact of listing counts. */
+const CLIENT_PACKS = ["can-250", "can-330", "pet-500", "pet-1000", "pet-2250"];
+const SKUS = [];
+for (const brand of BRANDS) {
+  const packs = brand.id === "pepsi" ? CLIENT_PACKS : CLIENT_PACKS.slice(0, 4);
+  for (const pack of packs) {
+    SKUS.push({
+      id: `${brand.id}-${pack}`,
+      brandId: brand.id,
+      pack,
+      name: `${brand.name} ${PACKS[pack].label}`,
+      rrp: PACKS[pack].rrp,
+    });
+  }
+}
+/* Pepsi Zero — a sixth Pepsi SKU with its own listing story, which is
+   what makes the assortment matrix worth looking at. */
+SKUS.push({
+  id: "pepsi-zero-330",
+  brandId: "pepsi",
+  pack: "can-330",
+  name: "Pepsi Zero 330ml",
+  rrp: 750,
+});
+
+const CLIENT = BRANDS.find((b) => b.client);
+const CLIENT_SKUS = SKUS.filter((s) => s.brandId === CLIENT.id);
+
+/* ---------------- POSM ---------------- */
+
+const POSM_TYPES = [
+  { id: "cooler", name: "Branded refrigerator", weight: 3, channels: ["hypermarket", "supermarket", "mini-market"] },
+  { id: "shelf-strip", name: "Shelf strips", weight: 2, channels: null },
+  { id: "poster", name: "Posters", weight: 1, channels: null },
+  { id: "stand", name: "Floor stand", weight: 2, channels: ["hypermarket", "supermarket"] },
+  { id: "display", name: "Promotional display", weight: 2, channels: ["hypermarket", "supermarket", "mini-market"] },
+];
+
+const OOS_REASONS = [
+  { id: "not-delivered", name: "Delivery not made", weight: 0.34 },
+  { id: "sold-out", name: "Sold out before revisit", weight: 0.27 },
+  { id: "not-ordered", name: "Retailer did not order", weight: 0.18 },
+  { id: "space-taken", name: "Space given to another brand", weight: 0.13 },
+  { id: "delisted", name: "Delisted at store level", weight: 0.08 },
+];
+
+const SHELF_POSITIONS = ["eye", "upper", "lower"];
+
+console.log("constants loaded:",
+  CITIES.length, "cities ·",
+  Object.values(DISTRICTS).flat().length, "districts ·",
+  BRANDS.length, "brands ·",
+  SKUS.length, "SKUs ·",
+  CLIENT_SKUS.length, "Pepsi SKUs");
+
+/* ------------------------------------------------------------------
+   THE UNIVERSE — 1,000 outlets, distributed by city and channel.
+------------------------------------------------------------------ */
+const CHANNEL_WORD = {
+  hypermarket: "Hypermarket",
+  supermarket: "Supermarket",
+  "mini-market": "Market",
+  grocery: "Grocery",
+  convenience: "Store",
+};
+
+const POS = [];
+let seq = 0;
+for (const city of CITIES) {
+  const districts = DISTRICTS[city.id];
+  for (let i = 0; i < city.pos; i += 1) {
+    /* Channel mix by weight, so a city's shape is realistic rather
+       than uniform. */
+    let roll = rand();
+    let channel = CHANNELS[CHANNELS.length - 1];
+    for (const c of CHANNELS) {
+      if (roll < c.share) { channel = c; break; }
+      roll -= c.share;
+    }
+    const district = districts[i % districts.length];
+    seq += 1;
+    const n = String((i % 99) + 1).padStart(3, "0");
+    POS.push({
+      id: `pos-${seq}`,
+      code: `${city.name.slice(0, 3).toUpperCase()}-${String(seq).padStart(4, "0")}`,
+      name: `${district} ${CHANNEL_WORD[channel.id]} ${n}`,
+      cityId: city.id,
+      district,
+      channel: channel.id,
+      retailer:
+        channel.id === "hypermarket" || channel.id === "supermarket"
+          ? choice(RETAILERS)
+          : "Independent",
+      /* Rough footfall weight — drives how much the outlet matters and
+         how many facings it has to give. */
+      volume: Math.round(clamp(0.4, 2.2, normal(channel.size / 4, 0.35)) * 100) / 100,
+    });
+  }
+}
+
+/* ------------------------------------------------------------------
+   THE CORE PANEL — 400 outlets audited EVERY month.
+
+   Stratified by city and channel so the core mirrors the universe. A
+   core that over-weights hypermarkets measures hypermarkets, and every
+   trend drawn from it would describe a market nobody sells into.
+------------------------------------------------------------------ */
+const CORE_SIZE = 400;
+const strata = new Map();
+for (const p of POS) {
+  const key = `${p.cityId}|${p.channel}`;
+  strata.set(key, [...(strata.get(key) ?? []), p.id]);
+}
+const CORE = new Set();
+{
+  const groups = [...strata.values()];
+  let i = 0;
+  while (CORE.size < CORE_SIZE && i < 400) {
+    for (const g of groups) {
+      if (CORE.size >= CORE_SIZE) break;
+      if (g[i]) CORE.add(g[i]);
+    }
+    i += 1;
+  }
+}
+for (const p of POS) p.core = CORE.has(p.id);
+
+/* ------------------------------------------------------------------
+   THE SCHEDULE — who is audited in which month, and on which day.
+
+   Core outlets every month. The remaining 600 rotate: each month draws
+   a fresh slice, so month-over-month overlap runs through the core.
+   That is the panel design the brief asks for on page 9 — trends at
+   market level, plus a Repeated POS section that can only ever mean
+   the core.
+
+   September is deliberately incomplete: 742 of 1,000, because the
+   month is 21 days in with 9 to go, and the coverage ring is the first
+   thing the dashboard has to make honest.
+------------------------------------------------------------------ */
+const ROTATING = POS.filter((p) => !p.core).map((p) => p.id);
+const MONTHLY_TARGET = 880;
+
+const schedule = new Map();
+for (const month of MONTHS) {
+  const target = month.id === CURRENT ? CONTRACT.visitedThisMonth : MONTHLY_TARGET;
+  const pool = [...ROTATING]
+    .sort(() => rand() - 0.5)
+    .slice(0, target - CORE.size);
+  const window = month.id === CURRENT ? CONTRACT.daysElapsed : month.days;
+  for (const posId of [...CORE, ...pool]) {
+    schedule.set(`${month.id}|${posId}`, intBetween(1, window));
+  }
+}
+
+const auditedIn = (monthId) => POS.filter((p) => schedule.has(`${monthId}|${p.id}`));
+const auditDate = (monthId, posId) => {
+  const d = schedule.get(`${monthId}|${posId}`);
+  return d === undefined ? null : `${monthId}-${String(d).padStart(2, "0")}`;
+};
+
+console.log(`universe ${POS.length} POS · core ${CORE.size} · rotating ${ROTATING.length}`);
+for (const m of MONTHS) {
+  const n = auditedIn(m.id).length;
+  console.log(`  ${m.short} ${String(n).padStart(4)} audited (${((n / POS.length) * 100).toFixed(1)}%)`);
+}
+
+/* ------------------------------------------------------------------
+   PERSISTENT OUTLET CHARACTER.
+
+   Drawn once per outlet, not per visit. A planogram, a store manager's
+   preference and a distributor's service level all persist for months;
+   without this an outlet's shelf share in April would be uncorrelated
+   with its share in May, and the Repeated POS section would be
+   measuring the random number generator.
+------------------------------------------------------------------ */
+const brandBias = new Map();
+const keepBias = new Map();
+const posmBias = new Map();
+for (const p of POS) {
+  keepBias.set(p.id, clamp(0.6, 1.45, normal(1, 0.2)));
+  posmBias.set(p.id, clamp(0.3, 1.7, normal(1, 0.35)));
+  for (const b of BRANDS) {
+    brandBias.set(`${p.id}|${b.id}`, clamp(0.55, 1.5, normal(1, 0.22)));
+  }
+}
+
+/* Range is a decision, not a per-visit coin flip: listed once, with a
+   little churn each month for real delistings and listings won. */
+const baseListed = new Map();
+for (const p of POS) {
+  const channel = CHANNELS.find((c) => c.id === p.channel);
+  for (const sku of SKUS) {
+    const brand = BRANDS.find((b) => b.id === sku.brandId);
+    const odds =
+      brand.strength *
+      (0.417 + channel.share * 0.4 + channel.size * 0.055) *
+      (sku.id === "pepsi-zero-330" ? 0.55 : 1) * // the newest line, thinnest range
+      (sku.pack === "pet-2250" ? 0.84 : 1) *
+      brandBias.get(`${p.id}|${brand.id}`);
+    baseListed.set(`${p.id}|${sku.id}`, pick(clamp(0.05, 0.97, odds)));
+  }
+}
+
+/* Shelf weight per brand — calibrated to the market the brief
+   describes: Pepsi 34% of shelf against Coca-Cola at 39%. */
+const SHELF_WEIGHT = {
+  pepsi: 0.265, "coca-cola": 0.372, "7up": 0.125,
+  mirinda: 0.102, "mountain-dew": 0.060, "rc-cola": 0.054,
+};
+
+/* Required range and POSM by channel — what "compliance" is measured
+   against. A grocery is not expected to carry the full six. */
+const REQUIRED_SKUS = {
+  hypermarket: 6, supermarket: 6, "mini-market": 4, grocery: 3, convenience: 3,
+};
+const requiredPosm = (channelId) =>
+  POSM_TYPES.filter((t) => !t.channels || t.channels.includes(channelId));
+
+/* ------------------------------------------------------------------
+   DRIFT — the six months have to tell a story, not repeat one.
+
+   Without this every month is an independent draw from the same
+   parameters, the trend lines come out flat, and the Competitor
+   Movement card has nothing to point at. The brief's narrative is
+   specific, so the drift is too:
+
+     · Coca-Cola has been taking shelf all half, hardest in Basra,
+       where the brief puts them at 35% → 42% in supermarkets
+     · Pepsi has been giving it up at the same rate
+     · Pepsi 500ml's availability has been deteriorating — it is the
+       SKU the whole demo narrative hangs on
+     · POSM has drifted down and is the worst-performing KPI
+
+   Everything is anchored so that SEPTEMBER equals the calibrated
+   figures above: month 5 multiplies by 1, and the earlier months are
+   where the movement lives. Calibrate the present, then walk backwards
+   — the other way round and every tuning pass would move the headline.
+------------------------------------------------------------------ */
+const MONTH_INDEX = Object.fromEntries(MONTHS.map((m, i) => [m.id, i]));
+
+/* 0 at April, 1 at September. */
+const progress = (monthId) => MONTH_INDEX[monthId] / (MONTHS.length - 1);
+
+/* Where each brand stands in each city, independent of time. The
+   brief puts Baghdad at Pepsi 31% / Coca-Cola 41% against a national
+   34 / 39 — the capital is where Pepsi is weakest on shelf, and that
+   is the whole basis of its "31 Baghdad supermarkets" insight. */
+const CITY_SHELF = {
+  baghdad: { pepsi: 0.86, "coca-cola": 1.10 },
+  basra: { pepsi: 0.95, "coca-cola": 1.06 },
+};
+
+function shelfDrift(monthId, brandId, cityId) {
+  const t = progress(monthId);
+  const place = CITY_SHELF[cityId]?.[brandId] ?? 1;
+  if (brandId === "coca-cola") {
+    /* Basra is where the brief says the swing happened. */
+    const gain = cityId === "basra" ? 0.13 : 0.055;
+    return place * (1 - gain * (1 - t));
+  }
+  if (brandId === "pepsi") {
+    const loss = cityId === "basra" ? 0.09 : 0.04;
+    return place * (1 + loss * (1 - t));
+  }
+  return place;
+}
+
+/* Pepsi 500ml has been emptying more often as the half went on. */
+function oosDrift(monthId, sku) {
+  const t = progress(monthId);
+  return sku.pack === "pet-500" && sku.brandId === CLIENT.id ? 1 - 0.3 * (1 - t) : 1;
+}
+
+/* POSM has slipped; it was near target in April. */
+const posmDrift = (monthId) => 1 + 0.16 * (1 - progress(monthId));
+
+/* ------------------------------------------------------------------
+   ONE VISIT.
+------------------------------------------------------------------ */
+function visitFor(monthId, pos) {
+  const channel = CHANNELS.find((c) => c.id === pos.channel);
+  const cells = [];
+  const oos = [];
+  const prices = [];
+
+  for (const sku of SKUS) {
+    const brand = BRANDS.find((b) => b.id === sku.brandId);
+    const listed = pick(0.045) ? !baseListed.get(`${pos.id}|${sku.id}`)
+                               : baseListed.get(`${pos.id}|${sku.id}`);
+    if (!listed) { cells.push([sku.id, 0, 0, null]); continue; }
+
+    const risk = clamp(0.02, 0.5,
+      (0.0945 + (channel.size < 4 ? 0.028 : 0)) *
+      (sku.pack === "pet-500" ? 1.5 : 1) *   // the brief's problem SKU
+      oosDrift(monthId, sku) *
+      (brand.client ? 1.06 : 0.92) /
+      keepBias.get(pos.id));
+    const inStock = !pick(risk);
+
+    const facings = inStock
+      ? Math.max(1, Math.round(
+          SHELF_WEIGHT[brand.id] * shelfDrift(monthId, brand.id, pos.cityId) *
+          26 * channel.size * 0.42 * pos.volume *
+          brandBias.get(`${pos.id}|${brand.id}`) * between(0.85, 1.15)))
+      : 0;
+
+    const position = inStock
+      ? (pick(brand.client ? 0.42 : brand.id === "coca-cola" ? 0.55 : 0.3)
+          ? "eye" : pick(0.5) ? "upper" : "lower")
+      : null;
+
+    cells.push([sku.id, listed ? (inStock ? 1 : 2) : 0, facings, position]);
+
+    if (inStock) {
+      const price = Math.round(
+        (sku.rrp * between(0.985, 1.048) * (pick(0.082) ? between(1.08, 1.2) : 1)) / 25
+      ) * 25;
+      prices.push([sku.id, price]);
+    } else {
+      let roll = rand();
+      let reason = OOS_REASONS[0];
+      for (const r of OOS_REASONS) {
+        if (roll < r.weight) { reason = r; break; }
+        roll -= r.weight;
+      }
+      const normalFacings = Math.max(1, Math.round(
+        SHELF_WEIGHT[brand.id] * 26 * channel.size * 0.42 * pos.volume *
+        brandBias.get(`${pos.id}|${brand.id}`)));
+      oos.push([sku.id, normalFacings, reason.id]);
+    }
+  }
+
+  /* POSM — presence per required type, driven by the outlet's own
+     execution character. */
+  const posm = requiredPosm(pos.channel).map((t) => [
+    t.id,
+    pick(clamp(0.05, 0.97, 0.738 * posmDrift(monthId) * posmBias.get(pos.id) * (t.id === "cooler" ? 0.85 : 1))),
+  ]);
+
+  return { cells, oos, prices, posm };
+}
+
+console.log("shelf model ready");
+
+/* ------------------------------------------------------------------
+   EXECUTION SCORE.
+
+   A composite, weighted toward availability because an empty shelf
+   costs more than a missing poster. The weights live here and nowhere
+   else, and every surface that shows a score shows the breakdown
+   beside it — a single number that cannot be taken apart is a number
+   nobody can act on.
+------------------------------------------------------------------ */
+const SCORE_WEIGHTS = {
+  availability: 0.30, shelfShare: 0.25, assortment: 0.20, price: 0.15, posm: 0.10,
+};
+/* Shelf share is scored against a par rather than raw: 40% of the
+   shelf is an excellent result, not a 40/100. */
+const SHARE_PAR = 0.40;
+
+function scoreVisit(v, pos) {
+  const client = v.cells.filter((c) => SKUS.find((s) => s.id === c[0]).brandId === CLIENT.id);
+  const listed = client.filter((c) => c[1] !== 0);
+  const inStock = listed.filter((c) => c[1] === 1);
+
+  const availability = listed.length ? inStock.length / listed.length : 0;
+
+  const totalFacings = v.cells.reduce((s, c) => s + c[2], 0);
+  const mine = client.reduce((s, c) => s + c[2], 0);
+  const share = totalFacings ? mine / totalFacings : 0;
+
+  const assortment = Math.min(1, listed.length / REQUIRED_SKUS[pos.channel]);
+
+  const clientPrices = v.prices.filter(
+    (p) => SKUS.find((s) => s.id === p[0]).brandId === CLIENT.id
+  );
+  const compliant = clientPrices.filter((p) => {
+    const rrp = SKUS.find((s) => s.id === p[0]).rrp;
+    return Math.abs(p[1] - rrp) / rrp <= 0.05;
+  });
+  const price = clientPrices.length ? compliant.length / clientPrices.length : 1;
+
+  const posm = v.posm.length ? v.posm.filter((p) => p[1]).length / v.posm.length : 1;
+
+  const score =
+    availability * SCORE_WEIGHTS.availability +
+    Math.min(1, share / SHARE_PAR) * SCORE_WEIGHTS.shelfShare +
+    assortment * SCORE_WEIGHTS.assortment +
+    price * SCORE_WEIGHTS.price +
+    posm * SCORE_WEIGHTS.posm;
+
+  const r1 = (n) => Math.round(n * 1000) / 10;
+  return {
+    score: Math.round(score * 100),
+    availability: r1(availability),
+    shelfShare: r1(share),
+    assortment: r1(assortment),
+    price: r1(price),
+    posm: r1(posm),
+  };
+}
+
+/* ------------------------------------------------------------------
+   BUILD EVERY MONTH.
+------------------------------------------------------------------ */
+const skuIndex = new Map(SKUS.map((s, i) => [s.id, i]));
+const posIndex = new Map(POS.map((p, i) => [p.id, i]));
+const posmIndex = new Map(POSM_TYPES.map((t, i) => [t.id, i]));
+const reasonIndex = new Map(OOS_REASONS.map((r, i) => [r.id, i]));
+const POSITION_IDX = { eye: 0, upper: 1, lower: 2 };
+
+const months = {};
+for (const month of MONTHS) {
+  const audited = auditedIn(month.id);
+  const bundle = { month: month.id, audited: [], matrix: [], oos: [], prices: [], posm: [], scores: [] };
+
+  for (const pos of audited) {
+    const v = visitFor(month.id, pos);
+    const pi = posIndex.get(pos.id);
+    bundle.audited.push([pi, auditDate(month.id, pos.id)]);
+
+    for (const [skuId, state, facings, position] of v.cells) {
+      if (state === 0 && facings === 0) {
+        bundle.matrix.push([pi, skuIndex.get(skuId), 0, 0, -1]);
+      } else {
+        bundle.matrix.push([
+          pi, skuIndex.get(skuId), state, facings,
+          position === null ? -1 : POSITION_IDX[position],
+        ]);
+      }
+    }
+    for (const [skuId, nf, reason] of v.oos) {
+      bundle.oos.push([pi, skuIndex.get(skuId), nf, reasonIndex.get(reason)]);
+    }
+    for (const [skuId, price] of v.prices) {
+      bundle.prices.push([pi, skuIndex.get(skuId), price]);
+    }
+    for (const [typeId, present] of v.posm) {
+      bundle.posm.push([pi, posmIndex.get(typeId), present ? 1 : 0]);
+    }
+    const s = scoreVisit(v, pos);
+    bundle.scores.push([pi, s.score, s.availability, s.shelfShare, s.assortment, s.price, s.posm]);
+  }
+  months[month.id] = bundle;
+}
+
+/* ---------------- calibration read-out ---------------- */
+const cur = months[CURRENT];
+const avg = (xs) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0);
+const facingsByBrand = new Map();
+for (const [, si, state, facings] of cur.matrix) {
+  if (state !== 1) continue;
+  const b = SKUS[si].brandId;
+  facingsByBrand.set(b, (facingsByBrand.get(b) ?? 0) + facings);
+}
+const totalFacings = [...facingsByBrand.values()].reduce((a, b) => a + b, 0);
+
+console.log(`\n--- September 2026, ${cur.audited.length} POS audited ---`);
+console.log(`  Execution score        ${Math.round(avg(cur.scores.map((s) => s[1])))} / 100   (target 82)`);
+console.log(`  On-shelf availability  ${avg(cur.scores.map((s) => s[2])).toFixed(1)}%   (target 87)`);
+console.log(`  Share of shelf         ${((facingsByBrand.get("pepsi") / totalFacings) * 100).toFixed(1)}%   (target 34)`);
+console.log(`  Assortment compliance  ${avg(cur.scores.map((s) => s[4])).toFixed(1)}%   (target 81)`);
+console.log(`  Price compliance       ${avg(cur.scores.map((s) => s[5])).toFixed(1)}%   (target 92)`);
+console.log(`  POSM compliance        ${avg(cur.scores.map((s) => s[6])).toFixed(1)}%   (target 68)`);
+console.log(`  Coca-Cola share        ${((facingsByBrand.get("coca-cola") / totalFacings) * 100).toFixed(1)}%   (target 39)`);
+
+/* ------------------------------------------------------------------
+   TRENDS — six months, pre-aggregated.
+
+   The Historical page needs a series, not six full bundles: shipping
+   2MB of cells to draw a line would be absurd. Aggregated here at the
+   levels the brief says are safe to compare across months — market,
+   city, channel, brand — plus a separate CORE-ONLY series, because
+   that is the only cut where the same doors sit on both ends of the
+   line and a month-over-month move means the market rather than the
+   sample.
+------------------------------------------------------------------ */
+function aggregate(bundle, filterPos) {
+  const keep = filterPos ? new Set(filterPos) : null;
+  const rows = bundle.scores.filter((r) => !keep || keep.has(r[0]));
+  if (!rows.length) return null;
+  const mean = (i) => Math.round((rows.reduce((s, r) => s + r[i], 0) / rows.length) * 10) / 10;
+
+  const facings = new Map();
+  for (const [pi, si, state, f] of bundle.matrix) {
+    if (state !== 1) continue;
+    if (keep && !keep.has(pi)) continue;
+    const b = SKUS[si].brandId;
+    facings.set(b, (facings.get(b) ?? 0) + f);
+  }
+  const total = [...facings.values()].reduce((a, b) => a + b, 0);
+
+  return {
+    outlets: rows.length,
+    score: Math.round(mean(1)),
+    availability: mean(2),
+    shelfShare: mean(3),
+    assortment: mean(4),
+    price: mean(5),
+    posm: mean(6),
+    brandShare: Object.fromEntries(
+      BRANDS.map((b) => [b.id, total ? Math.round(((facings.get(b.id) ?? 0) / total) * 1000) / 10 : 0])
+    ),
+  };
+}
+
+const coreIdx = new Set(POS.filter((p) => p.core).map((p) => posIndex.get(p.id)));
+const trends = {
+  months: MONTHS.map((m) => ({ id: m.id, label: m.label, short: m.short, current: !!m.current })),
+  /* All audited outlets — breadth. Comparable at market level only. */
+  market: MONTHS.map((m) => ({ month: m.id, ...aggregate(months[m.id]) })),
+  /* The same 400 doors every month — the only honest store-level line. */
+  core: MONTHS.map((m) => ({ month: m.id, ...aggregate(months[m.id], coreIdx) })),
+  byCity: Object.fromEntries(
+    CITIES.map((c) => {
+      const idx = new Set(POS.filter((p) => p.cityId === c.id).map((p) => posIndex.get(p.id)));
+      return [c.id, MONTHS.map((m) => ({ month: m.id, ...aggregate(months[m.id], idx) }))];
+    })
+  ),
+  byChannel: Object.fromEntries(
+    CHANNELS.map((c) => {
+      const idx = new Set(POS.filter((p) => p.channel === c.id).map((p) => posIndex.get(p.id)));
+      return [c.id, MONTHS.map((m) => ({ month: m.id, ...aggregate(months[m.id], idx) }))];
+    })
+  ),
+};
+
+/* ------------------------------------------------------------------
+   EMIT
+------------------------------------------------------------------ */
+const market = {
+  contract: {
+    ...CONTRACT,
+    coveragePct: Math.round((CONTRACT.visitedThisMonth / CONTRACT.contractedPos) * 1000) / 10,
+    remaining: CONTRACT.contractedPos - CONTRACT.visitedThisMonth,
+    currentMonth: CURRENT,
+    corePanel: CORE.size,
+  },
+  months: MONTHS,
+  cities: CITIES,
+  districts: Object.entries(DISTRICTS).flatMap(([cityId, names]) =>
+    names.map((name) => ({ cityId, name }))
+  ),
+  channels: CHANNELS.map(({ id, name, size }) => ({ id, name, size })),
+  retailers: RETAILERS,
+  brands: BRANDS,
+  skus: SKUS,
+  posmTypes: POSM_TYPES.map(({ id, name, channels }) => ({ id, name, channels })),
+  oosReasons: OOS_REASONS.map(({ id, name }) => ({ id, name })),
+  shelfPositions: SHELF_POSITIONS,
+  scoreWeights: SCORE_WEIGHTS,
+  sharePar: SHARE_PAR,
+  requiredSkus: REQUIRED_SKUS,
+  kpiTargets: { availability: 95, price: 90, posm: 85, assortment: 90, score: 85 },
+  pos: POS,
+};
+
+/* Not-listed cells are dropped from the payload: absence IS "not
+   listed", every SKU is checked at every audited outlet, and keeping
+   them would add a third of the bytes to say nothing. */
+for (const m of MONTHS) {
+  months[m.id].matrix = months[m.id].matrix.filter((r) => r[2] !== 0);
+}
+
+mkdirSync(OUT, { recursive: true });
+const files = { "market.json": market, "trends.json": trends };
+for (const m of MONTHS) {
+  files[`month-${m.id}.json`] = months[m.id];
+  if (m.id === CURRENT) files["month-current.json"] = months[m.id];
+}
+let bytes = 0;
+for (const [name, payload] of Object.entries(files)) {
+  const json = name.startsWith("month-")
+    ? JSON.stringify(payload)
+    : JSON.stringify(payload, null, 2) + "\n";
+  bytes += json.length;
+  writeFileSync(join(OUT, name), json);
+}
+
+console.log(`\nWrote ${Object.keys(files).length} payloads · ${(bytes / 1024 / 1024).toFixed(2)} MB total`);
+console.log(`  current month bundle ${(JSON.stringify(months[CURRENT]).length / 1024).toFixed(0)} KB`);
+console.log(`  core-panel trend: ${trends.core.map((t) => t.score).join(" → ")} execution score`);
+console.log(`  market trend:     ${trends.market.map((t) => t.availability).join(" → ")} availability`);

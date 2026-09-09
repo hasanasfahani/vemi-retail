@@ -10,7 +10,9 @@
     "data:build": "node scripts/build-portal-data.mjs",
     "data:check": "node scripts/check-portal-data.mjs && vitest run",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "market:build": "node scripts/build-market-data.mjs",
+    "market:check": "node scripts/check-market-data.mjs"
   },
   "dependencies": {
     "framer-motion": "^12.42.2",
