@@ -453,6 +453,29 @@ function shelfDrift(monthId, brandId, cityId) {
   return place;
 }
 
+/* ------------------------------------------------------------------
+   BRAND PRICE POSITION.
+
+   Every brand used to price off the same RRP with the same variance,
+   which meant the Competition page's price-position chart was six
+   bubbles in a vertical line: arithmetically correct, and saying
+   nothing. Real categories are not like that — a value challenger
+   undercuts, a premium brand holds.
+
+   The CLIENT is deliberately left at 1.0. Its price compliance is a
+   calibrated headline figure measured against RRP, and moving it would
+   move a number the checks are tuned against. Everyone else takes a
+   position around it.
+------------------------------------------------------------------ */
+const BRAND_PRICE = {
+  pepsi: 1,
+  "coca-cola": 1.005,   // shoulder to shoulder with the client
+  "7up": 0.975,
+  mirinda: 0.97,
+  "mountain-dew": 0.99,
+  "rc-cola": 0.9,       // the value challenger, and it shows on shelf
+};
+
 /* Pepsi 500ml has been emptying more often as the half went on. */
 function oosDrift(monthId, sku) {
   const t = progress(monthId);
@@ -461,6 +484,67 @@ function oosDrift(monthId, sku) {
 
 /* POSM has slipped; it was near target in April. */
 const posmDrift = (monthId) => 1 + 0.16 * (1 - progress(monthId));
+
+/* ------------------------------------------------------------------
+   PROMOTIONS AND SECONDARY DISPLAYS.
+
+   A real audit records these — a gondola end, a price flash, a branded
+   chiller by the till — and the brief asks the Competition page to
+   report them. They are observed per BRAND per outlet, not per SKU:
+   an auditor notes that Coca-Cola is running something here, not that
+   a particular can is.
+
+   Drawn from their own random stream, for the same reason placement
+   is: promotions were added after the shelf figures were calibrated,
+   and sharing the main generator would have shifted every later draw
+   and moved numbers the checks are tuned against.
+
+   The drift is the brief's story told a second way. Coca-Cola's
+   activity has climbed hard through the half and hardest in Basra —
+   which is where its shelf gain shows up. A competitor taking shelf
+   without visible activity behind it would be a market nobody could
+   explain; this is the mechanism under the movement.
+------------------------------------------------------------------ */
+const promoRand = mulberry32(717171);
+const promoPick = (p) => promoRand() < p;
+
+/* Baseline share of audited outlets running something, per brand. */
+const PROMO_BASE = {
+  pepsi: 0.22, "coca-cola": 0.26, "7up": 0.12,
+  mirinda: 0.10, "mountain-dew": 0.07, "rc-cola": 0.06,
+};
+
+function promoRate(monthId, brandId, cityId) {
+  const t = progress(monthId);
+  const base = PROMO_BASE[brandId] ?? 0.08;
+  if (brandId === "coca-cola") {
+    /* From roughly half its September level in April, and steeper in
+       Basra, where the shelf swing happened. */
+    const climb = cityId === "basra" ? 0.62 : 0.3;
+    return base * (cityId === "basra" ? 1.35 : 1) * (1 - climb * (1 - t));
+  }
+  if (brandId === CLIENT.id) {
+    /* Broadly flat: the client has not answered. */
+    return base * (1 + 0.06 * (1 - t));
+  }
+  return base;
+}
+
+/* A secondary display is the bigger commitment — floor space, not a
+   shelf talker — so it is rarer, and only in formats that have room. */
+const DISPLAY_CHANNELS = new Set(["hypermarket", "supermarket", "mini-market"]);
+
+function promosFor(monthId, pos) {
+  const rows = [];
+  for (const brand of BRANDS) {
+    const rate = promoRate(monthId, brand.id, pos.cityId) * (0.7 + pos.volume * 0.4);
+    const promo = promoPick(Math.min(0.9, rate));
+    const display =
+      DISPLAY_CHANNELS.has(pos.channel) && promoPick(Math.min(0.6, rate * 0.45));
+    if (promo || display) rows.push([brand.id, promo ? 1 : 0, display ? 1 : 0]);
+  }
+  return rows;
+}
 
 /* ------------------------------------------------------------------
    ONE VISIT.
@@ -500,8 +584,12 @@ function visitFor(monthId, pos) {
     cells.push([sku.id, listed ? (inStock ? 1 : 2) : 0, facings, position]);
 
     if (inStock) {
+      /* The brand's position multiplies the draw rather than adding a
+         draw of its own, so the random stream — and every figure
+         downstream of it — is untouched. */
       const price = Math.round(
-        (sku.rrp * between(0.985, 1.048) * (pick(0.082) ? between(1.08, 1.2) : 1)) / 25
+        (sku.rrp * BRAND_PRICE[brand.id] *
+          between(0.985, 1.048) * (pick(0.082) ? between(1.08, 1.2) : 1)) / 25
       ) * 25;
       prices.push([sku.id, price]);
     } else {
@@ -525,7 +613,7 @@ function visitFor(monthId, pos) {
     pick(clamp(0.05, 0.97, 0.738 * posmDrift(monthId) * posmBias.get(pos.id) * (t.id === "cooler" ? 0.85 : 1))),
   ]);
 
-  return { cells, oos, prices, posm };
+  return { cells, oos, prices, posm, promos: promosFor(monthId, pos) };
 }
 
 console.log("shelf model ready");
@@ -593,6 +681,7 @@ function scoreVisit(v, pos) {
 ------------------------------------------------------------------ */
 const skuIndex = new Map(SKUS.map((s, i) => [s.id, i]));
 const posIndex = new Map(POS.map((p, i) => [p.id, i]));
+const brandIndex = new Map(BRANDS.map((b, i) => [b.id, i]));
 const posmIndex = new Map(POSM_TYPES.map((t, i) => [t.id, i]));
 const reasonIndex = new Map(OOS_REASONS.map((r, i) => [r.id, i]));
 const POSITION_IDX = { eye: 0, upper: 1, lower: 2 };
@@ -600,7 +689,7 @@ const POSITION_IDX = { eye: 0, upper: 1, lower: 2 };
 const months = {};
 for (const month of MONTHS) {
   const audited = auditedIn(month.id);
-  const bundle = { month: month.id, audited: [], matrix: [], oos: [], prices: [], posm: [], scores: [] };
+  const bundle = { month: month.id, audited: [], matrix: [], oos: [], prices: [], posm: [], promos: [], scores: [] };
 
   for (const pos of audited) {
     const v = visitFor(month.id, pos);
@@ -625,6 +714,9 @@ for (const month of MONTHS) {
     }
     for (const [typeId, present] of v.posm) {
       bundle.posm.push([pi, posmIndex.get(typeId), present ? 1 : 0]);
+    }
+    for (const [brandId, promo, display] of v.promos) {
+      bundle.promos.push([pi, brandIndex.get(brandId), promo, display]);
     }
     const s = scoreVisit(v, pos);
     bundle.scores.push([pi, s.score, s.availability, s.shelfShare, s.assortment, s.price, s.posm]);
@@ -688,6 +780,29 @@ function aggregate(bundle, filterPos) {
     posm: mean(6),
     brandShare: Object.fromEntries(
       BRANDS.map((b) => [b.id, total ? Math.round(((facings.get(b.id) ?? 0) / total) * 1000) / 10 : 0])
+    ),
+    /* Share of audited outlets running a promotion, per brand — the
+       activity behind a shelf movement, so the Competition page can
+       say what a competitor DID as well as what it gained. */
+    promoShare: Object.fromEntries(
+      BRANDS.map((b, bi) => {
+        const outlets = new Set(
+          bundle.promos
+            .filter((r) => r[1] === bi && r[2] === 1 && (!keep || keep.has(r[0])))
+            .map((r) => r[0])
+        ).size;
+        return [b.id, rows.length ? Math.round((outlets / rows.length) * 1000) / 10 : 0];
+      })
+    ),
+    displayShare: Object.fromEntries(
+      BRANDS.map((b, bi) => {
+        const outlets = new Set(
+          bundle.promos
+            .filter((r) => r[1] === bi && r[3] === 1 && (!keep || keep.has(r[0])))
+            .map((r) => r[0])
+        ).size;
+        return [b.id, rows.length ? Math.round((outlets / rows.length) * 1000) / 10 : 0];
+      })
     ),
   };
 }

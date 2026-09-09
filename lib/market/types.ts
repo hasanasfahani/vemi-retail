@@ -145,6 +145,16 @@ export type PriceReading = {
 
 export type PosmReading = { posId: string; typeId: string; present: boolean };
 
+/* What a brand was DOING at an outlet, as opposed to what it held.
+   Observed per brand, not per SKU: an auditor records that Coca-Cola
+   is running something here, not that a particular can is. */
+export type PromoReading = {
+  posId: string;
+  brandId: string;
+  promo: boolean;
+  display: boolean;
+};
+
 /* Per-outlet execution, computed in the generator so every surface
    reads the same number rather than each recomputing the composite. */
 export type PosScore = {
@@ -164,6 +174,7 @@ export type MonthData = {
   gaps: Gap[];
   prices: PriceReading[];
   posm: PosmReading[];
+  promos: PromoReading[];
   scores: PosScore[];
 };
 
@@ -179,6 +190,11 @@ export type TrendPoint = {
   price: number;
   posm: number;
   brandShare: Record<string, number>;
+  /* Share of audited outlets where the brand was running a promotion,
+     and where it held a secondary display — the activity behind a
+     shelf movement, so a gain can be explained and not just reported. */
+  promoShare: Record<string, number>;
+  displayShare: Record<string, number>;
 };
 
 export type Trends = {

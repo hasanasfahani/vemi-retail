@@ -134,6 +134,12 @@ export function applyFilters(f: Filters, data: MonthData) {
   const gaps = data.gaps.filter((g) => posIds.has(g.posId) && skuIds.has(g.skuId));
   const prices = data.prices.filter((p) => posIds.has(p.posId) && skuIds.has(p.skuId));
   const posmRows = data.posm.filter((p) => posIds.has(p.posId));
+  /* Promotions are observed per brand, so the brand filter applies
+     here the same way the SKU filter applies to cells. */
+  const brandIds = new Set(f.brands.length ? f.brands : brands.map((b) => b.id));
+  const promoRows = data.promos.filter(
+    (p) => posIds.has(p.posId) && brandIds.has(p.brandId)
+  );
   const scores = data.scores.filter((s) => posIds.has(s.posId));
 
   const skuBrand = new Map(skus.map((s) => [s.id, s.brandId]));
@@ -179,7 +185,7 @@ export function applyFilters(f: Filters, data: MonthData) {
     notAuditedCount: inScope.length - audited.length,
     coveragePct: pct(audited.length, inScope.length),
     /* rows */
-    cells, gaps, prices, posm: posmRows, scores,
+    cells, gaps, prices, posm: posmRows, promos: promoRows, scores,
     /* rollups */
     byBrand,
     client: byBrand.find((b) => b.isClient),

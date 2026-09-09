@@ -15,7 +15,7 @@ import trendsJson from "../data/market/trends.json";
 import currentJson from "../data/market/month-current.json";
 import type {
   Cell, Gap, Market, MonthData, PosScore, PosmReading, PriceReading,
-  ShelfPosition, Trends,
+  PromoReading, ShelfPosition, Trends,
 } from "./types";
 
 export * from "./types";
@@ -81,6 +81,7 @@ type RawMonth = {
   oos: [number, number, number, number][];
   prices: [number, number, number][];
   posm: [number, number, number][];
+  promos: [number, number, number, number][];
   scores: [number, number, number, number, number, number, number][];
 };
 
@@ -124,6 +125,13 @@ function hydrate(raw: RawMonth): MonthData {
     present: present === 1,
   }));
 
+  const promos: PromoReading[] = raw.promos.map(([p, b, promo, display]) => ({
+    posId: posId(p),
+    brandId: brands[b].id,
+    promo: promo === 1,
+    display: display === 1,
+  }));
+
   const scores: PosScore[] = raw.scores.map(
     ([p, score, availability, shelfShare, assortment, price, posmPct]) => ({
       posId: posId(p),
@@ -139,7 +147,7 @@ function hydrate(raw: RawMonth): MonthData {
   return {
     month: raw.month,
     audited: raw.audited.map(([p, auditedAt]) => ({ posId: posId(p), auditedAt })),
-    cells, gaps, prices, posm: posmRows, scores,
+    cells, gaps, prices, posm: posmRows, promos, scores,
   };
 }
 

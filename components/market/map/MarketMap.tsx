@@ -27,6 +27,12 @@ export type MapPoint = {
   value: number;
   band: Band;
   meta?: string;
+  /* Aggregate points — a district rather than an outlet — carry their
+     own size and colour: size says how much evidence sits under the
+     bubble, colour says which brand leads it, and neither is a health
+     band. When these are given the band is used only as a fallback. */
+  radius?: number;
+  color?: string;
 };
 
 export default function MarketMap({
@@ -36,6 +42,7 @@ export default function MarketMap({
   unit = "",
   center,
   zoom,
+  cluster = true,
 }: {
   points: MapPoint[];
   onSelect?: (id: string) => void;
@@ -43,6 +50,10 @@ export default function MarketMap({
   unit?: string;
   center?: [number, number];
   zoom?: number;
+  /* Outlets cluster; aggregates do not. A bubble that already stands
+     for twelve outlets must not be merged into a bubble standing for
+     forty — the reader would have no idea what the number meant. */
+  cluster?: boolean;
 }) {
   const host = useRef<HTMLDivElement>(null);
   const map = useRef<import("leaflet").Map | null>(null);
@@ -126,11 +137,12 @@ export default function MarketMap({
 
       layer.current?.remove();
 
-      const cluster = (
-        L as unknown as {
-          markerClusterGroup: (o: Record<string, unknown>) => import("leaflet").LayerGroup;
-        }
-      ).markerClusterGroup({
+      const group = cluster
+        ? (
+            L as unknown as {
+              markerClusterGroup: (o: Record<string, unknown>) => import("leaflet").LayerGroup;
+            }
+          ).markerClusterGroup({
         showCoverageOnHover: false,
         maxClusterRadius: 46,
         /* A cluster is coloured by the WORST state inside it. A bubble
@@ -159,35 +171,36 @@ export default function MarketMap({
             iconSize: [size, size],
           });
         },
-      });
+          })
+        : L.layerGroup();
 
       for (const p of points) {
         const marker = L.circleMarker([p.lat, p.lng], {
-          radius: 6,
+          radius: p.radius ?? 6,
           weight: 2,
           color: "#ffffff",
-          fillColor: BAND_COLOR[p.band],
-          fillOpacity: 1,
+          fillColor: p.color ?? BAND_COLOR[p.band],
+          fillOpacity: p.color ? 0.85 : 1,
         }) as import("leaflet").CircleMarker & { options: { band?: Band } };
         marker.options.band = p.band;
         marker.bindTooltip(
-          `<strong>${p.name}</strong><br>${BAND_LABEL[p.band]} · ${p.value}${unit}${
+          `<strong>${p.name}</strong><br>${p.color ? "" : `${BAND_LABEL[p.band]} · `}${p.value}${unit}${
             p.meta ? `<br>${p.meta}` : ""
           }`,
           { direction: "top", offset: [0, -6] }
         );
         if (onSelect) marker.on("click", () => onSelect(p.id));
-        cluster.addLayer(marker);
+        group.addLayer(marker);
       }
 
-      cluster.addTo(map.current);
-      layer.current = cluster;
+      group.addTo(map.current);
+      layer.current = group;
     })();
 
     return () => {
       live = false;
     };
-  }, [points, ready, onSelect, unit]);
+  }, [points, ready, onSelect, unit, cluster]);
 
   return (
     <div className="relative overflow-hidden rounded-[12px] border border-line">

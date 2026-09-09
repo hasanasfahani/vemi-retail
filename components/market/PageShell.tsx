@@ -14,7 +14,12 @@ import { useEffect } from "react";
 import type { MonthData } from "@/lib/market/types";
 
 type ShellProps = {
-  children: (view: MarketView, search: string) => ReactNode;
+  /* The month's raw rows come with the view, because one page — the
+     Competition page — has to re-derive a view the brand filter does
+     NOT narrow: a brand comparison with five of six brands filtered
+     out is not a comparison. Everything else uses `view` and never
+     touches this. */
+  children: (view: MarketView, search: string, data: MonthData) => ReactNode;
   /* Opt in per page — search is page-local by design. */
   search?: boolean;
   searchPlaceholder?: string;
@@ -82,7 +87,7 @@ function Shell({ children, search, searchPlaceholder }: ShellProps) {
         searchPlaceholder={searchPlaceholder}
       />
       <main className="min-w-0 flex-1 overflow-x-hidden px-4 py-5 sm:px-6">
-        {children(view, query)}
+        {children(view, query, data)}
       </main>
     </>
   );

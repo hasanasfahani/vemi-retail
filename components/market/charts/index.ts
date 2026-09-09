@@ -3,6 +3,7 @@ export { default as StackedBars, type StackSeries } from "./StackedBars";
 export { default as RankedBars, type RankedRow } from "./RankedBars";
 export { default as ShareDonut, type Slice } from "./ShareDonut";
 export { default as Heatmap } from "./Heatmap";
+export { default as BubbleScatter, type Bubble } from "./BubbleScatter";
 export { default as ChartLegend } from "./ChartLegend";
 export { default as ChartTooltip } from "./ChartTooltip";
 export * from "./theme";
