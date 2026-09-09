@@ -266,7 +266,9 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
             Which execution dimension is weak, across everything audited
           </p>
         </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        {/* Six across only above 1536px. At 1280 the tiles were 154px
+            wide, which is narrower than the words on them. */}
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
           <KpiCard label="Availability" value={view.kpi.availability} target={targets.availability} trend={series.availability} delta={move("availability")} deltaFloor={1.73} href="/portal/performance?tab=availability" />
           <KpiCard label="Shelf share" value={view.client?.share ?? 0} target={targets.shelfShare} trend={series.shelfShare} delta={move("shelfShare")} deltaFloor={1.81} href="/portal/performance?tab=shelf" />
           <KpiCard label="Assortment" value={view.kpi.assortment} target={targets.assortment} trend={series.assortment} delta={move("assortment")} deltaFloor={1.8} href="/portal/performance?tab=assortment" />
@@ -401,7 +403,7 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
           </Method>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
           {cityRows2.map((row) => (
             <CityHealthCard key={row.cityId} health={row} />
           ))}

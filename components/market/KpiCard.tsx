@@ -56,18 +56,14 @@ export default function KpiCard({
       href={href}
       className="group flex min-w-0 flex-col rounded-[14px] border border-line bg-white p-3.5 shadow-[var(--shadow-card)] outline-none transition-colors hover:border-ink-400 focus-visible:border-violet"
     >
-      <div className="flex items-start justify-between gap-2">
-        <span className="min-w-0 truncate text-[11px] font-semibold uppercase tracking-wide text-ink-400">
-          {label}
-        </span>
-        <span
-          className="inline-flex shrink-0 items-center gap-1 rounded-full px-1.5 py-[1px] text-[10.5px] font-semibold"
-          style={{ background: `${color}1a`, color }}
-        >
-          <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden />
-          {BAND_LABEL[resolved]}
-        </span>
-      </div>
+      {/* The label owns its own line. Sharing a row with the status
+          pill, the pill won and "Shelf share" was rendered in 16px of
+          the 78px it needs — every one of the six tiles was clipped at
+          1280px. The status moved down beside the movement figure,
+          where it has room and reads as part of the same judgement. */}
+      <span className="block truncate text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+        {label}
+      </span>
 
       <div className="mt-2 flex items-end justify-between gap-2">
         <span className="font-display text-[27px] font-bold leading-none tracking-tight text-ink-900">
@@ -101,7 +97,14 @@ export default function KpiCard({
         </span>
       </div>
 
-      <div className="mt-1.5">
+      <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+        <span
+          className="inline-flex shrink-0 items-center gap-1 rounded-full px-1.5 py-[1px] text-[10.5px] font-semibold"
+          style={{ background: `${color}1a`, color }}
+        >
+          <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden />
+          {BAND_LABEL[resolved]}
+        </span>
         <Delta value={delta} floor={deltaFloor} label="vs last month" />
       </div>
     </Link>

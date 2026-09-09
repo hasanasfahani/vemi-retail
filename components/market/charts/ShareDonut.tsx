@@ -109,7 +109,7 @@ export default function ShareDonut({
               style={{ background: colorOf(slice.id, i) }}
               aria-hidden
             />
-            <span className="min-w-0 truncate text-ink-700">{slice.name}</span>
+            <span className="min-w-0 flex-1 leading-snug text-ink-700">{slice.name}</span>
             <span className="mono ml-auto font-semibold text-ink-900">
               {((slice.value / total) * 100).toFixed(1)}%
             </span>

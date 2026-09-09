@@ -111,20 +111,42 @@ export default function ShelfScene({
           const top = index * shelfHeight;
           const base = top + shelfHeight - 9;
 
-          /* Lay the packs out left to right, dropping any that run off
-             the board rather than shrinking them into a smear. */
+          /* Lay the packs out left to right, CLAMPING each group to
+             what is left of the board.
+
+             This used to `break` the moment a group did not fit, and
+             the first group is the widest — a hypermarket bay of 39
+             facings is 700px of bottles against a 320px board. The
+             result was that the largest stores in the panel, 225 of
+             742 outlets, drew a completely empty shelf while the
+             numbers beside them reported full stock. A drawing that
+             contradicts its own caption is worse than no drawing.
+
+             So a group now draws as many packs as fit, and the scene
+             reports what it had to leave out. */
           let x = 10;
           const drawn: { slot: Slot; x: number; n: number }[] = [];
           let budget = maxFacings;
+          let dropped = 0;
           for (const slot of slots) {
             const shape = PACK_SHAPE[slot.pack] ?? DEFAULT_SHAPE;
-            const n = Math.max(1, Math.min(slot.facings, budget));
-            const width = n * (shape.w + 1.5);
-            if (x + width > 310) break;
+            const wanted = Math.max(1, Math.min(slot.facings, budget));
+            const room = Math.floor((310 - x) / (shape.w + 1.5));
+            if (room < 1) {
+              dropped += slot.facings;
+              continue;
+            }
+            const n = Math.min(wanted, room);
+            dropped += Math.max(0, slot.facings - n);
             drawn.push({ slot, x, n });
-            x += width + 5;
+            x += n * (shape.w + 1.5) + 5;
             budget -= n;
-            if (budget <= 0) break;
+            if (budget <= 0) {
+              dropped += slots
+                .slice(slots.indexOf(slot) + 1)
+                .reduce((sum, rest) => sum + rest.facings, 0);
+              break;
+            }
           }
 
           return (
@@ -135,6 +157,15 @@ export default function ShelfScene({
               <text x={8} y={top + 12} fontSize={7.5} fill="var(--color-ink-400)" letterSpacing={0.4}>
                 {shelf.label.toUpperCase()}
               </text>
+
+              {dropped > 0 && (
+                <text
+                  x={312} y={top + 12} textAnchor="end"
+                  fontSize={7} fill="var(--color-ink-400)"
+                >
+                  +{dropped} more
+                </text>
+              )}
 
               {drawn.map(({ slot, x: left, n }) => {
                 const shape = PACK_SHAPE[slot.pack] ?? DEFAULT_SHAPE;

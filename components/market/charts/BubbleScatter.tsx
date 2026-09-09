@@ -92,10 +92,13 @@ export default function BubbleScatter({
                 strokeWidth={2}
               />
             ))}
+            {/* `xml:space` preserved, or SVG collapses the space in
+                "Mountain Dew" and the chart reads "MountainDew". */}
             <LabelList
               dataKey="name"
               position="top"
               offset={10}
+              xmlSpace="preserve"
               style={{ fill: "var(--color-ink-500)", fontSize: 11, fontWeight: 600 }}
             />
           </Scatter>

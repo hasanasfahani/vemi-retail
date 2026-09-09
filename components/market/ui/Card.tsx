@@ -33,9 +33,13 @@ export default function Card({
     <section
       className={`rounded-[14px] border border-line bg-white shadow-[var(--shadow-card)] ${className}`}
     >
+      {/* The header wraps rather than competes: a six-brand legend in
+          the action slot squeezed "Shelf battle by city" into 76px and
+          four lines of type, so below a certain width the action drops
+          to its own row instead. */}
       {head && (
-        <header className="flex items-start justify-between gap-3 px-4 pb-3 pt-3.5 sm:px-5">
-          <div className="min-w-0">
+        <header className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2 px-4 pb-3 pt-3.5 sm:px-5">
+          <div className="min-w-[210px] flex-1">
             {title && (
               <h2 className="font-display text-[14.5px] font-bold tracking-tight text-ink-900">
                 {title}
@@ -47,7 +51,7 @@ export default function Card({
               </p>
             )}
           </div>
-          {action && <div className="shrink-0">{action}</div>}
+          {action && <div className="shrink-0 empty:hidden">{action}</div>}
         </header>
       )}
       <div className={padded ? `px-4 sm:px-5 ${head ? "pb-4" : "py-4"}` : ""}>
