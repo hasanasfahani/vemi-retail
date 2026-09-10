@@ -151,3 +151,23 @@ describe("adopting a stored list", () => {
     expect(getWatches()).toHaveLength(1);
   });
 });
+
+describe("a single line is a different question from the range", () => {
+  it("reads a SKU-scoped assortment watch as that line's penetration", () => {
+    /* This is what the SKU charts draw: the share of audited outlets
+       carrying the line. Averaging outlets' whole-range scores would
+       pin a number the reader never saw. */
+    const sku = current.cells.find(() => true)!.skuId;
+    const carrying = new Set(
+      view.cells.filter((c) => c.skuId === sku).map((c) => c.posId)
+    ).size;
+    const expected = Math.round((carrying / view.outlets.length) * 1000) / 10;
+    expect(watchValue(make({ kpi: "assortment", scope: { skuId: sku } }), view))
+      .toBeCloseTo(expected, 1);
+  });
+
+  it("still reads an unscoped assortment watch as the range score", () => {
+    const whole = watchValue(make({ kpi: "assortment" }), view);
+    expect(whole).toBeCloseTo(view.kpi.assortment, 1);
+  });
+});

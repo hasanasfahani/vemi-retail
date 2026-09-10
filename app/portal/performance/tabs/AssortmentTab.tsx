@@ -18,7 +18,7 @@ import { Card, StatCard } from "@/components/market/ui";
 import KpiGapBar from "@/components/market/KpiGapBar";
 import DownloadGaps from "@/components/market/DownloadGaps";
 import RequestFollowUp from "@/components/market/RequestFollowUp";
-import { Heatmap, RankedBars, brandColor } from "@/components/market/charts";
+import { DotPlot, Heatmap, RankedBars } from "@/components/market/charts";
 import { assortment } from "@/lib/market/performance";
 import { governorates, governorateName, clientBrand, requiredSkus, skus } from "@/lib/market";
 import { useTargets } from "@/components/market/useTargets";
@@ -72,6 +72,16 @@ export default function AssortmentTab({ view }: { view: MarketView }) {
           label="Outlets audited"
           value={view.posCount}
           explain="Outlets the field team reached this cycle. Penetration is the share of THESE that list a line — an outlet nobody visited is not an outlet that refused the range."
+          watch={
+            <WatchEye
+              kpi="assortment"
+              scope={{}}
+              value={view.kpi.assortment}
+              target={targets.assortment}
+              month={view.month}
+              size="sm"
+            />
+          }
           footnote={`${view.coveragePct}% of the outlets in scope`}
         />
         {/* Penetration has no stated target — the audit does not say
@@ -83,6 +93,18 @@ export default function AssortmentTab({ view }: { view: MarketView }) {
           value={a.penetration[0]?.value ?? 0}
           unit="%"
           explain="The client line carried by the largest share of audited outlets. There is no band on this tile: the audit states no target for how many doors a single line should reach, and inventing one would assert a standard nobody set."
+          watch={
+            a.penetration[0] ? (
+              <WatchEye
+                kpi="assortment"
+                scope={{ skuId: a.penetration[0].id }}
+                value={a.penetration[0].value}
+                target={targets.assortment}
+                month={view.month}
+                size="sm"
+              />
+            ) : undefined
+          }
           footnote={a.penetration[0]?.label}
         />
         <StatCard
@@ -90,6 +112,18 @@ export default function AssortmentTab({ view }: { view: MarketView }) {
           value={worstSku?.value ?? 0}
           unit="%"
           explain="The client line carried by the smallest share of audited outlets — the widest distribution headroom in the range, and the one a rep can sell against on the next visit."
+          watch={
+            worstSku ? (
+              <WatchEye
+                kpi="assortment"
+                scope={{ skuId: worstSku.id }}
+                value={worstSku.value}
+                target={targets.assortment}
+                month={view.month}
+                size="sm"
+              />
+            ) : undefined
+          }
           footnote={worstSku?.label}
         />
       </div>
@@ -99,6 +133,27 @@ export default function AssortmentTab({ view }: { view: MarketView }) {
         lead="Share of audited outlets in each governorate that list the SKU."
         footnote="Penetration, not stock: this says whether the door carries the line at all. Whether it was on shelf that day is the Availability tab's question."
       >
+        {/* One eye per line, above the grid — a heatmap cell is a
+            SKU-and-place pair, and the watchlist slices one dimension
+            at a time, so the row is the honest unit to pin. */}
+        <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+          {clientSkus.map((sku) => {
+            const row = a.penetration.find((r) => r.id === sku.id);
+            return (
+              <span key={sku.id} className="inline-flex items-center gap-0.5 text-[11px] text-ink-500">
+                {sku.name}
+                <WatchEye
+                  kpi="assortment"
+                  scope={{ skuId: sku.id }}
+                  value={row?.value ?? 0}
+                  target={targets.assortment}
+                  month={view.month}
+                  size="sm"
+                />
+              </span>
+            );
+          })}
+        </div>
         <Heatmap
           rows={clientSkus.map((s) => ({ id: s.id, label: s.name }))}
           columns={governorates.map((c) => ({ id: c.id, label: c.name }))}
@@ -115,14 +170,23 @@ export default function AssortmentTab({ view }: { view: MarketView }) {
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card title="SKU penetration" lead="Audited outlets listing each client line.">
-          <RankedBars
+          <DotPlot
             rows={a.penetration.map((row) => ({
               id: row.id,
               label: row.label,
               value: row.value,
-              color: brandColor(clientBrand.id),
-              meta: `${row.outlets.toLocaleString()} listing · ${row.missing.toLocaleString()} not carrying it`,
+              watch: (
+                <WatchEye
+                  kpi="assortment"
+                  scope={{ skuId: row.id }}
+                  value={row.value}
+                  target={targets.assortment}
+                  month={view.month}
+                  size="sm"
+                />
+              ),
             }))}
+            min={0}
             max={100}
             unit="%"
           />

@@ -22,6 +22,7 @@
 
 import type { IssueKpi } from "./issues";
 import { KPI_LABEL } from "./issues";
+import { KPI_NAME } from "./kpiLabels";
 import type { MarketView } from "./filters";
 import { governorateName, channelName, clientBrand, brands, skuOf } from "./index";
 
@@ -44,9 +45,23 @@ export type WatchScope = {
   skuId?: string;
 };
 
+/* The measures a figure can be pinned on. The five audit KPIs and the
+   composite, plus three the Competition page states and nothing else
+   did: promotion coverage, eye-level conversion, and districts led.
+
+   All three are recomputable from the same rows every cycle, which is
+   the only test that matters here — a watch that cannot be recomputed
+   is a screenshot with a target written on it. */
+export type WatchKpi =
+  | IssueKpi
+  | "score"
+  | "promo"
+  | "visibility"
+  | "districtsLed";
+
 export type Watch = {
   id: string;
-  kpi: IssueKpi | "score";
+  kpi: WatchKpi;
   scope: WatchScope;
   /* What the reader wants it to reach. Defaults to the KPI's target,
      which is a figure already on the page rather than one somebody had
@@ -61,15 +76,33 @@ export type Watch = {
   note?: string;
 };
 
-export const WATCH_KPI_LABEL: Record<Watch["kpi"], string> = {
+export const WATCH_KPI_LABEL: Record<WatchKpi, string> = {
   ...KPI_LABEL,
-  score: "Execution score",
+  score: KPI_NAME.score,
+  promo: "Promotion presence",
+  visibility: "Eye-level conversion",
+  districtsLed: "Districts led",
+};
+
+/* Most of these are rates. Districts led is a count, and appending a
+   percent sign to it would turn nineteen districts into nineteen
+   percent of something unnamed. */
+export const WATCH_KPI_UNIT: Record<WatchKpi, string> = {
+  availability: "%",
+  shelfShare: "%",
+  assortment: "%",
+  price: "%",
+  posm: "%",
+  score: "",
+  promo: "%",
+  visibility: "%",
+  districtsLed: "",
 };
 
 /* One watch per question. Pinning the same measure over the same slice
    twice is not two watches, it is one watch clicked twice — and a list
    that fills with duplicates is a list nobody keeps. */
-export function watchId(kpi: Watch["kpi"], scope: WatchScope): string {
+export function watchId(kpi: WatchKpi, scope: WatchScope): string {
   return [
     kpi,
     scope.governorateId ?? "*",
@@ -194,6 +227,19 @@ export function watchValue(watch: Watch, view: MarketView): number | null {
     /* Range is a client contract figure; the audit states no expected
        range for a rival. */
     if (scope.brandId && scope.brandId !== clientBrand.id) return null;
+
+    /* ONE LINE IS A DIFFERENT QUESTION FROM THE RANGE. Scoped to a
+       SKU, "assortment" means that line's PENETRATION — the share of
+       audited outlets carrying it — which is what the SKU charts draw.
+       Averaging the outlets' whole-range scores instead would pin a
+       number the reader never saw and cannot find again. */
+    if (scope.skuId) {
+      const carrying = new Set(
+        view.cells.filter((c) => ids.has(c.posId) && c.skuId === scope.skuId).map((c) => c.posId)
+      );
+      return pct(carrying.size, outlets.length);
+    }
+
     const rows = view.scores.filter((s) => ids.has(s.posId));
     const usable = rows.map((s) => s.assortment).filter((v): v is number => v !== null);
     if (usable.length === 0) return null;
@@ -204,6 +250,60 @@ export function watchValue(watch: Watch, view: MarketView): number | null {
     const rows = view.prices.filter((p) => ids.has(p.posId) && mine(p.skuId));
     if (rows.length === 0) return null;
     return pct(rows.filter((p) => p.compliant).length, rows.length);
+  }
+
+  if (watch.kpi === "promo") {
+    /* Counted in DOORS. A promotion is either running at an outlet or
+       it is not, and converting that to a share of shelf would be
+       inventing a denominator. */
+    if (scope.skuId) return null;
+    const promoting = new Set(
+      view.promos.filter((p) => ids.has(p.posId) && p.brandId === brandId).map((p) => p.posId)
+    );
+    return pct(promoting.size, outlets.length);
+  }
+
+  if (watch.kpi === "visibility") {
+    /* Of the brand's OWN facings, the share at eye level. The
+       denominator is the brand's shelf, not the fixture: this asks how
+       well space is converted into visibility, which is a different
+       question from how much space there is. */
+    const stocked = view.cells.filter(
+      (c) => ids.has(c.posId) && c.state === "in-stock" && mine(c.skuId)
+    );
+    const total = stocked.reduce((s, c) => s + c.facings, 0);
+    if (total === 0) return null;
+    const eye = stocked
+      .filter((c) => c.position === "eye")
+      .reduce((s, c) => s + c.facings, 0);
+    return pct(eye, total);
+  }
+
+  if (watch.kpi === "districtsLed") {
+    /* Districts where this brand holds more of the fixture than any
+       other. Districts with fewer than three audited outlets are
+       excluded — one shop's shelf is not a district's position. */
+    if (scope.skuId) return null;
+    const byDistrict = new Map<string, Map<string, number>>();
+    const doorsIn = new Map<string, Set<string>>();
+    const outletById = new Map(outlets.map((o) => [o.id, o]));
+    for (const cell of view.cells) {
+      const outlet = outletById.get(cell.posId);
+      if (!outlet || cell.state !== "in-stock") continue;
+      const key = `${outlet.governorateId}|${outlet.district}`;
+      doorsIn.set(key, (doorsIn.get(key) ?? new Set()).add(cell.posId));
+      const held = byDistrict.get(key) ?? new Map<string, number>();
+      const b = skuOf(cell.skuId)?.brandId;
+      if (b) held.set(b, (held.get(b) ?? 0) + cell.facings);
+      byDistrict.set(key, held);
+    }
+    let led = 0;
+    for (const [key, held] of byDistrict) {
+      if ((doorsIn.get(key)?.size ?? 0) < 3) continue;
+      const top = [...held].sort((a, b) => b[1] - a[1])[0];
+      if (top && top[0] === brandId) led += 1;
+    }
+    return led;
   }
 
   /* POSM is recorded per outlet, not per SKU, so a line-scoped watch

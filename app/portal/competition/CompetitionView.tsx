@@ -14,6 +14,7 @@ import { useTargets } from "@/components/market/useTargets";
 import PosDrawer from "@/components/market/PosDrawer";
 import InsightCard from "@/components/market/InsightCard";
 import WatchEye from "@/components/market/WatchEye";
+import { KPI_NAME } from "@/lib/market/kpiLabels";
 import { countDetail } from "@/lib/market/bandDetail";
 import InsightDrawer from "@/components/market/InsightDrawer";
 import { useDecisions } from "@/components/market/useDecisions";
@@ -23,7 +24,7 @@ import { Card, EmptyState, StatCard, Tabs } from "@/components/market/ui";
 import Badge from "@/components/market/ui/Badge";
 import Bar from "@/components/market/ui/Bar";
 import {
-  BubbleScatter, ChartLegend, StackedBars, brandColor, orderedBrands,
+  BubbleScatter, ChartLegend, GapBars, StackedBars, brandColor, orderedBrands,
 } from "@/components/market/charts";
 import {
   byRetailer, districtLeads, pricePosition, scoreboard,
@@ -123,7 +124,7 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
         </div>
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {rows.slice(0, 3).map((row) => (
-            <ScoreCard key={row.id} row={row} leader={leader} />
+            <ScoreCard key={row.id} row={row} leader={leader} month={all.month} />
           ))}
         </div>
       </section>
@@ -186,6 +187,18 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
             footnote:
               "A count of places, not of volume. Leading many small districts and losing a few large ones can still leave the national share behind.",
           })}
+          watch={
+            <WatchEye
+              kpi="districtsLed"
+              scope={{}}
+              value={clientLeads}
+              /* More than half the districts with enough coverage to
+                 judge — the same bar the tile bands itself on. */
+              target={Math.ceil(leads.length / 2)}
+              month={all.month}
+              size="sm"
+            />
+          }
           footnote={`of ${leads.length} districts with at least three audited outlets`}
         />
         <StatCard
@@ -205,6 +218,19 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
             footnote:
               "Banded against the rival rather than a target: the audit sets no contracted promotion coverage, so the only honest comparison is what the competition is doing.",
           }}
+          watch={
+            <WatchEye
+              kpi="promo"
+              scope={{}}
+              value={client.promo}
+              /* No contracted promotion coverage exists, so the target
+                 is the rival's own figure — matching what the tile
+                 bands itself against. */
+              target={leader.promo}
+              month={all.month}
+              size="sm"
+            />
+          }
           footnote={`${leader.name} runs one in ${leader.promo}% of audited outlets`}
         />
         <StatCard
@@ -222,6 +248,16 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
             footnote:
               "No band on this tile: the audit sets no contracted eye-level share, so there is nothing to call strong or weak. The rival's figure is the only yardstick available.",
           }}
+          watch={
+            <WatchEye
+              kpi="visibility"
+              scope={{}}
+              value={client.visibility}
+              target={leader.visibility}
+              month={all.month}
+              size="sm"
+            />
+          }
           footnote={`Share of ${clientBrand.name} facings at eye level · ${leader.name} ${leader.visibility}%`}
         />
       </div>
@@ -231,8 +267,24 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
         title="Shelf battle"
         lead="Share of measured facings, 100% stacked."
         action={
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <ChartLegend items={ordered.map((b) => ({ id: b.id, name: b.name, color: brandColor(b.id) }))} />
+            {/* One eye per brand in the battle, beside the legend that
+                names them — the stacked bars themselves have no row to
+                hang a control on. */}
+            <span className="flex items-center gap-0.5">
+              {ordered.map((b) => (
+                <WatchEye
+                  key={b.id}
+                  kpi="shelfShare"
+                  scope={{ brandId: b.id }}
+                  value={rows.find((r) => r.id === b.id)?.share ?? 0}
+                  target={targets.shelfShare}
+                  month={all.month}
+                  size="sm"
+                />
+              ))}
+            </span>
           </div>
         }
         footnote="Retailer groups exclude independents — the absence of a group is not a group, and including it would make it the biggest one on the chart."
@@ -265,31 +317,31 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
           />
         </Card>
 
-        <Card title="Price position" lead="Indexed on the category average across every reading.">
-          <ul className="flex flex-col">
-            {rows.map((row) => (
-              <li key={row.id} className="border-b border-line py-2.5 last:border-0">
-                <div className="flex items-baseline justify-between gap-2">
-                  <span className="truncate text-[12.5px] font-medium text-ink-700">{row.name}</span>
-                  <span className="mono text-[12.5px] font-semibold text-ink-900">
-                    {row.averagePrice.toLocaleString()} {contract.currency}
-                  </span>
-                </div>
-                <div className="mt-1.5 flex items-center gap-2">
-                  <Bar
+        <Card
+          title="Price position"
+          lead="Indexed on the category average across every reading."
+          footnote="Bars run out from the 100 index — left is a value position, right is a premium one. Drawn from par rather than from zero because the distance from the category is the whole question, and a bar starting at zero draws that part smallest."
+        >
+          <GapBars
+            par={100}
+            unit=""
+            rows={rows.map((row) => ({
+              id: row.id,
+              label: row.name,
+              value: row.priceIndex,
+              watch:
+                row.isClient ? (
+                  <WatchEye
+                    kpi="price"
+                    scope={{ brandId: row.id }}
                     value={row.priceIndex}
-                    max={130}
-                    par={100}
-                    color={brandColor(row.id)}
-                    label={`${row.name} price index ${row.priceIndex}`}
+                    target={100}
+                    month={all.month}
+                    size="sm"
                   />
-                  <span className="mono w-[46px] shrink-0 text-right text-[11.5px] text-ink-400">
-                    {row.priceIndex}
-                  </span>
-                </div>
-              </li>
-            ))}
-          </ul>
+                ) : undefined,
+            }))}
+          />
         </Card>
       </div>
 
@@ -354,15 +406,19 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
 
 /* One brand's card. Every measure is computed the same way for every
    brand — the client gets no favourable denominator. */
-function ScoreCard({ row, leader }: { row: BrandRow; leader: BrandRow }) {
+function ScoreCard({ row, leader, month }: { row: BrandRow; leader: BrandRow; month: string }) {
   const targets = useTargets();
+  /* `kpi` is set only where the watchlist can find the figure again
+     next cycle. Facings per outlet and secondary displays have no
+     watchable measure behind them yet, so those two rows carry no eye
+     rather than an eye that pins something else. */
   const measures = [
-    { label: "Availability", value: row.availability, unit: "%", max: 100, par: targets.availability },
-    { label: "Share of shelf", value: row.share, unit: "%", max: 60, par: targets.shelfShare },
-    { label: "Facings per outlet", value: row.perOutlet, unit: "", max: 90 },
-    { label: "Eye-level share", value: row.visibility, unit: "%", max: 100 },
-    { label: "Promotion presence", value: row.promo, unit: "%", max: 50 },
-    { label: "Secondary displays", value: row.display, unit: "%", max: 30 },
+    { label: KPI_NAME.availability, value: row.availability, unit: "%", max: 100, par: targets.availability, kpi: "availability" as const },
+    { label: KPI_NAME.shelfShare, value: row.share, unit: "%", max: 60, par: targets.shelfShare, kpi: "shelfShare" as const },
+    { label: "Facings per outlet", value: row.perOutlet, unit: "", max: 90, kpi: null },
+    { label: "Eye-level share", value: row.visibility, unit: "%", max: 100, kpi: "visibility" as const },
+    { label: "Promotion presence", value: row.promo, unit: "%", max: 50, kpi: "promo" as const },
+    { label: "Secondary displays", value: row.display, unit: "%", max: 30, kpi: null },
   ];
 
   return (
@@ -397,6 +453,16 @@ function ScoreCard({ row, leader }: { row: BrandRow; leader: BrandRow }) {
           <div key={m.label} className="flex items-center gap-2">
             <dt className="w-[104px] shrink-0 text-[11.5px] text-ink-500">{m.label}</dt>
             <Bar value={m.value} max={m.max} par={m.par} color={brandColor(row.id)} label={`${row.name} ${m.label}`} />
+            {m.kpi && (
+              <WatchEye
+                kpi={m.kpi}
+                scope={{ brandId: row.id }}
+                value={m.value}
+                target={m.par ?? m.value}
+                month={month}
+                size="sm"
+              />
+            )}
             <dd className="mono w-[48px] shrink-0 text-right text-[12px] font-semibold text-ink-900">
               {m.value}
               {m.unit}

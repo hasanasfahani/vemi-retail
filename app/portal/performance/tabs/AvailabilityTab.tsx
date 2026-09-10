@@ -15,7 +15,7 @@ import { Card, StatCard } from "@/components/market/ui";
 import KpiGapBar from "@/components/market/KpiGapBar";
 import DownloadGaps from "@/components/market/DownloadGaps";
 import RequestFollowUp from "@/components/market/RequestFollowUp";
-import { ChartLegend, Heatmap, RankedBars, ShareDonut, StackedBars, brandColor, MEASURE } from "@/components/market/charts";
+import { ChartLegend, DotPlot, Heatmap, RankedBars, ShareDonut, StackedBars, brandColor, MEASURE } from "@/components/market/charts";
 import { scoreBand } from "@/components/market/ui/health";
 import { availability } from "@/lib/market/performance";
 import { governorates, governorateName } from "@/lib/market";
@@ -63,6 +63,16 @@ export default function AvailabilityTab({ view }: { view: MarketView }) {
           label="Listings checked"
           value={a.listings}
           explain="One listing is one client SKU at one outlet. An outlet that carries four client lines contributes four listings, so a wide-range door weighs more than a narrow one — which is the point: availability is measured over shelf positions, not over addresses."
+          watch={
+            <WatchEye
+              kpi="availability"
+              scope={{}}
+              value={a.rate}
+              target={targets.availability}
+              month={view.month}
+              size="sm"
+            />
+          }
           footnote="Client SKU × outlet pairs audited this month"
         />
         <StatCard
@@ -165,16 +175,26 @@ export default function AvailabilityTab({ view }: { view: MarketView }) {
         <Card
           title="Availability by SKU"
           lead="Worst first — the line to fix, not the range to admire."
-          footnote="Measured only where the SKU is listed, so a SKU nobody stocks cannot look like one everybody has run out of."
+          footnote="Measured only where the SKU is listed, so a SKU nobody stocks cannot look like one everybody has run out of. One dot per line on a shared scale, which stays readable as the range grows."
         >
-          <RankedBars
+          <DotPlot
             rows={a.bySku.map((row) => ({
               id: row.id,
               label: row.label,
               value: row.value,
               color: brandColor("pepsi"),
-              meta: `${row.out} gaps across ${row.listed.toLocaleString()} listings`,
+              watch: (
+                <WatchEye
+                  kpi="availability"
+                  scope={{ skuId: row.id }}
+                  value={row.value}
+                  target={targets.availability}
+                  month={view.month}
+                  size="sm"
+                />
+              ),
             }))}
+            min={0}
             max={100}
             par={targets.availability}
             unit="%"

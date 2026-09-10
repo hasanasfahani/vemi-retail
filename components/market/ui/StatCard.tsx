@@ -63,23 +63,31 @@ export default function StatCard({
 
   return (
     <div className="flex min-w-0 flex-col rounded-[14px] border border-line bg-white p-3.5 shadow-[var(--shadow-card)]">
-      <div className="flex items-start justify-between gap-2">
-        <span className="flex min-w-0 items-center gap-1">
-          <span className="truncate text-[11px] font-semibold uppercase tracking-wide text-ink-400">
-            {label}
-          </span>
-          {explain && <InfoTip label={`How ${label} is measured`}>{explain}</InfoTip>}
+      {/* THE LABEL OWNS ITS OWN ROW, and this is the second time that
+          lesson has been learned here. Sharing a row with a status chip
+          clipped every KPI tile on the dashboard at 1280px; adding an
+          info control and a Watch control to the same row did it again
+          on the Performance tiles, where "Best material" rendered as
+          "BEST MATE…". The controls sit on the row beneath, where they
+          have the width they need and still line up across tiles. */}
+      <div className="flex items-start justify-between gap-1.5">
+        <span className="min-w-0 flex-1 text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+          {label}
         </span>
         <span className="flex shrink-0 items-center gap-1">
-          {resolved &&
-            (detail ? (
-              <StatusChip band={resolved} size="sm" detail={detail} title={label} />
-            ) : (
-              <Badge band={resolved} size="sm" />
-            ))}
+          {explain && <InfoTip label={`How ${label} is measured`}>{explain}</InfoTip>}
           {watch}
         </span>
       </div>
+      {resolved && (
+        <span className="mt-1 flex">
+          {detail ? (
+            <StatusChip band={resolved} size="sm" detail={detail} title={label} />
+          ) : (
+            <Badge band={resolved} size="sm" />
+          )}
+        </span>
+      )}
 
       <div className="mt-1.5 flex items-end justify-between gap-2">
         <span className="font-display text-[26px] font-bold leading-none tracking-tight text-ink-900">

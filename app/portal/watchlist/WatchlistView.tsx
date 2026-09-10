@@ -22,7 +22,8 @@ import { useWatchlist } from "@/components/market/useWatchlist";
 import { Card, StatCard, EmptyState, Badge, Delta } from "@/components/market/ui";
 import type { Band } from "@/components/market/ui/health";
 import {
-  WATCH_KPI_LABEL, WATCH_STATE_LABEL, scopeLabel, scopeMatches, watchState, watchValue,
+  WATCH_KPI_LABEL, WATCH_KPI_UNIT, WATCH_STATE_LABEL, scopeLabel, scopeMatches,
+  watchState, watchValue,
   type WatchState,
 } from "@/lib/market/watchlist";
 import { monthLabel } from "@/lib/market";
@@ -46,12 +47,14 @@ function Watchlist({ view }: { view: MarketView }) {
   const rows = useMemo(() => {
     return watches
       .map((watch) => {
+        const unit = WATCH_KPI_UNIT[watch.kpi];
         const inScope = scopeMatches(watch.scope, view);
         const current = inScope ? watchValue(watch, view) : null;
         return {
           watch,
           current,
           state: watchState(watch, current, inScope),
+          unit,
           gap: current === null ? null : Math.round((watch.target - current) * 10) / 10,
           moved: current === null ? null : Math.round((current - watch.baseline) * 10) / 10,
         };
@@ -114,7 +117,7 @@ function Watchlist({ view }: { view: MarketView }) {
       </div>
 
       <section className="flex flex-col gap-3">
-        {rows.map(({ watch, current, state, gap, moved }) => (
+        {rows.map(({ watch, current, state, gap, moved, unit }) => (
           <Card key={watch.id} className="px-0">
             <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-3 px-4 py-3.5 sm:px-5">
               <div className="min-w-[200px] flex-1">
@@ -134,22 +137,22 @@ function Watchlist({ view }: { view: MarketView }) {
                 </p>
               ) : (
                 <div className="flex flex-wrap items-end gap-x-6 gap-y-2">
-                  <Figure label="Now" value={`${current}%`} strong />
+                  <Figure label="Now" value={`${current}${unit}`} strong />
                   <Figure
                     label={`Pinned · ${monthLabel(watch.baselineMonth)}`}
-                    value={`${watch.baseline}%`}
+                    value={`${watch.baseline}${unit}`}
                   />
-                  <Figure label="Target" value={`${watch.target}%`} />
+                  <Figure label="Target" value={`${watch.target}${unit}`} />
                   <div>
                     <span className="block text-[10.5px] font-semibold uppercase tracking-wide text-ink-400">
                       Since
                     </span>
                     <span className="mt-0.5 block">
-                      <Delta value={moved ?? 0} unit="pt" floor={1.81} />
+                      <Delta value={moved ?? 0} unit={unit ? "pt" : ""} floor={1.81} />
                     </span>
                   </div>
                   {gap !== null && gap > 0 && (
-                    <Figure label="Still to go" value={`${gap}pt`} />
+                    <Figure label="Still to go" value={`${gap}${unit || " districts"}`} />
                   )}
                 </div>
               )}

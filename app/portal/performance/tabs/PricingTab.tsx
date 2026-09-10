@@ -15,10 +15,10 @@ import { KPI_NAME } from "@/lib/market/kpiLabels";
 import KpiGapBar from "@/components/market/KpiGapBar";
 import DownloadGaps from "@/components/market/DownloadGaps";
 import RequestFollowUp from "@/components/market/RequestFollowUp";
-import { RankedBars, brandColor } from "@/components/market/charts";
+import { DotPlot, RankedBars, brandColor } from "@/components/market/charts";
 import Badge from "@/components/market/ui/Badge";
 import { pricing } from "@/lib/market/performance";
-import { brandOf, governorateName, contract } from "@/lib/market";
+import { clientBrand, governorateName, contract } from "@/lib/market";
 import { useTargets } from "@/components/market/useTargets";
 import { issuesFor, scopeOf } from "@/lib/market/issues";
 import type { MarketView } from "@/lib/market/filters";
@@ -109,6 +109,16 @@ export default function PricingTab({ view }: { view: MarketView }) {
           label="Readings taken"
           value={p.readings}
           explain="One reading is one client SKU's shelf price at one outlet, recorded on the visit. Lines the outlet does not carry produce no reading, so this is smaller than the listings checked on the Availability tab."
+          watch={
+            <WatchEye
+              kpi="price"
+              scope={{}}
+              value={p.compliance}
+              target={targets.price}
+              month={view.month}
+              size="sm"
+            />
+          }
           footnote="Client price observations this month"
         />
         <StatCard
@@ -169,18 +179,31 @@ export default function PricingTab({ view }: { view: MarketView }) {
         <Card
           title="Average price by SKU"
           lead="Observed shelf price against the recommended price."
-          footnote="Bars show the observed average; the tick is the list price, so distance from the tick is the story."
+          footnote="Each line carries two dots — the observed average, and the list price it is supposed to sit on. The bar between them IS the finding: its length is the gap, and a column of long connectors is a pattern nobody has to work out."
         >
-          <RankedBars
+          <DotPlot
             rows={p.bySku.map((sku) => ({
               id: sku.id,
               label: sku.name,
               value: sku.average,
+              reference: sku.rrp,
               color: brandColor(sku.brandId),
-              meta: `${brandOf(sku.brandId)?.name} · list ${iqd(sku.rrp)} · ${sku.readings} readings · range ${sku.spread.min}–${sku.spread.max}`,
+              watch:
+                sku.brandId === clientBrand.id ? (
+                  <WatchEye
+                    kpi="price"
+                    scope={{ skuId: sku.id }}
+                    value={p.compliance}
+                    target={targets.price}
+                    month={view.month}
+                    size="sm"
+                  />
+                ) : undefined,
             }))}
-            unit={` ${contract.currency}`}
-            max={Math.max(...p.bySku.map((s) => Math.max(s.average, s.rrp))) * 1.05}
+            referenceLabel="List price"
+            format={(v) => iqd(v)}
+            min={Math.min(...p.bySku.map((s) => Math.min(s.average, s.rrp))) * 0.96}
+            max={Math.max(...p.bySku.map((s) => Math.max(s.average, s.rrp))) * 1.04}
           />
         </Card>
 
@@ -201,7 +224,7 @@ export default function PricingTab({ view }: { view: MarketView }) {
           </Card>
 
           <Card title="Compliance by governorate" lead="Share of client readings within 5% of list.">
-            <RankedBars
+            <DotPlot
               rows={p.byGovernorate.map((row) => ({
                 id: row.id,
                 label: row.label,
@@ -216,8 +239,8 @@ export default function PricingTab({ view }: { view: MarketView }) {
                     size="sm"
                   />
                 ),
-                meta: `average ${iqd(row.average)} · ${row.readings.toLocaleString()} readings`,
               }))}
+              min={0}
               max={100}
               par={targets.price}
               unit="%"

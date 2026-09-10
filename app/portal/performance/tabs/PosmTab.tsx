@@ -16,7 +16,7 @@ import KpiGapBar from "@/components/market/KpiGapBar";
 import DownloadGaps from "@/components/market/DownloadGaps";
 import RequestFollowUp from "@/components/market/RequestFollowUp";
 import ShelfCard from "@/components/market/ShelfCard";
-import { RankedBars } from "@/components/market/charts";
+import { GapBars, RankedBars } from "@/components/market/charts";
 import { posm } from "@/lib/market/performance";
 import { posmTypes } from "@/lib/market";
 import { rateBand } from "@/components/market/ui/health";
@@ -78,6 +78,16 @@ export default function PosmTab({ view }: { view: MarketView }) {
         <StatCard
           label="Items checked"
           value={p.checked}
+          watch={
+            <WatchEye
+              kpi="posm"
+              scope={{}}
+              value={view.kpi.posm}
+              target={targets.posm}
+              month={view.month}
+              size="sm"
+            />
+          }
           explain="One check is one material type at one outlet — a cooler sticker and a shelf strip at the same door are two. Compliance divides by this, so a door where more material is agreed carries more weight."
           footnote="Material types checked across audited outlets"
         />
@@ -124,6 +134,16 @@ export default function PosmTab({ view }: { view: MarketView }) {
         <Card
           title="Presence by material"
           lead="Where each type was checked, how often it was there."
+          action={
+            <WatchEye
+              kpi="posm"
+              scope={{}}
+              value={view.kpi.posm}
+              target={targets.posm}
+              month={view.month}
+              size="sm"
+            />
+          }
           footnote={`Coolers, stands and displays are only checked in the formats that can take them — ${posmTypes
             .filter((t) => t.channels)
             .map((t) => t.name.toLowerCase())
@@ -154,51 +174,53 @@ export default function PosmTab({ view }: { view: MarketView }) {
         </Card>
 
         <div className="flex flex-col gap-4">
-          <Card title="Weakest governorates" lead="Worst first — where a deployment run would pay.">
-            <RankedBars
+          <Card
+            title="Weakest governorates"
+            lead="Distance from the POSM target, worst first."
+            footnote="Bars run out from the target rather than up from zero. The question here is never how much material there is — it is how far short a place has fallen, and a chart starting at zero draws that quantity smallest."
+          >
+            <GapBars
+              par={targets.posm}
               rows={p.byGovernorate.map((row) => ({
                 id: row.id,
                 label: row.label,
-              watch: (
-                <WatchEye
-                  kpi="posm"
-                  scope={{ governorateId: row.id }}
-                  value={row.value}
-                  target={targets.posm}
-                  month={view.month}
-                  size="sm"
-                />
-              ),
                 value: row.value,
-                meta: `${row.missing.toLocaleString()} items missing of ${row.checked.toLocaleString()} checked`,
+                watch: (
+                  <WatchEye
+                    kpi="posm"
+                    scope={{ governorateId: row.id }}
+                    value={row.value}
+                    target={targets.posm}
+                    month={view.month}
+                    size="sm"
+                  />
+                ),
               }))}
-              max={100}
-              par={targets.posm}
-              unit="%"
             />
           </Card>
 
-          <Card title="By channel" lead="Which formats carry the material and which do not.">
-            <RankedBars
+          <Card
+            title="By channel"
+            lead="Which formats carry the material and which do not."
+            footnote="Measured against the same POSM target as everywhere else, so a format cannot look compliant by being compared only to its peers."
+          >
+            <GapBars
+              par={targets.posm}
               rows={p.byChannel.map((row) => ({
                 id: row.id,
                 label: row.label,
-              watch: (
-                <WatchEye
-                  kpi="posm"
-                  scope={{ channel: row.id }}
-                  value={row.value}
-                  target={targets.posm}
-                  month={view.month}
-                  size="sm"
-                />
-              ),
                 value: row.value,
-                meta: `${row.checked.toLocaleString()} items checked`,
+                watch: (
+                  <WatchEye
+                    kpi="posm"
+                    scope={{ channel: row.id }}
+                    value={row.value}
+                    target={targets.posm}
+                    month={view.month}
+                    size="sm"
+                  />
+                ),
               }))}
-              max={100}
-              par={targets.posm}
-              unit="%"
             />
           </Card>
         </div>
