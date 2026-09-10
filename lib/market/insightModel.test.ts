@@ -243,3 +243,90 @@ describe("the report", () => {
     expect(counted).toBe(report.cards.length);
   });
 });
+
+/* ------------------------------------------------------------------
+   PHASE B — rollups, conjunctions and the competitive detectors.
+------------------------------------------------------------------ */
+
+describe("rollups", () => {
+  it("collapses the per-outlet rules into one card each", () => {
+    /* Before rollups the Insights page carried 123 single-door
+       assortment findings under one chip — 57% of the page, and no way
+       to learn the only thing that matters first: how many doors. */
+    const range = report.byOutcome["grow-distribution"];
+    expect(range.length).toBeLessThan(5);
+    const parent = range.find((i) => i.rule === "r11-assortment-gap");
+    expect(parent).toBeDefined();
+    expect(report.children.get(parent!.id)!.length).toBeGreaterThan(100);
+  });
+
+  it("never restates a number — the total is the sum of its instances", () => {
+    for (const rule of ["r1-outlet-gaps", "r11-assortment-gap"] as const) {
+      const parent = report.cards.find((i) => i.rule === rule && i.axis === "market");
+      expect(parent, rule).toBeDefined();
+      const kids = report.children.get(parent!.id) ?? [];
+      const summed = kids.reduce((s, k) => s + k.impact.value, 0);
+      expect(parent!.impact.value).toBe(summed);
+    }
+  });
+
+  it("keeps every folded instance reachable", () => {
+    const folded = report.all.filter((i) => i.parentId);
+    expect(folded.length).toBeGreaterThan(150);
+    for (const child of folded) expect(child.axis).toBe("outlet");
+  });
+});
+
+describe("conjunctions", () => {
+  it("refuses a conjunction that is only arithmetic", () => {
+    /* C1 looks for doors that stock the client well and still give it
+       little shelf — the brief's own flagship example. 166 outlets
+       qualify, which sounds like a discovery and is not: independence
+       predicts 171.5. The lift gate is the only thing standing between
+       that count and a card, so it is tested rather than trusted. */
+    expect(report.all.some((i) => i.rule === "c1-stocked-not-shown")).toBe(false);
+  });
+
+  it("refuses a conjunction that is rarer than chance", () => {
+    /* C2's doors carrying every core line but one run at lift 0.5–0.8:
+       fewer than independence predicts, not more. */
+    expect(report.all.some((i) => i.rule === "c2-core-range-missing")).toBe(false);
+  });
+});
+
+describe("competitive detectors", () => {
+  it("gives the Competition page something to show", () => {
+    const competitive = report.cards.filter((i) => i.benchmark === "rival");
+    expect(competitive.length).toBeGreaterThanOrEqual(5);
+  });
+
+  it("reports a city shelf gap only above that city's own floor", () => {
+    for (const insight of report.all.filter((i) => i.rule === "r16-share-gap")) {
+      const floor = SHARE_FLOOR_PT[insight.axisValue ?? "market"] ?? SHARE_FLOOR_PT.market;
+      expect(insight.impact.value, insight.axisValue).toBeGreaterThanOrEqual(floor);
+    }
+  });
+
+  it("selects competitive cards on the benchmark, not on the label", () => {
+    /* The Competition page filters on benchmark so the two views cannot
+       drift apart when a category is renamed. */
+    const byBenchmark = report.cards.filter((i) => i.benchmark === "rival");
+    const byOutcome = report.byOutcome["respond-to-competition"];
+    expect(byBenchmark).toEqual(byOutcome);
+  });
+});
+
+describe("headline grammar", () => {
+  it("never says '1 outlets'", () => {
+    for (const insight of report.all) {
+      expect(insight.headline, insight.id).not.toMatch(/\b1 outlets\b/);
+      expect(insight.headline, insight.id).not.toMatch(/\b1 [a-z]+s\b(?! )/);
+    }
+  });
+
+  it("keeps a headline short enough to read at a glance", () => {
+    for (const insight of report.cards) {
+      expect(insight.headline.length, insight.headline).toBeLessThanOrEqual(96);
+    }
+  });
+});

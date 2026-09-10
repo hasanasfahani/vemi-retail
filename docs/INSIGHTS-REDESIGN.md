@@ -130,7 +130,17 @@ affected list.
 behaviour change — the current `insights.test.ts` expectations must
 still hold, extended with the new fields.
 
-**B.0 · The concentration problem Phase A surfaced.** Grow distribution
+**B.0 · ✅ Rollups.** Four rules spoke one outlet at a time (R1, R5, R9,
+R11). Each now also states its market total under the same rule id, so
+subsumption folds the instances into it: **218 findings → 24 cards**,
+Grow distribution 123 → 1. Required one refinement to the Phase A rule:
+an **outlet-level child is never promoted**, because "materially
+different from the market" is a claim about a segment where a rate is
+computed over a population — a single outlet is an instance, not a rival
+account. A rollup also may not soften its instances: R9's doors are
+critical individually, so the total is too.
+
+**Original note —** Grow distribution
 holds **123 of 214** findings — every one a single-outlet
 `r11-assortment-gap`, because that rule only ever emits at outlet level
 and so has no parent to fold into. One chip would hold 57% of the page.
@@ -138,19 +148,40 @@ The fix is a channel- or market-level assortment parent so those 123
 become its breakdown; without it, subsumption has nothing to bite on.
 Do this before the new detectors.
 
-**B.2 · Conjunctions.** The new value, and the reason the page is worth
-building: availability high ∧ shelf share low; client available ∧
-required POSM absent; SKU required ∧ absent. These need a **count-based
-sufficiency test** (minimum N, and whether the co-occurrence exceeds the
-base rate) — cohort floors govern comparisons, not counts, so this is a
-separate check, not a reuse.
+**B.2 · ⚠️ Conjunctions — built, lift-tested, and both are SILENT.**
+The sufficiency test is `lift = observed ÷ (n · P(A) · P(B))`, with a
+1.25 bar. Results on the September panel:
 
-**B.3 · Competitive.** Derived from `competition.ts`, which already
+- **C1 (stocked well, still thin on shelf)** — the brief's flagship
+  example. 166 outlets qualify; independence predicts 171.5. **Lift
+  1.00**, identical at every bar tested (34%: 214 vs 222.8; 40%: 296 vs
+  296.5). Availability and shelf share are independent in this dataset.
+- **C2 (a core line missing from doors carrying the rest)** — 32–71
+  outlets per SKU, but **lift 0.5–0.8**: *rarer* than chance. Broad-range
+  doors carry everything, which is the sensible retail pattern.
+
+Both rules are kept and silent, on the precedent R7 already sets in this
+file: a calibrated detector reporting nothing is itself a finding about
+the market. **This is a decision for the user — see "The conjunction
+problem" below.**
+
+**B.3 · ✅ Competitive.** R16 (leading rival's fixture gap per
+governorate, gated on that governorate's own bootstrapped floor) and R17
+(promotion coverage in doors, not facings). Respond to competition went
+3 → 7 cards.
+
+**Original note —** Derived from `competition.ts`, which already
 computes share, facings, `perOutlet`, eye-level `visibility`, promo
 presence and `districtLeads`. Any brand that leads the client anywhere
 is eligible; subsumption keeps the trivial ones off the page.
 
-**B.4 · Verify Impact.** Reuses `compareCohort` / `resultOf` from
+**B.4 · ✅ Verify Impact.** `verifyImpact.ts` reads `FollowUpRow`s the
+Action Center already built — no second before-and-after. Direction is
+set per finding (the one detector that can report either), preliminary
+results say so in the sentence and drop to medium quality, and the CTA
+deep-links to the request.
+
+**Original note — Reuses `compareCohort` / `resultOf` from
 `followUp.ts`. The card summarises; **Open Analysis deep-links into the
 Action Center request** rather than re-rendering a parallel before/after.
 One comparison implementation, no chance of two views disagreeing.
@@ -231,3 +262,34 @@ Roughly two thirds of the Follow-up redesign, because the engine, the
 floors, the follow-up flow, the POS drawer, the tables and the shelf
 scene all exist. Phase B.2 (conjunctions) and Phase D (detail view) are
 the two that carry real new work.
+
+
+---
+
+## The conjunction problem — needs a decision
+
+Phase B.2 built the detectors and the lift test, and the test says
+neither conjunction exists in this dataset. The cause is structural: the
+generator draws availability, facings, listings and POSM from
+independent random streams, so no two KPIs co-vary. Every conjunction
+will therefore come out at lift ≈ 1 (or below), for ever.
+
+That matters because conjunctions were the argument for the whole page —
+"reveal relationships the user would otherwise investigate manually"
+(PRD §17). Without cross-KPI structure there are no relationships to
+reveal, and the Insights page is a well-ranked list of single-KPI gaps.
+
+Two ways forward:
+
+1. **Accept it.** Ship the lift gate and the two silent detectors as a
+   calibration record. The page is honest and slightly less interesting
+   than the brief imagined. Zero risk to anything already calibrated.
+2. **Give the generator a "well-served door" latent factor**, so
+   availability, shelf share, assortment and POSM co-move the way they
+   do in real retail. Conjunctions then exist and the lift test starts
+   earning its keep. But it moves every calibrated figure in the
+   portal — the thresholds in `insights.ts` each cite observed values,
+   and all of them would need re-deriving.
+
+Option 2 is the honest model of retail and the expensive one. Not a call
+to make inside a phase.

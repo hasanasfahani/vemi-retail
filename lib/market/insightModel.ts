@@ -169,6 +169,20 @@ export const RULE_CLASS: Record<RuleId, Classification> = {
      The panel rotates, so this is a market-sample change and says so. */
   "r14-competitor-movement": { outcome: "respond-to-competition", benchmark: "rival", direction: "risk", basis: "market-sample" },
   "r15-sku-stockout": { outcome: "protect-sales", benchmark: "target", direction: "risk", basis: "point-in-time" },
+  /* Stocked well and still short of the fixture: the yardstick is the
+     shelf par, so this is a shelf decision, not a competitor one. */
+  "c1-stocked-not-shown": { outcome: "win-the-shelf", benchmark: "target", direction: "risk", basis: "point-in-time" },
+  /* A core line absent from doors that carry the rest of the range. */
+  "c2-core-range-missing": { outcome: "grow-distribution", benchmark: "target", direction: "risk", basis: "point-in-time" },
+  /* Measured against a rival's fixture and a rival's promotion
+     coverage, so the benchmark rule sends both to competition. */
+  "r16-share-gap": { outcome: "respond-to-competition", benchmark: "rival", direction: "risk", basis: "point-in-time" },
+  "r17-promo-gap": { outcome: "respond-to-competition", benchmark: "rival", direction: "risk", basis: "point-in-time" },
+  /* The only like-for-like finding in the portal: the same outlets on
+     both ends of the comparison. Its direction is not fixed — a
+     follow-up can report a win or a worsening — so verifyImpact.ts
+     sets it per finding rather than reading it from here. */
+  "v1-follow-up-result": { outcome: "verify-impact", benchmark: "prior-period", direction: "win", basis: "like-for-like" },
 };
 
 /* ------------------------------------------------------------------
@@ -352,6 +366,19 @@ export function phenomenonOf(insight: Insight): string {
    splitting it out prints the same fact twice. It takes two divergent
    children before there is a second story to tell.
 
+   ONE FINDING IS NEVER PROMOTED, whatever it says: an outlet-level
+   child. "Materially different from the wider market" is a claim about
+   a SEGMENT — a governorate, a channel, a district — where a rate is
+   computed over a population and can genuinely diverge from another
+   population's. A single outlet is a sample of size one. It is an
+   INSTANCE of the market phenomenon, not a rival account of it, and
+   promoting it would put three hundred street names on a page whose
+   job is to say what is happening in the market.
+
+   This is what makes the rollups in insights.ts work: a per-outlet rule
+   emits its instances and one market-level parent, and the instances
+   become that parent's breakdown rather than 123 cards under one chip.
+
    Suppressed findings keep their `parentId` and stay in the
    collection. They are what the breakdown selector renders.
 
@@ -407,7 +434,8 @@ export function subsume(insights: DecisionInsight[]): DecisionInsight[] {
       const siblings = byRank.filter(
         (s) => s !== child && AXIS_RANK[s.axis] === AXIS_RANK[child.axis]
       );
-      const promoted = diverges(child) && siblings.some(diverges);
+      const promoted =
+        child.axis !== "outlet" && diverges(child) && siblings.some(diverges);
       if (!promoted) parentOf.set(child.id, parent.id);
     }
   }
@@ -493,8 +521,17 @@ export function topCards(report: DecisionReport, limit = 5): DecisionInsight[] {
   return picked;
 }
 
-export function decide(insights: Insight[], view: MarketView): DecisionReport {
-  const all = subsume(insights.map((i) => classify(i, view))).sort(byPriority);
+/* `extra` is for findings that are already decisions and were never
+   detected from this month's panel — today that means follow-up
+   results, which are facts about a request rather than about the
+   market. They go through subsumption and ranking with everything
+   else, so a page never has to know where a card came from. */
+export function decide(
+  insights: Insight[],
+  view: MarketView,
+  extra: DecisionInsight[] = []
+): DecisionReport {
+  const all = subsume([...insights.map((i) => classify(i, view)), ...extra]).sort(byPriority);
   const cards = all.filter((i) => !i.parentId);
 
   const byOutcome = Object.fromEntries(

@@ -25,6 +25,7 @@ import {
   skus, trends,
 } from "./index";
 import { moneyOf } from "./economics";
+import { getTargets } from "./settings";
 import type { MarketView } from "./filters";
 import type { Cell, Sku } from "./types";
 
@@ -57,7 +58,22 @@ export type RuleId =
   | "r11-assortment-gap"
   | "r13-posm-absent"
   | "r14-competitor-movement"
-  | "r15-sku-stockout";
+  | "r15-sku-stockout"
+  /* Conjunctions — two conditions that co-occur where they should not.
+     Numbered apart from the single-condition rules because they are a
+     different kind of claim and are tested differently: a lift check
+     rather than a threshold. */
+  | "c1-stocked-not-shown"
+  | "c2-core-range-missing"
+  /* Competitive standing — what a rival HOLDS, where R14 reports what
+     a rival has MOVED. */
+  | "r16-share-gap"
+  | "r17-promo-gap"
+  /* Not detected here. A follow-up result is a fact about a REQUEST,
+     not about the current panel, so it is built where the requests
+     live — see verifyImpact.ts. The id is declared here so a stored
+     rule name still resolves and the classification map stays total. */
+  | "v1-follow-up-result";
 
 /* Exported so anything holding a stored rule name — an action created
    cycles ago — can tell "this finding is gone" from "this rule is
@@ -67,6 +83,8 @@ export const RULE_IDS: RuleId[] = [
   "r4-rival-substitution", "r5-price-cluster", "r6-channel-gap",
   "r7-shelf-position", "r9-dark-outlet", "r11-assortment-gap",
   "r13-posm-absent", "r14-competitor-movement", "r15-sku-stockout",
+  "c1-stocked-not-shown", "c2-core-range-missing",
+  "r16-share-gap", "r17-promo-gap", "v1-follow-up-result",
 ];
 
 export type EvidenceTable = { columns: string[]; rows: (string | number)[][] };
@@ -228,6 +246,75 @@ export const THRESHOLDS = {
      Observed: Pepsi 500ml PET is empty in 91 of the outlets that list
      it — by far the worst, with 250ml Can next at 52. */
   r15SkuStockout: { warningOutlets: 40, criticalOutlets: 75 },
+
+  /* ---------- conjunctions ----------
+
+     A conjunction is not a gap against a target; it is two conditions
+     found together in the same door. So it is not judged by a
+     threshold on a rate, and the detection floors do not apply
+     either — those govern COMPARISONS between periods or cohorts, and
+     a conjunction is a COUNT.
+
+     It gets its own test, in two parts.
+
+     MIN_OUTLETS is the floor below which the count describes a
+     handful of doors rather than a pattern.
+
+     LIFT is the part that matters. The interesting claim is not "37
+     outlets are like this" — with 742 doors, 37 of almost anything is
+     arithmetic. It is "these two conditions occur together MORE than
+     they would if they were unrelated." Expected co-occurrence is
+     n × P(A) × P(B); lift is observed ÷ expected. At lift 1.0 the
+     conjunction is telling you nothing you could not have got by
+     multiplying two numbers from the dashboard. */
+  conjunction: { minOutlets: 12, minLift: 1.25, criticalOutlets: 40 },
+
+  /* WHAT THE LIFT TEST FOUND, AND WHY C1 IS SILENT.
+
+     C1 looks for the conjunction the brief leads with: doors that stock
+     the client well and still give it little shelf. The count is large —
+     166 outlets at three quarters of par, 296 at full par — and on a
+     card it would read as a discovery.
+
+     It is not one. Across 737 audited outlets, 445 hold the client at
+     or above the 95% availability target and 284 sit under three
+     quarters of the shelf par; if those two facts were unrelated you
+     would expect 171.5 doors to show both, and 166 do. Lift 1.00. The
+     same at 34% (214 observed, 222.8 expected) and at 40% (296 against
+     296.5). Availability and shelf share are independent in this
+     market, so every one of those 166 doors is arithmetic a reader
+     could have done from two dashboard tiles.
+
+     The rule is kept, silent, for the same reason R7 is kept: a
+     calibrated detector that reports nothing is a finding about the
+     market, and deleting it would mean re-deriving this next quarter. */
+
+  /* A SKU belongs to the client's CORE RANGE when it is listed in at
+     least this share of audited outlets. Nothing in the dataset names a
+     contracted range, so inventing one would be dishonest; what can be
+     measured is which lines the brand evidently sells broadly.
+
+     Observed listing rates across the 742-outlet panel: 1L PET 70.5%,
+     500ml PET 69.7%, 250ml Can 68.9%, 330ml Can 67.5%, 2.25L PET 60.0%,
+     Pepsi Zero 330ml 41.5%. The range clusters tightly between 60 and
+     71 with one clear outlier below, so the bar is set at 60 — five
+     lines in, the tail line out. A 70 bar would have admitted a single
+     SKU and left nothing for it to be missing alongside. */
+  coreRangeListedPct: 60,
+
+  /* A governorate where the leading rival holds more of the fixture
+     than the client. Judged against that governorate's own bootstrapped
+     detection floor — 3.09pt in Baghdad, 5.57pt in Karbala — so a gap
+     is only reported where the panel there could have seen it.
+     `minOutlets` keeps a governorate the filter has thinned to a
+     handful of doors from producing a share figure at all. */
+  r16ShareGap: { minOutlets: 20, criticalPt: 12 },
+
+  /* Promotion presence, client against the leading rival, counted in
+     outlets rather than facings. Carries the same 5pt outlet-coverage
+     floor competition.ts uses for promotion movement: roughly one
+     outlet in twenty, comfortably outside month-to-month wobble. */
+  r17PromoGap: { floorPt: 5, criticalPt: 15 },
 } as const;
 
 /* Bootstrapped detection floors, in share points, from
@@ -245,6 +332,12 @@ export const SHARE_FLOOR_PT: Record<string, number> = {
 export const REVISIT_DAYS = 30;
 
 /* ---------- small helpers ---------- */
+
+/* Headlines are built from counts, and counts reach 1 as soon as a
+   filter narrows the panel. "1 outlets" in a card that exists to be
+   trusted with numbers is a small error that reads as a large one. */
+export const plural = (n: number, one: string, many = `${one}s`) =>
+  `${n} ${n === 1 ? one : many}`;
 
 const r1 = (n: number) => Math.round(n * 10) / 10;
 const pct = (n: number, d: number) => (d === 0 ? 0 : r1((n / d) * 100));
@@ -1080,6 +1173,421 @@ function r15SkuStockout(ctx: Ctx): RawInsight[] {
 
 /* ---------- entry point ---------- */
 
+
+
+
+/* ==================================================================
+   R16 · the fixture gap, city by city
+
+   Where R14 reports what a rival has MOVED over six months, this
+   reports what a rival HOLDS today. Both are measured against the
+   governorate's own bootstrapped detection floor, because a 3pt gap in
+   Baghdad and a 3pt gap in Karbala are not the same claim: Baghdad
+   contributes enough doors to see one, Karbala does not.
+
+   The benchmark is a rival brand rather than the contracted par, and
+   that is what puts it under Respond to competition rather than Win
+   the shelf. Same measurement, different yardstick, and the yardstick
+   decides.
+================================================================== */
+function r16ShareGap(ctx: Ctx): RawInsight[] {
+  const { view } = ctx;
+  const byGovernorate = new Map<string, Cell[]>();
+  const outletsIn = new Map<string, Set<string>>();
+  for (const cell of view.cells) {
+    const outlet = ctx.posById.get(cell.posId);
+    if (!outlet) continue;
+    const g = outlet.governorateId;
+    byGovernorate.set(g, [...(byGovernorate.get(g) ?? []), cell]);
+    outletsIn.set(g, (outletsIn.get(g) ?? new Set()).add(cell.posId));
+  }
+
+  const out: RawInsight[] = [];
+  for (const [governorateId, cells] of byGovernorate) {
+    const doors = outletsIn.get(governorateId)?.size ?? 0;
+    if (doors < THRESHOLDS.r16ShareGap.minOutlets) continue;
+
+    const stocked = cells.filter((c) => c.state === "in-stock");
+    const total = facingsOf(stocked);
+    if (total === 0) continue;
+
+    const byBrand = new Map<string, number>();
+    for (const cell of stocked) {
+      const brandId = ctx.skuById.get(cell.skuId)?.brandId;
+      if (brandId) byBrand.set(brandId, (byBrand.get(brandId) ?? 0) + cell.facings);
+    }
+    const mine = pct(byBrand.get(clientBrand.id) ?? 0, total);
+    const rivals = [...byBrand]
+      .filter(([id]) => !portfolioBrands.some((b) => b.id === id))
+      .map(([id, f]) => ({ id, share: pct(f, total) }))
+      .sort((a, b) => b.share - a.share);
+
+    const leader = rivals[0];
+    if (!leader) continue;
+    const gap = r1(leader.share - mine);
+    const floor = SHARE_FLOOR_PT[governorateId] ?? SHARE_FLOOR_PT.market;
+    if (gap < floor) continue;
+
+    const rival = brands.find((b) => b.id === leader.id);
+    out.push({
+      id: `r16-${governorateId}`,
+      rule: "r16-share-gap",
+      category: "competitor",
+      severity: gap >= THRESHOLDS.r16ShareGap.criticalPt ? "critical" : "warning",
+      headline: `${rival?.name ?? leader.id} holds ${gap}pt more ${governorateName(governorateId)} shelf than ${clientBrand.name}`,
+      detail: `Across ${doors} audited ${governorateName(governorateId)} outlets, ${rival?.name ?? leader.id} takes ${leader.share}% of the measured fixture against ${clientBrand.name} at ${mine}%. The city's detection floor is ${floor}pt, so the gap is wider than what this panel could mistake for noise.`,
+      impact: { value: gap, unit: "outlets", label: `${gap}pt of city shelf` },
+      confidence: "measured",
+      scope: { outlets: doors, label: governorateName(governorateId) },
+      cta: { href: `/portal/competition?governorate=${governorateId}`, label: "Open competition" },
+      affected: [...(outletsIn.get(governorateId) ?? [])],
+      evidence: {
+        formula: `leading rival's share of measured facings − client's, within the governorate, reported only above its ${floor}pt detection floor`,
+        table: {
+          columns: ["Brand", "Share of fixture"],
+          rows: [
+            [rival?.name ?? leader.id, `${leader.share}%`],
+            [clientBrand.name, `${mine}%`],
+            ["Gap", `${gap}pt`],
+          ],
+        },
+      },
+      entities: { brandId: leader.id, governorateId },
+    });
+  }
+  return out;
+}
+
+/* ==================================================================
+   R17 · who is running promotions
+
+   Counted in DOORS, not in facings: a promotion is either observed at
+   an outlet or it is not, and converting that to a share of shelf
+   would be inventing a denominator. The client's coverage against the
+   rival running the most.
+================================================================== */
+function r17PromoGap(ctx: Ctx): RawInsight[] {
+  const { view } = ctx;
+  const doors = new Set(view.cells.map((c) => c.posId)).size;
+  if (doors === 0) return [];
+
+  const byBrand = new Map<string, Set<string>>();
+  for (const row of view.promos) {
+    byBrand.set(row.brandId, (byBrand.get(row.brandId) ?? new Set()).add(row.posId));
+  }
+
+  const mine = pct(byBrand.get(clientBrand.id)?.size ?? 0, doors);
+  const rivals = [...byBrand]
+    .filter(([id]) => !portfolioBrands.some((b) => b.id === id))
+    .map(([id, set]) => ({ id, cover: pct(set.size, doors) }))
+    .sort((a, b) => b.cover - a.cover);
+
+  const leader = rivals[0];
+  if (!leader) return [];
+  const gap = r1(leader.cover - mine);
+  if (gap < THRESHOLDS.r17PromoGap.floorPt) return [];
+
+  const rival = brands.find((b) => b.id === leader.id);
+  return [
+    {
+      id: "r17-promo-gap",
+      rule: "r17-promo-gap",
+      category: "competitor",
+      severity: gap >= THRESHOLDS.r17PromoGap.criticalPt ? "critical" : "warning",
+      headline: `${rival?.name ?? leader.id} is promoting in ${gap}pt more outlets than ${clientBrand.name}`,
+      detail: `${rival?.name ?? leader.id} was observed running a promotion in ${leader.cover}% of the ${doors} audited outlets against ${clientBrand.name} at ${mine}%.`,
+      impact: { value: gap, unit: "outlets", label: `${gap}pt of outlet coverage` },
+      confidence: "measured",
+      scope: { outlets: doors, label: `${doors} audited outlets` },
+      cta: { href: "/portal/competition", label: "Open competition" },
+      affected: [...(byBrand.get(leader.id) ?? [])],
+      evidence: {
+        formula: `outlets where the brand was observed promoting ÷ audited outlets, client subtracted from the leading rival; floor ${THRESHOLDS.r17PromoGap.floorPt}pt of outlet coverage`,
+        table: {
+          columns: ["Brand", "Outlets promoting"],
+          rows: [
+            [rival?.name ?? leader.id, `${leader.cover}%`],
+            [clientBrand.name, `${mine}%`],
+            ["Gap", `${gap}pt`],
+          ],
+        },
+      },
+      entities: { brandId: leader.id },
+    },
+  ];
+}
+
+/* ==================================================================
+   CONJUNCTIONS
+
+   The two conditions a reader would otherwise have to notice
+   themselves by holding one chart next to another. Everything else in
+   this file measures one thing against one yardstick; these measure
+   two things against each other, in the same door.
+
+   Both are lift-tested. See THRESHOLDS.conjunction for why a count
+   alone is not a finding.
+================================================================== */
+
+/* Observed ÷ expected-if-unrelated. 1.0 means the two conditions are
+   independent and the conjunction is telling the reader nothing they
+   could not have multiplied for themselves. */
+function liftOf(both: number, a: number, b: number, n: number): number {
+  if (n === 0 || a === 0 || b === 0) return 0;
+  const expected = (a / n) * (b / n) * n;
+  return expected === 0 ? 0 : r1(both / expected);
+}
+
+/* ------------------------------------------------------------------
+   C1 · stocked, but not shown
+
+   Outlets holding the client at or above the availability target while
+   holding well under its share of the fixture. The product is THERE.
+   Nobody has to be persuaded to list it, nobody has to chase a
+   delivery — the argument is about centimetres, and it is the one
+   conversation a rep can have on the next visit without anyone's
+   permission.
+
+   The pair is worth stating precisely because it is counter-intuitive:
+   availability and shelf share normally move together, so doors where
+   they come apart are not what a reader would have guessed from either
+   number on its own.
+------------------------------------------------------------------ */
+function c1StockedNotShown(ctx: Ctx): RawInsight[] {
+  const targets = getTargets();
+  /* Well under, not merely under: at three quarters of par the gap is
+     wider than the ordinary spread between doors. */
+  const shareBar = r1(targets.shelfShare * 0.75);
+
+  const rows: { posId: string; availability: number; share: number }[] = [];
+  for (const [posId, cells] of ctx.cellsByPos) {
+    const own = cells.filter(isClient);
+    if (own.length === 0) continue;
+    const availability = pct(own.filter((c) => c.state === "in-stock").length, own.length);
+    const total = facingsOf(cells);
+    if (total === 0) continue;
+    rows.push({ posId, availability, share: shareOf(cells) });
+  }
+  if (rows.length === 0) return [];
+
+  const strong = rows.filter((r) => r.availability >= targets.availability);
+  const thin = rows.filter((r) => r.share < shareBar);
+  const both = rows.filter((r) => r.availability >= targets.availability && r.share < shareBar);
+
+  const lift = liftOf(both.length, strong.length, thin.length, rows.length);
+  if (both.length < THRESHOLDS.conjunction.minOutlets) return [];
+  if (lift < THRESHOLDS.conjunction.minLift) return [];
+
+  const avgShare = r1(both.reduce((s, r) => s + r.share, 0) / both.length);
+  const avgAvail = r1(both.reduce((s, r) => s + r.availability, 0) / both.length);
+  const worst = [...both].sort((a, b) => a.share - b.share).slice(0, 10);
+
+  return [
+    {
+      id: "c1-stocked-not-shown",
+      rule: "c1-stocked-not-shown",
+      category: "opportunity",
+      severity:
+        both.length >= THRESHOLDS.conjunction.criticalOutlets ? "critical" : "warning",
+      headline: `${plural(both.length, "outlet")} stock${both.length === 1 ? "s" : ""} ${clientBrand.name} well and still give${both.length === 1 ? "s" : ""} it ${avgShare}% of the shelf`,
+      detail: `${both.length} audited outlets hold ${clientBrand.name} at ${avgAvail}% availability — at or above the ${targets.availability}% target — while giving it ${avgShare}% of their fixture against a ${targets.shelfShare}% par. The listing is won and the delivery is arriving; what is missing is space.`,
+      impact: { value: both.length, unit: "outlets", label: `${both.length} outlets with space to argue for` },
+      confidence: "measured",
+      scope: { outlets: both.length, label: `${both.length} audited outlets` },
+      cta: { href: "/portal/pos", label: "Open POS explorer" },
+      affected: both.map((r) => r.posId),
+      evidence: {
+        formula: `outlets with client availability ≥ ${targets.availability}% AND client shelf share < ${shareBar}% (three quarters of the ${targets.shelfShare}% par); reported at lift ${lift}× over independent co-occurrence`,
+        table: {
+          columns: ["Outlet", "Availability", "Shelf share"],
+          rows: worst.map((r) => [
+            ctx.posById.get(r.posId)?.name ?? r.posId,
+            `${r.availability}%`,
+            `${r.share}%`,
+          ]),
+        },
+      },
+      entities: { brandId: clientBrand.id },
+    },
+  ];
+}
+
+/* ------------------------------------------------------------------
+   C2 · a core line missing from doors that carry the rest
+
+   For each line the brand evidently sells everywhere — listed in at
+   least `coreRangeListedPct` of audited outlets — the doors that carry
+   the REST of the range and not this one.
+
+   The second half of that sentence is what makes it a conjunction
+   rather than a distribution count. An outlet that carries nothing is
+   a different problem, already told by R9; an outlet that carries four
+   of five core lines has made a range decision about the fifth, and
+   that decision is what a rep can reopen.
+------------------------------------------------------------------ */
+function c2CoreRangeMissing(ctx: Ctx): RawInsight[] {
+  const { view } = ctx;
+  const outletIds = [...ctx.cellsByPos.keys()];
+  const panel = outletIds.length;
+  if (panel === 0) return [];
+
+  const clientSkus = [...clientSkuIds(view)];
+  const listedAt = new Map<string, Set<string>>();
+  for (const [posId, cells] of ctx.cellsByPos) {
+    listedAt.set(posId, new Set(cells.filter(isClient).map((c) => c.skuId)));
+  }
+
+  const core = clientSkus.filter((skuId) => {
+    const n = outletIds.filter((posId) => listedAt.get(posId)?.has(skuId)).length;
+    return pct(n, panel) >= THRESHOLDS.coreRangeListedPct;
+  });
+  if (core.length < 2) return [];
+
+  const out: RawInsight[] = [];
+  for (const skuId of core) {
+    const carriesRest = outletIds.filter((posId) => {
+      const held = listedAt.get(posId);
+      if (!held) return false;
+      /* Carries the rest of the core: every other core line but this. */
+      return core.every((other) => other === skuId || held.has(other));
+    });
+    const missing = carriesRest.filter((posId) => !listedAt.get(posId)?.has(skuId));
+
+    const hasSku = outletIds.filter((posId) => listedAt.get(posId)?.has(skuId)).length;
+    const lift = liftOf(missing.length, carriesRest.length, panel - hasSku, panel);
+    if (missing.length < THRESHOLDS.conjunction.minOutlets) continue;
+    if (lift < THRESHOLDS.conjunction.minLift) continue;
+
+    const sku = ctx.skuById.get(skuId);
+    const share = pct(missing.length, carriesRest.length);
+
+    out.push({
+      id: `c2-${skuId}`,
+      rule: "c2-core-range-missing",
+      category: "opportunity",
+      severity:
+        missing.length >= THRESHOLDS.conjunction.criticalOutlets ? "critical" : "warning",
+      headline: `${sku?.name ?? skuId} is missing from ${plural(missing.length, "outlet")} that carr${missing.length === 1 ? "ies" : "y"} the rest of the range`,
+      detail: `${missing.length} of the ${carriesRest.length} audited outlets stocking every other core ${clientBrand.name} line do not list ${sku?.name ?? skuId} — ${share}% of doors that have already said yes to the range.`,
+      impact: { value: missing.length, unit: "outlets", label: `${missing.length} listings to win` },
+      confidence: "measured",
+      scope: { outlets: carriesRest.length, label: `${carriesRest.length} outlets carrying the core range` },
+      cta: { href: `/portal/performance?kpi=assortment`, label: "Open assortment" },
+      affected: missing,
+      evidence: {
+        formula: `client lines listed in ≥${THRESHOLDS.coreRangeListedPct}% of audited outlets form the core range; counted are outlets listing every core line except this one, at lift ${lift}× over independent co-occurrence`,
+        table: {
+          columns: ["Scope", "Outlets"],
+          rows: [
+            ["Carry every other core line", carriesRest.length],
+            [`Of those, missing ${sku?.name ?? skuId}`, missing.length],
+            ["Share", `${share}%`],
+          ],
+        },
+      },
+      entities: { skuId, brandId: clientBrand.id },
+    });
+  }
+  return out;
+}
+
+/* ==================================================================
+   ROLLUPS
+
+   Four rules speak one outlet at a time — R1's empty facings, R5's
+   mispriced lines, R9's dark doors, R11's thin range. Each is exactly
+   right at that resolution: a rep works one outlet, and the card names
+   the street.
+
+   But a page cannot open with 123 street names. Ranked and chipped,
+   R11 alone filled 57% of the Insights page with single doors, and the
+   reader had no way to learn the one thing they most need first —
+   HOW MANY doors, and is that a lot.
+
+   So each of those rules also states its own market total. Same rule
+   id, same phenomenon, one level wider, which is precisely what the
+   decision layer's subsumption is built to fold: the market finding
+   becomes the card, and the outlets become its breakdown. Nothing is
+   discarded and no number is restated — the rollup sums what the
+   instances already counted.
+================================================================== */
+function rollup(
+  children: RawInsight[],
+  spec: {
+    rule: RuleId;
+    category: Category;
+    /* Outlet counts at which the market total becomes a warning and a
+       critical finding. Stated per rule, from the same observed panel
+       the per-outlet thresholds were argued against. */
+    warningOutlets: number;
+    criticalOutlets: number;
+    headline: (outlets: number) => string;
+    detail: (outlets: number, impact: number) => string;
+    impactLabel: (value: number) => string;
+    formula: string;
+    /* What the breakdown table shows per outlet. */
+    column: string;
+    valueOf: (child: RawInsight) => string | number;
+  }
+): RawInsight[] {
+  if (children.length < spec.warningOutlets) return [];
+
+  const affected = [...new Set(children.flatMap((c) => c.affected))];
+  const impact = children.reduce((s, c) => s + c.impact.value, 0);
+  /* A total is only as directly observed as its weakest part. */
+  const confidence = children.some((c) => c.confidence === "estimated")
+    ? "estimated"
+    : "measured";
+
+  /* A rollup must never soften what its instances say. R9's doors are
+     a binary fact — the outlet lists the client and has none of it —
+     so every instance is critical, and a market total calling four of
+     them a warning would be the aggregate contradicting its own parts.
+
+     The converse is NOT true and is deliberately not implemented: a
+     handful of critical instances inside a large population does not
+     make the population critical. R11 has 26 outlets three SKUs short
+     among 123, and "123 outlets carry a thinner range" is a warning
+     about a market, not an emergency. So the escalation only fires
+     when the finding is critical in EVERY door it was found in. */
+  const allCritical = children.every((c) => c.severity === "critical");
+
+  const worst = [...children]
+    .sort((a, b) => b.impact.value - a.impact.value)
+    .slice(0, 10);
+
+  return [
+    {
+      id: `${spec.rule}-market`,
+      rule: spec.rule,
+      category: spec.category,
+      severity:
+        allCritical || affected.length >= spec.criticalOutlets ? "critical" : "warning",
+      headline: spec.headline(affected.length),
+      detail: spec.detail(affected.length, impact),
+      impact: {
+        value: impact,
+        unit: children[0].impact.unit,
+        label: spec.impactLabel(impact),
+      },
+      confidence,
+      scope: { outlets: affected.length, label: `${affected.length} audited outlets` },
+      cta: { href: "/portal/pos", label: "Open POS explorer" },
+      affected,
+      evidence: {
+        formula: spec.formula,
+        table: {
+          columns: ["Outlet", spec.column],
+          rows: worst.map((c) => [c.scope.label, spec.valueOf(c)]),
+        },
+      },
+      /* No posId and no governorate: this finding is about the market,
+         and the decision layer reads the absence as the market axis. */
+      entities: { brandId: clientBrand.id },
+    },
+  ];
+}
+
 export function generateInsights(view: MarketView): InsightReport {
   const posById = new Map(view.outlets.map((p) => [p.id, p]));
   /* Every SKU the master list knows, not only the ones this filter
@@ -1094,19 +1602,85 @@ export function generateInsights(view: MarketView): InsightReport {
 
   const ctx: Ctx = { view, posById, cellsByPos, skuById };
 
+  const gaps = r1OutletGaps(ctx);
+  const prices = r5PriceCluster(ctx);
+  const dark = r9DarkOutlets(ctx);
+  const range = r11AssortmentGap(ctx);
+
   const all = [
-    ...r1OutletGaps(ctx),
+    ...gaps,
+    ...rollup(gaps, {
+      rule: "r1-outlet-gaps",
+      category: "critical",
+      /* Observed: 51 outlets carry ≥2 client gaps, 4 carry ≥3. */
+      warningOutlets: 20,
+      criticalOutlets: 45,
+      headline: (n) => `${plural(n, "outlet")} ${n === 1 ? "has" : "have"} two or more ${clientBrand.name} lines empty`,
+      detail: (n, v) =>
+        `${n} audited outlets were carrying at least two empty ${clientBrand.name} facings on the day they were visited — ${v.toLocaleString()} facing-days of agreed space earning nothing before the next cycle.`,
+      impactLabel: (v) => `${v.toLocaleString()} facing-days until the next visit`,
+      formula: "outlets with ≥2 empty client lines; facing-days summed across them",
+      column: "Facing-days",
+      valueOf: (c) => c.impact.value.toLocaleString(),
+    }),
     ...r2DistrictDeficit(ctx),
     ...r3DistributionGap(ctx),
     ...r4RivalSubstitution(ctx),
-    ...r5PriceCluster(ctx),
+    ...prices,
+    ...rollup(prices, {
+      rule: "r5-price-cluster",
+      category: "execution-gap",
+      /* Observed: 174 outlets carry ≥1 breach, 19 carry ≥2. */
+      warningOutlets: 10,
+      criticalOutlets: 25,
+      headline: (n) => `${plural(n, "outlet")} ${n === 1 ? "is" : "are"} selling two or more ${clientBrand.name} lines off list`,
+      detail: (n, v) =>
+        `${n} audited outlets had at least two ${clientBrand.name} lines priced more than 5% away from list — ${v} readings in total.`,
+      impactLabel: (v) => `${v} readings off list`,
+      formula: "outlets with ≥2 client readings more than 5% from RRP",
+      column: "Readings off list",
+      valueOf: (c) => c.impact.value,
+    }),
     ...r6ChannelGap(ctx),
     ...r7ShelfPosition(ctx),
-    ...r9DarkOutlets(ctx),
-    ...r11AssortmentGap(ctx),
+    ...dark,
+    ...rollup(dark, {
+      rule: "r9-dark-outlet",
+      category: "critical",
+      /* Observed: 4 such outlets. Rare enough that two is a story. */
+      warningOutlets: 2,
+      criticalOutlets: 8,
+      headline: (n) => `${plural(n, "outlet")} ${n === 1 ? "lists" : "list"} ${clientBrand.name} and stock${n === 1 ? "s" : ""} none of it`,
+      detail: (n, v) =>
+        `${n} audited outlets have a ${clientBrand.name} listing and had nothing on shelf at all — ${v.toLocaleString()} facing-days of a relationship that already exists.`,
+      impactLabel: (v) => `${v.toLocaleString()} facing-days dark`,
+      formula: "outlets listing the client with zero client facings in stock",
+      column: "Facing-days",
+      valueOf: (c) => c.impact.value.toLocaleString(),
+    }),
+    ...range,
+    ...rollup(range, {
+      rule: "r11-assortment-gap",
+      category: "opportunity",
+      /* Observed: 265 outlets sit ≥1 SKU short of their format, 118 sit
+         ≥2 short. This is the largest single population in the file. */
+      warningOutlets: 40,
+      criticalOutlets: 100,
+      headline: (n) => `${plural(n, "outlet")} carr${n === 1 ? "ies" : "y"} a thinner ${clientBrand.name} range than ${n === 1 ? "its" : "their"} format`,
+      detail: (n, v) =>
+        `${n} audited outlets list at least two ${clientBrand.name} SKUs fewer than the median for their own channel — ${v} listings of headroom in doors the brand already sells to.`,
+      impactLabel: (v) => `${v} SKU listings of headroom`,
+      formula: "outlets ≥2 client SKUs below their own channel's median listing count",
+      column: "SKUs short",
+      valueOf: (c) => c.impact.value,
+    }),
     ...r13PosmAbsent(ctx),
     ...r14CompetitorMovement(ctx),
     ...r15SkuStockout(ctx),
+    ...c1StockedNotShown(ctx),
+    ...c2CoreRangeMissing(ctx),
+    ...r16ShareGap(ctx),
+    ...r17PromoGap(ctx),
   ]
     /* The two derived fields, filled once. Concentration answers "and
        where is this?" without any rule needing to know about governorates;
