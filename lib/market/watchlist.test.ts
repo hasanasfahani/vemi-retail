@@ -4,6 +4,8 @@
 import { describe, expect, it } from "vitest";
 import { clientBrand, current, skuOf } from "./index";
 import { scoreboard } from "./competition";
+import { governorateHealth } from "./governorateHealth";
+import { portfolioHealth } from "./brandHealth";
 import { EMPTY_FILTERS, applyFilters } from "./filters";
 import {
   WATCH_FLOOR_PT, WATCH_KPI_LABEL, WATCH_KPI_UNIT, getWatches, resetWatchesForTest,
@@ -226,6 +228,52 @@ describe("the price index", () => {
     for (const brand of board) {
       expect(watchValue(make({ kpi: "priceIndex", scope: { brandId: brand.id } }), view), brand.id)
         .toBe(brand.priceIndex);
+    }
+  });
+});
+
+describe("one question, one number", () => {
+  it("reads a governorate's execution score the way its own card does", () => {
+    /* Pinning Basra from the health card stored 85 and the watchlist
+       read it back as 83 within seconds, calling a watch created that
+       moment "moving away". Both figures were defensible: the card
+       weights the city's own aggregate components, and averaging
+       per-outlet composites gives every door equal say. They are
+       different questions, and only one of them is on the screen. */
+    for (const row of governorateHealth(view)) {
+      expect(
+        watchValue(make({ kpi: "score", scope: { governorateId: row.governorateId } }), view),
+        row.name
+      ).toBe(row.score);
+    }
+  });
+});
+
+describe("the brand cards agree with what they pin", () => {
+  it("reads a brand's shelf share the way its health card does", () => {
+    for (const row of portfolioHealth(view)) {
+      expect(
+        watchValue(make({ kpi: "shelfShare", scope: { brandId: row.brandId } }), view),
+        row.name
+      ).toBeCloseTo(row.share, 1);
+    }
+  });
+
+  it("reads a brand's eye-level conversion the way the scoreboard does", () => {
+    for (const row of scoreboard(view)) {
+      expect(
+        watchValue(make({ kpi: "visibility", scope: { brandId: row.id } }), view),
+        row.name
+      ).toBeCloseTo(row.visibility, 1);
+    }
+  });
+
+  it("reads a brand's promotion presence the way the scoreboard does", () => {
+    for (const row of scoreboard(view)) {
+      expect(
+        watchValue(make({ kpi: "promo", scope: { brandId: row.id } }), view),
+        row.name
+      ).toBeCloseTo(row.promo, 1);
     }
   });
 });

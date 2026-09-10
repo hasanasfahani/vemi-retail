@@ -24,6 +24,7 @@ import type { IssueKpi } from "./issues";
 import { KPI_LABEL } from "./issues";
 import { KPI_NAME } from "./kpiLabels";
 import { scoreboard } from "./competition";
+import { governorateHealth } from "./governorateHealth";
 import type { MarketView } from "./filters";
 import { governorateName, channelName, clientBrand, brands, skuOf } from "./index";
 
@@ -229,7 +230,27 @@ export function watchValue(watch: Watch, view: MarketView): number | null {
      no rival execution score to average — so a brand-scoped watch on
      it would be answering a different question than it asked. */
   if (watch.kpi === "score") {
+    /* There is no rival execution score to average. */
     if (scope.brandId && scope.brandId !== clientBrand.id) return null;
+
+    /* A GOVERNORATE'S SCORE IS THE ONE ITS CARD SHOWS, and getting this
+       wrong was visible within seconds: pinning Basra from the health
+       card stored 85, and the watchlist read it back as 83 and called
+       it "moving away" on the day it was created.
+
+       Both numbers were defensible and they were different questions.
+       The card weights the governorate's own aggregate components —
+       availability 30, shelf 25, and so on, each computed across the
+       whole city. Averaging per-outlet composites instead gives every
+       door equal say regardless of size. One question, one number: the
+       watch reads the same function the card does. */
+    if (scope.governorateId && !scope.district && !scope.channel && !scope.retailer) {
+      const health = governorateHealth(view).find(
+        (row) => row.governorateId === scope.governorateId
+      );
+      return health ? health.score : null;
+    }
+
     const rows = view.scores.filter((s) => ids.has(s.posId));
     if (rows.length === 0) return null;
     return Math.round(rows.reduce((sum, s) => sum + s.score, 0) / rows.length);
@@ -286,8 +307,14 @@ export function watchValue(watch: Watch, view: MarketView): number | null {
        it is not, and converting that to a share of shelf would be
        inventing a denominator. */
     if (scope.skuId) return null;
+    /* `promos` carries a row per brand per audited outlet; the boolean
+       on it says whether one was actually running. Counting the rows
+       instead of the true ones counted every audited door as promoting
+       — Coca-Cola read 35.4% against the scoreboard's 28.2%. */
     const promoting = new Set(
-      view.promos.filter((p) => ids.has(p.posId) && p.brandId === brandId).map((p) => p.posId)
+      view.promos
+        .filter((p) => ids.has(p.posId) && p.brandId === brandId && p.promo)
+        .map((p) => p.posId)
     );
     return pct(promoting.size, outlets.length);
   }
