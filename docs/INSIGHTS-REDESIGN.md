@@ -290,7 +290,34 @@ change.
 
 ---
 
-## Phase E — actions
+## Phase E — actions ✅
+
+Done. CSV was already there (DataTable). Added:
+
+**Email** — `mailtoFor` builds the message from the finding's own
+headline, figure, scope, sentence and formula, with an absolute link
+back to `?insight=<id>`. No mail server, no fake "sent" toast. Composed
+on click rather than at render, because the server has no origin to put
+in the link and building it at render time meant the button did not
+exist in the first HTML at all.
+
+**Request follow-up** — reuses `RequestFollowUp` with the issue records
+narrowed to the finding's own outlets. `RULE_KPI` says what a follow-up
+would go back and measure, and null is a real answer: R4, R14, R16 and
+R17 are measured on a competitor, and re-auditing a rival's shelf is the
+wrong question.
+
+**The gate.** `MIN_FOLLOW_UP_POS = 20`, and it is a COUNT rather than a
+computed floor, for a measured reason. Bootstrapped floors on plausible
+per-outlet deltas: 4 outlets → 5.3pt, 6 → 9.0, 10 → 10.5, 12 → 10.9,
+20 → 9.7, 30 → 7.9, 60 → 6.5. Two outlets returns **0.0pt** — a
+degenerate bootstrap, not a precise cohort, and a floor of zero would
+make any movement look significant. So eligibility is checked before the
+fact, on a number that cannot degenerate.
+
+**Print** — `window.print()` on the drawer.
+
+Original spec —
 
 CSV of the affected rows; `mailto:` with a prefilled summary and **no
 fake sent-confirmation**; Request Follow-up reusing `RequestFollowUp.tsx`,

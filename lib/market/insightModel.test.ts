@@ -8,6 +8,9 @@ import { EMPTY_FILTERS, applyFilters } from "./filters";
 import { generateInsights, RULE_IDS, SHARE_FLOOR_PT, type Insight } from "./insights";
 import {
   MIN_DIVERGENCE_PT,
+  MIN_FOLLOW_UP_POS,
+  RULE_KPI,
+  followUpBlock,
   OUTCOMES,
   PRIORITY_WEIGHTS,
   RULE_CLASS,
@@ -342,5 +345,40 @@ describe("the trend window never reads past the month in hand", () => {
     expect(basra!.evidence.table.columns).toContain("September 2026");
     expect(basra!.evidence.table.columns).not.toContain("November 2026");
     expect(basra!.impact.value).toBeCloseTo(4.7, 1);
+  });
+});
+
+describe("what can be re-audited", () => {
+  it("classifies a KPI for every rule, or says there is none", () => {
+    for (const rule of RULE_IDS) expect(RULE_KPI).toHaveProperty(rule);
+  });
+
+  it("refuses to send anyone back to re-measure a competitor", () => {
+    /* R4 counts the RIVAL's facings standing where the client is out.
+       A follow-up audit of that is asking the wrong question. */
+    for (const rule of ["r4-rival-substitution", "r14-competitor-movement", "r16-share-gap", "r17-promo-gap"] as const) {
+      expect(RULE_KPI[rule], rule).toBeNull();
+    }
+  });
+
+  it("blocks a follow-up whose cohort could not read its own result", () => {
+    const thin = report.all.find(
+      (i) => i.kpi !== null && i.affected.length < MIN_FOLLOW_UP_POS
+    );
+    expect(thin, "expected at least one narrow finding in the panel").toBeDefined();
+    expect(followUpBlock(thin!)).toContain("could not tell a real change from noise");
+  });
+
+  it("allows one whose cohort can", () => {
+    const wide = report.cards.find(
+      (i) => i.kpi !== null && i.affected.length >= MIN_FOLLOW_UP_POS
+    );
+    expect(wide).toBeDefined();
+    expect(followUpBlock(wide!)).toBeNull();
+  });
+
+  it("blocks a competitor finding for the reason it is actually blocked", () => {
+    const rival = report.cards.find((i) => i.benchmark === "rival");
+    expect(followUpBlock(rival!)).toContain("measured on a competitor");
   });
 });

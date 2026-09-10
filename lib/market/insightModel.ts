@@ -29,6 +29,7 @@ import {
   type RuleId,
   type Severity,
 } from "./insights";
+import type { IssueKpi } from "./issues";
 
 /* ------------------------------------------------------------------
    OUTCOMES
@@ -106,6 +107,9 @@ export type PriorityBand = "high" | "medium" | "low";
 
 export type DecisionInsight = Insight & {
   outcome: Outcome;
+  /* What a follow-up would go back and measure. Null where nothing
+     could be — see RULE_KPI. */
+  kpi: IssueKpi | null;
   benchmark: Benchmark;
   direction: Direction;
   comparisonBasis: ComparisonBasis;
@@ -184,6 +188,77 @@ export const RULE_CLASS: Record<RuleId, Classification> = {
      sets it per finding rather than reading it from here. */
   "v1-follow-up-result": { outcome: "verify-impact", benchmark: "prior-period", direction: "win", basis: "like-for-like" },
 };
+
+/* ------------------------------------------------------------------
+   WHICH KPI A FINDING IS ABOUT
+
+   Needed for one thing only: a follow-up audit is raised against a KPI,
+   because that is what the field team goes back to measure. A finding
+   with no measurable KPI behind it cannot be re-audited, and the
+   button that offers to do so has to be absent rather than broken.
+
+   Null is a real answer here, not a gap. R4 counts a RIVAL'S facings —
+   sending someone back to re-measure a competitor's shelf would be
+   asking the wrong question. R14 and R16 compare brands over a window;
+   R17 counts promotions nobody controls.
+------------------------------------------------------------------ */
+export const RULE_KPI: Record<RuleId, IssueKpi | null> = {
+  "r1-outlet-gaps": "availability",
+  "r2-district-deficit": "shelfShare",
+  "r3-distribution-gap": "assortment",
+  "r4-rival-substitution": null,
+  "r5-price-cluster": "price",
+  "r6-channel-gap": "availability",
+  "r7-shelf-position": "shelfShare",
+  "r9-dark-outlet": "availability",
+  "r11-assortment-gap": "assortment",
+  "r13-posm-absent": "posm",
+  "r14-competitor-movement": null,
+  "r15-sku-stockout": "availability",
+  "c1-stocked-not-shown": "shelfShare",
+  "c2-core-range-missing": "assortment",
+  "r16-share-gap": null,
+  "r17-promo-gap": null,
+  /* A follow-up result is already the answer to a follow-up. */
+  "v1-follow-up-result": null,
+};
+
+/* ------------------------------------------------------------------
+   WHEN A FINDING CAN BE RE-AUDITED
+
+   A follow-up is worth raising only if the cycle it triggers could
+   produce a readable answer. A request over a handful of doors comes
+   back with a movement its own cohort cannot distinguish from noise,
+   and the reader is then told "no material change" about a question
+   that was never answerable.
+
+   Measured, over bootstrapped floors on plausible per-outlet deltas:
+   4 outlets → 5.3pt, 6 → 9.0, 10 → 10.5, 12 → 10.9, 20 → 9.7, 30 → 7.9,
+   40 → 6.8, 60 → 6.5. The floor barely improves between 12 and 20 and
+   only falls usefully past 30.
+
+   Two outlets is the trap. The bootstrap over so few values returns
+   0.0pt — not a precise cohort, a degenerate one — and a floor of zero
+   would make any movement at all look significant. So the gate is a
+   count, checked before the fact, rather than a floor computed from a
+   comparison that has not happened yet.
+
+   20 is where a cohort can see roughly a 10pt move, which is the size
+   of lift a single follow-up cycle actually produces.
+------------------------------------------------------------------ */
+export const MIN_FOLLOW_UP_POS = 20;
+
+export function followUpBlock(insight: DecisionInsight): string | null {
+  if (!insight.kpi) {
+    return "Nothing here can be re-audited — this finding is measured on a competitor, not on your own shelf.";
+  }
+  if (insight.affected.length < MIN_FOLLOW_UP_POS) {
+    return `A follow-up over ${insight.affected.length} ${
+      insight.affected.length === 1 ? "outlet" : "outlets"
+    } could not tell a real change from noise. ${MIN_FOLLOW_UP_POS} is the smallest cohort that can.`;
+  }
+  return null;
+}
 
 /* ------------------------------------------------------------------
    SEVERITY, NORMALISED
@@ -471,6 +546,7 @@ export function classify(insight: Insight, view: MarketView): DecisionInsight {
   return {
     ...insight,
     outcome: cls.outcome,
+    kpi: RULE_KPI[insight.rule],
     benchmark: cls.benchmark,
     direction: cls.direction,
     comparisonBasis: cls.basis,

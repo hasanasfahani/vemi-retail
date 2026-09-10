@@ -19,7 +19,10 @@ import Drawer from "./ui/Drawer";
 import DataTable, { type Column } from "./ui/DataTable";
 import Badge from "./ui/Badge";
 import type { Band } from "./ui/health";
-import { OUTCOME_LABEL, type DecisionInsight } from "@/lib/market/insightModel";
+import { OUTCOME_LABEL, followUpBlock, type DecisionInsight } from "@/lib/market/insightModel";
+import { insightUrl, mailtoFor } from "@/lib/market/insightShare";
+import { issuesFor } from "@/lib/market/issues";
+import RequestFollowUp from "./RequestFollowUp";
 import { governorateName, channelName, monthLabel } from "@/lib/market/index";
 import type { MarketView } from "@/lib/market/filters";
 
@@ -70,6 +73,17 @@ export default function InsightDrawer({
   onClose: () => void;
   onOpenPos: (posId: string) => void;
 }) {
+  /* The issue records behind this finding, narrowed to the outlets it
+     actually names. RequestFollowUp works in issues rather than in
+     outlets, because a request is raised against what was WRONG, not
+     against a list of addresses — and the Action Center recomputes its
+     figures from those ids under whatever filter is active later. */
+  const issues = useMemo(() => {
+    if (!insight?.kpi) return [];
+    const wanted = new Set(insight.affected);
+    return issuesFor(view, insight.kpi).filter((i) => wanted.has(i.posId));
+  }, [insight, view]);
+
   const outlets = useMemo<OutletRow[]>(() => {
     if (!insight) return [];
     const byId = new Map(view.outlets.map((o) => [o.id, o]));
@@ -109,6 +123,19 @@ export default function InsightDrawer({
   ];
 
   const basis = BASIS[insight.comparisonBasis];
+  const blocked = followUpBlock(insight);
+
+  /* Composed when the reader asks for it, not while rendering. The
+     body has to carry an absolute link back to this finding, and the
+     server has no address to put in one — building it at render time
+     meant the button simply did not exist in the first HTML. */
+  const openMail = () => {
+    window.location.href = mailtoFor(
+      insight,
+      view.month,
+      insightUrl(insight, window.location.origin)
+    );
+  };
 
   return (
     <Drawer
@@ -123,6 +150,30 @@ export default function InsightDrawer({
             {insight.scope.label} · {monthLabel(view.month)}
           </span>
         </span>
+      }
+      footer={
+        <div className="flex flex-wrap items-center gap-2">
+          {insight.kpi && !blocked && (
+            <RequestFollowUp kpi={insight.kpi} issues={issues} view={view} />
+          )}
+          <button
+            type="button"
+            onClick={openMail}
+            className="rounded-[9px] border border-line-strong bg-white px-2.5 py-1.5 text-[12px] font-semibold text-ink-700 transition-colors hover:border-ink-400"
+          >
+            Email
+          </button>
+          <button
+            type="button"
+            onClick={() => window.print()}
+            className="rounded-[9px] border border-line-strong bg-white px-2.5 py-1.5 text-[12px] font-semibold text-ink-700 transition-colors hover:border-ink-400"
+          >
+            Print
+          </button>
+          {blocked && (
+            <p className="basis-full text-[11.5px] leading-snug text-ink-400">{blocked}</p>
+          )}
+        </div>
       }
     >
       <div className="flex flex-col gap-5">

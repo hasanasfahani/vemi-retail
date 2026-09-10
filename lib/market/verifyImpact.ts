@@ -118,6 +118,8 @@ export function verifyImpact(rows: FollowUpRow[], view: MarketView): DecisionIns
     out.push({
       ...base,
       outcome: "verify-impact",
+      /* Already the answer to a follow-up; there is nothing to raise. */
+      kpi: null,
       benchmark: "prior-period",
       /* Set per finding, not per rule: this is the one detector that
          can report either. */
