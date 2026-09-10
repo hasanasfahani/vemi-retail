@@ -12,17 +12,20 @@ import { useMemo, useState } from "react";
 import PageShell from "@/components/market/PageShell";
 import { useTargets } from "@/components/market/useTargets";
 import PosDrawer from "@/components/market/PosDrawer";
+import InsightCard from "@/components/market/InsightCard";
+import InsightDrawer from "@/components/market/InsightDrawer";
+import { useDecisions } from "@/components/market/useDecisions";
+import type { DecisionInsight } from "@/lib/market/insightModel";
 import MarketMap, { type MapPoint } from "@/components/market/map/MarketMap";
-import { Card, StatCard, Tabs } from "@/components/market/ui";
+import { Card, EmptyState, StatCard, Tabs } from "@/components/market/ui";
 import Badge from "@/components/market/ui/Badge";
 import Bar from "@/components/market/ui/Bar";
-import Delta from "@/components/market/ui/Delta";
 import {
   BubbleScatter, ChartLegend, StackedBars, brandColor, orderedBrands,
 } from "@/components/market/charts";
 import {
-  ACTIVITY_LABEL, activity, byRetailer, districtLeads, pricePosition, scoreboard,
-  type Activity, type BrandRow,
+  byRetailer, districtLeads, pricePosition, scoreboard,
+  type BrandRow,
 } from "@/lib/market/competition";
 import { shelf } from "@/lib/market/performance";
 import { applyFilters, type MarketView } from "@/lib/market/filters";
@@ -49,11 +52,23 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
 
   const [battle, setBattle] = useState("governorate");
   const [openPos, setOpenPos] = useState<string | null>(null);
+  const [openInsight, setOpenInsight] = useState<DecisionInsight | null>(null);
 
   const rows = useMemo(() => scoreboard(all), [all]);
   const bubbles = useMemo(() => pricePosition(all), [all]);
   const leads = useMemo(() => districtLeads(all), [all]);
-  const events = useMemo(() => activity(all), [all]);
+  /* Computed on `all`, the same view the charts above use, so a card
+     and the chart it sits under can never disagree about a share.
+
+     Selected on the BENCHMARK rather than on the outcome label: a
+     finding measured against a rival belongs here whatever the chip on
+     the Insights page happens to be called this quarter. One test
+     pins the two selections equal. */
+  const report = useDecisions(all);
+  const competitive = useMemo(
+    () => report.cards.filter((i) => i.benchmark === "rival"),
+    [report]
+  );
   const s = useMemo(() => shelf(all), [all]);
   const retailers = useMemo(() => byRetailer(all), [all]);
 
@@ -222,23 +237,44 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
         <MarketMap points={points} unit="%" height={440} cluster={false} />
       </Card>
 
-      {/* ---------- E · competitor activity ---------- */}
+      {/* ---------- E · competitive findings ---------- */}
       <section>
         <div className="mb-2 flex items-baseline justify-between gap-3">
           <h2 className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
-            Competitor activity
+            Competitive findings
           </h2>
           <span className="mono text-[11.5px] text-ink-400">
-            Across the six-month window
+            Everything the audit measured against a rival rather than a target
           </span>
         </div>
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-          {events.slice(0, 6).map((event) => (
-            <ActivityCard key={event.id} event={event} />
-          ))}
-        </div>
+        {competitive.length === 0 ? (
+          <Card>
+            <EmptyState
+              title="No competitive finding clears its floor in this scope"
+              lead="A gap is only reported where this panel could have seen it. Narrow the filters less, or look at the charts above for the underlying position."
+            />
+          </Card>
+        ) : (
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {competitive.map((insight) => (
+              <InsightCard
+                key={insight.id}
+                insight={insight}
+                onOpen={setOpenInsight}
+                childCount={report.children.get(insight.id)?.length ?? 0}
+              />
+            ))}
+          </div>
+        )}
       </section>
 
+      <InsightDrawer
+        insight={openInsight}
+        view={all}
+        childrenFindings={openInsight ? report.children.get(openInsight.id) ?? [] : []}
+        onClose={() => setOpenInsight(null)}
+        onOpenPos={setOpenPos}
+      />
       <PosDrawer posId={openPos} view={all} onClose={() => setOpenPos(null)} />
     </div>
   );
@@ -300,35 +336,6 @@ function ScoreCard({ row, leader }: { row: BrandRow; leader: BrandRow }) {
       <p className="mono mt-3 border-t border-line pt-2.5 text-[11px] text-ink-400">
         {row.outlets.toLocaleString()} outlets stocking · {row.facings.toLocaleString()} facings ·
         price index {row.priceIndex}
-      </p>
-    </article>
-  );
-}
-
-function ActivityCard({ event }: { event: Activity }) {
-  return (
-    <article className="flex min-w-0 flex-col rounded-[14px] border border-line bg-white p-3.5 shadow-[var(--shadow-card)]">
-      <div className="flex items-center justify-between gap-2">
-        <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-ink-400">
-          <span
-            className="h-2 w-2 rounded-[2px]"
-            style={{ background: brandColor(event.brandId) }}
-            aria-hidden
-          />
-          {ACTIVITY_LABEL[event.kind]}
-        </span>
-        <Delta value={event.value} unit={event.unit} floor={0} goodUp={false} />
-      </div>
-
-      <h3 className="mt-2 font-display text-[13.5px] font-bold leading-snug tracking-tight text-ink-900">
-        {event.headline}
-      </h3>
-      <p className="mt-1 text-[12px] leading-snug text-ink-500">{event.detail}</p>
-
-      <p className="mt-2.5 text-[11px] leading-snug text-ink-400">
-        {event.material
-          ? "Larger than the panel's detection floor for this slice."
-          : "Below the detection floor for this slice — context, not yet a finding."}
       </p>
     </article>
   );

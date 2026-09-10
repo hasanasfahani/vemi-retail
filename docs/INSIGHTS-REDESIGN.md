@@ -326,7 +326,29 @@ Insight is browser print of the drawer.
 
 ---
 
-## Phase F — page integration
+## Phase F — page integration ✅
+
+F.1 and F.2 landed in Phase C (the card migration required them).
+F.3 done here: the Competition page's `activity()` feed is replaced by
+competitive findings, and the four chart panels are untouched, exactly
+as scoped.
+
+Two details worth keeping:
+
+- The findings are computed on `all` — the same brand/SKU-stripped view
+  the charts above use — so a card and the chart under it cannot
+  disagree about a share.
+- Selection is on `benchmark === "rival"`, **not** on the outcome label.
+  A finding measured against a rival belongs on this page whatever the
+  chip is called; a test pins the two selections equal.
+
+Seven findings render: contested facings, promotion coverage, a pack-rival
+distribution gap, three city shelf gaps and the Basra movement.
+
+`activity()`, `ACTIVITY_LABEL` and `type Activity` in `competition.ts`
+are now referenced only by their own test → **Phase G**.
+
+Original spec —
 
 **F.1 · Insights page.** Header (total + high priority), seven category
 chips, sort control, the empty state — which names the binding filter
