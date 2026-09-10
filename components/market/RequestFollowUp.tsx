@@ -167,9 +167,13 @@ export default function RequestFollowUp({
 
           {existing && (
             <p className="rounded-[10px] border border-violet-100 bg-violet-050 px-3 py-2.5 text-[12px] leading-snug text-violet-ink">
-              A {KPI_LABEL[kpi].toLowerCase()} request for {cycleLabel(cycle)} already exists,
-              covering {existing.posIds.length.toLocaleString()} outlets. Confirming again raises a
-              second one rather than replacing it.
+              {/* Reworded to sidestep the article: "A availability
+                  request" is what a template gets you when the noun
+                  varies. */}
+              There is already a {cycleLabel(cycle)} request for{" "}
+              {KPI_LABEL[kpi].toLowerCase()}, covering{" "}
+              {existing.posIds.length.toLocaleString()} outlets. Confirming again raises a second
+              one rather than replacing it.
             </p>
           )}
 
