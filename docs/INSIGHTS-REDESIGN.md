@@ -195,39 +195,83 @@ portal's bands (`rateBand` / `StatusChip` cut-offs) or not appear.
 
 ---
 
-## Phase C — the card
+## Frontend scope — demo-first
 
-Rewrite `InsightCard`: category eyebrow, decision headline, **hero
-delta** (the difference is the finding; its components sit smaller),
-supporting values, scope line, optional badge (priority, or
-`Like-for-like · N POS`), then Open Analysis + Download + Email.
+**Instruction, 10 Sep:** the frontend is for interactive demo screens.
+Keep it as simple as possible; hardcode where that keeps it simple.
 
-Ships with a compact variant for the dashboard. All four consumers
-updated in this phase so nothing is left half-migrated.
+**What this does NOT change.** The engine stays derived. Hardcoding
+`decide()`'s output would mean hand-typing 24 cards of figures that go
+stale on the first filter change — more work than reading the objects
+that already exist, and worse. Phases A and B stand.
+
+**What it cuts from phases C–G:**
+
+- One card component, no separate compact variant.
+- The detail view uses the `evidence.table` **every insight already
+  carries**, instead of a per-detector nominated chart. That was the
+  largest single item in the plan and it is already built.
+- Breakdown selector → the folded children, listed. No dimension
+  switching.
+- Download Insight print route → browser print of the drawer.
+- No bulk actions, no sort control beyond priority, no local filters
+  beyond the category chips.
+- Affected-POS table reuses `DataTable` as-is: no pagination, no
+  per-column filtering. Click through to the existing POS drawer.
+
+**And it settles the conjunction question by itself:** regenerating the
+dataset (option 2 below) is out of scope for a demo. Accepting the
+silent detectors is the answer.
+
+---
+
+## Phase C — the card ✅
+
+Done. `InsightCard` takes a `DecisionInsight`; outcome eyebrow coloured
+by priority, headline held to two lines so figures align across a row,
+the rule's own impact figure as the hero, and a uniform outlet count
+rather than each rule's own scope wording (some phrase it as "outlets
+with a client stockout", others as "48 audited outlets" — printing both
+in one corner reads as two different fields).
+
+`useDecisions` assembles the report once so three pages cannot hold
+three slightly different ones. All consumers migrated: Executive
+Dashboard (now "Key decision insights", one card per rule via
+`topCards`), the Insights page (rebuilt on outcome chips, empty ones
+hidden), and Reports (`classify` on its existing risk list).
+
+Also corrected: the dashboard's InfoTip still described the old ranking
+(severity → confidence → impact per outlet). It now describes the real
+one.
+
+Original spec —
+
+Rewrite `InsightCard`: outcome eyebrow, decision headline, **hero
+figure** (the impact the rule states, in the rule's own unit),
+scope line, priority + basis badges, then Open. One component, used at
+every size. All four consumers updated in this phase so nothing is left
+half-migrated.
 
 ---
 
 ## Phase D — the detail view
 
-A `Drawer`, reusing `DataTable`, `ShelfScene`, `PosDrawer` and the
-existing chart components.
+A `Drawer`, reusing `DataTable` and `PosDrawer`.
 
-A finding summary · B the template sentence · C the chart the detector
-nominates (not one chart forced on every insight) · D breakdown selector
-limited to the axes that apply · E affected-POS table, click-through to
-the POS drawer · F evidence · G trend, labelled Market Sample or
-Like-for-Like, shown only when the data supports it.
+Finding summary · the rule's own `detail` sentence · the `evidence.table`
+and `evidence.formula` each insight already carries · the folded
+children, listed · affected-POS table with click-through. Comparison
+basis labelled Market sample / Like-for-like wherever a finding claims a
+change.
 
 ---
 
 ## Phase E — actions
 
-CSV of the affected rows (extends `gapReport.ts`); `mailto:` with a
-prefilled quantitative summary and **no fake sent-confirmation**; a
-print route for Download Insight; Request Follow-up reusing
-`RequestFollowUp.tsx`, **disabled with a stated reason when the cohort
-is too small to produce a measurable result** — the expected detectable
-range travels with the request, as it already does in the Action Center.
+CSV of the affected rows; `mailto:` with a prefilled summary and **no
+fake sent-confirmation**; Request Follow-up reusing `RequestFollowUp.tsx`,
+disabled with a stated reason when the cohort is too small. Download
+Insight is browser print of the drawer.
 
 ---
 

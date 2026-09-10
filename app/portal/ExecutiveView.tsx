@@ -33,7 +33,8 @@ import MapLegend from "@/components/market/map/legend";
 import { Card, InfoTip } from "@/components/market/ui";
 import { RankedBars } from "@/components/market/charts";
 import { scoreBand, rateBand, type Band } from "@/components/market/ui/health";
-import { generateInsights } from "@/lib/market/insights";
+import { topCards } from "@/lib/market/insightModel";
+import { useDecisions } from "@/components/market/useDecisions";
 import {
   isPortfolio, portfolioHealth, portfolioScore, BAND_WORD,
 } from "@/lib/market/brandHealth";
@@ -145,7 +146,7 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
   const [governorateMetric, setGovernorateMetric] = useState<MetricId>("score");
   const [openPos, setOpenPos] = useState<string | null>(null);
 
-  const report = useMemo(() => generateInsights(view), [view]);
+  const report = useDecisions(view);
 
   /* The per-outlet figures behind each headline. An average of 87%
      can describe a steady market or a split one, and the status chip
@@ -470,26 +471,31 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
 
       </section>
 
-      {/* ---------- 3 · risks and opportunities ---------- */}
+      {/* ---------- 3 · key decision insights ---------- */}
       <section>
         <div className="mb-2 flex items-baseline justify-between gap-3">
           <h2 className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-ink-400">
-            Risks and opportunities
+            Key decision insights
             <InfoTip label="How findings are chosen and ranked" align="left">
-              Every card comes from a named rule with a stated formula, and the working is behind
-              the “Why?” on each one. The board shows the highest-ranked finding from each
-              category so it cannot fill with five versions of the same stockout. Ranking puts
-              severity first, then findings counted from field rows ahead of ones projected from
-              a gap, then impact per outlet affected.
+              Every card comes from a named rule with a stated formula and a threshold it had to
+              clear to appear at all. Ranking weighs three measured things: how large the finding
+              is by its own rule&rsquo;s scale, how much of the market&rsquo;s trading weight it
+              touches, and how strong the evidence behind it is. No card is chosen by hand. The
+              board takes one finding per rule, so it cannot fill with five versions of the same
+              stockout.
             </InfoTip>
           </h2>
           <Link href="/portal/insights" className="text-[12px] font-semibold text-violet-ink hover:underline">
-            All {report.all.length.toLocaleString()} findings
+            All {report.cards.length.toLocaleString()} findings
           </Link>
         </div>
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-          {report.headlines.map((insight) => (
-            <InsightCard key={insight.id} insight={insight} />
+          {topCards(report, 5).map((insight) => (
+            <InsightCard
+              key={insight.id}
+              insight={insight}
+              childCount={report.children.get(insight.id)?.length ?? 0}
+            />
           ))}
         </div>
       </section>

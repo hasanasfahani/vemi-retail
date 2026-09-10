@@ -1,198 +1,107 @@
 "use client";
 
-/* PAGE 4 · Insights — an intelligence feed, not a dashboard.
+/* PAGE 4 · Insights — quantitative findings, ranked.
 
-   Three sections, three different jobs:
+   One list, chipped by the decision each finding supports rather than
+   by the rule that found it. Every card is an object the engine
+   produced: the headline, the figure, the scope and the rank all come
+   from a rule that had to clear its own calibrated threshold to appear
+   at all. Nothing on this page is written by hand.
 
-     A · Top insights — what the engine ranks highest right now, with
-         the working behind each one a click away.
-     B · Opportunities — the same findings sorted by what they are
-         worth in dinars, which is the only unit that ranks across
-         facing-days, outlets and price readings.
-     C · Market stories — the handful of narrative blocks whose test
-         passes this month.
-
-   Nothing on this page is written by hand. Every headline, figure and
-   recommendation comes from a rule or a story template that had to
-   pass its own condition to appear. */
+   Findings that only restate a wider one are not here — they are the
+   breakdown behind it. The count on each card says how many. */
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
 import PageShell from "@/components/market/PageShell";
 import InsightCard from "@/components/market/InsightCard";
-import OpportunityCard from "@/components/market/OpportunityCard";
-import StoryCard from "@/components/market/StoryCard";
+import { useDecisions } from "@/components/market/useDecisions";
 import { Card, StatCard, Tabs, EmptyState } from "@/components/market/ui";
-import { CATEGORY_LABEL, generateInsights, type Category } from "@/lib/market/insights";
-import { marketStories } from "@/lib/market/stories";
-import { formatIqd, impactAssumption } from "@/lib/market/economics";
+import { OUTCOMES, OUTCOME_LABEL, type Outcome } from "@/lib/market/insightModel";
 import type { MarketView } from "@/lib/market/filters";
-
-const FILTERS: { id: Category | "all"; label: string }[] = [
-  { id: "all", label: "Everything" },
-  { id: "critical", label: CATEGORY_LABEL.critical },
-  { id: "opportunity", label: CATEGORY_LABEL.opportunity },
-  { id: "execution-gap", label: CATEGORY_LABEL["execution-gap"] },
-  { id: "competitor", label: CATEGORY_LABEL.competitor },
-];
 
 export default function InsightsView() {
   return <PageShell>{(view) => <Insights view={view} />}</PageShell>;
 }
 
 function Insights({ view }: { view: MarketView }) {
-  const [category, setCategory] = useState<Category | "all">("all");
+  const [outcome, setOutcome] = useState<Outcome | "all">("all");
+  const report = useDecisions(view);
 
-  const report = useMemo(() => generateInsights(view), [view]);
-  const stories = useMemo(() => marketStories(view), [view]);
+  const shown = outcome === "all" ? report.cards : report.byOutcome[outcome];
 
-  const shown = useMemo(
-    () => (category === "all" ? report.all : report.byCategory[category]),
-    [report, category]
-  );
+  const high = report.cards.filter((i) => i.priorityBand === "high").length;
+  const competitive = report.cards.filter((i) => i.benchmark === "rival").length;
+  const behind = report.all.length - report.cards.length;
 
-  /* Opportunities are the findings money can actually be attached to,
-     largest first. Everything else stays in section A rather than
-     being given a fabricated dinar figure to make the list longer. */
-  const opportunities = useMemo(
-    () =>
-      report.all
-        .filter((i) => i.money !== null && i.money > 0)
-        .sort((a, b) => (b.money ?? 0) - (a.money ?? 0))
-        .slice(0, 8),
+  /* Only the chips that have something under them. Seven tabs, four of
+     them empty, teaches a reader that the filters do not work. */
+  const tabs = useMemo(
+    () => [
+      { id: "all" as const, label: "Everything", count: report.cards.length },
+      ...OUTCOMES.filter((o) => report.byOutcome[o].length > 0).map((o) => ({
+        id: o,
+        label: OUTCOME_LABEL[o],
+        count: report.byOutcome[o].length,
+      })),
+    ],
     [report]
   );
-
-  const exposed = opportunities.reduce((s, i) => s + (i.money ?? 0), 0);
-  const critical = report.byCategory.critical.length;
 
   return (
     <div className="flex flex-col gap-5">
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label="Findings"
-          value={report.all.length}
+          value={report.cards.length}
           footnote={`Across ${view.posCount.toLocaleString()} audited outlets`}
         />
         <StatCard
-          label="Critical"
-          value={critical}
-          band={critical > 0 ? "critical" : "strong"}
-          footnote="Findings the engine ranks as needing immediate attention"
+          label="High priority"
+          value={high}
+          band={high > 0 ? "critical" : "strong"}
+          footnote="Ranked on size, commercial reach and evidence"
         />
         <StatCard
-          label="Exposed"
-          value={`${formatIqd(exposed)}`}
-          unit=" IQD"
-          footnote="Modelled value of the top opportunities, until the next visit"
+          label="Competitive"
+          value={competitive}
+          footnote="Findings measured against a rival rather than a target"
         />
         <StatCard
-          label="Stories"
-          value={stories.length}
-          footnote={`of 5 narrative tests passing this month`}
+          label="Outlets behind them"
+          value={behind}
+          footnote="Single-outlet findings folded into the market finding they belong to"
         />
       </div>
 
-      {/* ---------- A · top insights ---------- */}
       <section>
         <div className="mb-2.5 flex flex-wrap items-baseline justify-between gap-3">
           <h2 className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
-            Top insights
+            What the audit found
           </h2>
           <span className="mono text-[11.5px] text-ink-400">
-            Ranked by severity, then by impact per outlet within a unit
+            Ranked by size, commercial reach and strength of evidence
           </span>
         </div>
 
         <div className="mb-3">
-          <Tabs
-            tabs={FILTERS.map((f) => ({
-              id: f.id,
-              label: f.label,
-              count: f.id === "all" ? report.all.length : report.byCategory[f.id].length,
-            }))}
-            active={category}
-            onChange={(id) => setCategory(id as Category | "all")}
-          />
+          <Tabs tabs={tabs} active={outcome} onChange={(id) => setOutcome(id as Outcome | "all")} />
         </div>
 
         {shown.length === 0 ? (
           <Card>
             <EmptyState
-              title="Nothing in this category"
-              lead="No finding in the current scope falls into this category. Widen the filters, or look at another category."
+              title="Nothing in this scope clears its detection threshold"
+              lead="Every rule states a condition and a size it has to reach before it will speak. In the current filter, none of them does. Widen the filters, or look at another decision."
             />
           </Card>
         ) : (
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-            {shown.slice(0, 9).map((insight) => (
-              <InsightCard key={insight.id} insight={insight} />
-            ))}
-          </div>
-        )}
-
-        {shown.length > 9 && (
-          <p className="mt-2.5 text-[12px] text-ink-500">
-            Showing the 9 highest-ranked of {shown.length.toLocaleString()}.{" "}
-            <Link href="/portal/actions" className="font-semibold text-violet-ink hover:underline">
-              Raise a follow-up audit from the Performance tabs
-            </Link>
-            .
-          </p>
-        )}
-      </section>
-
-      {/* ---------- B · opportunities ---------- */}
-      <section>
-        <div className="mb-2.5 flex flex-wrap items-baseline justify-between gap-3">
-          <h2 className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
-            Opportunities, by what they are worth
-          </h2>
-          <span className="mono text-[11.5px] text-ink-400">
-            {formatIqd(exposed)} IQD across {opportunities.length} findings
-          </span>
-        </div>
-
-        <div className="grid gap-3 lg:grid-cols-2">
-          {opportunities.map((insight, index) => (
-            <OpportunityCard
-              key={insight.id}
-              insight={insight}
-              rank={index + 1}
-              max={opportunities[0]?.money ?? 1}
-            />
-          ))}
-        </div>
-
-        {impactAssumption && (
-          <p className="mt-3 max-w-[92ch] rounded-[12px] border border-line bg-white px-3.5 py-2.5 text-[11.5px] leading-relaxed text-ink-500">
-            {impactAssumption}
-          </p>
-        )}
-      </section>
-
-      {/* ---------- C · market stories ---------- */}
-      <section>
-        <div className="mb-2.5 flex flex-wrap items-baseline justify-between gap-3">
-          <h2 className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
-            Market stories
-          </h2>
-          <span className="mono text-[11.5px] text-ink-400">
-            Each appears only while its condition holds
-          </span>
-        </div>
-
-        {stories.length === 0 ? (
-          <Card>
-            <EmptyState
-              title="No story passes its test in this scope"
-              lead="Story blocks state a condition and appear only when the data meets it. In this filter, none of the five does."
-            />
-          </Card>
-        ) : (
-          <div className="flex flex-col gap-4">
-            {stories.map((story) => (
-              <StoryCard key={story.id} story={story} />
+            {shown.map((insight) => (
+              <InsightCard
+                key={insight.id}
+                insight={insight}
+                childCount={report.children.get(insight.id)?.length ?? 0}
+              />
             ))}
           </div>
         )}

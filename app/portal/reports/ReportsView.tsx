@@ -16,6 +16,7 @@ import { useMemo } from "react";
 import PageShell from "@/components/market/PageShell";
 import CoverageRing from "@/components/market/CoverageRing";
 import InsightCard from "@/components/market/InsightCard";
+import { classify } from "@/lib/market/insightModel";
 import MarketMap, { type MapPoint } from "@/components/market/map/MarketMap";
 import MapLegend from "@/components/market/map/legend";
 import { Card, ScoreRing, StatCard, Toasts, useToasts } from "@/components/market/ui";
@@ -196,7 +197,7 @@ function Reports({ view }: { view: MarketView }) {
       <Section n={4} title="Biggest risks">
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {report.risks.map((risk) => (
-            <InsightCard key={risk.id} insight={risk} />
+            <InsightCard key={risk.id} insight={classify(risk, view)} />
           ))}
         </div>
       </Section>
