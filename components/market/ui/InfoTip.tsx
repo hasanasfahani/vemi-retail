@@ -13,7 +13,11 @@
    reachable from the keyboard — a tooltip that only exists on hover is
    unavailable to anyone using a keyboard or a touchscreen. */
 
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+
+/* Roughly the popover's width, used to decide which side it opens on
+   before it has been rendered and measured. */
+const WIDTH = 330;
 
 export default function InfoTip({
   label = "How this is measured",
@@ -27,8 +31,27 @@ export default function InfoTip({
   children: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
+  /* Which side it actually opens on, decided from where there is room.
+
+     `align` is the preference, not the outcome. Anchored right, the
+     panel extends 330px leftward from the trigger — and the trigger on
+     the first KPI tile sits near the left edge of the content area, so
+     the panel ran out over the navigation rail. It now flips to
+     whichever side fits. */
+  const [side, setSide] = useState<"left" | "right">(align);
   const box = useRef<HTMLSpanElement>(null);
   const id = useId();
+
+  useLayoutEffect(() => {
+    if (!open || !box.current) return;
+    const rect = box.current.getBoundingClientRect();
+    const roomLeft = rect.right - WIDTH >= 12;
+    const roomRight = rect.left + WIDTH <= window.innerWidth - 12;
+    /* Keep the preference when it fits; otherwise take the side that
+       does; if neither does, prefer the one with more room. */
+    if (align === "right") setSide(roomLeft ? "right" : roomRight ? "left" : "right");
+    else setSide(roomRight ? "left" : roomLeft ? "right" : "left");
+  }, [open, align]);
 
   useEffect(() => {
     if (!open) return;
@@ -77,7 +100,7 @@ export default function InfoTip({
           id={id}
           role="note"
           className={`absolute top-[calc(100%+7px)] z-40 block w-[min(330px,74vw)] rounded-[12px] border border-line bg-white p-3 text-[11.5px] font-normal leading-relaxed text-ink-500 shadow-[var(--shadow-pop)] ${
-            align === "right" ? "right-0" : "left-0"
+            side === "right" ? "right-0" : "left-0"
           }`}
         >
           {children}

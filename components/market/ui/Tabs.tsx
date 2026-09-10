@@ -17,7 +17,7 @@ export default function Tabs({
   onChange: (id: string) => void;
 }) {
   return (
-    <div role="tablist" className="flex gap-1 overflow-x-auto border-b border-line">
+    <div role="tablist" className="no-scrollbar flex gap-1 overflow-x-auto border-b border-line">
       {tabs.map((tab) => {
         const on = tab.id === active;
         return (

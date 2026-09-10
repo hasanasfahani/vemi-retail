@@ -550,6 +550,18 @@ body {
 .leaflet-tooltip strong { color: var(--color-ink-900); }
 .vemi-cluster { background: none; border: 0; }
 
+/* A strip that can still be dragged or swiped, without the permanent
+   grey bar macOS paints when "show scroll bars" is set to always. The
+   tab strips are the case that needs it: five tabs almost never
+   overflow, so the bar was pure furniture sitting across the row. */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* ------------------------------------------------------------------
    PRINT
 
