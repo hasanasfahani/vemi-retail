@@ -92,7 +92,11 @@ function Insights({ view }: { view: MarketView }) {
         <StatCard
           label="High priority"
           value={high}
-          band={high > 0 ? "critical" : "strong"}
+          /* No band on an empty scope. A green "Strong" beside a zero
+             reads as good news, and a filter that reached no audited
+             outlet has not delivered good news — it has delivered
+             nothing to judge. */
+          band={report.cards.length === 0 ? undefined : high > 0 ? "critical" : "strong"}
           footnote="Ranked on size, commercial reach and evidence"
         />
         <StatCard

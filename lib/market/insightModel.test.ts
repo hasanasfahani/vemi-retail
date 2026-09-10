@@ -381,3 +381,31 @@ describe("what can be re-audited", () => {
     expect(followUpBlock(rival!)).toContain("measured on a competitor");
   });
 });
+
+describe("narrowing the filter narrows the page", () => {
+  const inGovernorate = (id: string) => {
+    const scoped = applyFilters({ ...EMPTY_FILTERS, governorates: [id] }, current);
+    return decide(generateInsights(scoped).all, scoped);
+  };
+
+  it("does not produce MORE cards for one governorate than for the market", () => {
+    /* The rollups once had an absolute minimum outlet count, calibrated
+       on the full 742-outlet panel. Under a governorate filter the
+       panel shrinks, the minimum stopped being met, no market finding
+       was emitted — and every instance came back as its own card. The
+       page got LONGER as the reader narrowed: 28 cards market-wide
+       became 33 in Basra, and the assortment chip went from one card
+       to fourteen street names. */
+    for (const id of ["basra", "baghdad", "erbil", "karbala"]) {
+      expect(inGovernorate(id).cards.length, id).toBeLessThan(report.cards.length);
+    }
+  });
+
+  it("keeps folding the per-outlet rules inside a single governorate", () => {
+    for (const id of ["basra", "baghdad", "erbil", "karbala"]) {
+      const scoped = inGovernorate(id);
+      expect(scoped.byOutcome["grow-distribution"].length, id).toBeLessThanOrEqual(2);
+      expect(scoped.all.length - scoped.cards.length, id).toBeGreaterThan(0);
+    }
+  });
+});

@@ -1489,10 +1489,19 @@ function rollup(
   children: RawInsight[],
   spec: {
     rule: RuleId;
-      /* Outlet counts at which the market total becomes a warning and a
-       critical finding. Stated per rule, from the same observed panel
-       the per-outlet thresholds were argued against. */
-    warningOutlets: number;
+      /* The outlet count at which the market total becomes CRITICAL
+       rather than a warning. Stated per rule, from the same observed
+       panel the per-outlet thresholds were argued against.
+
+       There is deliberately no minimum count for the rollup to EXIST.
+       Its job is to be the parent of findings that already cleared
+       their own thresholds, and a threshold on the parent is a
+       threshold on whether the page collapses — not on whether the
+       finding is real. Under a governorate filter the panel shrinks
+       and an absolute minimum stopped firing, so every instance came
+       back as its own card and narrowing the filter made the page
+       LONGER: 28 cards market-wide became 33 in Basra, with the
+       assortment chip going from one card to fourteen street names. */
     criticalOutlets: number;
     headline: (outlets: number) => string;
     detail: (outlets: number, impact: number) => string;
@@ -1503,7 +1512,8 @@ function rollup(
     valueOf: (child: RawInsight) => string | number;
   }
 ): RawInsight[] {
-  if (children.length < spec.warningOutlets) return [];
+  /* Two instances are enough to be worth saying once. */
+  if (children.length < 2) return [];
 
   const affected = [...new Set(children.flatMap((c) => c.affected))];
   const impact = children.reduce((s, c) => s + c.impact.value, 0);
@@ -1584,7 +1594,6 @@ export function generateInsights(view: MarketView): InsightReport {
     ...rollup(gaps, {
       rule: "r1-outlet-gaps",
       /* Observed: 51 outlets carry ≥2 client gaps, 4 carry ≥3. */
-      warningOutlets: 20,
       criticalOutlets: 45,
       headline: (n) => `${plural(n, "outlet")} ${n === 1 ? "has" : "have"} two or more ${clientBrand.name} lines empty`,
       detail: (n, v) =>
@@ -1601,7 +1610,6 @@ export function generateInsights(view: MarketView): InsightReport {
     ...rollup(prices, {
       rule: "r5-price-cluster",
       /* Observed: 174 outlets carry ≥1 breach, 19 carry ≥2. */
-      warningOutlets: 10,
       criticalOutlets: 25,
       headline: (n) => `${plural(n, "outlet")} ${n === 1 ? "is" : "are"} selling two or more ${clientBrand.name} lines off list`,
       detail: (n, v) =>
@@ -1616,8 +1624,7 @@ export function generateInsights(view: MarketView): InsightReport {
     ...dark,
     ...rollup(dark, {
       rule: "r9-dark-outlet",
-      /* Observed: 4 such outlets. Rare enough that two is a story. */
-      warningOutlets: 2,
+      /* Observed: 4 such outlets. */
       criticalOutlets: 8,
       headline: (n) => `${plural(n, "outlet")} ${n === 1 ? "lists" : "list"} ${clientBrand.name} and stock${n === 1 ? "s" : ""} none of it`,
       detail: (n, v) =>
@@ -1630,9 +1637,8 @@ export function generateInsights(view: MarketView): InsightReport {
     ...range,
     ...rollup(range, {
       rule: "r11-assortment-gap",
-      /* Observed: 265 outlets sit ≥1 SKU short of their format, 118 sit
-         ≥2 short. This is the largest single population in the file. */
-      warningOutlets: 40,
+      /* Observed: 265 outlets sit ≥1 SKU short of their format, 118
+         sit ≥2 short. The largest single population in the file. */
       criticalOutlets: 100,
       headline: (n) => `${plural(n, "outlet")} carr${n === 1 ? "ies" : "y"} a thinner ${clientBrand.name} range than ${n === 1 ? "its" : "their"} format`,
       detail: (n, v) =>
