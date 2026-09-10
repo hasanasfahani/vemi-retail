@@ -16,6 +16,7 @@ import {
   clientBrand, governorates, governorateName, contract, monthLabel,
 } from "./index";
 import { getTargets } from "./settings";
+import { KPI_NAME } from "./kpiLabels";
 import type { MarketView } from "./filters";
 import { decide, topCards, OUTCOME_LABEL, type DecisionInsight } from "./insightModel";
 import { generateInsights, type Insight } from "./insights";
@@ -108,11 +109,11 @@ export function buildReport(view: MarketView): Report {
       target: getTargets().score,
     },
     kpis: [
-      kpi("availability", "On-shelf availability", a.rate, getTargets().availability, "availability"),
-      kpi("share", "Share of shelf", s.clientShare, getTargets().shelfShare, "shelfShare"),
-      kpi("assortment", "Assortment compliance", view.kpi.assortment, getTargets().assortment, "assortment"),
-      kpi("price", "Price compliance", view.kpi.price, getTargets().price, "price"),
-      kpi("posm", "POSM compliance", p.compliance, getTargets().posm, "posm"),
+      kpi("availability", KPI_NAME.availability, a.rate, getTargets().availability, "availability"),
+      kpi("share", KPI_NAME.shelfShare, s.clientShare, getTargets().shelfShare, "shelfShare"),
+      kpi("assortment", KPI_NAME.assortment, view.kpi.assortment, getTargets().assortment, "assortment"),
+      kpi("price", KPI_NAME.price, view.kpi.price, getTargets().price, "price"),
+      kpi("posm", KPI_NAME.posm, p.compliance, getTargets().posm, "posm"),
     ],
     risks,
     opportunities,

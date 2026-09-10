@@ -26,6 +26,7 @@
    ============================================================ */
 
 import { kpiTargets, sharePar } from "./index";
+import { KPI_HINT, KPI_NAME } from "./kpiLabels";
 
 export type Targets = {
   availability: number;
@@ -45,14 +46,12 @@ export const DEFAULT_TARGETS: Targets = {
   score: kpiTargets.score,
 };
 
-export const TARGET_META: { id: keyof Targets; label: string; hint: string }[] = [
-  { id: "availability", label: "On-shelf availability", hint: "Listed lines found in stock" },
-  { id: "shelfShare", label: "Share of shelf", hint: "Client facings as a share of the fixture" },
-  { id: "assortment", label: "Assortment compliance", hint: "Range carried against the format's expectation" },
-  { id: "price", label: "Price compliance", hint: "Readings within 5% of RRP" },
-  { id: "posm", label: "POSM compliance", hint: "Agreed material present where checked" },
-  { id: "score", label: "Execution score", hint: "The weighted composite of the five above" },
-];
+/* Names and hints both come from the one map. This page used to call
+   availability "On-shelf availability" and shelf share "Share of
+   shelf" — reasonable names, and two more than the portal needed. */
+export const TARGET_META: { id: keyof Targets; label: string; hint: string }[] = (
+  ["availability", "shelfShare", "assortment", "price", "posm", "score"] as const
+).map((id) => ({ id, label: KPI_NAME[id], hint: KPI_HINT[id] }));
 
 const KEY = "vemi.targets.v1";
 

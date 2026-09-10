@@ -29,6 +29,7 @@
    ============================================================ */
 
 import { brands, clientBrand, portfolioBrands, requiredSkus, scoreWeights, skus } from "./index";
+import { KPI_NAME } from "./kpiLabels";
 import type { MarketView } from "./filters";
 import { scoreBand, type Band } from "@/components/market/ui/health";
 
@@ -69,13 +70,7 @@ export type BrandHealth = {
   share: number;
 };
 
-const LABEL: Record<ComponentId, string> = {
-  availability: "Availability",
-  shelfShare: "Shelf share",
-  assortment: "Assortment",
-  price: "Price compliance",
-  posm: "POSM",
-};
+const LABEL: Record<ComponentId, string> = KPI_NAME;
 
 /* The composite, for one brand, over one filtered view. */
 function healthFor(brandId: string, view: MarketView): Omit<BrandHealth, "delta"> | null {

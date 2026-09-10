@@ -22,14 +22,20 @@ import {
 import { getTargets } from "./settings";
 import type { MarketView } from "./filters";
 
+import { KPI_NAME } from "./kpiLabels";
+
 export type IssueKpi = "availability" | "shelfShare" | "assortment" | "price" | "posm";
 
+/* Re-exported under its long-standing name so the twenty call sites
+   that already import it keep working, but the VALUES now come from
+   the one map — see kpiLabels.ts for what went wrong when they did
+   not. */
 export const KPI_LABEL: Record<IssueKpi, string> = {
-  availability: "Availability",
-  shelfShare: "Shelf & visibility",
-  assortment: "Assortment",
-  price: "Pricing",
-  posm: "POSM",
+  availability: KPI_NAME.availability,
+  shelfShare: KPI_NAME.shelfShare,
+  assortment: KPI_NAME.assortment,
+  price: KPI_NAME.price,
+  posm: KPI_NAME.posm,
 };
 
 /* What the export and the drawer call the thing that is wrong. */

@@ -10,6 +10,7 @@ import { useMemo } from "react";
 
 import { countDetail, scoreBandDetail } from "@/lib/market/bandDetail";
 import WatchEye from "@/components/market/WatchEye";
+import { KPI_NAME } from "@/lib/market/kpiLabels";
 import { Card, StatCard } from "@/components/market/ui";
 import KpiGapBar from "@/components/market/KpiGapBar";
 import DownloadGaps from "@/components/market/DownloadGaps";
@@ -42,7 +43,7 @@ export default function AvailabilityTab({ view }: { view: MarketView }) {
   return (
     <div className="flex flex-col gap-4">
       <KpiGapBar
-        label="Availability"
+        label={KPI_NAME.availability}
         value={a.rate}
         target={targets.availability}
         spread={spread}
@@ -86,7 +87,7 @@ export default function AvailabilityTab({ view }: { view: MarketView }) {
           footnote={`${view.coveragePct}% of the outlets in scope`}
         />
         <StatCard
-          label="Execution score"
+          label={KPI_NAME.score}
           value={view.kpi.score}
           target={targets.score}
           band={scoreBand(view.kpi.score)}

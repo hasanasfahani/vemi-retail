@@ -18,6 +18,7 @@
 
 import { governorates, clientBrand, requiredSkus, scoreWeights, skus } from "./index";
 import { getTargets } from "./settings";
+import { KPI_NAME } from "./kpiLabels";
 import type { MarketView } from "./filters";
 import { scoreBand, type Band } from "@/components/market/ui/health";
 import type { ComponentId, HealthComponent } from "./brandHealth";
@@ -45,13 +46,7 @@ export type GovernorateHealth = {
   inScope: number;
 };
 
-const LABEL: Record<ComponentId, string> = {
-  availability: "Availability",
-  shelfShare: "Shelf share",
-  assortment: "Assortment",
-  price: "Price compliance",
-  posm: "POSM",
-};
+const LABEL: Record<ComponentId, string> = KPI_NAME;
 
 function healthFor(governorateId: string, view: MarketView): Omit<GovernorateHealth, "delta"> | null {
   const city = governorates.find((c) => c.id === governorateId);

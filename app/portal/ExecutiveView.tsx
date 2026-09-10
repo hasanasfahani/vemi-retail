@@ -36,6 +36,7 @@ import { scoreBand, rateBand, type Band } from "@/components/market/ui/health";
 import { topCards, type DecisionInsight } from "@/lib/market/insightModel";
 import InsightDrawer from "@/components/market/InsightDrawer";
 import WatchEye from "@/components/market/WatchEye";
+import { KPI_NAME } from "@/lib/market/kpiLabels";
 import { useDecisions } from "@/components/market/useDecisions";
 import {
   isPortfolio, portfolioHealth, portfolioScore, BAND_WORD,
@@ -59,11 +60,11 @@ type MetricId = "score" | "availability" | "shelfShare" | "posm" | "price";
 
 function metricsFor(targets: Targets) {
   return [
-    { id: "score" as const, label: "Execution score", unit: "", target: targets.score },
-    { id: "availability" as const, label: "Availability", unit: "%", target: targets.availability },
-    { id: "shelfShare" as const, label: "Shelf share", unit: "%", target: targets.shelfShare },
-    { id: "posm" as const, label: "POSM", unit: "%", target: targets.posm },
-    { id: "price" as const, label: "Price compliance", unit: "%", target: targets.price },
+    { id: "score" as const, label: KPI_NAME.score, unit: "", target: targets.score },
+    { id: "availability" as const, label: KPI_NAME.availability, unit: "%", target: targets.availability },
+    { id: "shelfShare" as const, label: KPI_NAME.shelfShare, unit: "%", target: targets.shelfShare },
+    { id: "posm" as const, label: KPI_NAME.posm, unit: "%", target: targets.posm },
+    { id: "price" as const, label: KPI_NAME.price, unit: "%", target: targets.price },
   ];
 }
 
@@ -380,12 +381,12 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
         {/* Six across only above 1536px. At 1280 the tiles were 154px
             wide, which is narrower than the words on them. */}
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
-          <KpiCard explain={EXPLAIN.availability} label="Availability" value={view.kpi.availability} target={targets.availability} trend={series.availability} spread={spread.availability} watch={{ kpi: "availability", month: view.month }} delta={move("availability")} deltaFloor={1.73} href="/portal/performance?tab=availability" />
-          <KpiCard explain={EXPLAIN.shelfShare} label="Shelf share" value={view.client?.share ?? 0} target={targets.shelfShare} trend={series.shelfShare} spread={spread.shelfShare} watch={{ kpi: "shelfShare", month: view.month }} delta={move("shelfShare")} deltaFloor={1.81} href="/portal/performance?tab=shelf" />
-          <KpiCard explain={EXPLAIN.assortment} label="Assortment" value={view.kpi.assortment} target={targets.assortment} trend={series.assortment} spread={spread.assortment} watch={{ kpi: "assortment", month: view.month }} delta={move("assortment")} deltaFloor={1.8} href="/portal/performance?tab=assortment" />
-          <KpiCard explain={EXPLAIN.price} label="Price compliance" value={view.kpi.price} target={targets.price} trend={series.price} spread={spread.price} watch={{ kpi: "price", month: view.month }} delta={move("price")} deltaFloor={1.8} href="/portal/performance?tab=pricing" />
-          <KpiCard explain={EXPLAIN.posm} label="POSM" value={view.kpi.posm} target={targets.posm} trend={series.posm} spread={spread.posm} watch={{ kpi: "posm", month: view.month }} delta={move("posm")} deltaFloor={1.8} href="/portal/performance?tab=posm" />
-          <KpiCard isScore explain={EXPLAIN.score} label="Execution score" value={view.kpi.score} unit="" target={targets.score} trend={series.score} watch={{ kpi: "score", month: view.month }} delta={move("score")} deltaFloor={1.8} band={scoreBand(view.kpi.score)} href="/portal/performance" />
+          <KpiCard explain={EXPLAIN.availability} label={KPI_NAME.availability} value={view.kpi.availability} target={targets.availability} trend={series.availability} spread={spread.availability} watch={{ kpi: "availability", month: view.month }} delta={move("availability")} deltaFloor={1.73} href="/portal/performance?tab=availability" />
+          <KpiCard explain={EXPLAIN.shelfShare} label={KPI_NAME.shelfShare} value={view.client?.share ?? 0} target={targets.shelfShare} trend={series.shelfShare} spread={spread.shelfShare} watch={{ kpi: "shelfShare", month: view.month }} delta={move("shelfShare")} deltaFloor={1.81} href="/portal/performance?tab=shelf" />
+          <KpiCard explain={EXPLAIN.assortment} label={KPI_NAME.assortment} value={view.kpi.assortment} target={targets.assortment} trend={series.assortment} spread={spread.assortment} watch={{ kpi: "assortment", month: view.month }} delta={move("assortment")} deltaFloor={1.8} href="/portal/performance?tab=assortment" />
+          <KpiCard explain={EXPLAIN.price} label={KPI_NAME.price} value={view.kpi.price} target={targets.price} trend={series.price} spread={spread.price} watch={{ kpi: "price", month: view.month }} delta={move("price")} deltaFloor={1.8} href="/portal/performance?tab=pricing" />
+          <KpiCard explain={EXPLAIN.posm} label={KPI_NAME.posm} value={view.kpi.posm} target={targets.posm} trend={series.posm} spread={spread.posm} watch={{ kpi: "posm", month: view.month }} delta={move("posm")} deltaFloor={1.8} href="/portal/performance?tab=posm" />
+          <KpiCard isScore explain={EXPLAIN.score} label={KPI_NAME.score} value={view.kpi.score} unit="" target={targets.score} trend={series.score} watch={{ kpi: "score", month: view.month }} delta={move("score")} deltaFloor={1.8} band={scoreBand(view.kpi.score)} href="/portal/performance" />
         </div>
       </section>
 

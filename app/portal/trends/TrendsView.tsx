@@ -19,6 +19,7 @@
 import { useMemo, useState } from "react";
 import PageShell from "@/components/market/PageShell";
 import { useTargets } from "@/components/market/useTargets";
+import { KPI_NAME } from "@/lib/market/kpiLabels";
 import PosDrawer from "@/components/market/PosDrawer";
 import { Card, DataTable, EmptyState, StatCard, Tabs, type Column } from "@/components/market/ui";
 import Badge from "@/components/market/ui/Badge";
@@ -42,12 +43,12 @@ type MeasureId =
    moves the reference line on every chart here too. */
 function measuresFor(targets: Targets) {
   return [
-    { id: "score" as const, label: "Execution score", unit: "", target: targets.score },
-    { id: "availability" as const, label: "Availability", unit: "%", target: targets.availability },
-    { id: "shelfShare" as const, label: "Share of shelf", unit: "%", target: targets.shelfShare },
-    { id: "posm" as const, label: "POSM", unit: "%", target: targets.posm },
-    { id: "price" as const, label: "Price compliance", unit: "%", target: targets.price },
-    { id: "assortment" as const, label: "Assortment", unit: "%", target: targets.assortment },
+    { id: "score" as const, label: KPI_NAME.score, unit: "", target: targets.score },
+    { id: "availability" as const, label: KPI_NAME.availability, unit: "%", target: targets.availability },
+    { id: "shelfShare" as const, label: KPI_NAME.shelfShare, unit: "%", target: targets.shelfShare },
+    { id: "posm" as const, label: KPI_NAME.posm, unit: "%", target: targets.posm },
+    { id: "price" as const, label: KPI_NAME.price, unit: "%", target: targets.price },
+    { id: "assortment" as const, label: KPI_NAME.assortment, unit: "%", target: targets.assortment },
   ];
 }
 

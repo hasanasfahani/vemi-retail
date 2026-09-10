@@ -11,6 +11,7 @@ import { useMemo } from "react";
 import { countDetail } from "@/lib/market/bandDetail";
 import { Card, DataTable, StatCard, type Column, type Facet } from "@/components/market/ui";
 import WatchEye from "@/components/market/WatchEye";
+import { KPI_NAME } from "@/lib/market/kpiLabels";
 import KpiGapBar from "@/components/market/KpiGapBar";
 import DownloadGaps from "@/components/market/DownloadGaps";
 import RequestFollowUp from "@/components/market/RequestFollowUp";
@@ -88,7 +89,7 @@ export default function PricingTab({ view }: { view: MarketView }) {
   return (
     <div className="flex flex-col gap-4">
       <KpiGapBar
-        label="Price compliance"
+        label={KPI_NAME.price}
         value={p.compliance}
         target={targets.price}
         spread={spread}
