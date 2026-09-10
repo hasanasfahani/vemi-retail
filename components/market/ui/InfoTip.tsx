@@ -45,8 +45,15 @@ export default function InfoTip({
   useLayoutEffect(() => {
     if (!open || !box.current) return;
     const rect = box.current.getBoundingClientRect();
-    const roomLeft = rect.right - WIDTH >= 12;
-    const roomRight = rect.left + WIDTH <= window.innerWidth - 12;
+    /* The boundary is the CONTENT AREA, not the window. Measuring
+       against the viewport let the panel sit flush against — and two
+       pixels over — the navigation rail, which is the same mistake in
+       miniature. */
+    const main = box.current.closest("main")?.getBoundingClientRect();
+    const leftEdge = (main?.left ?? 0) + 8;
+    const rightEdge = (main?.right ?? window.innerWidth) - 8;
+    const roomLeft = rect.right - WIDTH >= leftEdge;
+    const roomRight = rect.left + WIDTH <= rightEdge;
     /* Keep the preference when it fits; otherwise take the side that
        does; if neither does, prefer the one with more room. */
     if (align === "right") setSide(roomLeft ? "right" : roomRight ? "left" : "right");
