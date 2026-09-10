@@ -35,6 +35,7 @@ import { RankedBars } from "@/components/market/charts";
 import { scoreBand, rateBand, type Band } from "@/components/market/ui/health";
 import { topCards, type DecisionInsight } from "@/lib/market/insightModel";
 import InsightDrawer from "@/components/market/InsightDrawer";
+import WatchEye from "@/components/market/WatchEye";
 import { useDecisions } from "@/components/market/useDecisions";
 import {
   isPortfolio, portfolioHealth, portfolioScore, BAND_WORD,
@@ -51,6 +52,9 @@ import type { Targets } from "@/lib/market/settings";
    One list, used by both, so the two sections always offer the same
    vocabulary — and built from the LIVE targets, so editing a goal on
    the Setup page rebands the map and the city bars with it. */
+/* Deliberately a subset of the watchlist's own KPI names, so a bar in
+   the governorate chart can be pinned by passing the metric straight
+   through — no second vocabulary to keep in step with the first. */
 type MetricId = "score" | "availability" | "shelfShare" | "posm" | "price";
 
 function metricsFor(targets: Targets) {
@@ -433,6 +437,16 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
               health={row}
               focused={focusBrand === row.brandId}
               size={focusBrand ? 148 : 128}
+              watch={
+                <WatchEye
+                  kpi="shelfShare"
+                  scope={{ brandId: row.brandId }}
+                  value={row.share}
+                  target={targets.shelfShare}
+                  month={view.month}
+                  size="sm"
+                />
+              }
             />
           ))}
 
@@ -525,7 +539,20 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
           {governorateHealthRows.map((row) => (
-            <GovernorateHealthCard key={row.governorateId} health={row} />
+            <GovernorateHealthCard
+              key={row.governorateId}
+              health={row}
+              watch={
+                <WatchEye
+                  kpi="score"
+                  scope={{ governorateId: row.governorateId }}
+                  value={row.score}
+                  target={targets.score}
+                  month={view.month}
+                  size="sm"
+                />
+              }
+            />
           ))}
         </div>
       </section>
@@ -587,6 +614,16 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
             label: row.label,
             value: row.value,
             meta: `${row.outlets.toLocaleString()} audited outlets`,
+            watch: (
+              <WatchEye
+                kpi={governorateMetric}
+                scope={{ governorateId: row.id }}
+                value={row.value}
+                target={metricOf(governorateMetric).target}
+                month={view.month}
+                size="sm"
+              />
+            ),
           }))}
           max={100}
           par={metricOf(governorateMetric).target}

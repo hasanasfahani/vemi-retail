@@ -21,8 +21,8 @@ import StatusChip from "./ui/StatusChip";
 import TargetSpark from "./ui/TargetSpark";
 import { BAND_COLOR, rateBand, type Band } from "./ui/health";
 import { distributionDetail, rateBandDetail, scoreBandDetail } from "@/lib/market/bandDetail";
-import WatchButton from "./WatchButton";
-import type { Watch as WatchRecord } from "@/lib/market/watchlist";
+import WatchEye from "./WatchEye";
+import type { Watch as WatchRecord, WatchScope } from "@/lib/market/watchlist";
 
 export default function KpiCard({
   label,
@@ -60,7 +60,7 @@ export default function KpiCard({
   /* Which measure this tile is and which cycle it is reading, so the
      figure can be pinned with an honest baseline. Omitted where a tile
      shows something the watchlist cannot recompute. */
-  watch?: { kpi: WatchRecord["kpi"]; month: string };
+  watch?: { kpi: WatchRecord["kpi"]; month: string; scope?: WatchScope };
 }) {
   const resolved = band ?? rateBand(value, target);
   const color = BAND_COLOR[resolved];
@@ -95,9 +95,24 @@ export default function KpiCard({
         <span className="block truncate text-[11px] font-semibold uppercase tracking-wide text-ink-400">
           {label}
         </span>
-        {/* The label keeps its own casing — lowercasing turned "POSM"
-            into "posm" for a screen reader. */}
-        {explain && <InfoTip label={`How ${label} is measured`}>{explain}</InfoTip>}
+        {/* Both controls live in the header row, above the overlay
+            link, so they sit at the same height on every tile whatever
+            the body below them turns out to be. */}
+        <span className="relative z-10 flex shrink-0 items-center gap-0.5">
+          {/* The label keeps its own casing — lowercasing turned "POSM"
+              into "posm" for a screen reader. */}
+          {explain && <InfoTip label={`How ${label} is measured`}>{explain}</InfoTip>}
+          {watch && (
+            <WatchEye
+              kpi={watch.kpi}
+              scope={watch.scope ?? {}}
+              value={value}
+              target={target}
+              month={watch.month}
+              size="sm"
+            />
+          )}
+        </span>
       </div>
 
       <div className="pointer-events-none mt-2 flex items-end justify-between gap-2">
@@ -156,20 +171,6 @@ export default function KpiCard({
         <span className="pointer-events-none">
           <Delta value={delta} floor={deltaFloor} label="vs last month" />
         </span>
-        {watch && (
-          /* Above the overlay link, or clicking Watch would navigate
-             to Performance instead of pinning anything. */
-          <span className="relative z-10 ml-auto">
-            <WatchButton
-              kpi={watch.kpi}
-              scope={{}}
-              value={value}
-              target={target}
-              month={watch.month}
-              size="sm"
-            />
-          </span>
-        )}
       </div>
     </article>
   );

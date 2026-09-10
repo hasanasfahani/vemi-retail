@@ -12,6 +12,7 @@
    score over two hundred, and a reader deciding where to send someone
    needs to know which one they are looking at. */
 
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { BAND_WORD } from "@/lib/market/brandHealth";
 import type { GovernorateHealth } from "@/lib/market/governorateHealth";
@@ -23,9 +24,11 @@ import Delta from "./ui/Delta";
 export default function GovernorateHealthCard({
   health,
   size = 108,
+  watch,
 }: {
   health: GovernorateHealth;
   size?: number;
+  watch?: ReactNode;
 }) {
   const stroke = 10;
   const r = (size - stroke) / 2;
@@ -50,8 +53,11 @@ export default function GovernorateHealthCard({
             </span>
           )}
         </h3>
-        <span className="mono shrink-0 text-[10.5px] text-ink-400">
-          {health.outlets.toLocaleString()} audited
+        <span className="flex shrink-0 items-center gap-1">
+          <span className="mono text-[10.5px] text-ink-400">
+            {health.outlets.toLocaleString()} audited
+          </span>
+          {watch}
         </span>
       </div>
 

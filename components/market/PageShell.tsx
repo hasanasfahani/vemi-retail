@@ -7,6 +7,7 @@
 
 import { Suspense, useMemo, useState, type ReactNode } from "react";
 import Header from "./Header";
+import ToastHost from "./ToastHost";
 import { useFilters } from "./useFilters";
 import { applyFilters, type MarketView } from "@/lib/market/filters";
 import { cachedMonth, current, loadMonth } from "@/lib/market";
@@ -98,6 +99,8 @@ function Shell({ children, search, searchPlaceholder }: ShellProps) {
       <main className="min-w-0 flex-1 overflow-x-hidden px-4 py-5 sm:px-6">
         {children(view, query, data)}
       </main>
+      {/* One host for every confirmation on the page — see toastBus. */}
+      <ToastHost />
     </>
   );
 }

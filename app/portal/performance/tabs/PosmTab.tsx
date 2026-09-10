@@ -9,13 +9,14 @@ import { useMemo } from "react";
    with a boot full of material closes the gap in one visit. */
 
 import { countDetail, rateBandDetail } from "@/lib/market/bandDetail";
+import StatusChip from "@/components/market/ui/StatusChip";
 import { Card, StatCard } from "@/components/market/ui";
+import WatchEye from "@/components/market/WatchEye";
 import KpiGapBar from "@/components/market/KpiGapBar";
 import DownloadGaps from "@/components/market/DownloadGaps";
 import RequestFollowUp from "@/components/market/RequestFollowUp";
 import ShelfCard from "@/components/market/ShelfCard";
 import { RankedBars } from "@/components/market/charts";
-import Badge from "@/components/market/ui/Badge";
 import { posm } from "@/lib/market/performance";
 import { posmTypes } from "@/lib/market";
 import { rateBand } from "@/components/market/ui/health";
@@ -134,7 +135,17 @@ export default function PosmTab({ view }: { view: MarketView }) {
               label: row.label,
               value: row.value,
               meta: `${row.present.toLocaleString()} present of ${row.checked.toLocaleString()} checked`,
-              trailing: <Badge band={rateBand(row.value, targets.posm)} size="sm" />,
+              trailing: (
+                <StatusChip
+                  band={rateBand(row.value, targets.posm)}
+                  size="sm"
+                  title={`${row.label}: where it was checked`}
+                  detail={{
+                    ...rateBandDetail(row.value, targets.posm),
+                    footnote: `${row.present.toLocaleString()} present of ${row.checked.toLocaleString()} checked. The denominator counts only the outlets where this material is expected — a cooler is not missing from a door that could never take one.`,
+                  }}
+                />
+              ),
             }))}
             max={100}
             par={targets.posm}
@@ -148,6 +159,16 @@ export default function PosmTab({ view }: { view: MarketView }) {
               rows={p.byGovernorate.map((row) => ({
                 id: row.id,
                 label: row.label,
+              watch: (
+                <WatchEye
+                  kpi="posm"
+                  scope={{ governorateId: row.id }}
+                  value={row.value}
+                  target={targets.posm}
+                  month={view.month}
+                  size="sm"
+                />
+              ),
                 value: row.value,
                 meta: `${row.missing.toLocaleString()} items missing of ${row.checked.toLocaleString()} checked`,
               }))}
@@ -162,6 +183,16 @@ export default function PosmTab({ view }: { view: MarketView }) {
               rows={p.byChannel.map((row) => ({
                 id: row.id,
                 label: row.label,
+              watch: (
+                <WatchEye
+                  kpi="posm"
+                  scope={{ channel: row.id }}
+                  value={row.value}
+                  target={targets.posm}
+                  month={view.month}
+                  size="sm"
+                />
+              ),
                 value: row.value,
                 meta: `${row.checked.toLocaleString()} items checked`,
               }))}

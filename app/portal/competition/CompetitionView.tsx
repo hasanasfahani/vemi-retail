@@ -13,6 +13,8 @@ import PageShell from "@/components/market/PageShell";
 import { useTargets } from "@/components/market/useTargets";
 import PosDrawer from "@/components/market/PosDrawer";
 import InsightCard from "@/components/market/InsightCard";
+import WatchEye from "@/components/market/WatchEye";
+import { countDetail } from "@/lib/market/bandDetail";
 import InsightDrawer from "@/components/market/InsightDrawer";
 import { useDecisions } from "@/components/market/useDecisions";
 import type { DecisionInsight } from "@/lib/market/insightModel";
@@ -50,6 +52,7 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
   );
   const narrowed = view.filters.brands.length > 0 || view.filters.skus.length > 0;
 
+  const targets = useTargets();
   const [battle, setBattle] = useState("governorate");
   const [openPos, setOpenPos] = useState<string | null>(null);
   const [openInsight, setOpenInsight] = useState<DecisionInsight | null>(null);
@@ -139,6 +142,31 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
           value={leader.isClient ? 0 : Math.round((leader.share - client.share) * 10) / 10}
           unit="pt"
           band={leader.isClient ? "strong" : "attention"}
+          explain={`Every facing counted across all ${all.posCount.toLocaleString()} audited outlets, the leading brand's share minus ${clientBrand.name}'s. One national figure — the findings below are per governorate, and only appear where a gap clears that governorate's own detection floor, so the cities where ${clientBrand.name} holds its own never pull this row down.`}
+          detail={{
+            lead: leader.isClient
+              ? `${clientBrand.name} leads the fixture nationally.`
+              : `${leader.name} holds ${Math.round((leader.share - client.share) * 10) / 10}pt more of the national fixture than ${clientBrand.name}.`,
+            rows: [
+              { label: leader.name, value: `${leader.share}%` },
+              { label: clientBrand.name, value: `${client.share}%`, here: true },
+              { label: "Gap", value: `${Math.round((leader.share - client.share) * 10) / 10}pt` },
+              { label: "Contracted par", value: `${targets.shelfShare}%` },
+              { label: "Outlets measured", value: all.posCount.toLocaleString() },
+            ],
+            footnote:
+              "A national average across governorates of very different sizes. Baghdad contributes far more facings than Karbala, so this leans toward the large markets.",
+          }}
+          watch={
+            <WatchEye
+              kpi="shelfShare"
+              scope={{}}
+              value={client.share}
+              target={targets.shelfShare}
+              month={all.month}
+              size="sm"
+            />
+          }
           footnote={
             leader.isClient
               ? `${clientBrand.name} leads the fixture across every audited outlet`
@@ -149,6 +177,15 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
           label="Districts led"
           value={clientLeads}
           band={clientLeads > leads.length / 2 ? "strong" : "attention"}
+          explain={`Districts where ${clientBrand.name} holds more of the fixture than any other brand. Districts with fewer than three audited outlets are excluded: one shop's shelf is not a district's position.`}
+          detail={countDetail({
+            count: clientLeads,
+            total: leads.length,
+            of: "districts with enough coverage to judge",
+            against: { label: "Led by a rival", count: leads.length - clientLeads },
+            footnote:
+              "A count of places, not of volume. Leading many small districts and losing a few large ones can still leave the national share behind.",
+          })}
           footnote={`of ${leads.length} districts with at least three audited outlets`}
         />
         <StatCard
@@ -156,12 +193,35 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
           value={client.promo}
           unit="%"
           band={client.promo >= leader.promo ? "strong" : "attention"}
+          explain="The share of audited outlets where a promotion for the brand was observed on the visit. Counted in doors rather than facings — a promotion is either running at an outlet or it is not, and converting that to a share of shelf would be inventing a denominator."
+          detail={{
+            lead: `${clientBrand.name} was promoting in ${client.promo}% of audited outlets against ${leader.name} at ${leader.promo}%.`,
+            rows: [
+              { label: leader.name, value: `${leader.promo}%` },
+              { label: clientBrand.name, value: `${client.promo}%`, here: true },
+              { label: "Difference", value: `${Math.round((client.promo - leader.promo) * 10) / 10}pt` },
+              { label: "Outlets audited", value: all.posCount.toLocaleString() },
+            ],
+            footnote:
+              "Banded against the rival rather than a target: the audit sets no contracted promotion coverage, so the only honest comparison is what the competition is doing.",
+          }}
           footnote={`${leader.name} runs one in ${leader.promo}% of audited outlets`}
         />
         <StatCard
           label="Eye-level conversion"
           value={client.visibility}
           unit="%"
+          explain={`Of ${clientBrand.name}'s own facings, the share sitting at eye level rather than above or below it. It says how well shelf space is converted into visibility, which is a different question from how much space there is — a brand can hold a large fixture badly.`}
+          detail={{
+            lead: `${client.visibility}% of ${clientBrand.name} facings sit at eye level, against ${leader.visibility}% of ${leader.name}'s.`,
+            rows: [
+              { label: leader.name, value: `${leader.visibility}%` },
+              { label: clientBrand.name, value: `${client.visibility}%`, here: true },
+              { label: "Difference", value: `${Math.round((client.visibility - leader.visibility) * 10) / 10}pt` },
+            ],
+            footnote:
+              "No band on this tile: the audit sets no contracted eye-level share, so there is nothing to call strong or weak. The rival's figure is the only yardstick available.",
+          }}
           footnote={`Share of ${clientBrand.name} facings at eye level · ${leader.name} ${leader.visibility}%`}
         />
       </div>

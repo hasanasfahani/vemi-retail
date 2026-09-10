@@ -10,6 +10,7 @@
    words, and the movement figure states its direction in text as well
    as in tint. */
 
+import type { ReactNode } from "react";
 import { BAND_WORD, type BrandHealth } from "@/lib/market/brandHealth";
 import StatusChip from "./ui/StatusChip";
 import { componentDetail } from "@/lib/market/bandDetail";
@@ -22,12 +23,17 @@ export default function BrandHealthCard({
   focused,
   size = 128,
   onSelect,
+  watch,
 }: {
   health: BrandHealth;
   /* The brand the global filter has narrowed to, if any. */
   focused?: boolean;
   size?: number;
   onSelect?: (brandId: string) => void;
+  /* Pinned to the header row, at the same height on every card —
+     which is the whole reason this is an icon and not a button. The
+     ring below it is a different height on every card. */
+  watch?: ReactNode;
 }) {
   const stroke = 11;
   const r = (size - stroke) / 2;
@@ -48,11 +54,14 @@ export default function BrandHealthCard({
             {health.name}
           </span>
         </span>
-        {health.isClient && (
-          <span className="mono shrink-0 text-[10px] uppercase tracking-wide text-ink-400">
-            Lead brand
-          </span>
-        )}
+        <span className="flex shrink-0 items-center gap-1">
+          {health.isClient && (
+            <span className="mono text-[10px] uppercase tracking-wide text-ink-400">
+              Lead brand
+            </span>
+          )}
+          {watch}
+        </span>
       </div>
 
       <div className="mt-3 flex justify-center">

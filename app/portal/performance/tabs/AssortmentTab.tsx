@@ -10,12 +10,15 @@ import { useMemo } from "react";
    hypermarket standard would manufacture a failure the field team
    cannot fix. */
 
+import { rateBandDetail } from "@/lib/market/bandDetail";
+import WatchEye from "@/components/market/WatchEye";
+import StatusChip from "@/components/market/ui/StatusChip";
+import { rateBand } from "@/components/market/ui/health";
 import { Card, StatCard } from "@/components/market/ui";
 import KpiGapBar from "@/components/market/KpiGapBar";
 import DownloadGaps from "@/components/market/DownloadGaps";
 import RequestFollowUp from "@/components/market/RequestFollowUp";
 import { Heatmap, RankedBars, brandColor } from "@/components/market/charts";
-import Badge from "@/components/market/ui/Badge";
 import { assortment } from "@/lib/market/performance";
 import { governorates, governorateName, clientBrand, requiredSkus, skus } from "@/lib/market";
 import { useTargets } from "@/components/market/useTargets";
@@ -139,8 +142,23 @@ export default function AssortmentTab({ view }: { view: MarketView }) {
               value: row.value,
               meta: `${row.listed} listed on average · ${row.required} expected in this format · ${row.outlets.toLocaleString()} outlets`,
               trailing: (
-                <Badge
-                  band={row.value >= targets.assortment ? "strong" : row.value >= targets.assortment - 9 ? "average" : "attention"}
+                <StatusChip
+                  band={rateBand(row.value, targets.assortment)}
+                  size="sm"
+                  title={`${row.label}: range carried`}
+                  detail={{
+                    ...rateBandDetail(row.value, targets.assortment),
+                    footnote: `Measured against what THIS format is expected to carry — ${row.required} client lines — not against the widest format in the market. A kiosk holding its whole expected range is complying, whatever a hypermarket carries.`,
+                  }}
+                />
+              ),
+              watch: (
+                <WatchEye
+                  kpi="assortment"
+                  scope={{ channel: row.id }}
+                  value={row.value}
+                  target={targets.assortment}
+                  month={view.month}
                   size="sm"
                 />
               ),

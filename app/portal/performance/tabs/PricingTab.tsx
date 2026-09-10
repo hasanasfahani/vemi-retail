@@ -10,6 +10,7 @@ import { useMemo } from "react";
 
 import { countDetail } from "@/lib/market/bandDetail";
 import { Card, DataTable, StatCard, type Column, type Facet } from "@/components/market/ui";
+import WatchEye from "@/components/market/WatchEye";
 import KpiGapBar from "@/components/market/KpiGapBar";
 import DownloadGaps from "@/components/market/DownloadGaps";
 import RequestFollowUp from "@/components/market/RequestFollowUp";
@@ -204,6 +205,16 @@ export default function PricingTab({ view }: { view: MarketView }) {
                 id: row.id,
                 label: row.label,
                 value: row.compliance,
+                watch: (
+                  <WatchEye
+                    kpi="price"
+                    scope={{ governorateId: row.id }}
+                    value={row.compliance}
+                    target={targets.price}
+                    month={view.month}
+                    size="sm"
+                  />
+                ),
                 meta: `average ${iqd(row.average)} · ${row.readings.toLocaleString()} readings`,
               }))}
               max={100}

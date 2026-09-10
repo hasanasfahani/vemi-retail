@@ -17,6 +17,11 @@ export type RankedRow = {
   color?: string;
   meta?: ReactNode;
   trailing?: ReactNode;
+  /* The Watch control for this row. Rendered OUTSIDE the row's click
+     target: where a row opens something, wrapping it in the row's own
+     button would nest a button inside a button, which is neither valid
+     nor operable. */
+  watch?: ReactNode;
 };
 
 export default function RankedBars({
@@ -66,18 +71,27 @@ export default function RankedBars({
           </>
         );
         return (
-          <li key={row.id} className="border-b border-line py-2.5 last:border-0">
-            {onRowClick ? (
-              <button
-                type="button"
-                onClick={() => onRowClick(row)}
-                className="-mx-1.5 w-[calc(100%+0.75rem)] rounded-[8px] px-1.5 py-0.5 text-left transition-colors hover:bg-canvas"
-              >
-                {body}
-              </button>
-            ) : (
-              body
-            )}
+          <li
+            key={row.id}
+            className="flex items-start gap-1.5 border-b border-line py-2.5 last:border-0"
+          >
+            <div className="min-w-0 flex-1">
+              {onRowClick ? (
+                <button
+                  type="button"
+                  onClick={() => onRowClick(row)}
+                  className="-mx-1.5 w-[calc(100%+0.75rem)] rounded-[8px] px-1.5 py-0.5 text-left transition-colors hover:bg-canvas"
+                >
+                  {body}
+                </button>
+              ) : (
+                body
+              )}
+            </div>
+            {/* Pinned to the top of the row so every eye in the list
+                sits on one vertical line, whatever each row's meta
+                text turns out to be. */}
+            {row.watch && <span className="shrink-0 pt-px">{row.watch}</span>}
           </li>
         );
       })}

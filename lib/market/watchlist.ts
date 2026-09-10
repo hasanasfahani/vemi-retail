@@ -23,13 +23,25 @@
 import type { IssueKpi } from "./issues";
 import { KPI_LABEL } from "./issues";
 import type { MarketView } from "./filters";
-import { governorateName, channelName, clientBrand, skuOf } from "./index";
+import { governorateName, channelName, clientBrand, brands, skuOf } from "./index";
 
 export type WatchScope = {
-  /* Empty means the whole market. Each of these narrows it. */
+  /* Empty means the whole market. Each of these narrows it.
+
+     THE RULE THAT DECIDES WHAT THIS HOLDS: a watch may only be pinned
+     on a slice the portal can find again next month. Everything here
+     is a dimension of the audit itself — a place, a format, a retailer,
+     a brand, a line — so the same question can be asked of a cycle
+     nobody has run yet. A watch on "the third row of this chart" would
+     have nothing to recompute. */
   governorateId?: string;
+  district?: string;
   channel?: string;
   retailer?: string;
+  /* Any brand, not only the client. A rival taking space is exactly
+     the thing worth keeping an eye on. */
+  brandId?: string;
+  skuId?: string;
 };
 
 export type Watch = {
@@ -61,14 +73,20 @@ export function watchId(kpi: Watch["kpi"], scope: WatchScope): string {
   return [
     kpi,
     scope.governorateId ?? "*",
+    scope.district ?? "*",
     scope.channel ?? "*",
     scope.retailer ?? "*",
+    scope.brandId ?? "*",
+    scope.skuId ?? "*",
   ].join("|");
 }
 
 export function scopeLabel(scope: WatchScope): string {
   const parts = [
+    scope.brandId ? brands.find((b) => b.id === scope.brandId)?.name ?? scope.brandId : null,
+    scope.skuId ? skuOf(scope.skuId)?.name ?? scope.skuId : null,
     scope.governorateId ? governorateName(scope.governorateId) : null,
+    scope.district ?? null,
     scope.channel ? channelName(scope.channel) : null,
     scope.retailer ?? null,
   ].filter(Boolean);
@@ -86,6 +104,8 @@ export function scopeMatches(scope: WatchScope, view: MarketView): boolean {
   }
   if (scope.channel && f.channels.length && !f.channels.includes(scope.channel)) return false;
   if (scope.retailer && f.retailers.length && !f.retailers.includes(scope.retailer)) return false;
+  if (scope.brandId && f.brands.length && !f.brands.includes(scope.brandId)) return false;
+  if (scope.skuId && f.skus.length && !f.skus.includes(scope.skuId)) return false;
   return true;
 }
 
@@ -100,24 +120,37 @@ const r1 = (n: number) => Math.round(n * 10) / 10;
 const pct = (n: number, d: number) => (d === 0 ? 0 : r1((n / d) * 100));
 
 export function watchValue(watch: Watch, view: MarketView): number | null {
+  const { scope } = watch;
+
   const outlets = view.outlets.filter(
     (o) =>
-      (!watch.scope.governorateId || o.governorateId === watch.scope.governorateId) &&
-      (!watch.scope.channel || o.channel === watch.scope.channel) &&
-      (!watch.scope.retailer || o.retailer === watch.scope.retailer)
+      (!scope.governorateId || o.governorateId === scope.governorateId) &&
+      (!scope.district || o.district === scope.district) &&
+      (!scope.channel || o.channel === scope.channel) &&
+      (!scope.retailer || o.retailer === scope.retailer)
   );
   if (outlets.length === 0) return null;
   const ids = new Set(outlets.map((o) => o.id));
 
+  /* Whose shelf is being watched. Defaults to the client, because a
+     watch with no brand named is a watch on your own performance. */
+  const brandId = scope.brandId ?? clientBrand.id;
+  const mine = (skuId: string) => {
+    if (scope.skuId) return skuId === scope.skuId;
+    return skuOf(skuId)?.brandId === brandId;
+  };
+
+  /* The composite is scored per outlet for the CLIENT only — there is
+     no rival execution score to average — so a brand-scoped watch on
+     it would be answering a different question than it asked. */
   if (watch.kpi === "score") {
+    if (scope.brandId && scope.brandId !== clientBrand.id) return null;
     const rows = view.scores.filter((s) => ids.has(s.posId));
     if (rows.length === 0) return null;
     return Math.round(rows.reduce((sum, s) => sum + s.score, 0) / rows.length);
   }
 
-  const own = view.cells.filter(
-    (c) => ids.has(c.posId) && skuOf(c.skuId)?.brandId === clientBrand.id
-  );
+  const own = view.cells.filter((c) => ids.has(c.posId) && mine(c.skuId));
 
   if (watch.kpi === "availability") {
     if (own.length === 0) return null;
@@ -125,9 +158,9 @@ export function watchValue(watch: Watch, view: MarketView): number | null {
   }
 
   if (watch.kpi === "shelfShare") {
-    /* Denominator from the WHOLE fixture in those outlets, not the
-       client's own rows — otherwise a brand filter would leave the
-       client holding 100% of a shelf containing only the client. */
+    /* Denominator from the WHOLE fixture in those outlets, never the
+       watched brand's own rows — otherwise every brand would hold
+       100% of a shelf containing only itself. */
     const all = view.cells.filter((c) => ids.has(c.posId) && c.state === "in-stock");
     const total = all.reduce((s, c) => s + c.facings, 0);
     if (total === 0) return null;
@@ -135,6 +168,9 @@ export function watchValue(watch: Watch, view: MarketView): number | null {
   }
 
   if (watch.kpi === "assortment") {
+    /* Range is a client contract figure; the audit states no expected
+       range for a rival. */
+    if (scope.brandId && scope.brandId !== clientBrand.id) return null;
     const rows = view.scores.filter((s) => ids.has(s.posId));
     const usable = rows.map((s) => s.assortment).filter((v): v is number => v !== null);
     if (usable.length === 0) return null;
@@ -142,13 +178,15 @@ export function watchValue(watch: Watch, view: MarketView): number | null {
   }
 
   if (watch.kpi === "price") {
-    const rows = view.prices.filter(
-      (p) => ids.has(p.posId) && skuOf(p.skuId)?.brandId === clientBrand.id
-    );
+    const rows = view.prices.filter((p) => ids.has(p.posId) && mine(p.skuId));
     if (rows.length === 0) return null;
     return pct(rows.filter((p) => p.compliant).length, rows.length);
   }
 
+  /* POSM is recorded per outlet, not per SKU, so a line-scoped watch
+     on it has no rows of its own to count. */
+  if (scope.skuId) return null;
+  if (scope.brandId && scope.brandId !== clientBrand.id) return null;
   const posm = view.posm.filter((p) => ids.has(p.posId));
   if (posm.length === 0) return null;
   return pct(posm.filter((p) => p.present).length, posm.length);

@@ -30,6 +30,7 @@ export default function StatCard({
   action,
   detail,
   explain,
+  watch,
 }: {
   label: string;
   value: number | string;
@@ -52,6 +53,9 @@ export default function StatCard({
   /* How the figure is derived. A rate whose denominator is unstated is
      a number the reader has to take on trust. */
   explain?: ReactNode;
+  /* The Watch control, given where the figure is one the watchlist can
+     find again next cycle. */
+  watch?: ReactNode;
 }) {
   const numeric = typeof value === "number" ? value : null;
   const resolved =
@@ -66,12 +70,15 @@ export default function StatCard({
           </span>
           {explain && <InfoTip label={`How ${label} is measured`}>{explain}</InfoTip>}
         </span>
-        {resolved &&
-          (detail ? (
-            <StatusChip band={resolved} size="sm" detail={detail} title={label} />
-          ) : (
-            <Badge band={resolved} size="sm" />
-          ))}
+        <span className="flex shrink-0 items-center gap-1">
+          {resolved &&
+            (detail ? (
+              <StatusChip band={resolved} size="sm" detail={detail} title={label} />
+            ) : (
+              <Badge band={resolved} size="sm" />
+            ))}
+          {watch}
+        </span>
       </div>
 
       <div className="mt-1.5 flex items-end justify-between gap-2">

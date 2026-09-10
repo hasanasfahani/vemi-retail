@@ -9,6 +9,7 @@ import { useMemo } from "react";
    it as a failure would make the range look like a supply problem. */
 
 import { countDetail, scoreBandDetail } from "@/lib/market/bandDetail";
+import WatchEye from "@/components/market/WatchEye";
 import { Card, StatCard } from "@/components/market/ui";
 import KpiGapBar from "@/components/market/KpiGapBar";
 import DownloadGaps from "@/components/market/DownloadGaps";
@@ -91,6 +92,16 @@ export default function AvailabilityTab({ view }: { view: MarketView }) {
           band={scoreBand(view.kpi.score)}
           detail={scoreBandDetail(view.kpi.score)}
           explain="The weighted composite of all five measures — availability 30, shelf share 25, assortment 20, price 15, POSM 10 — averaged across audited outlets."
+          watch={
+            <WatchEye
+              kpi="score"
+              scope={{}}
+              value={view.kpi.score}
+              target={targets.score}
+              month={view.month}
+              size="sm"
+            />
+          }
         />
       </div>
 
@@ -100,6 +111,16 @@ export default function AvailabilityTab({ view }: { view: MarketView }) {
             rows={a.byGovernorate.map((row) => ({
               id: row.id,
               label: row.label,
+              watch: (
+                <WatchEye
+                  kpi="availability"
+                  scope={{ governorateId: row.id }}
+                  value={row.value}
+                  target={targets.availability}
+                  month={view.month}
+                  size="sm"
+                />
+              ),
               value: row.value,
               meta: `${row.listings.toLocaleString()} listings across ${row.outlets.toLocaleString()} outlets`,
             }))}
