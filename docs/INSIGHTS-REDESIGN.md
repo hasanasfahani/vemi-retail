@@ -365,7 +365,30 @@ are untouched.
 
 ---
 
-## Phase G — removals
+## Phase G — removals ✅
+
+Deleted: `stories.ts`, `stories.test.ts`, `StoryCard.tsx`,
+`OpportunityCard.tsx`, and — as flagged in Phase F — `activity()`,
+`ACTIVITY_LABEL` and `type Activity` from `competition.ts`.
+
+The old four-category system went with them: `Category`,
+`CATEGORY_LABEL`, the `category` field on every rule, and
+`InsightReport.byCategory` / `.headlines`. Two overlapping taxonomies
+where one is dead is exactly the kind of detail the MVP rule says to
+remove rather than carry. `generateInsights` now returns `{ all }`, and
+`report.ts` takes its recommended actions from `topCards(decide(...))`.
+
+`report.stories` turned out to be computed on every report build and
+never rendered — dead before this phase started.
+
+**One test was worth saving rather than deleting.** The activity suite
+asserted the dataset's central competitive story: Coca-Cola gained Basra
+shelf AND ran promotions there. That is a property of the DATA, not of
+the component that reported it, so it is now pinned against the trend
+rows and the promo rows directly, above Basra's own 4.63pt floor, where
+no future refactor of the reporting layer can quietly lose it.
+
+Original spec —
 
 Delete `stories.ts`, `stories.test.ts`, `StoryCard.tsx`,
 `OpportunityCard.tsx` and the old four-category constants. Confirm

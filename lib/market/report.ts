@@ -17,8 +17,8 @@ import {
 } from "./index";
 import { getTargets } from "./settings";
 import type { MarketView } from "./filters";
+import { decide, topCards, OUTCOME_LABEL, type DecisionInsight } from "./insightModel";
 import { generateInsights, type Insight } from "./insights";
-import { marketStories, type Story } from "./stories";
 import { scoreboard, type BrandRow } from "./competition";
 import { availability, movement, posm, shelf } from "./performance";
 import { formatIqd, impactAssumption } from "./economics";
@@ -51,9 +51,8 @@ export type Report = {
   opportunities: Insight[];
   exposed: number;
   competitive: BrandRow[];
-  stories: Story[];
   governorates: { id: string; label: string; score: number; outlets: number; band: Band }[];
-  recommended: Insight[];
+  recommended: DecisionInsight[];
 };
 
 export function buildReport(view: MarketView): Report {
@@ -119,7 +118,6 @@ export function buildReport(view: MarketView): Report {
     opportunities,
     exposed: opportunities.reduce((sum, i) => sum + (i.money ?? 0), 0),
     competitive: board,
-    stories: marketStories(view),
     governorates: governorates
       .map((city) => {
         const outlets = view.outlets.filter((o) => o.governorateId === city.id);
@@ -140,7 +138,7 @@ export function buildReport(view: MarketView): Report {
       })
       .filter((row) => row.outlets > 0)
       .sort((x, y) => y.score - x.score),
-    recommended: insights.headlines,
+    recommended: topCards(decide(insights.all, view), 5),
   };
 }
 
@@ -212,7 +210,7 @@ export function reportCsv(report: Report): string {
 
   section("Recommended actions", ["Finding", "Category", "Outlets", "Next step"]);
   for (const item of report.recommended) {
-    rows.push([item.headline, item.category, item.scope.outlets, item.cta.label]);
+    rows.push([item.headline, OUTCOME_LABEL[item.outcome], item.scope.outlets, item.cta.label]);
   }
 
   rows.push([]);

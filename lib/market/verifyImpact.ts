@@ -75,7 +75,6 @@ export function verifyImpact(rows: FollowUpRow[], view: MarketView): DecisionIns
     const base: Insight = {
       id: `v1-${request.id}`,
       rule: "v1-follow-up-result",
-      category: improved ? "opportunity" : "critical",
       severity: row.result === "mixed" ? "watch" : improved ? "watch" : "critical",
       headline:
         row.result === "mixed"

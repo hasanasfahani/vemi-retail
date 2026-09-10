@@ -36,7 +36,6 @@ const report = decide(raw, view);
 const make = (over: Partial<Insight> = {}): Insight => ({
   id: "x1",
   rule: "r2-district-deficit",
-  category: "critical",
   severity: "warning",
   headline: "h",
   detail: "d",

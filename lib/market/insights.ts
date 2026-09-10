@@ -33,18 +33,6 @@ import type { Cell, Sku } from "./types";
 
 export type Severity = "critical" | "warning" | "watch";
 
-/* The four cards the brief asks the Executive Dashboard to speak in.
-   Severity says how loud; category says what kind of conversation it
-   starts — an emergency, a headroom argument, a discipline problem, or
-   a competitor doing something. */
-export type Category = "critical" | "opportunity" | "execution-gap" | "competitor";
-
-export const CATEGORY_LABEL: Record<Category, string> = {
-  critical: "Critical",
-  opportunity: "Opportunity",
-  "execution-gap": "Execution gap",
-  competitor: "Competitor movement",
-};
 
 export type RuleId =
   | "r1-outlet-gaps"
@@ -92,7 +80,6 @@ export type EvidenceTable = { columns: string[]; rows: (string | number)[][] };
 export type Insight = {
   id: string;
   rule: RuleId;
-  category: Category;
   severity: Severity;
   headline: string;
   detail: string;
@@ -149,11 +136,6 @@ export type RawInsight = Omit<Insight, "concentration" | "money">;
 
 export type InsightReport = {
   all: Insight[];
-  byCategory: Record<Category, Insight[]>;
-  /* The four or five cards the Executive Dashboard shows: the top
-     finding from each category, so the page cannot fill up with five
-     variations of the same stockout. */
-  headlines: Insight[];
 };
 
 /* ------------------------------------------------------------------
@@ -442,7 +424,6 @@ function r1OutletGaps(ctx: Ctx): RawInsight[] {
     out.push({
       id: `r1-${posId}`,
       rule: "r1-outlet-gaps",
-      category: "critical",
       severity:
         gaps.length >= THRESHOLDS.r1OutletGaps.criticalCount ? "critical" : "warning",
       headline: `${gaps.length} ${clientBrand.name} lines empty at ${outlet.name}`,
@@ -522,7 +503,6 @@ function r2DistrictDeficit(ctx: Ctx): RawInsight[] {
     out.push({
       id: `r2-${dk}`,
       rule: "r2-district-deficit",
-      category: "opportunity",
       severity:
         deficit >= THRESHOLDS.r2DistrictDeficit.criticalPt ? "critical" : "warning",
       headline: `${clientBrand.name} shelf share is ${deficit}pt below city par in ${district}`,
@@ -589,7 +569,6 @@ function r3DistributionGap(ctx: Ctx): RawInsight[] {
     out.push({
       id: `r3-${sku.id}`,
       rule: "r3-distribution-gap",
-      category: "opportunity",
       severity: gap >= THRESHOLDS.r3DistributionGap.criticalPt ? "critical" : "warning",
       headline: `${sku.name} is listed in ${gap}pt fewer outlets than its pack rivals`,
       detail: `${sku.name} is carried by ${own}% of audited outlets against a ${peerMedian}% median for other ${sku.pack.replace("-", " ")} lines — roughly ${missing} outlets where the format sells and this SKU is absent.`,
@@ -662,7 +641,6 @@ function r4RivalSubstitution(ctx: Ctx): RawInsight[] {
     {
       id: `r4-${topId}`,
       rule: "r4-rival-substitution",
-      category: "competitor",
       severity:
         share >= THRESHOLDS.r4RivalSubstitution.criticalSharePct ? "critical" : "warning",
       headline: `${rival.name} holds ${share}% of the shelf where ${clientBrand.name} is out`,
@@ -723,7 +701,6 @@ function r5PriceCluster(ctx: Ctx): RawInsight[] {
     out.push({
       id: `r5-${posId}`,
       rule: "r5-price-cluster",
-      category: "execution-gap",
       severity:
         rows.length >= THRESHOLDS.r5PriceCluster.criticalCount ? "critical" : "warning",
       headline: `${rows.length} ${clientBrand.name} lines mispriced at ${outlet.name}`,
@@ -782,7 +759,6 @@ function r6ChannelGap(ctx: Ctx): RawInsight[] {
     out.push({
       id: `r6-${channel}`,
       rule: "r6-channel-gap",
-      category: "execution-gap",
       severity: gap >= THRESHOLDS.r6ChannelGap.criticalPt ? "critical" : "warning",
       headline: `${channelName(channel)} availability is ${gap}pt behind your own average`,
       detail: `${clientBrand.name} is on shelf in ${rate}% of ${channelName(channel)} listings against ${overall}% across all audited outlets — ${outlets} outlets in one format, failing the same way.`,
@@ -836,7 +812,6 @@ function r7ShelfPosition(ctx: Ctx): RawInsight[] {
     {
       id: "r7-eye-level",
       rule: "r7-shelf-position",
-      category: "execution-gap",
       severity: gap >= THRESHOLDS.r7ShelfPosition.criticalPt ? "critical" : "warning",
       headline: `${clientBrand.name} holds ${gap}pt less of the eye-level shelf than of the rest`,
       detail: `${eyeShare}% of eye-level facings against ${restShare}% elsewhere — the client is being shelved, but not at the height that sells.`,
@@ -889,7 +864,6 @@ function r9DarkOutlets(ctx: Ctx): RawInsight[] {
     out.push({
       id: `r9-${posId}`,
       rule: "r9-dark-outlet",
-      category: "critical",
       severity: "critical",
       headline: `${outlet.name} carries no ${clientBrand.name} at all`,
       detail: `${outlet.name} lists ${own.length} ${clientBrand.name} SKUs and had every one of them out of stock — a listed door selling none of the brand.`,
@@ -951,7 +925,6 @@ function r11AssortmentGap(ctx: Ctx): RawInsight[] {
     out.push({
       id: `r11-${posId}`,
       rule: "r11-assortment-gap",
-      category: "opportunity",
       severity:
         short >= THRESHOLDS.r11AssortmentGap.criticalCount ? "critical" : "warning",
       headline: `${outlet.name} carries ${short} fewer ${clientBrand.name} SKUs than its format`,
@@ -1015,7 +988,6 @@ function r13PosmAbsent(ctx: Ctx): RawInsight[] {
     {
       id: "r13-posm-absent",
       rule: "r13-posm-absent",
-      category: "execution-gap",
       severity:
         bare.length >= THRESHOLDS.r13PosmAbsent.criticalCount ? "critical" : "warning",
       headline: `${clientBrand.name} is on shelf in ${bare.length} outlets with no POSM at all`,
@@ -1089,7 +1061,6 @@ function r14CompetitorMovement(ctx: Ctx): RawInsight[] {
     out.push({
       id: `r14-${governorateId}`,
       rule: "r14-competitor-movement",
-      category: "competitor",
       severity: gainer.delta >= floor * 1.5 ? "critical" : "warning",
       headline: `${gainer.brand.name} has gained ${gainer.delta}pt of shelf in ${governorateName(governorateId)}`,
       detail: `Across ${monthLabel(first.month)} to ${monthLabel(last.month)}, ${gainer.brand.name} moved from ${first.brandShare[gainer.brand.id]}% to ${last.brandShare[gainer.brand.id]}% of ${governorateName(governorateId)} shelf${
@@ -1152,7 +1123,6 @@ function r15SkuStockout(ctx: Ctx): RawInsight[] {
     out.push({
       id: `r15-${skuId}`,
       rule: "r15-sku-stockout",
-      category: "critical",
       severity:
         empty.length >= THRESHOLDS.r15SkuStockout.criticalOutlets ? "critical" : "warning",
       headline: `${sku.name} is out of stock in ${empty.length} audited outlets`,
@@ -1240,7 +1210,6 @@ function r16ShareGap(ctx: Ctx): RawInsight[] {
     out.push({
       id: `r16-${governorateId}`,
       rule: "r16-share-gap",
-      category: "competitor",
       severity: gap >= THRESHOLDS.r16ShareGap.criticalPt ? "critical" : "warning",
       headline: `${rival?.name ?? leader.id} holds ${gap}pt more ${governorateName(governorateId)} shelf than ${clientBrand.name}`,
       detail: `Across ${doors} audited ${governorateName(governorateId)} outlets, ${rival?.name ?? leader.id} takes ${leader.share}% of the measured fixture against ${clientBrand.name} at ${mine}%. The city's detection floor is ${floor}pt, so the gap is wider than what this panel could mistake for noise.`,
@@ -1300,7 +1269,6 @@ function r17PromoGap(ctx: Ctx): RawInsight[] {
     {
       id: "r17-promo-gap",
       rule: "r17-promo-gap",
-      category: "competitor",
       severity: gap >= THRESHOLDS.r17PromoGap.criticalPt ? "critical" : "warning",
       headline: `${rival?.name ?? leader.id} is promoting in ${gap}pt more outlets than ${clientBrand.name}`,
       detail: `${rival?.name ?? leader.id} was observed running a promotion in ${leader.cover}% of the ${doors} audited outlets against ${clientBrand.name} at ${mine}%.`,
@@ -1394,7 +1362,6 @@ function c1StockedNotShown(ctx: Ctx): RawInsight[] {
     {
       id: "c1-stocked-not-shown",
       rule: "c1-stocked-not-shown",
-      category: "opportunity",
       severity:
         both.length >= THRESHOLDS.conjunction.criticalOutlets ? "critical" : "warning",
       headline: `${plural(both.length, "outlet")} stock${both.length === 1 ? "s" : ""} ${clientBrand.name} well and still give${both.length === 1 ? "s" : ""} it ${avgShare}% of the shelf`,
@@ -1472,7 +1439,6 @@ function c2CoreRangeMissing(ctx: Ctx): RawInsight[] {
     out.push({
       id: `c2-${skuId}`,
       rule: "c2-core-range-missing",
-      category: "opportunity",
       severity:
         missing.length >= THRESHOLDS.conjunction.criticalOutlets ? "critical" : "warning",
       headline: `${sku?.name ?? skuId} is missing from ${plural(missing.length, "outlet")} that carr${missing.length === 1 ? "ies" : "y"} the rest of the range`,
@@ -1523,8 +1489,7 @@ function rollup(
   children: RawInsight[],
   spec: {
     rule: RuleId;
-    category: Category;
-    /* Outlet counts at which the market total becomes a warning and a
+      /* Outlet counts at which the market total becomes a warning and a
        critical finding. Stated per rule, from the same observed panel
        the per-outlet thresholds were argued against. */
     warningOutlets: number;
@@ -1568,8 +1533,7 @@ function rollup(
     {
       id: `${spec.rule}-market`,
       rule: spec.rule,
-      category: spec.category,
-      severity:
+        severity:
         allCritical || affected.length >= spec.criticalOutlets ? "critical" : "warning",
       headline: spec.headline(affected.length),
       detail: spec.detail(affected.length, impact),
@@ -1619,7 +1583,6 @@ export function generateInsights(view: MarketView): InsightReport {
     ...gaps,
     ...rollup(gaps, {
       rule: "r1-outlet-gaps",
-      category: "critical",
       /* Observed: 51 outlets carry ≥2 client gaps, 4 carry ≥3. */
       warningOutlets: 20,
       criticalOutlets: 45,
@@ -1637,7 +1600,6 @@ export function generateInsights(view: MarketView): InsightReport {
     ...prices,
     ...rollup(prices, {
       rule: "r5-price-cluster",
-      category: "execution-gap",
       /* Observed: 174 outlets carry ≥1 breach, 19 carry ≥2. */
       warningOutlets: 10,
       criticalOutlets: 25,
@@ -1654,7 +1616,6 @@ export function generateInsights(view: MarketView): InsightReport {
     ...dark,
     ...rollup(dark, {
       rule: "r9-dark-outlet",
-      category: "critical",
       /* Observed: 4 such outlets. Rare enough that two is a story. */
       warningOutlets: 2,
       criticalOutlets: 8,
@@ -1669,7 +1630,6 @@ export function generateInsights(view: MarketView): InsightReport {
     ...range,
     ...rollup(range, {
       rule: "r11-assortment-gap",
-      category: "opportunity",
       /* Observed: 265 outlets sit ≥1 SKU short of their format, 118 sit
          ≥2 short. This is the largest single population in the file. */
       warningOutlets: 40,
@@ -1720,30 +1680,7 @@ export function generateInsights(view: MarketView): InsightReport {
       return sev !== 0 ? sev : byRank(a, b);
     });
 
-  const byCategory = {
-    critical: all.filter((i) => i.category === "critical"),
-    opportunity: all.filter((i) => i.category === "opportunity"),
-    "execution-gap": all.filter((i) => i.category === "execution-gap"),
-    competitor: all.filter((i) => i.category === "competitor"),
-  } as Record<Category, Insight[]>;
 
-  /* One card per category, so the dashboard cannot fill with five
-     variations of the same stockout. Any remaining slot goes to the
-     highest-ranked finding from a rule not already on the board —
-     "next by rank" would just print a second outlet with the same
-     three empty facings, which tells the reader nothing new. */
-  const picked = (Object.keys(byCategory) as Category[])
-    .map((c) => byCategory[c][0])
-    .filter(Boolean);
-  const usedRules = new Set(picked.map((i) => i.rule));
-  const spare: Insight[] = [];
-  for (const insight of all) {
-    if (spare.length >= 5 - picked.length) break;
-    if (usedRules.has(insight.rule)) continue;
-    usedRules.add(insight.rule);
-    spare.push(insight);
-  }
-  const headlines = [...picked, ...spare].slice(0, 5);
 
-  return { all, byCategory, headlines };
+  return { all };
 }

@@ -8,8 +8,7 @@
    ============================================================ */
 
 import {
-  brands, governorates, governorateName, channels, clientBrand, districts, monthLabel,
-  pos as allPos, skus, trends,
+  brands, channels, clientBrand, districts, pos as allPos, skus,
 } from "./index";
 import type { MarketView } from "./filters";
 import type { Cell } from "./types";
@@ -245,124 +244,6 @@ export function districtLeads(view: MarketView, minOutlets = 3): DistrictLead[] 
   }
 
   return rows.sort((a, b) => b.facings - a.facings);
-}
-
-/* ---------- E · competitor activity ----------
-
-   What a rival DID, not only what it holds. Every event below is a
-   comparison between the first and last month of the trend window, at
-   the level the panel can support — the same rule the insight engine's
-   movement rule follows, for the same reason.
-
-   Nothing here is invented: a "new listing" is a SKU whose
-   distribution rose from nothing, a "shelf gain" is a share movement
-   above the detection floor, a "promotion push" is a change in the
-   share of outlets where the brand was observed running one. */
-
-export type ActivityKind =
-  | "shelf-gain" | "promotion" | "display" | "new-listing" | "price-move";
-
-export type Activity = {
-  id: string;
-  kind: ActivityKind;
-  brandId: string;
-  governorateId: string | null;
-  headline: string;
-  detail: string;
-  value: number;
-  unit: string;
-  /* Whether the movement clears the detection floor for the slice it
-     was measured on. Below it, the event is reported as context and
-     labelled as such rather than dressed up as a finding. */
-  material: boolean;
-};
-
-export const ACTIVITY_LABEL: Record<ActivityKind, string> = {
-  "shelf-gain": "Shelf space",
-  promotion: "Promotion",
-  display: "Secondary display",
-  "new-listing": "New listing",
-  "price-move": "Price move",
-};
-
-const GOVERNORATE_FLOOR: Record<string, number> = {
-  baghdad: 3.09, basra: 4.63, erbil: 4.79, nineveh: 5.05, najaf: 4.9, karbala: 5.57,
-};
-const MARKET_FLOOR = 1.81;
-/* Promotion presence is a count of outlets, not a share of facings, so
-   it carries its own floor: 5 points of outlet coverage is roughly one
-   outlet in twenty and comfortably outside month-to-month wobble. */
-const PROMO_FLOOR = 5;
-
-export function activity(view: MarketView): Activity[] {
-  const rivals = brands.filter((b) => b.owner !== clientBrand.owner);
-  const scope = view.filters.governorates.length ? view.filters.governorates : governorates.map((c) => c.id);
-  const events: Activity[] = [];
-
-  for (const governorateId of scope) {
-    const series = trends.byGovernorate[governorateId];
-    if (!series) continue;
-    /* The trend file extends past the month being viewed so follow-up
-       cycles have somewhere to land. An activity feed reading its last
-       point would report movement that has not happened yet. */
-    const line = series.filter((p) => p.month <= view.month);
-    if (line.length < 2) continue;
-    const first = line[0];
-    const last = line[line.length - 1];
-    const floor = GOVERNORATE_FLOOR[governorateId] ?? MARKET_FLOOR;
-
-    for (const brand of rivals) {
-      const shelf = r1((last.brandShare[brand.id] ?? 0) - (first.brandShare[brand.id] ?? 0));
-      if (shelf > 0.5) {
-        events.push({
-          id: `shelf-${governorateId}-${brand.id}`,
-          kind: "shelf-gain",
-          brandId: brand.id,
-          governorateId,
-          headline: `${brand.name} took ${shelf}pt of shelf in ${governorateName(governorateId)}`,
-          detail: `${first.brandShare[brand.id]}% to ${last.brandShare[brand.id]}% of measured facings between ${monthLabel(first.month)} and ${monthLabel(last.month)}.`,
-          value: shelf,
-          unit: "pt",
-          material: shelf >= floor,
-        });
-      }
-
-      const promo = r1((last.promoShare?.[brand.id] ?? 0) - (first.promoShare?.[brand.id] ?? 0));
-      if (promo > 2) {
-        events.push({
-          id: `promo-${governorateId}-${brand.id}`,
-          kind: "promotion",
-          brandId: brand.id,
-          governorateId,
-          headline: `${brand.name} is promoting in ${last.promoShare[brand.id]}% of audited ${governorateName(governorateId)} outlets`,
-          detail: `Up from ${first.promoShare[brand.id]}% in ${monthLabel(first.month)} — the activity behind the shelf movement.`,
-          value: promo,
-          unit: "pt",
-          material: promo >= PROMO_FLOOR,
-        });
-      }
-
-      const display = r1((last.displayShare?.[brand.id] ?? 0) - (first.displayShare?.[brand.id] ?? 0));
-      if (display > 2) {
-        events.push({
-          id: `display-${governorateId}-${brand.id}`,
-          kind: "display",
-          brandId: brand.id,
-          governorateId,
-          headline: `${brand.name} added secondary displays in ${governorateName(governorateId)}`,
-          detail: `Present in ${last.displayShare[brand.id]}% of audited outlets, up from ${first.displayShare[brand.id]}%.`,
-          value: display,
-          unit: "pt",
-          material: display >= PROMO_FLOOR,
-        });
-      }
-    }
-  }
-
-  return events.sort((a, b) => {
-    if (a.material !== b.material) return a.material ? -1 : 1;
-    return b.value - a.value;
-  });
 }
 
 /* ---------- shelf battle by retailer ----------

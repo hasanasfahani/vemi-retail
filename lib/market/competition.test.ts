@@ -7,9 +7,9 @@
 
 import { describe, expect, it } from "vitest";
 import { EMPTY_FILTERS, applyFilters } from "./filters";
-import { current, brands, clientBrand, skus } from "./index";
+import { current, brands, clientBrand, skus, trends } from "./index";
 import {
-  activity, byRetailer, districtLeads, pricePosition, scoreboard,
+  byRetailer, districtLeads, pricePosition, scoreboard,
 } from "./competition";
 
 const view = applyFilters(EMPTY_FILTERS, current);
@@ -91,29 +91,32 @@ describe("who leads where", () => {
   });
 });
 
-describe("competitor activity", () => {
-  const events = activity(view);
+describe("the Basra story, held in the data itself", () => {
+  /* Coca-Cola did something in Basra and the shelf moved. Both halves
+     used to be asserted against the activity feed; the feed is gone,
+     replaced by findings from the insight engine, but the FACT is a
+     property of the dataset rather than of whichever component reports
+     it. So it is pinned here, against the rows, where no future
+     refactor of the reporting layer can quietly lose it. */
 
-  it("reports rivals only, never portfolio stablemates", () => {
-    for (const event of events) {
-      const brand = brands.find((b) => b.id === event.brandId)!;
-      expect(brand.owner).not.toBe(clientBrand.owner);
-    }
+  it("has Coca-Cola gaining Basra shelf across the window to date", () => {
+    const line = trends.byGovernorate.basra.filter((p) => p.month <= view.month);
+    const first = line[0];
+    const last = line[line.length - 1];
+    const moved = (last.brandShare["coca-cola"] ?? 0) - (first.brandShare["coca-cola"] ?? 0);
+    /* Basra's own bootstrapped detection floor is 4.63pt. */
+    expect(moved).toBeGreaterThan(4.63);
   });
 
-  it("puts events that clear their detection floor first", () => {
-    const firstSoft = events.findIndex((e) => !e.material);
-    if (firstSoft !== -1) {
-      expect(events.slice(firstSoft).every((e) => !e.material)).toBe(true);
-    }
-  });
-
-  it("finds the promotion push behind the Basra shelf gain", () => {
-    /* The demo's central competitive story: Coca-Cola did something,
-       and the shelf moved. Both halves have to be visible. */
-    const basra = events.filter((e) => e.governorateId === "basra" && e.brandId === "coca-cola");
-    expect(basra.some((e) => e.kind === "shelf-gain" && e.material)).toBe(true);
-    expect(basra.some((e) => e.kind === "promotion" && e.material)).toBe(true);
+  it("has Coca-Cola promoting in more Basra outlets than the client", () => {
+    const basra = new Set(
+      view.outlets.filter((o) => o.governorateId === "basra").map((o) => o.id)
+    );
+    const cover = (brandId: string) =>
+      new Set(
+        view.promos.filter((p) => p.brandId === brandId && basra.has(p.posId)).map((p) => p.posId)
+      ).size;
+    expect(cover("coca-cola")).toBeGreaterThan(cover(clientBrand.id));
   });
 });
 

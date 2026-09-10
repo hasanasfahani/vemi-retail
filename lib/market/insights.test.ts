@@ -67,12 +67,6 @@ describe("the engine as a whole", () => {
     }
   });
 
-  it("shows at most five headline cards and never two from one category", () => {
-    expect(report.headlines.length).toBeLessThanOrEqual(5);
-    const cats = report.headlines.map((i) => i.category);
-    const firstOfEach = new Set(cats);
-    expect(firstOfEach.size).toBeGreaterThanOrEqual(Math.min(4, cats.length));
-  });
 });
 
 describe("significance", () => {
