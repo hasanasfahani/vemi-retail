@@ -93,6 +93,29 @@ export function scopeLabel(scope: WatchScope): string {
   return parts.length ? parts.join(" · ") : "All audited outlets";
 }
 
+/* THE ID IS DERIVED, SO IT IS RE-DERIVED ON THE WAY IN.
+
+   A stored id is a cached answer to "which question is this?", and the
+   question is fully described by the kpi and the scope beside it. When
+   the scope gained brand, SKU and district, every id already in a
+   browser was left in the old four-part shape — so a figure genuinely
+   on the watchlist showed an unwatched eye, and clicking it added a
+   second row for the same question.
+
+   Recomputing on load makes that class of bug impossible rather than
+   fixed once: any future dimension added to the scope heals itself the
+   next time the list is read. Duplicates that collapse to one id are
+   folded, newest kept, because that is what the reader last said. */
+function adopt(stored: Watch[]): Watch[] {
+  const byId = new Map<string, Watch>();
+  for (const watch of stored) {
+    if (!watch || typeof watch !== "object" || !watch.kpi) continue;
+    const id = watchId(watch.kpi, watch.scope ?? {});
+    byId.set(id, { ...watch, scope: watch.scope ?? {}, id });
+  }
+  return [...byId.values()];
+}
+
 /* Does the current view still contain the slice this watch asks about?
    A watch pinned on Basra says nothing while the reader is filtered to
    Erbil, and showing a figure anyway would be answering a question
@@ -236,7 +259,7 @@ export function subscribeWatches(listener: () => void): () => void {
     try {
       const raw = localStorage.getItem(KEY);
       const parsed = raw ? JSON.parse(raw) : null;
-      if (Array.isArray(parsed)) watches = parsed as Watch[];
+      if (Array.isArray(parsed)) watches = adopt(parsed as Watch[]);
     } catch {
       /* Private mode, cleared storage, a hand-edited value — an empty
          list is the honest answer and the page still works. */
@@ -257,6 +280,17 @@ export function watchesReady(): boolean {
   return hydrated;
 }
 
+
+/* Tests only: re-read storage from scratch. The store hydrates once
+   per page, which is right in a browser and useless in a suite that
+   needs to try several stored shapes. */
+export function resetWatchesForTest(): void {
+  hydrated = false;
+  watches = [];
+  const listener = () => {};
+  const off = subscribeWatches(listener);
+  off();
+}
 
 export function saveWatches(next: Watch[]): void {
   watches = next;

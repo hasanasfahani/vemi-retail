@@ -5,7 +5,8 @@ import { describe, expect, it } from "vitest";
 import { current } from "./index";
 import { EMPTY_FILTERS, applyFilters } from "./filters";
 import {
-  WATCH_FLOOR_PT, scopeLabel, scopeMatches, watchId, watchState, watchValue,
+  WATCH_FLOOR_PT, getWatches, resetWatchesForTest, scopeLabel, scopeMatches,
+  watchId, watchState, watchValue,
   type Watch,
 } from "./watchlist";
 
@@ -96,5 +97,57 @@ describe("state", () => {
   it("says nothing when the filter has narrowed the slice away", () => {
     expect(watchState(make(), 88, false)).toBe("out-of-scope");
     expect(watchState(make(), null, true)).toBe("out-of-scope");
+  });
+});
+
+describe("adopting a stored list", () => {
+  /* The suite runs in node, which has no storage. A three-line stub is
+     enough: the store only ever calls getItem and setItem. */
+  const held = new Map<string, string>();
+  (globalThis as unknown as { localStorage: Storage }).localStorage = {
+    getItem: (k: string) => held.get(k) ?? null,
+    setItem: (k: string, v: string) => void held.set(k, v),
+    removeItem: (k: string) => void held.delete(k),
+  } as unknown as Storage;
+
+  it("re-derives ids rather than trusting them", () => {
+    /* When the scope gained brand, SKU and district, every id already
+       in a browser was left in the old four-part shape — so a figure
+       genuinely on the list showed an unwatched eye and clicking it
+       added a second row for the same question. The id is a cached
+       answer to "which question is this?", and the question is fully
+       described by the kpi and scope beside it. */
+    const legacy = [
+      { ...make(), id: "availability|*|*|*" },
+      { ...make({ kpi: "posm" }), id: "posm|*|*|*" },
+    ];
+    localStorage.setItem("vemi.watchlist.v1", JSON.stringify(legacy));
+    resetWatchesForTest();
+    const ids = getWatches().map((w) => w.id);
+    expect(ids).toContain(watchId("availability", {}));
+    expect(ids).toContain(watchId("posm", {}));
+    expect(ids).not.toContain("availability|*|*|*");
+  });
+
+  it("folds two rows that turn out to be one question", () => {
+    const dupes = [
+      { ...make(), id: "availability|*|*|*", baseline: 70 },
+      { ...make(), id: "availability|*|*|*|*|*|*", baseline: 88 },
+    ];
+    localStorage.setItem("vemi.watchlist.v1", JSON.stringify(dupes));
+    resetWatchesForTest();
+    const held = getWatches().filter((w) => w.kpi === "availability");
+    expect(held).toHaveLength(1);
+    /* The newer pin wins — it is what the reader last said. */
+    expect(held[0].baseline).toBe(88);
+  });
+
+  it("survives a hand-edited value without losing the good rows", () => {
+    localStorage.setItem(
+      "vemi.watchlist.v1",
+      JSON.stringify([null, { nonsense: true }, make()])
+    );
+    resetWatchesForTest();
+    expect(getWatches()).toHaveLength(1);
   });
 });
