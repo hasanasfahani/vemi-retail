@@ -69,15 +69,17 @@ export default function SplitBars({
           const fill = row.total === 0 ? 0 : (row.present / row.total) * 100;
           return (
             <li key={row.id} className="border-b border-line py-2 last:border-0">
-              <div className="flex items-baseline justify-between gap-2">
-                <span className="truncate text-[12.5px] font-medium text-ink-700">{row.label}</span>
+              <div className="flex items-center justify-between gap-2">
+                <span className="flex min-w-0 items-center gap-1.5">
+                  {row.watch}
+                  <span className="truncate text-[12.5px] font-medium text-ink-700">{row.label}</span>
+                </span>
                 <span className="flex shrink-0 items-baseline gap-2">
                   <span className="mono text-[12.5px] font-semibold text-ink-900">
                     {missing.toLocaleString()}
                     {unit} {missingLabel.toLowerCase()}
                   </span>
                   <span className="mono text-[11px] text-ink-400">{share}% there</span>
-                  {row.watch}
                 </span>
               </div>
               <div

@@ -23,6 +23,7 @@
 import type { IssueKpi } from "./issues";
 import { KPI_LABEL } from "./issues";
 import { KPI_NAME } from "./kpiLabels";
+import { scoreboard } from "./competition";
 import type { MarketView } from "./filters";
 import { governorateName, channelName, clientBrand, brands, skuOf } from "./index";
 
@@ -68,7 +69,12 @@ export type WatchKpi =
   | "coverage"
   | "priceAbove"
   | "priceBelow"
-  | "priceWorst";
+  | "priceWorst"
+  /* The mix-adjusted price index. Read through competition.ts's own
+     scoreboard rather than recomputed here: the index divides each
+     reading by the average price of its own pack before averaging the
+     ratios, and a second copy of that would be a second answer. */
+  | "priceIndex";
 
 export type Watch = {
   id: string;
@@ -98,6 +104,7 @@ export const WATCH_KPI_LABEL: Record<WatchKpi, string> = {
   priceAbove: "Readings above list",
   priceBelow: "Readings below list",
   priceWorst: "Worst price variance",
+  priceIndex: "Price index",
 };
 
 /* Most of these are rates. Districts led is a count, and appending a
@@ -118,6 +125,7 @@ export const WATCH_KPI_UNIT: Record<WatchKpi, string> = {
   priceAbove: "",
   priceBelow: "",
   priceWorst: "%",
+  priceIndex: "",
 };
 
 /* One watch per question. Pinning the same measure over the same slice
@@ -349,6 +357,19 @@ export function watchValue(watch: Watch, view: MarketView): number | null {
     return rows.filter((p) =>
       watch.kpi === "priceAbove" ? p.variance > 5 : p.variance < -5
     ).length;
+  }
+
+  if (watch.kpi === "priceIndex") {
+    /* 100 is category par. Scoped to a place or a format the index is
+       recomputed over those outlets only, which is what the reader
+       filtered to. */
+    const board = scoreboard(
+      scope.governorateId || scope.channel || scope.retailer
+        ? { ...view, outlets, cells: view.cells.filter((c) => ids.has(c.posId)),
+            prices: view.prices.filter((p) => ids.has(p.posId)) }
+        : view
+    );
+    return board.find((b) => b.id === brandId)?.priceIndex ?? null;
   }
 
   if (watch.kpi === "priceWorst") {

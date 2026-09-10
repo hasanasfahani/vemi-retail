@@ -61,12 +61,15 @@ export default function GapBars({
               key={row.id}
               className="flex items-center gap-2 border-b border-line py-1.5 last:border-0"
             >
-              <span className="w-[34%] shrink-0 truncate text-[12px] text-ink-700" title={row.label}>
+              {/* Leading, so the eyes read as one column rather than
+                  as punctuation at the end of each row. */}
+              {row.watch && <span className="shrink-0">{row.watch}</span>}
+              <span className="min-w-0 flex-1 truncate text-[12px] text-ink-700" title={row.label}>
                 {row.label}
               </span>
 
               <span
-                className="relative h-4 min-w-0 flex-1"
+                className="relative h-4 w-[38%] shrink-0"
                 role="img"
                 aria-label={`${row.label}: ${r1(row.value)}${unit}, ${
                   behind ? `${r1(Math.abs(gap))}${unit} below` : `${r1(gap)}${unit} above`
@@ -121,7 +124,6 @@ export default function GapBars({
                 </span>
               )}
               {row.trailing}
-              {row.watch}
             </li>
           );
         })}

@@ -3,6 +3,7 @@
 
 import { describe, expect, it } from "vitest";
 import { clientBrand, current, skuOf } from "./index";
+import { scoreboard } from "./competition";
 import { EMPTY_FILTERS, applyFilters } from "./filters";
 import {
   WATCH_FLOOR_PT, WATCH_KPI_LABEL, WATCH_KPI_UNIT, getWatches, resetWatchesForTest,
@@ -212,6 +213,19 @@ describe("the measures the tabs state directly", () => {
     for (const kpi of Object.keys(WATCH_KPI_LABEL) as (keyof typeof WATCH_KPI_LABEL)[]) {
       expect(WATCH_KPI_LABEL[kpi], kpi).toBeTruthy();
       expect(WATCH_KPI_UNIT[kpi], kpi).toBeDefined();
+    }
+  });
+});
+
+describe("the price index", () => {
+  it("reads the same number the Competition scoreboard shows", () => {
+    /* Not recomputed here. The index divides each reading by the
+       average price of its own pack before averaging the ratios, and a
+       second copy of that formula would eventually be a second answer. */
+    const board = scoreboard(view);
+    for (const brand of board) {
+      expect(watchValue(make({ kpi: "priceIndex", scope: { brandId: brand.id } }), view), brand.id)
+        .toBe(brand.priceIndex);
     }
   });
 });

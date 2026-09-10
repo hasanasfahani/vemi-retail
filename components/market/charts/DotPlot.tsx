@@ -88,7 +88,8 @@ export default function DotPlot({
                 className="flex items-center gap-2 border-b border-line py-1 last:border-0"
                 style={{ minHeight: height }}
               >
-                <span className="w-[38%] shrink-0 truncate text-[12px] text-ink-700" title={row.label}>
+                {row.watch && <span className="shrink-0">{row.watch}</span>}
+                <span className="w-[34%] shrink-0 truncate text-[12px] text-ink-700" title={row.label}>
                   {row.label}
                 </span>
 
@@ -138,7 +139,6 @@ export default function DotPlot({
                   {show(row.value)}
                 </span>
                 {row.trailing}
-                {row.watch}
               </li>
             );
           })}

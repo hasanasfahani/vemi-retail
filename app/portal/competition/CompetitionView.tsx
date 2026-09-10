@@ -267,15 +267,23 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
         title="Shelf battle"
         lead="Share of measured facings, 100% stacked."
         action={
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-            <ChartLegend items={ordered.map((b) => ({ id: b.id, name: b.name, color: brandColor(b.id) }))} />
-            {/* One eye per brand in the battle, beside the legend that
-                names them — the stacked bars themselves have no row to
-                hang a control on. */}
-            <span className="flex items-center gap-0.5">
-              {ordered.map((b) => (
+          /* The legend IS the control row here. A stacked bar has no
+             row per brand to hang an eye on, and a cluster of six
+             identical eyes after the names made the reader count along
+             the row to work out which belonged to which. Each eye now
+             sits under the name it belongs to. */
+          <div className="flex flex-wrap items-start gap-x-3 gap-y-2">
+            {ordered.map((b) => (
+              <span key={b.id} className="flex flex-col items-center gap-0.5">
+                <span className="inline-flex items-center gap-1.5 text-[11.5px] text-ink-500">
+                  <span
+                    className="h-2 w-2 shrink-0 rounded-[2px]"
+                    style={{ background: brandColor(b.id) }}
+                    aria-hidden
+                  />
+                  {b.name}
+                </span>
                 <WatchEye
-                  key={b.id}
                   kpi="shelfShare"
                   scope={{ brandId: b.id }}
                   value={rows.find((r) => r.id === b.id)?.share ?? 0}
@@ -283,8 +291,8 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
                   month={all.month}
                   size="sm"
                 />
-              ))}
-            </span>
+              </span>
+            ))}
           </div>
         }
         footnote="Retailer groups exclude independents — the absence of a group is not a group, and including it would make it the biggest one on the chart."
@@ -329,17 +337,18 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
               id: row.id,
               label: row.name,
               value: row.priceIndex,
-              watch:
-                row.isClient ? (
-                  <WatchEye
-                    kpi="price"
-                    scope={{ brandId: row.id }}
-                    value={row.priceIndex}
-                    target={100}
-                    month={all.month}
-                    size="sm"
-                  />
-                ) : undefined,
+              /* Every brand, not only the client: a rival drifting to a
+                 premium position is exactly the thing worth watching. */
+              watch: (
+                <WatchEye
+                  kpi="priceIndex"
+                  scope={{ brandId: row.id }}
+                  value={row.priceIndex}
+                  target={100}
+                  month={all.month}
+                  size="sm"
+                />
+              ),
             }))}
           />
         </Card>
@@ -451,18 +460,25 @@ function ScoreCard({ row, leader, month }: { row: BrandRow; leader: BrandRow; mo
       <dl className="mt-3 flex flex-col gap-2">
         {measures.map((m) => (
           <div key={m.label} className="flex items-center gap-2">
+            {/* The control leads the row, so the eyes form one column
+                down the card's left edge instead of interrupting the
+                run from bar to figure. The two rows with no watchable
+                measure hold the same width open, or their labels would
+                step out of line with the rest. */}
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center">
+              {m.kpi && (
+                <WatchEye
+                  kpi={m.kpi}
+                  scope={{ brandId: row.id }}
+                  value={m.value}
+                  target={m.par ?? m.value}
+                  month={month}
+                  size="sm"
+                />
+              )}
+            </span>
             <dt className="w-[104px] shrink-0 text-[11.5px] text-ink-500">{m.label}</dt>
             <Bar value={m.value} max={m.max} par={m.par} color={brandColor(row.id)} label={`${row.name} ${m.label}`} />
-            {m.kpi && (
-              <WatchEye
-                kpi={m.kpi}
-                scope={{ brandId: row.id }}
-                value={m.value}
-                target={m.par ?? m.value}
-                month={month}
-                size="sm"
-              />
-            )}
             <dd className="mono w-[48px] shrink-0 text-right text-[12px] font-semibold text-ink-900">
               {m.value}
               {m.unit}

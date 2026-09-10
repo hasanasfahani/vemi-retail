@@ -75,6 +75,9 @@ export default function RankedBars({
             key={row.id}
             className="flex items-start gap-1.5 border-b border-line py-2.5 last:border-0"
           >
+            {/* Leading, so a page of these reads as one column of
+                controls. */}
+            {row.watch && <span className="shrink-0 pt-px">{row.watch}</span>}
             <div className="min-w-0 flex-1">
               {onRowClick ? (
                 <button
@@ -88,10 +91,6 @@ export default function RankedBars({
                 body
               )}
             </div>
-            {/* Pinned to the top of the row so every eye in the list
-                sits on one vertical line, whatever each row's meta
-                text turns out to be. */}
-            {row.watch && <span className="shrink-0 pt-px">{row.watch}</span>}
           </li>
         );
       })}
