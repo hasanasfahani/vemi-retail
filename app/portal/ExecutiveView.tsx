@@ -147,6 +147,21 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
 
   const report = useMemo(() => generateInsights(view), [view]);
 
+  /* The per-outlet figures behind each headline. An average of 87%
+     can describe a steady market or a split one, and the status chip
+     is where that difference becomes visible. */
+  const spread = useMemo(() => {
+    const of = (key: "availability" | "shelfShare" | "assortment" | "price" | "posm") =>
+      view.scores.map((s) => s[key]).filter((v): v is number => v !== null);
+    return {
+      availability: of("availability"),
+      shelfShare: of("shelfShare"),
+      assortment: of("assortment"),
+      price: of("price"),
+      posm: of("posm"),
+    };
+  }, [view]);
+
   /* Last cycle's rows, for the movement figure on each ring. They are
      fetched rather than shipped, so the cards state a level first and
      gain their delta a moment later. */
@@ -358,12 +373,12 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
         {/* Six across only above 1536px. At 1280 the tiles were 154px
             wide, which is narrower than the words on them. */}
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
-          <KpiCard explain={EXPLAIN.availability} label="Availability" value={view.kpi.availability} target={targets.availability} trend={series.availability} delta={move("availability")} deltaFloor={1.73} href="/portal/performance?tab=availability" />
-          <KpiCard explain={EXPLAIN.shelfShare} label="Shelf share" value={view.client?.share ?? 0} target={targets.shelfShare} trend={series.shelfShare} delta={move("shelfShare")} deltaFloor={1.81} href="/portal/performance?tab=shelf" />
-          <KpiCard explain={EXPLAIN.assortment} label="Assortment" value={view.kpi.assortment} target={targets.assortment} trend={series.assortment} delta={move("assortment")} deltaFloor={1.8} href="/portal/performance?tab=assortment" />
-          <KpiCard explain={EXPLAIN.price} label="Price compliance" value={view.kpi.price} target={targets.price} trend={series.price} delta={move("price")} deltaFloor={1.8} href="/portal/performance?tab=pricing" />
-          <KpiCard explain={EXPLAIN.posm} label="POSM" value={view.kpi.posm} target={targets.posm} trend={series.posm} delta={move("posm")} deltaFloor={1.8} href="/portal/performance?tab=posm" />
-          <KpiCard explain={EXPLAIN.score} label="Execution score" value={view.kpi.score} unit="" target={targets.score} trend={series.score} delta={move("score")} deltaFloor={1.8} band={scoreBand(view.kpi.score)} href="/portal/performance" />
+          <KpiCard explain={EXPLAIN.availability} label="Availability" value={view.kpi.availability} target={targets.availability} trend={series.availability} spread={spread.availability} delta={move("availability")} deltaFloor={1.73} href="/portal/performance?tab=availability" />
+          <KpiCard explain={EXPLAIN.shelfShare} label="Shelf share" value={view.client?.share ?? 0} target={targets.shelfShare} trend={series.shelfShare} spread={spread.shelfShare} delta={move("shelfShare")} deltaFloor={1.81} href="/portal/performance?tab=shelf" />
+          <KpiCard explain={EXPLAIN.assortment} label="Assortment" value={view.kpi.assortment} target={targets.assortment} trend={series.assortment} spread={spread.assortment} delta={move("assortment")} deltaFloor={1.8} href="/portal/performance?tab=assortment" />
+          <KpiCard explain={EXPLAIN.price} label="Price compliance" value={view.kpi.price} target={targets.price} trend={series.price} spread={spread.price} delta={move("price")} deltaFloor={1.8} href="/portal/performance?tab=pricing" />
+          <KpiCard explain={EXPLAIN.posm} label="POSM" value={view.kpi.posm} target={targets.posm} trend={series.posm} spread={spread.posm} delta={move("posm")} deltaFloor={1.8} href="/portal/performance?tab=posm" />
+          <KpiCard isScore explain={EXPLAIN.score} label="Execution score" value={view.kpi.score} unit="" target={targets.score} trend={series.score} delta={move("score")} deltaFloor={1.8} band={scoreBand(view.kpi.score)} href="/portal/performance" />
         </div>
       </section>
 

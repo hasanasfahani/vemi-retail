@@ -16,10 +16,15 @@ import { useState } from "react";
 import Link from "next/link";
 import Drawer from "./ui/Drawer";
 import Badge from "./ui/Badge";
+import StatusChip from "./ui/StatusChip";
+import { componentDetail } from "@/lib/market/bandDetail";
+import { scoreBand } from "./ui/health";
 import Bar from "./ui/Bar";
 import ScoreRing from "./ui/ScoreRing";
 import ShelfScene from "./ShelfScene";
-import { channelName, governorateName, contract, monthLabel, skuOf } from "@/lib/market";
+import {
+  channelName, governorateName, contract, monthLabel, scoreWeights, skuOf,
+} from "@/lib/market";
 import FollowUpEvidence from "./FollowUpEvidence";
 import { kpiTargetsForDrawer, posRows, recommendationsFor, type PosRow } from "@/lib/market/pos";
 import { outletCase } from "@/lib/market/outletCase";
@@ -143,7 +148,24 @@ export default function PosDrawer({
 
             {/* ---------- score and KPIs ---------- */}
             <div className="flex flex-wrap items-center gap-5">
-              <ScoreRing score={row.score} size={104} />
+              <span className="flex flex-col items-center gap-1.5">
+                <ScoreRing score={row.score} size={104} />
+                <StatusChip
+                  band={scoreBand(row.score)}
+                  size="sm"
+                  title="What makes this outlet's score"
+                  detail={componentDetail(
+                    row.score,
+                    kpiTargetsForDrawer()
+                      .filter((kpi) => row[kpi.key] !== null)
+                      .map((kpi) => ({
+                        label: kpi.label,
+                        score: row[kpi.key] as number,
+                        weight: scoreWeights[kpi.key === "shelfShare" ? "shelfShare" : kpi.key],
+                      }))
+                  )}
+                />
+              </span>
               <dl className="min-w-[240px] flex-1 flex-col gap-2">
                 {kpiTargetsForDrawer().map((kpi) => {
                   const value = row[kpi.key];

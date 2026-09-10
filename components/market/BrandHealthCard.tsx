@@ -11,6 +11,8 @@
    as in tint. */
 
 import { BAND_WORD, type BrandHealth } from "@/lib/market/brandHealth";
+import StatusChip from "./ui/StatusChip";
+import { componentDetail } from "@/lib/market/bandDetail";
 import { BAND_COLOR } from "./ui/health";
 import { brandColor } from "./charts/theme";
 import Delta from "./ui/Delta";
@@ -79,14 +81,13 @@ export default function BrandHealthCard({
         </div>
       </div>
 
-      <p className="mt-2.5 text-center">
-        <span
-          className="inline-flex items-center gap-1.5 rounded-full px-2 py-[2px] text-[11.5px] font-semibold"
-          style={{ background: `${color}1a`, color }}
-        >
-          <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden />
-          {BAND_WORD[health.band]}
-        </span>
+      <p className="mt-2.5 flex justify-center">
+        <StatusChip
+          band={health.band}
+          label={BAND_WORD[health.band]}
+          title={`${health.name}: what makes the score`}
+          detail={componentDetail(health.score, health.components)}
+        />
       </p>
 
       <p className="mt-1.5 flex items-center justify-center gap-1.5">

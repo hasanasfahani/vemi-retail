@@ -31,6 +31,12 @@ export default function ShelfTab({ view }: { view: MarketView }) {
      carry, so the header, the file and the request cannot disagree. */
   const issues = useMemo(() => issuesFor(view, "shelfShare"), [view]);
   const scope = useMemo(() => scopeOf(issues), [issues]);
+  /* How the market is actually spread on this measure — the thing
+     the headline average is worst at telling you. */
+  const spread = useMemo(
+    () => view.scores.map((s) => s.shelfShare).filter((v): v is number => v !== null),
+    [view]
+  );
   const targets = useTargets();
   const par = targets.shelfShare;
   const ordered = orderedBrands();
@@ -59,6 +65,7 @@ export default function ShelfTab({ view }: { view: MarketView }) {
         label="Share of shelf"
         value={s.clientShare}
         target={par}
+        spread={spread}
         affectedPos={scope.affectedPos}
         issues={scope.issues}
         issueNoun="outlets below par"

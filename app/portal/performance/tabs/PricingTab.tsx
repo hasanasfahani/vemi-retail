@@ -31,6 +31,12 @@ export default function PricingTab({ view }: { view: MarketView }) {
      carry, so the header, the file and the request cannot disagree. */
   const issues = useMemo(() => issuesFor(view, "price"), [view]);
   const scope = useMemo(() => scopeOf(issues), [issues]);
+  /* How the market is actually spread on this measure — the thing
+     the headline average is worst at telling you. */
+  const spread = useMemo(
+    () => view.scores.map((s) => s.price).filter((v): v is number => v !== null),
+    [view]
+  );
   const overs = p.distribution.filter((d) => d.id.startsWith("over")).reduce((s, d) => s + d.value, 0);
   const unders = p.distribution.filter((d) => d.id.startsWith("under")).reduce((s, d) => s + d.value, 0);
 
@@ -83,6 +89,7 @@ export default function PricingTab({ view }: { view: MarketView }) {
         label="Price compliance"
         value={p.compliance}
         target={targets.price}
+        spread={spread}
         affectedPos={scope.affectedPos}
         issues={scope.issues}
         issueNoun="readings off list"

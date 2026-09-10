@@ -4,6 +4,7 @@
 export { default as Card } from "./Card";
 export { default as StatCard } from "./StatCard";
 export { default as Badge } from "./Badge";
+export { default as StatusChip } from "./StatusChip";
 export { default as Delta } from "./Delta";
 export { default as Bar } from "./Bar";
 export { default as Sparkline } from "./Sparkline";

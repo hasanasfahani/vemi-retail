@@ -31,6 +31,12 @@ export default function PosmTab({ view }: { view: MarketView }) {
      carry, so the header, the file and the request cannot disagree. */
   const issues = useMemo(() => issuesFor(view, "posm"), [view]);
   const scope = useMemo(() => scopeOf(issues), [issues]);
+  /* How the market is actually spread on this measure — the thing
+     the headline average is worst at telling you. */
+  const spread = useMemo(
+    () => view.scores.map((s) => s.posm).filter((v): v is number => v !== null),
+    [view]
+  );
   const worstType = p.byType[p.byType.length - 1];
 
   const cardFor = (row: { posId: string; value: number }, caption: string) => {
@@ -54,6 +60,7 @@ export default function PosmTab({ view }: { view: MarketView }) {
         label="POSM compliance"
         value={p.compliance}
         target={targets.posm}
+        spread={spread}
         affectedPos={scope.affectedPos}
         issues={scope.issues}
         issueNoun="missing material"

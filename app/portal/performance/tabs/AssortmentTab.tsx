@@ -31,6 +31,12 @@ export default function AssortmentTab({ view }: { view: MarketView }) {
      carry, so the header, the file and the request cannot disagree. */
   const issues = useMemo(() => issuesFor(view, "assortment"), [view]);
   const scope = useMemo(() => scopeOf(issues), [issues]);
+  /* How the market is actually spread on this measure — the thing
+     the headline average is worst at telling you. */
+  const spread = useMemo(
+    () => view.scores.map((s) => s.assortment).filter((v): v is number => v !== null),
+    [view]
+  );
   const clientSkus = skus.filter((s) => s.brandId === clientBrand.id);
   const worstSku = a.penetration[a.penetration.length - 1];
 
@@ -40,6 +46,7 @@ export default function AssortmentTab({ view }: { view: MarketView }) {
         label="Assortment compliance"
         value={a.compliance}
         target={targets.assortment}
+        spread={spread}
         affectedPos={scope.affectedPos}
         issues={scope.issues}
         issueNoun="missing listings"

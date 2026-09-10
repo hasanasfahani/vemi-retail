@@ -17,8 +17,10 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import Delta from "./ui/Delta";
 import InfoTip from "./ui/InfoTip";
+import StatusChip from "./ui/StatusChip";
 import TargetSpark from "./ui/TargetSpark";
-import { BAND_COLOR, BAND_LABEL, rateBand, type Band } from "./ui/health";
+import { BAND_COLOR, rateBand, type Band } from "./ui/health";
+import { distributionDetail, rateBandDetail, scoreBandDetail } from "@/lib/market/bandDetail";
 
 export default function KpiCard({
   label,
@@ -31,6 +33,8 @@ export default function KpiCard({
   href,
   band,
   explain,
+  spread,
+  isScore,
 }: {
   label: string;
   value: number;
@@ -45,6 +49,11 @@ export default function KpiCard({
      denominator is unstated is a number a reader has to take on
      trust. */
   explain?: ReactNode;
+  /* Per-outlet values behind the headline, so the chip can show how
+     the market is actually spread rather than only its average. */
+  spread?: number[];
+  /* Composites band on their own scale rather than against a target. */
+  isScore?: boolean;
 }) {
   const resolved = band ?? rateBand(value, target);
   const color = BAND_COLOR[resolved];
@@ -116,15 +125,30 @@ export default function KpiCard({
         </span>
       </div>
 
-      <div className="pointer-events-none mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
-        <span
-          className="inline-flex shrink-0 items-center gap-1 rounded-full px-1.5 py-[1px] text-[10.5px] font-semibold"
-          style={{ background: `${color}1a`, color }}
-        >
-          <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden />
-          {BAND_LABEL[resolved]}
+      <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+        {/* Above the card's overlay link, so the chip can be hovered
+            and focused without navigating. */}
+        <span className="relative z-10">
+          <StatusChip
+            band={resolved}
+            size="sm"
+            detail={
+              isScore
+                ? scoreBandDetail(value)
+                : spread && spread.length
+                  ? distributionDetail(spread, target, unit)
+                  : rateBandDetail(value, target, unit)
+            }
+            title={
+              spread && spread.length && !isScore
+                ? `${label}: where the market sits`
+                : undefined
+            }
+          />
         </span>
-        <Delta value={delta} floor={deltaFloor} label="vs last month" />
+        <span className="pointer-events-none">
+          <Delta value={delta} floor={deltaFloor} label="vs last month" />
+        </span>
       </div>
     </article>
   );

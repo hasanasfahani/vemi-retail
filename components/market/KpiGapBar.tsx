@@ -17,7 +17,9 @@
 
 import type { ReactNode } from "react";
 import InfoTip from "./ui/InfoTip";
-import { BAND_COLOR, BAND_LABEL, rateBand } from "./ui/health";
+import StatusChip from "./ui/StatusChip";
+import { distributionDetail, rateBandDetail } from "@/lib/market/bandDetail";
+import { rateBand } from "./ui/health";
 
 export default function KpiGapBar({
   label,
@@ -29,6 +31,7 @@ export default function KpiGapBar({
   issueNoun,
   explain,
   actions,
+  spread,
 }: {
   label: string;
   value: number;
@@ -42,9 +45,11 @@ export default function KpiGapBar({
   issueNoun: string;
   explain?: ReactNode;
   actions?: ReactNode;
+  /* Per-outlet figures behind the headline, so the chip can show how
+     the market is spread rather than only its average. */
+  spread?: number[];
 }) {
   const band = rateBand(value, target);
-  const color = BAND_COLOR[band];
   const gap = Math.round((target - value) * 10) / 10;
   const met = gap <= 0;
 
@@ -62,12 +67,16 @@ export default function KpiGapBar({
               {value}
               <span className="ml-0.5 text-[20px] font-semibold text-ink-500">{unit}</span>
             </span>
-            <span
-              className="mb-1 inline-flex items-center gap-1.5 rounded-full px-2 py-[2px] text-[11.5px] font-semibold"
-              style={{ background: `${color}1a`, color }}
-            >
-              <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden />
-              {BAND_LABEL[band]}
+            <span className="mb-1">
+              <StatusChip
+                band={band}
+                detail={
+                  spread && spread.length
+                    ? distributionDetail(spread, target, unit)
+                    : rateBandDetail(value, target, unit)
+                }
+                title={spread && spread.length ? `${label}: where the market sits` : undefined}
+              />
             </span>
           </p>
         </div>

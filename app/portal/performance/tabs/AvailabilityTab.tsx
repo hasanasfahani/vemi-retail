@@ -29,6 +29,12 @@ export default function AvailabilityTab({ view }: { view: MarketView }) {
      carry, so the header, the file and the request cannot disagree. */
   const issues = useMemo(() => issuesFor(view, "availability"), [view]);
   const scope = useMemo(() => scopeOf(issues), [issues]);
+  /* How the market is actually spread on this measure — the thing
+     the headline average is worst at telling you. */
+  const spread = useMemo(
+    () => view.scores.map((s) => s.availability).filter((v): v is number => v !== null),
+    [view]
+  );
 
 
   return (
@@ -37,6 +43,7 @@ export default function AvailabilityTab({ view }: { view: MarketView }) {
         label="Availability"
         value={a.rate}
         target={targets.availability}
+        spread={spread}
         affectedPos={scope.affectedPos}
         issues={scope.issues}
         issueNoun="SKU availability gaps"
