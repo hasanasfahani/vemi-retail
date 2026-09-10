@@ -16,7 +16,7 @@ import KpiGapBar from "@/components/market/KpiGapBar";
 import DownloadGaps from "@/components/market/DownloadGaps";
 import RequestFollowUp from "@/components/market/RequestFollowUp";
 import ShelfCard from "@/components/market/ShelfCard";
-import { GapBars, RankedBars } from "@/components/market/charts";
+import { GapBars, RankedBars, SplitBars } from "@/components/market/charts";
 import { posm } from "@/lib/market/performance";
 import { posmTypes } from "@/lib/market";
 import { rateBand } from "@/components/market/ui/health";
@@ -176,15 +176,17 @@ export default function PosmTab({ view }: { view: MarketView }) {
         <div className="flex flex-col gap-4">
           <Card
             title="Weakest governorates"
-            lead="Distance from the POSM target, worst first."
-            footnote="Bars run out from the target rather than up from zero. The question here is never how much material there is — it is how far short a place has fallen, and a chart starting at zero draws that quantity smallest."
+            lead="Where a deployment run would pay — how much is missing, not just the rate."
+            footnote="Bar length is how many items were checked there, and the hollow part is what was missing. A place with a poor rate over eighty checks has fewer items missing than a middling one over four hundred, and a chart drawn in percentages ranks those the wrong way round for anyone loading a van."
           >
-            <GapBars
-              par={targets.posm}
+            <SplitBars
+              presentLabel="Material present"
+              missingLabel="Missing"
               rows={p.byGovernorate.map((row) => ({
                 id: row.id,
                 label: row.label,
-                value: row.value,
+                total: row.checked,
+                present: row.checked - row.missing,
                 watch: (
                   <WatchEye
                     kpi="posm"
@@ -201,8 +203,8 @@ export default function PosmTab({ view }: { view: MarketView }) {
 
           <Card
             title="By channel"
-            lead="Which formats carry the material and which do not."
-            footnote="Measured against the same POSM target as everywhere else, so a format cannot look compliant by being compared only to its peers."
+            lead="Distance from the POSM target, format by format."
+            footnote="Measured against the same target as everywhere else, so a format cannot look compliant by being compared only to its peers. This is the compliance question; the card beside it is the volume one."
           >
             <GapBars
               par={targets.posm}

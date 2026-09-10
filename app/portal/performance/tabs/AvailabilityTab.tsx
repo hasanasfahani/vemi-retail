@@ -88,12 +88,34 @@ export default function AvailabilityTab({ view }: { view: MarketView }) {
               "A gap is a line the outlet LISTS and did not have. Space that is already agreed, already priced, and earning nothing.",
           })}
           explain="Listed client lines found out of stock on the visit. It excludes lines the outlet never carried — that is the Assortment tab's question, not this one."
+          watch={
+            <WatchEye
+              kpi="gapsFound"
+              scope={{}}
+              value={a.gaps}
+              /* Zero is the only defensible goal for a line the outlet
+                 has already agreed to stock. */
+              target={0}
+              month={view.month}
+              size="sm"
+            />
+          }
           footnote="Listed lines standing empty on the visit"
         />
         <StatCard
           label="Outlets audited"
           value={view.posCount}
           explain="Outlets the field team actually reached this cycle. Every rate on this page divides by this, never by the outlets in scope — a door nobody visited must not be counted as one with an empty shelf."
+          watch={
+            <WatchEye
+              kpi="coverage"
+              scope={{}}
+              value={view.coveragePct}
+              target={100}
+              month={view.month}
+              size="sm"
+            />
+          }
           footnote={`${view.coveragePct}% of the outlets in scope`}
         />
         <StatCard
@@ -145,12 +167,31 @@ export default function AvailabilityTab({ view }: { view: MarketView }) {
           title="Availability by channel"
           lead="The client against every other brand in the same format."
           action={
-            <ChartLegend
-              items={[
-                { id: "client", name: "Pepsi", color: MEASURE },
-                { id: "category", name: "Rest of category", color: "var(--color-comp-1)" },
-              ]}
-            />
+            <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <ChartLegend
+                items={[
+                  { id: "client", name: "Pepsi", color: MEASURE },
+                  { id: "category", name: "Rest of category", color: "var(--color-comp-1)" },
+                ]}
+              />
+              {/* Grouped bars have no row to hang a control on, so the
+                  eyes sit beside the legend that names the formats. */}
+              <span className="flex items-center gap-0.5">
+                {a.byChannel.map((row) => (
+                  <span key={row.id} className="inline-flex items-center gap-0.5 text-[11px] text-ink-400">
+                    {row.label}
+                    <WatchEye
+                      kpi="availability"
+                      scope={{ channel: row.id }}
+                      value={row.client}
+                      target={targets.availability}
+                      month={view.month}
+                      size="sm"
+                    />
+                  </span>
+                ))}
+              </span>
+            </span>
           }
           footnote="A rate is only good or bad relative to what everyone else in that format achieves."
         >
@@ -201,7 +242,23 @@ export default function AvailabilityTab({ view }: { view: MarketView }) {
           />
         </Card>
 
-        <Card title="Why the shelf was empty" lead="Reason recorded by the auditor who found the gap.">
+        <Card
+          title="Why the shelf was empty"
+          lead="Reason recorded by the auditor who found the gap."
+          action={
+            /* A reason is not a slice the audit can be re-run against,
+               so the eye pins the gap count the ring totals rather than
+               a wedge of it. */
+            <WatchEye
+              kpi="gapsFound"
+              scope={{}}
+              value={a.gaps}
+              target={0}
+              month={view.month}
+              size="sm"
+            />
+          }
+        >
           <ShareDonut
             palette="category"
             slices={a.byReason.map((row) => ({ id: row.id, name: row.name, value: row.value }))}

@@ -3,6 +3,7 @@ export { default as StackedBars, type StackSeries } from "./StackedBars";
 export { default as RankedBars, type RankedRow } from "./RankedBars";
 export { default as DotPlot, type DotRow } from "./DotPlot";
 export { default as GapBars, type GapRow } from "./GapBars";
+export { default as SplitBars, type SplitRow } from "./SplitBars";
 export { default as ShareDonut, type Slice } from "./ShareDonut";
 export { default as Heatmap } from "./Heatmap";
 export { default as BubbleScatter, type Bubble } from "./BubbleScatter";

@@ -15,10 +15,10 @@ import { KPI_NAME } from "@/lib/market/kpiLabels";
 import KpiGapBar from "@/components/market/KpiGapBar";
 import DownloadGaps from "@/components/market/DownloadGaps";
 import RequestFollowUp from "@/components/market/RequestFollowUp";
-import { DotPlot, RankedBars, brandColor } from "@/components/market/charts";
+import { DotPlot, GapBars, RankedBars } from "@/components/market/charts";
 import Badge from "@/components/market/ui/Badge";
 import { pricing } from "@/lib/market/performance";
-import { clientBrand, governorateName, contract } from "@/lib/market";
+import { governorateName, contract } from "@/lib/market";
 import { useTargets } from "@/components/market/useTargets";
 import { issuesFor, scopeOf } from "@/lib/market/issues";
 import type { MarketView } from "@/lib/market/filters";
@@ -40,6 +40,25 @@ export default function PricingTab({ view }: { view: MarketView }) {
     () => view.scores.map((s) => s.price).filter((v): v is number => v !== null),
     [view]
   );
+  /* Compliance per LINE, for the baseline a per-SKU watch stores. The
+     tab's headline compliance is the client's whole book, and pinning
+     that against a Coca-Cola row would record a number describing a
+     different brand. */
+  const complianceBySku = useMemo(() => {
+    const held = new Map<string, { n: number; ok: number }>();
+    for (const row of view.prices) {
+      const cell = held.get(row.skuId) ?? { n: 0, ok: 0 };
+      cell.n += 1;
+      if (row.compliant) cell.ok += 1;
+      held.set(row.skuId, cell);
+    }
+    return held;
+  }, [view.prices]);
+  const complianceOf = (skuId: string) => {
+    const cell = complianceBySku.get(skuId);
+    return cell && cell.n > 0 ? Math.round((cell.ok / cell.n) * 1000) / 10 : 0;
+  };
+
   const overs = p.distribution.filter((d) => d.id.startsWith("over")).reduce((s, d) => s + d.value, 0);
   const unders = p.distribution.filter((d) => d.id.startsWith("under")).reduce((s, d) => s + d.value, 0);
 
@@ -134,6 +153,16 @@ export default function PricingTab({ view }: { view: MarketView }) {
               "Over-pricing costs volume: the shopper sees a higher shelf price than the brand set and buys something else.",
           })}
           explain="Readings more than 5% over the recommended price. The 5% band is the tolerance the audit treats as compliant; anything inside it is not counted here."
+          watch={
+            <WatchEye
+              kpi="priceAbove"
+              scope={{}}
+              value={overs}
+              target={0}
+              month={view.month}
+              size="sm"
+            />
+          }
           footnote="Readings more than 5% over RRP — a volume risk"
         />
         <StatCard
@@ -149,6 +178,16 @@ export default function PricingTab({ view }: { view: MarketView }) {
               "Under-pricing costs margin rather than volume, which is why it bands more gently than the other side.",
           })}
           explain="Readings more than 5% under the recommended price — the same 5% tolerance, in the other direction."
+          watch={
+            <WatchEye
+              kpi="priceBelow"
+              scope={{}}
+              value={unders}
+              target={0}
+              month={view.month}
+              size="sm"
+            />
+          }
           footnote="Readings more than 5% under RRP — a margin risk"
         />
         <StatCard
@@ -171,6 +210,16 @@ export default function PricingTab({ view }: { view: MarketView }) {
               : null
           }
           explain="The single largest distance from the recommended price anywhere in the current scope. A worst case, not an average — the tab's compliance rate is the average."
+          watch={
+            <WatchEye
+              kpi="priceWorst"
+              scope={{}}
+              value={Math.abs(p.outliers[0]?.variance ?? 0)}
+              target={5}
+              month={view.month}
+              size="sm"
+            />
+          }
           footnote={p.outliers[0]?.outlet?.name}
         />
       </div>
@@ -178,32 +227,29 @@ export default function PricingTab({ view }: { view: MarketView }) {
       <div className="grid gap-4 lg:grid-cols-2">
         <Card
           title="Average price by SKU"
-          lead="Observed shelf price against the recommended price."
-          footnote="Each line carries two dots — the observed average, and the list price it is supposed to sit on. The bar between them IS the finding: its length is the gap, and a column of long connectors is a pattern nobody has to work out."
+          lead="How far each line sits from its own recommended price."
+          footnote="Every SKU has a different list price, so absolute dinars cannot be compared down a column. The distance from list can: each bar runs from that line's own RRP, which makes the chart read the same whether a SKU sells for 500 or 5,000."
         >
-          <DotPlot
+          <GapBars
+            par={0}
+            unit="%"
+            parLabel="each line's own list price"
             rows={p.bySku.map((sku) => ({
               id: sku.id,
               label: sku.name,
-              value: sku.average,
-              reference: sku.rrp,
-              color: brandColor(sku.brandId),
-              watch:
-                sku.brandId === clientBrand.id ? (
-                  <WatchEye
-                    kpi="price"
-                    scope={{ skuId: sku.id }}
-                    value={p.compliance}
-                    target={targets.price}
-                    month={view.month}
-                    size="sm"
-                  />
-                ) : undefined,
+              value: sku.rrp === 0 ? 0 : Math.round(((sku.average - sku.rrp) / sku.rrp) * 1000) / 10,
+              meta: `${iqd(sku.average)} observed · list ${iqd(sku.rrp)} · ${sku.readings} readings`,
+              watch: (
+                <WatchEye
+                  kpi="price"
+                  scope={{ skuId: sku.id }}
+                  value={complianceOf(sku.id)}
+                  target={targets.price}
+                  month={view.month}
+                  size="sm"
+                />
+              ),
             }))}
-            referenceLabel="List price"
-            format={(v) => iqd(v)}
-            min={Math.min(...p.bySku.map((s) => Math.min(s.average, s.rrp))) * 0.96}
-            max={Math.max(...p.bySku.map((s) => Math.max(s.average, s.rrp))) * 1.04}
           />
         </Card>
 

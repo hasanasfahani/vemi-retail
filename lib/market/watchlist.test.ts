@@ -2,11 +2,11 @@
    recomputed, and these tests guard that line. */
 
 import { describe, expect, it } from "vitest";
-import { current } from "./index";
+import { clientBrand, current, skuOf } from "./index";
 import { EMPTY_FILTERS, applyFilters } from "./filters";
 import {
-  WATCH_FLOOR_PT, getWatches, resetWatchesForTest, scopeLabel, scopeMatches,
-  watchId, watchState, watchValue,
+  WATCH_FLOOR_PT, WATCH_KPI_LABEL, WATCH_KPI_UNIT, getWatches, resetWatchesForTest,
+  scopeLabel, scopeMatches, watchId, watchState, watchValue,
   type Watch,
 } from "./watchlist";
 
@@ -169,5 +169,49 @@ describe("a single line is a different question from the range", () => {
   it("still reads an unscoped assortment watch as the range score", () => {
     const whole = watchValue(make({ kpi: "assortment" }), view);
     expect(whole).toBeCloseTo(view.kpi.assortment, 1);
+  });
+});
+
+describe("the measures the tabs state directly", () => {
+  it("counts gaps rather than reading the availability rate", () => {
+    const gaps = view.cells.filter(
+      (c) => skuOf(c.skuId)?.brandId === clientBrand.id && c.state === "out-of-stock"
+    ).length;
+    expect(watchValue(make({ kpi: "gapsFound" }), view)).toBe(gaps);
+  });
+
+  it("reports coverage against the outlets in scope, not the ones reached", () => {
+    expect(watchValue(make({ kpi: "coverage" }), view)).toBeCloseTo(view.coveragePct, 1);
+  });
+
+  it("refuses a brand-scoped coverage watch", () => {
+    /* Coverage is a property of the collection plan, not of a shelf.
+       Answering it with the same number under a brand scope would let
+       two different questions share one figure. */
+    expect(watchValue(make({ kpi: "coverage", scope: { brandId: "coca-cola" } }), view)).toBeNull();
+  });
+
+  it("splits the two sides of off-list pricing", () => {
+    const above = watchValue(make({ kpi: "priceAbove" }), view)!;
+    const below = watchValue(make({ kpi: "priceBelow" }), view)!;
+    const off = view.prices.filter(
+      (p) => skuOf(p.skuId)?.brandId === clientBrand.id && Math.abs(p.variance) > 5
+    ).length;
+    expect(above + below).toBe(off);
+  });
+
+  it("reads the worst variance as a worst case, not an average", () => {
+    const worst = watchValue(make({ kpi: "priceWorst" }), view)!;
+    const every = view.prices
+      .filter((p) => skuOf(p.skuId)?.brandId === clientBrand.id)
+      .map((p) => Math.abs(p.variance));
+    expect(worst).toBeCloseTo(Math.max(...every), 1);
+  });
+
+  it("gives every measure a label and a unit", () => {
+    for (const kpi of Object.keys(WATCH_KPI_LABEL) as (keyof typeof WATCH_KPI_LABEL)[]) {
+      expect(WATCH_KPI_LABEL[kpi], kpi).toBeTruthy();
+      expect(WATCH_KPI_UNIT[kpi], kpi).toBeDefined();
+    }
   });
 });

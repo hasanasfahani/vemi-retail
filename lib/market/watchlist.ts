@@ -57,7 +57,18 @@ export type WatchKpi =
   | "score"
   | "promo"
   | "visibility"
-  | "districtsLed";
+  | "districtsLed"
+  /* Counts and extremes the tabs state directly. Each is a quantity a
+     tile shows, and each is recomputed from the same rows every cycle
+     — the only test that decides whether something belongs here. Where
+     a tile showed a figure with no measure behind it, the honest fix
+     was to add the measure rather than hang an eye on the nearest KPI
+     and pin a number the tile does not display. */
+  | "gapsFound"
+  | "coverage"
+  | "priceAbove"
+  | "priceBelow"
+  | "priceWorst";
 
 export type Watch = {
   id: string;
@@ -82,6 +93,11 @@ export const WATCH_KPI_LABEL: Record<WatchKpi, string> = {
   promo: "Promotion presence",
   visibility: "Eye-level conversion",
   districtsLed: "Districts led",
+  gapsFound: "Gaps found",
+  coverage: "Coverage",
+  priceAbove: "Readings above list",
+  priceBelow: "Readings below list",
+  priceWorst: "Worst price variance",
 };
 
 /* Most of these are rates. Districts led is a count, and appending a
@@ -97,6 +113,11 @@ export const WATCH_KPI_UNIT: Record<WatchKpi, string> = {
   promo: "%",
   visibility: "%",
   districtsLed: "",
+  gapsFound: "",
+  coverage: "%",
+  priceAbove: "",
+  priceBelow: "",
+  priceWorst: "%",
 };
 
 /* One watch per question. Pinning the same measure over the same slice
@@ -304,6 +325,39 @@ export function watchValue(watch: Watch, view: MarketView): number | null {
       if (top && top[0] === brandId) led += 1;
     }
     return led;
+  }
+
+  if (watch.kpi === "gapsFound") {
+    /* Listed lines that were empty. A count, not a rate: it is what
+       the tile shows, and what a field team is sent to close. */
+    return own.filter((c) => c.state === "out-of-stock").length;
+  }
+
+  if (watch.kpi === "coverage") {
+    /* Of the outlets this scope selects, the share the audit reached.
+       A property of the collection plan rather than of the shelf, and
+       true whatever the brand filter says — so a brand-scoped coverage
+       watch is refused rather than answered with the same number. */
+    if (scope.brandId || scope.skuId) return null;
+    const inScope = view.outlets.length + view.notAuditedCount;
+    return pct(view.outlets.length, inScope);
+  }
+
+  if (watch.kpi === "priceAbove" || watch.kpi === "priceBelow") {
+    const rows = view.prices.filter((p) => ids.has(p.posId) && mine(p.skuId));
+    if (rows.length === 0) return null;
+    return rows.filter((p) =>
+      watch.kpi === "priceAbove" ? p.variance > 5 : p.variance < -5
+    ).length;
+  }
+
+  if (watch.kpi === "priceWorst") {
+    /* The single widest distance from list anywhere in scope. A worst
+       case rather than an average, which is why it is its own measure
+       and not a second reading of price compliance. */
+    const rows = view.prices.filter((p) => ids.has(p.posId) && mine(p.skuId));
+    if (rows.length === 0) return null;
+    return r1(Math.max(...rows.map((p) => Math.abs(p.variance))));
   }
 
   /* POSM is recorded per outlet, not per SKU, so a line-scoped watch

@@ -31,11 +31,17 @@ export default function GapBars({
   /* Widest gap the axis has to show. Given rather than inferred where
      two charts should be readable against each other. */
   reach,
+  /* What the centre line IS, where it is not a target — the list
+     price, the category average. The footnote says it, and the bands
+     are dropped, because "needs attention" against a reference point
+     nobody set as a goal would be a judgement the audit never made. */
+  parLabel,
 }: {
   rows: GapRow[];
   par: number;
   unit?: string;
   reach?: number;
+  parLabel?: string;
 }) {
   const gaps = rows.map((r) => r.value - par);
   const span = Math.max(reach ?? 0, ...gaps.map((g) => Math.abs(g)), 1);
@@ -80,7 +86,11 @@ export default function GapBars({
                        two points short and one twenty points short are
                        not the same news, and the portal already has a
                        vocabulary for saying so. */
-                    background: behind ? BAND_COLOR[rateBand(row.value, par)] : "var(--color-good)",
+                    background: parLabel
+                      ? "var(--color-serious)"
+                      : behind
+                        ? BAND_COLOR[rateBand(row.value, par)]
+                        : "var(--color-good)",
                   }}
                   aria-hidden
                 />
@@ -88,16 +98,28 @@ export default function GapBars({
 
               <span
                 className="mono w-[4.75rem] shrink-0 text-right text-[12px] font-semibold"
-                style={{ color: behind ? BAND_COLOR[rateBand(row.value, par)] : "var(--color-good)" }}
+                style={{
+                  color: parLabel
+                    ? "var(--color-ink-900)"
+                    : behind
+                      ? BAND_COLOR[rateBand(row.value, par)]
+                      : "var(--color-good)",
+                }}
               >
                 {gap > 0 ? "+" : ""}
                 {r1(gap)}
                 {unit}
               </span>
-              <span className="mono w-[3.5rem] shrink-0 text-right text-[12px] text-ink-500">
-                {r1(row.value)}
-                {unit}
-              </span>
+              {/* The level, EXCEPT where the centre line is a
+                  reference the value is already measured from. With the
+                  list price at zero the gap and the level are the same
+                  number, and printing it twice reads as two facts. */}
+              {par !== 0 && (
+                <span className="mono w-[3.5rem] shrink-0 text-right text-[12px] text-ink-500">
+                  {r1(row.value)}
+                  {unit}
+                </span>
+              )}
               {row.trailing}
               {row.watch}
             </li>
@@ -105,8 +127,14 @@ export default function GapBars({
         })}
       </ul>
       <p className="mt-1.5 text-[11px] text-ink-400">
-        Bars run from the {par}
-        {unit} target — left is behind it, right is ahead. The second figure is the level itself.
+        {parLabel ? (
+          <>Bars run from {parLabel} — left is under it, right is over. The second figure is the level itself.</>
+        ) : (
+          <>
+            Bars run from the {par}
+            {unit} target — left is behind it, right is ahead. The second figure is the level itself.
+          </>
+        )}
       </p>
     </div>
   );
