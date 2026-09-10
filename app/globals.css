@@ -18,6 +18,16 @@
   --color-ink-700: #3d3f47;
   --color-ink-500: #6b6e78;
   --color-ink-400: #9a9ca5;
+  /* TWO STEPS THAT WERE BEING USED BEFORE THEY EXISTED. Six places
+     across the portal asked for ink-300 or ink-600 — the unwatched
+     state of every eye among them — and Tailwind generates nothing for
+     a token that is not declared, so each silently inherited its
+     parent's colour. The unwatched eye was rendering nearly as dark as
+     the watching one, which is the single thing that control has to
+     tell apart. 300 sits between 400 and the line colour; 600 between
+     500 and 700. */
+  --color-ink-300: #b9bbc4;
+  --color-ink-600: #54565f;
   --color-line: #e7e8ec;
   --color-line-strong: #d8dae0;
 
