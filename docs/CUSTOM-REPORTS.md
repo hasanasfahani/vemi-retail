@@ -243,8 +243,8 @@ block.
 | --- | --- | --- |
 | **A** ✅ | Store + model | `reports.ts`, external store, URL serialisation, 22 tests |
 | **B** ✅ | Registry | 21 blocks across 8 groups, each a pure `(view) => ReactNode`. Every block rendered under 8 deliberately awkward scopes, including one that reaches no outlet at all |
-| **C** | The page | Route, header, editable title, empty state, block grid |
-| **D** | Add | The drawer, grouping, search, click-to-add |
+| **C** ✅ | The page | Route, header, editable title, empty state, auto-packed grid, scope chips, delete — plus the index page and the share-link landing, so the feature is reachable and a link resolves |
+| **D** | Add | ~~The drawer, grouping, search, click-to-add~~ — landed with C, because a page you cannot put anything on is not a page. What remains: previews in the picker, keyboard navigation, and the recently-used group |
 | **E** | Configure | Settings popover, per-block scope with its chip, width, duplicate, remove |
 | **F** | Reorder | Drag with `framer-motion`, keyboard move |
 | **G** | Nav + index | Rail group, `+`, cap and overflow page |
