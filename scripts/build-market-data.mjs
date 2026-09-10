@@ -686,10 +686,39 @@ const FOLLOW_UPS = [];
 
 /* Seeded after a month is generated: the outlets whose gaps that cycle
    found, carried into the next cycle as a request. */
+/* A stable, well-mixed ordering key for an outlet id.
+
+   The obvious FNV hash over the id string was not good enough here:
+   every id shares a "pos-" prefix and differs only in a sequential
+   number, so the low hashes clustered and the first 53 all landed in
+   Baghdad — the very artefact the tiebreak exists to remove. This is a
+   murmur3-style finaliser over the numeric part, which avalanches
+   properly on sequential input. */
+function spread(posId) {
+  let a = (Number(posId.replace(/\D/g, "")) || 0) >>> 0;
+  a = Math.imul(a ^ (a >>> 16), 2246822507);
+  a = Math.imul(a ^ (a >>> 13), 3266489909);
+  a ^= a >>> 16;
+  return (a >>> 0) / 4294967296;
+}
+
 function seedFollowUp(originMonth, cycle, bundleRows, spec) {
   const candidates = bundleRows
-    .filter((row) => row.issues > 0)
-    .sort((a, b) => b.issues - a.issues)
+    /* Only outlets with a gap on THIS request's KPI. */
+    .filter((row) => row[spec.kpi] > 0)
+    /* POSM is only a gap where the brand is actually on shelf — an
+       outlet stocking none of the range has a range problem, not a
+       material one, and the app's issue records say the same. */
+    .filter((row) => spec.kpi !== "posm" || row.stocked > 0)
+    /* Ties broken by a hash of the outlet id, not by file order.
+
+       Shelf share is a yes/no gap, so every candidate scored 1, the
+       sort left them in POS order, and POS order is governorate order
+       — the request came out 100% Baghdad by accident, which makes the
+       governorate level of the hierarchy pointless for that row. A
+       hash scatters the selection across the country while staying
+       deterministic. */
+    .sort((a, b) => b[spec.kpi] - a[spec.kpi] || spread(a.posId) - spread(b.posId))
     .slice(0, 40 + Math.floor(followUpRand() * 25));
 
   if (candidates.length < 12) return null;
@@ -945,11 +974,32 @@ for (const month of MONTHS) {
     }
     const s = scoreVisit(v, pos);
     bundle.scores.push([pi, s.score, s.availability, s.shelfShare, s.assortment, s.price, s.posm]);
+    /* Gap counts PER KPI, because a request is about one of them.
+
+       These used to be a single mixed number — client stockouts plus
+       missing material — so an availability request could be seeded
+       with outlets whose only problem was POSM. The page then read
+       "35 affected POS · 54 issues" beside "37 of 41 revisited", and a
+       reader is entitled to ask what the 41 is. A request now contains
+       only outlets with a gap on its own KPI. */
+    const own = v.cells.filter(
+      (c) => SKUS.find((x) => x.id === c[0]).brandId === CLIENT.id
+    );
+    const listedOwn = own.filter((c) => c[1] !== 0);
+    const stocked = listedOwn.filter((c) => c[1] === 1);
+    const facings = v.cells.reduce((sum, c) => sum + c[2], 0);
+    const mine = own.reduce((sum, c) => sum + c[2], 0);
     issueRows.push({
       posId: pos.id,
-      issues:
-        v.cells.filter((c) => c[1] === 2 && SKUS.find((x) => x.id === c[0]).brandId === CLIENT.id)
-          .length + v.posm.filter((row) => !row[1]).length,
+      availability: listedOwn.filter((c) => c[1] === 2).length,
+      posm: v.posm.filter((row) => !row[1]).length,
+      assortment: Math.max(0, REQUIRED_SKUS[pos.channel] - listedOwn.length),
+      price: v.prices.filter((pr) => {
+        const sku = SKUS.find((x) => x.id === pr[0]);
+        return sku.brandId === CLIENT.id && Math.abs(pr[1] - sku.rrp) / sku.rrp > 0.05;
+      }).length,
+      shelfShare: facings && mine / facings < SHARE_PAR ? 1 : 0,
+      stocked: stocked.length,
     });
   }
   months[month.id] = bundle;
