@@ -112,6 +112,43 @@ export default function Sidebar() {
             {collapsed && i > 0 && <div className="mx-2 mb-2 h-px bg-line" />}
             {group.items.map((item) => {
               const active = pathname === item.href;
+
+              /* Not a link. A padlocked row that navigates anywhere is
+                 a promise the product cannot keep yet. */
+              if (item.locked) {
+                return (
+                  <div
+                    key={item.href}
+                    title={`${item.label} — coming soon`}
+                    aria-disabled="true"
+                    className={`mb-0.5 flex cursor-default items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13.5px] font-medium text-ink-300 ${
+                      collapsed ? "justify-center" : ""
+                    }`}
+                  >
+                    <Icon name={item.icon} className="h-[17px] w-[17px] shrink-0" />
+                    {!collapsed && (
+                      <>
+                        <span className="truncate">{item.label}</span>
+                        <svg
+                          viewBox="0 0 16 16"
+                          className="ml-auto h-3.5 w-3.5 shrink-0"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.6"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden
+                        >
+                          <rect x="3.5" y="7" width="9" height="6" rx="1.5" />
+                          <path d="M5.75 7V5.25a2.25 2.25 0 0 1 4.5 0V7" />
+                        </svg>
+                        <span className="sr-only">Coming soon</span>
+                      </>
+                    )}
+                  </div>
+                );
+              }
+
               return (
                 <Link
                   key={item.href}

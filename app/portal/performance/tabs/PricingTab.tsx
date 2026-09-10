@@ -8,6 +8,7 @@ import { useMemo } from "react";
    under list is a margin problem, one 12% over is a volume problem,
    and an average that mixes them says neither. */
 
+import { countDetail } from "@/lib/market/bandDetail";
 import { Card, DataTable, StatCard, type Column, type Facet } from "@/components/market/ui";
 import KpiGapBar from "@/components/market/KpiGapBar";
 import DownloadGaps from "@/components/market/DownloadGaps";
@@ -102,10 +103,64 @@ export default function PricingTab({ view }: { view: MarketView }) {
       />
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Readings taken" value={p.readings} footnote="Client price observations this month" />
-        <StatCard label="Above list" value={overs} band={overs > unders ? "attention" : "average"} footnote="Readings more than 5% over RRP — a volume risk" />
-        <StatCard label="Below list" value={unders} band="average" footnote="Readings more than 5% under RRP — a margin risk" />
-        <StatCard label="Worst variance" value={p.outliers[0] ? `${p.outliers[0].variance > 0 ? "+" : ""}${p.outliers[0].variance}%` : "—"} band="critical" footnote={p.outliers[0]?.outlet?.name} />
+        <StatCard
+          label="Readings taken"
+          value={p.readings}
+          explain="One reading is one client SKU's shelf price at one outlet, recorded on the visit. Lines the outlet does not carry produce no reading, so this is smaller than the listings checked on the Availability tab."
+          footnote="Client price observations this month"
+        />
+        <StatCard
+          label="Above list"
+          value={overs}
+          band={overs > unders ? "attention" : "average"}
+          detail={countDetail({
+            count: overs,
+            total: p.readings,
+            of: "price readings",
+            against: { label: "Below list", count: unders },
+            footnote:
+              "Over-pricing costs volume: the shopper sees a higher shelf price than the brand set and buys something else.",
+          })}
+          explain="Readings more than 5% over the recommended price. The 5% band is the tolerance the audit treats as compliant; anything inside it is not counted here."
+          footnote="Readings more than 5% over RRP — a volume risk"
+        />
+        <StatCard
+          label="Below list"
+          value={unders}
+          band="average"
+          detail={countDetail({
+            count: unders,
+            total: p.readings,
+            of: "price readings",
+            against: { label: "Above list", count: overs },
+            footnote:
+              "Under-pricing costs margin rather than volume, which is why it bands more gently than the other side.",
+          })}
+          explain="Readings more than 5% under the recommended price — the same 5% tolerance, in the other direction."
+          footnote="Readings more than 5% under RRP — a margin risk"
+        />
+        <StatCard
+          label="Worst variance"
+          value={p.outliers[0] ? `${p.outliers[0].variance > 0 ? "+" : ""}${p.outliers[0].variance}%` : "—"}
+          band="critical"
+          detail={
+            p.outliers[0]
+              ? {
+                  lead: `${p.outliers[0].variance > 0 ? "+" : ""}${p.outliers[0].variance}% away from list — the single widest reading in the current scope.`,
+                  rows: [
+                    { label: "Outlet", value: p.outliers[0].outlet?.name ?? "—" },
+                    { label: "Reading", value: `${p.outliers[0].variance > 0 ? "+" : ""}${p.outliers[0].variance}%`, here: true },
+                    { label: "Compliant band", value: "within ±5%" },
+                    { label: "Readings outside it", value: (overs + unders).toLocaleString() },
+                  ],
+                  footnote:
+                    "One outlet, not a pattern. It is shown because the widest single breach is usually the one somebody can fix on the next visit.",
+                }
+              : null
+          }
+          explain="The single largest distance from the recommended price anywhere in the current scope. A worst case, not an average — the tab's compliance rate is the average."
+          footnote={p.outliers[0]?.outlet?.name}
+        />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">

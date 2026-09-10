@@ -59,14 +59,36 @@ export default function AssortmentTab({ view }: { view: MarketView }) {
       />
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="SKUs in range" value={clientSkus.length} footnote="Client lines monitored under the audit" />
-        <StatCard label="Outlets audited" value={view.posCount} footnote={`${view.coveragePct}% of the outlets in scope`} />
+        <StatCard
+          label="SKUs in range"
+          value={clientSkus.length}
+          explain="Client lines the audit tracks. Every penetration figure on this tab divides by the outlets audited, never by this — a line is measured across doors, not against its siblings."
+          footnote="Client lines monitored under the audit"
+        />
+        <StatCard
+          label="Outlets audited"
+          value={view.posCount}
+          explain="Outlets the field team reached this cycle. Penetration is the share of THESE that list a line — an outlet nobody visited is not an outlet that refused the range."
+          footnote={`${view.coveragePct}% of the outlets in scope`}
+        />
         {/* Penetration has no stated target — the audit does not say
             what share of doors a SKU ought to reach — so these two
             state the range and let the reader judge it. Inventing a
             band here would be asserting a standard nobody set. */}
-        <StatCard label="Widest SKU" value={a.penetration[0]?.value ?? 0} unit="%" footnote={a.penetration[0]?.label} />
-        <StatCard label="Narrowest SKU" value={worstSku?.value ?? 0} unit="%" footnote={worstSku?.label} />
+        <StatCard
+          label="Widest SKU"
+          value={a.penetration[0]?.value ?? 0}
+          unit="%"
+          explain="The client line carried by the largest share of audited outlets. There is no band on this tile: the audit states no target for how many doors a single line should reach, and inventing one would assert a standard nobody set."
+          footnote={a.penetration[0]?.label}
+        />
+        <StatCard
+          label="Narrowest SKU"
+          value={worstSku?.value ?? 0}
+          unit="%"
+          explain="The client line carried by the smallest share of audited outlets — the widest distribution headroom in the range, and the one a rep can sell against on the next visit."
+          footnote={worstSku?.label}
+        />
       </div>
 
       <Card

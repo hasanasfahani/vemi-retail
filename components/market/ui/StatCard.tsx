@@ -9,7 +9,10 @@ import type { ReactNode } from "react";
 import Delta from "./Delta";
 import Sparkline from "./Sparkline";
 import Badge from "./Badge";
+import StatusChip from "./StatusChip";
+import InfoTip from "./InfoTip";
 import { rateBand, type Band } from "./health";
+import type { BandDetail } from "@/lib/market/bandDetail";
 
 export default function StatCard({
   label,
@@ -25,6 +28,8 @@ export default function StatCard({
   trend,
   footnote,
   action,
+  detail,
+  explain,
 }: {
   label: string;
   value: number | string;
@@ -40,6 +45,13 @@ export default function StatCard({
   trend?: number[];
   footnote?: ReactNode;
   action?: ReactNode;
+  /* What sits behind the status chip: the cut-offs it was judged by,
+     where this figure falls, and what would move it. Given, the plain
+     badge becomes an interrogable chip. */
+  detail?: BandDetail | null;
+  /* How the figure is derived. A rate whose denominator is unstated is
+     a number the reader has to take on trust. */
+  explain?: ReactNode;
 }) {
   const numeric = typeof value === "number" ? value : null;
   const resolved =
@@ -48,10 +60,18 @@ export default function StatCard({
   return (
     <div className="flex min-w-0 flex-col rounded-[14px] border border-line bg-white p-3.5 shadow-[var(--shadow-card)]">
       <div className="flex items-start justify-between gap-2">
-        <span className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
-          {label}
+        <span className="flex min-w-0 items-center gap-1">
+          <span className="truncate text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+            {label}
+          </span>
+          {explain && <InfoTip label={`How ${label} is measured`}>{explain}</InfoTip>}
         </span>
-        {resolved && <Badge band={resolved} size="sm" />}
+        {resolved &&
+          (detail ? (
+            <StatusChip band={resolved} size="sm" detail={detail} title={label} />
+          ) : (
+            <Badge band={resolved} size="sm" />
+          ))}
       </div>
 
       <div className="mt-1.5 flex items-end justify-between gap-2">

@@ -173,3 +173,48 @@ export function distributionDetail(
       "An average hides this. The same figure can describe a steady market or a split one.",
   };
 }
+
+
+/* ---------- a COUNT, judged against what it came out of ----------
+
+   Several tiles state a count rather than a rate: gaps found, readings
+   above list, outlets stocking with no material. A count has no target
+   and no bands of its own — "26" is neither good nor bad — so what a
+   reader needs behind its chip is the denominator it came out of, the
+   share that represents, and, where the count only means something
+   beside another count, that counterpart.
+
+   This is deliberately NOT rateBandDetail with a made-up target.
+   Inventing a threshold for "how many gaps is too many" would be the
+   portal asserting a standard nobody set. */
+export function countDetail(args: {
+  count: number;
+  total: number;
+  /* What the denominator is, in the reader's words: "listings
+     checked", "price readings", "audited outlets". */
+  of: string;
+  /* The other side of a two-sided count, where there is one. */
+  against?: { label: string; count: number };
+  footnote?: string;
+}): BandDetail {
+  const share = args.total === 0 ? 0 : r1((args.count / args.total) * 100);
+
+  const rows: BandRow[] = [
+    { label: "Found", value: args.count.toLocaleString(), here: true },
+    { label: `Out of ${args.of}`, value: args.total.toLocaleString() },
+    { label: "Share", value: `${share}%` },
+  ];
+
+  if (args.against) {
+    rows.push({
+      label: args.against.label,
+      value: args.against.count.toLocaleString(),
+    });
+  }
+
+  return {
+    lead: `${args.count.toLocaleString()} of ${args.total.toLocaleString()} ${args.of} — ${share}%.`,
+    rows,
+    footnote: args.footnote,
+  };
+}

@@ -8,6 +8,7 @@ import { useMemo } from "react";
    is already on the shelf, the relationship already exists, and a rep
    with a boot full of material closes the gap in one visit. */
 
+import { countDetail, rateBandDetail } from "@/lib/market/bandDetail";
 import { Card, StatCard } from "@/components/market/ui";
 import KpiGapBar from "@/components/market/KpiGapBar";
 import DownloadGaps from "@/components/market/DownloadGaps";
@@ -73,11 +74,25 @@ export default function PosmTab({ view }: { view: MarketView }) {
       />
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Items checked" value={p.checked} footnote="Material types checked across audited outlets" />
+        <StatCard
+          label="Items checked"
+          value={p.checked}
+          explain="One check is one material type at one outlet — a cooler sticker and a shelf strip at the same door are two. Compliance divides by this, so a door where more material is agreed carries more weight."
+          footnote="Material types checked across audited outlets"
+        />
         <StatCard
           label="Stocked, unsupported"
           value={p.bare.length}
           band="critical"
+          detail={countDetail({
+            count: p.bare.length,
+            total: view.posCount,
+            of: "audited outlets",
+            against: { label: "Carrying some material", count: view.posCount - p.bare.length },
+            footnote:
+              "The product is already on shelf and the relationship already exists. A rep with a boot full of material closes this in one visit.",
+          })}
+          explain="Outlets that have the brand in stock and carried no point-of-sale material at all when they were checked. Not a shortfall against a target — a complete absence."
           footnote="Outlets carrying the brand with no material at all — the cheapest gap in the file to close"
         />
         {/* Banded against the POSM target, not against each other. The
@@ -89,6 +104,8 @@ export default function PosmTab({ view }: { view: MarketView }) {
           value={p.byType[0]?.value ?? 0}
           unit="%"
           band={rateBand(p.byType[0]?.value ?? 0, targets.posm)}
+          detail={rateBandDetail(p.byType[0]?.value ?? 0, targets.posm)}
+          explain={`The material type present in the largest share of the outlets where it was checked. Banded against the ${targets.posm}% POSM target, not against the other materials — the best item in a failing category is still failing.`}
           footnote={p.byType[0]?.label}
         />
         <StatCard
@@ -96,6 +113,8 @@ export default function PosmTab({ view }: { view: MarketView }) {
           value={worstType?.value ?? 0}
           unit="%"
           band={rateBand(worstType?.value ?? 0, targets.posm)}
+          detail={rateBandDetail(worstType?.value ?? 0, targets.posm)}
+          explain={`The material type present in the smallest share of the outlets where it was checked, against the ${targets.posm}% target.`}
           footnote={worstType?.label}
         />
       </div>

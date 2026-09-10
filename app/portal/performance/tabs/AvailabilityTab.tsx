@@ -8,6 +8,7 @@ import { useMemo } from "react";
    that never carried Pepsi 2.25L has not "run out" of it, and counting
    it as a failure would make the range look like a supply problem. */
 
+import { countDetail, scoreBandDetail } from "@/lib/market/bandDetail";
 import { Card, StatCard } from "@/components/market/ui";
 import KpiGapBar from "@/components/market/KpiGapBar";
 import DownloadGaps from "@/components/market/DownloadGaps";
@@ -56,10 +57,41 @@ export default function AvailabilityTab({ view }: { view: MarketView }) {
       />
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Listings checked" value={a.listings} footnote="Client SKU × outlet pairs audited this month" />
-        <StatCard label="Gaps found" value={a.gaps} band={a.gaps > 0 ? "attention" : "strong"} footnote="Listed lines standing empty on the visit" />
-        <StatCard label="Outlets audited" value={view.posCount} footnote={`${view.coveragePct}% of the outlets in scope`} />
-        <StatCard label="Execution score" value={view.kpi.score} target={targets.score} band={scoreBand(view.kpi.score)} />
+        <StatCard
+          label="Listings checked"
+          value={a.listings}
+          explain="One listing is one client SKU at one outlet. An outlet that carries four client lines contributes four listings, so a wide-range door weighs more than a narrow one — which is the point: availability is measured over shelf positions, not over addresses."
+          footnote="Client SKU × outlet pairs audited this month"
+        />
+        <StatCard
+          label="Gaps found"
+          value={a.gaps}
+          band={a.gaps > 0 ? "attention" : "strong"}
+          detail={countDetail({
+            count: a.gaps,
+            total: a.listings,
+            of: "listings checked",
+            against: { label: "Found in stock", count: a.listings - a.gaps },
+            footnote:
+              "A gap is a line the outlet LISTS and did not have. Space that is already agreed, already priced, and earning nothing.",
+          })}
+          explain="Listed client lines found out of stock on the visit. It excludes lines the outlet never carried — that is the Assortment tab's question, not this one."
+          footnote="Listed lines standing empty on the visit"
+        />
+        <StatCard
+          label="Outlets audited"
+          value={view.posCount}
+          explain="Outlets the field team actually reached this cycle. Every rate on this page divides by this, never by the outlets in scope — a door nobody visited must not be counted as one with an empty shelf."
+          footnote={`${view.coveragePct}% of the outlets in scope`}
+        />
+        <StatCard
+          label="Execution score"
+          value={view.kpi.score}
+          target={targets.score}
+          band={scoreBand(view.kpi.score)}
+          detail={scoreBandDetail(view.kpi.score)}
+          explain="The weighted composite of all five measures — availability 30, shelf share 25, assortment 20, price 15, POSM 10 — averaged across audited outlets."
+        />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">

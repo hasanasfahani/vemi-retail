@@ -85,6 +85,27 @@ export default function ShelfTab({ view }: { view: MarketView }) {
             value={brand.share}
             unit="%"
             band={brand.id === clientBrand.id ? (brand.share >= par ? "strong" : "attention") : undefined}
+            detail={
+              brand.id === clientBrand.id
+                ? {
+                    lead: `${brand.share}% of the measured fixture against a ${par}% contracted par.`,
+                    rows: [
+                      { label: "At or above par", value: `${par}% and over` },
+                      { label: "Below par", value: `under ${par}%`, here: brand.share < par },
+                      { label: "Holding now", value: `${brand.share}%`, here: true },
+                      { label: "Facings per stocking outlet", value: `${brand.perOutlet}` },
+                      { label: "Outlets stocking", value: brand.outlets.toLocaleString() },
+                    ],
+                    footnote:
+                      "Only the client brand is banded here. A rival's share is a fact about the market, not a shortfall against a contract nobody signed with them.",
+                  }
+                : null
+            }
+            explain={
+              brand.id === clientBrand.id
+                ? `Share of every facing measured in the audited outlets, against the ${par}% par the contract sets.`
+                : "Share of every facing measured in the audited outlets. No band: this brand has no par to be judged against."
+            }
             footnote={`${brand.perOutlet} facings per stocking outlet · ${brand.outlets.toLocaleString()} outlets`}
           />
         ))}

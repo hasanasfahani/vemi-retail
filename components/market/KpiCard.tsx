@@ -21,6 +21,8 @@ import StatusChip from "./ui/StatusChip";
 import TargetSpark from "./ui/TargetSpark";
 import { BAND_COLOR, rateBand, type Band } from "./ui/health";
 import { distributionDetail, rateBandDetail, scoreBandDetail } from "@/lib/market/bandDetail";
+import WatchButton from "./WatchButton";
+import type { Watch as WatchRecord } from "@/lib/market/watchlist";
 
 export default function KpiCard({
   label,
@@ -35,6 +37,7 @@ export default function KpiCard({
   explain,
   spread,
   isScore,
+  watch,
 }: {
   label: string;
   value: number;
@@ -54,6 +57,10 @@ export default function KpiCard({
   spread?: number[];
   /* Composites band on their own scale rather than against a target. */
   isScore?: boolean;
+  /* Which measure this tile is and which cycle it is reading, so the
+     figure can be pinned with an honest baseline. Omitted where a tile
+     shows something the watchlist cannot recompute. */
+  watch?: { kpi: WatchRecord["kpi"]; month: string };
 }) {
   const resolved = band ?? rateBand(value, target);
   const color = BAND_COLOR[resolved];
@@ -149,6 +156,20 @@ export default function KpiCard({
         <span className="pointer-events-none">
           <Delta value={delta} floor={deltaFloor} label="vs last month" />
         </span>
+        {watch && (
+          /* Above the overlay link, or clicking Watch would navigate
+             to Performance instead of pinning anything. */
+          <span className="relative z-10 ml-auto">
+            <WatchButton
+              kpi={watch.kpi}
+              scope={{}}
+              value={value}
+              target={target}
+              month={watch.month}
+              size="sm"
+            />
+          </span>
+        )}
       </div>
     </article>
   );

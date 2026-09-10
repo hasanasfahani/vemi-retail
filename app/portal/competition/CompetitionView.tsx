@@ -126,12 +126,24 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
       </section>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {/* ACROSS THE WHOLE PANEL, and the label has to say so.
+
+            The competitive findings below report gaps CITY BY CITY, and
+            they only speak where a gap clears that city's own detection
+            floor — so the cities where the client holds its own produce
+            no card at all. The result is a national figure sitting
+            above a row of larger city figures, which reads as a
+            contradiction unless the scopes are named. */}
         <StatCard
-          label="Shelf gap to leader"
+          label="Shelf gap to leader, nationally"
           value={leader.isClient ? 0 : Math.round((leader.share - client.share) * 10) / 10}
           unit="pt"
           band={leader.isClient ? "strong" : "attention"}
-          footnote={leader.isClient ? `${clientBrand.name} leads the fixture` : `${leader.name} at ${leader.share}% vs ${client.share}%`}
+          footnote={
+            leader.isClient
+              ? `${clientBrand.name} leads the fixture across every audited outlet`
+              : `${leader.name} at ${leader.share}% vs ${client.share}% across all ${all.posCount.toLocaleString()} audited outlets — individual governorates run wider and narrower than this`
+          }
         />
         <StatCard
           label="Districts led"
