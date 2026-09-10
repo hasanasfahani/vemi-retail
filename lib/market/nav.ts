@@ -14,12 +14,20 @@ export type NavItem = {
      thing. */
   locked?: boolean;
 };
-export type NavGroup = { label: string; items: NavItem[] };
+export type NavGroup = {
+  label: string;
+  items: NavItem[];
+  /* Groups the rail extends at runtime. The reports a person builds
+     cannot be a constant, and the sidebar is the only place that knows
+     about them — so the group is marked here rather than the sidebar
+     matching on a label string that a rename would break. */
+  id?: "reports";
+};
 
 export type IconName =
   | "dashboard" | "performance" | "competition" | "insights"
   | "actions" | "pos" | "report" | "trends"
-  | "setup" | "users" | "customers" | "watchlist";
+  | "setup" | "users" | "customers" | "watchlist" | "custom-report" | "plus";
 
 export const NAV: NavGroup[] = [
   {
@@ -45,6 +53,7 @@ export const NAV: NavGroup[] = [
   },
   {
     label: "Reports",
+    id: "reports",
     items: [
       { href: "/portal/reports", label: "Monthly Reports", icon: "report" },
       { href: "/portal/trends", label: "Historical Trends", icon: "trends" },

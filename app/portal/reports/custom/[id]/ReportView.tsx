@@ -44,6 +44,41 @@ export default function ReportView() {
   return <PageShell>{(view, _q, data) => <Report view={view} data={data} />}</PageShell>;
 }
 
+/* Drag starts from a handle, not from the card. A whole draggable card
+   swallows text selection and fights every control inside it, so the
+   element only becomes draggable while the handle is held. */
+function DragHandle({
+  label,
+  onGrab,
+  onRelease,
+}: {
+  label: string;
+  onGrab: () => void;
+  onRelease: () => void;
+}) {
+  return (
+    <span
+      draggable
+      onDragStart={(e) => {
+        /* Firefox refuses to start a drag without payload. */
+        e.dataTransfer.setData("text/plain", label);
+        e.dataTransfer.effectAllowed = "move";
+        onGrab();
+      }}
+      onDragEnd={onRelease}
+      title={`Drag to move ${label}`}
+      aria-hidden
+      className="flex h-6 w-5 cursor-grab items-center justify-center rounded-[7px] text-ink-300 transition-colors hover:bg-canvas hover:text-ink-700 active:cursor-grabbing"
+    >
+      <svg viewBox="0 0 16 16" className="h-4 w-4" fill="currentColor">
+        <circle cx="6" cy="4" r="1.2" /><circle cx="10" cy="4" r="1.2" />
+        <circle cx="6" cy="8" r="1.2" /><circle cx="10" cy="8" r="1.2" />
+        <circle cx="6" cy="12" r="1.2" /><circle cx="10" cy="12" r="1.2" />
+      </svg>
+    </span>
+  );
+}
+
 function Report({ view, data }: { view: MarketView; data: MonthData }) {
   const params = useParams<{ id: string }>();
   const id = String(params?.id ?? "");
@@ -53,6 +88,11 @@ function Report({ view, data }: { view: MarketView; data: MonthData }) {
   const { reports, ready, save, remove } = useReports();
   const targets = useTargets();
   const [picking, setPicking] = useState(false);
+  /* Which block is being carried, and which position it is currently
+     over. Both are indices into the report's own order, so a drop is
+     just `moveBlock`. */
+  const [carrying, setCarrying] = useState<number | null>(null);
+  const [over, setOver] = useState<number | null>(null);
 
   const report = useMemo(() => reports.find((r) => r.id === id) ?? null, [reports, id]);
 
@@ -176,13 +216,34 @@ function Report({ view, data }: { view: MarketView; data: MonthData }) {
           </div>
         </Card>
       ) : (
+        /* HTML5 drag rather than a motion library's reorder: those
+           measure along ONE axis, and this is a two-column grid where a
+           block can move sideways as well as down. Dropping on a
+           position is `moveBlock`, which the keyboard path in each
+           block's menu already calls — one operation, two ways in. */
         <div className="grid gap-4 lg:grid-cols-2">
           {report.blocks.map((block, index) => {
             const def = BLOCKS.find((b) => b.id === block.blockId);
+            const isCarrying = carrying === index;
+            const isTarget = over === index && carrying !== null && carrying !== index;
             return (
               <div
                 key={block.id}
-                className={def?.width === "half" ? "min-w-0" : "min-w-0 lg:col-span-2"}
+                onDragOver={(e) => {
+                  if (carrying === null) return;
+                  e.preventDefault();
+                  setOver(index);
+                }}
+                onDrop={(e) => {
+                  if (carrying === null) return;
+                  e.preventDefault();
+                  edit(moveBlock(report, report.blocks[carrying].id, index));
+                  setCarrying(null);
+                  setOver(null);
+                }}
+                className={`${def?.width === "half" ? "min-w-0" : "min-w-0 lg:col-span-2"} rounded-[15px] transition-all ${
+                  isCarrying ? "opacity-40" : ""
+                } ${isTarget ? "ring-2 ring-violet ring-offset-2" : ""}`}
               >
                 <ReportBlockCard
                   block={block}
@@ -191,17 +252,27 @@ function Report({ view, data }: { view: MarketView; data: MonthData }) {
                   targets={targets}
                   action={
                     def ? (
-                      <BlockMenu
-                        block={block}
-                        def={def}
-                        index={index}
-                        total={report.blocks.length}
-                        onScope={(scope) => edit(setBlockScope(report, block.id, scope))}
-                        onTitle={(title) => edit(setBlockTitle(report, block.id, title))}
-                        onMove={(to) => edit(moveBlock(report, block.id, to))}
-                        onDuplicate={() => edit(duplicateBlock(report, block.id))}
-                        onRemove={() => edit(removeBlock(report, block.id))}
-                      />
+                      <>
+                        <DragHandle
+                          label={block.title ?? def.label}
+                          onGrab={() => setCarrying(index)}
+                          onRelease={() => {
+                            setCarrying(null);
+                            setOver(null);
+                          }}
+                        />
+                        <BlockMenu
+                          block={block}
+                          def={def}
+                          index={index}
+                          total={report.blocks.length}
+                          onScope={(scope) => edit(setBlockScope(report, block.id, scope))}
+                          onTitle={(title) => edit(setBlockTitle(report, block.id, title))}
+                          onMove={(to) => edit(moveBlock(report, block.id, to))}
+                          onDuplicate={() => edit(duplicateBlock(report, block.id))}
+                          onRemove={() => edit(removeBlock(report, block.id))}
+                        />
+                      </>
                     ) : (
                       <button
                         type="button"

@@ -22,8 +22,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { NAV } from "@/lib/market/nav";
+import { useReports } from "./useReports";
+import { createReport, upsertReport } from "@/lib/market/reports";
 import { contract, coverage } from "@/lib/market";
 import Icon from "./Icon";
 
@@ -43,6 +45,11 @@ export default function Sidebar() {
   const qs = params.toString();
   const withFilters = (href: string) => (qs ? `${href}?${qs}` : href);
   const [collapsed, setCollapsed] = useState(false);
+  const router = useRouter();
+  /* The rail shows a few and the index shows the rest. A sidebar that
+     grows without limit stops being navigation. */
+  const { recent } = useReports();
+  const RAIL_CAP = 5;
 
   useEffect(() => {
     let stored = false;
@@ -105,8 +112,28 @@ export default function Sidebar() {
         {NAV.map((group, i) => (
           <div key={group.label} className={i > 0 ? "mt-4" : undefined}>
             {!collapsed && (
-              <div className="px-2.5 pb-1.5 text-[10.5px] font-semibold uppercase tracking-[0.09em] text-ink-400">
-                {group.label}
+              <div className="flex items-center justify-between gap-2 px-2.5 pb-1.5">
+                <span className="text-[10.5px] font-semibold uppercase tracking-[0.09em] text-ink-400">
+                  {group.label}
+                </span>
+                {group.id === "reports" && (
+                  <button
+                    type="button"
+                    title="Build a report"
+                    aria-label="Build a report"
+                    onClick={() => {
+                      /* Created and opened in one gesture, with its name
+                         selected. Nothing is gated behind confirming it,
+                         so walking away costs nothing. */
+                      const report = createReport();
+                      upsertReport(report);
+                      router.push(`/portal/reports/custom/${report.id}?new=1`);
+                    }}
+                    className="flex h-5 w-5 items-center justify-center rounded-[6px] text-ink-400 transition-colors hover:bg-canvas hover:text-ink-900"
+                  >
+                    <Icon name="plus" className="h-3.5 w-3.5" />
+                  </button>
+                )}
               </div>
             )}
             {collapsed && i > 0 && <div className="mx-2 mb-2 h-px bg-line" />}
@@ -168,6 +195,43 @@ export default function Sidebar() {
                 </Link>
               );
             })}
+
+            {/* The reader's own reports, under the two standing pages. */}
+            {group.id === "reports" && recent.length > 0 && (
+              <>
+                {!collapsed && <div className="mx-2.5 my-1.5 h-px bg-line" />}
+                {recent.slice(0, RAIL_CAP).map((report) => {
+                  const href = `/portal/reports/custom/${report.id}`;
+                  const active = pathname === href;
+                  return (
+                    <Link
+                      key={report.id}
+                      href={withFilters(href)}
+                      aria-current={active ? "page" : undefined}
+                      title={collapsed ? report.name : undefined}
+                      className={`mb-0.5 flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13.5px] transition-colors ${
+                        collapsed ? "justify-center" : ""
+                      } ${
+                        active
+                          ? "bg-violet-050 font-semibold text-violet-ink"
+                          : "font-medium text-ink-500 hover:bg-canvas hover:text-ink-900"
+                      }`}
+                    >
+                      <Icon name="custom-report" className="h-[17px] w-[17px] shrink-0" />
+                      {!collapsed && <span className="truncate">{report.name}</span>}
+                    </Link>
+                  );
+                })}
+                {!collapsed && recent.length > RAIL_CAP && (
+                  <Link
+                    href={withFilters("/portal/reports/custom")}
+                    className="mb-0.5 block rounded-lg px-2.5 py-1.5 text-[12px] font-semibold text-ink-400 transition-colors hover:bg-canvas hover:text-ink-900"
+                  >
+                    All {recent.length} reports
+                  </Link>
+                )}
+              </>
+            )}
           </div>
         ))}
       </div>

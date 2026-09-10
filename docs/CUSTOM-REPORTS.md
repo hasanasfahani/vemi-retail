@@ -246,8 +246,8 @@ block.
 | **C** ✅ | The page | Route, header, editable title, empty state, auto-packed grid, scope chips, delete — plus the index page and the share-link landing, so the feature is reachable and a link resolves |
 | **D** ✅ | Add | Drawer, grouping, search, click-to-add (landed with C), plus a schematic per block, arrow-key walking, and a "You use these" group derived from the reader's own reports rather than a second list to keep in step |
 | **E** ✅ | Configure | One menu per block: scope (with the chip already on the card), rename, duplicate, move up/down, remove. Width is not offered — the catalogue declares it and the grid packs, so the reader cannot leave a chart in a shape that breaks it |
-| **F** | Reorder | Drag with `framer-motion`, keyboard move |
-| **G** | Nav + index | Rail group, `+`, cap and overflow page |
+| **F** ✅ | Reorder | HTML5 drag from a handle, not a motion library — those measure along ONE axis and this is a two-column grid where a block moves sideways as well as down. A drop is `moveBlock`, the same call the keyboard path already made |
+| **G** ✅ | Nav + index | `+` on the Reports group heading, the reader's reports listed beneath the two standing pages, capped at five with an overflow link to the index |
 | **H** | Export | Print stylesheet, CSV, share link |
 
 B was the one that looked small and was not, and the brand-filter
