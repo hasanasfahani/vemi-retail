@@ -300,8 +300,13 @@ export function activity(view: MarketView): Activity[] {
   const events: Activity[] = [];
 
   for (const governorateId of scope) {
-    const line = trends.byGovernorate[governorateId];
-    if (!line || line.length < 2) continue;
+    const series = trends.byGovernorate[governorateId];
+    if (!series) continue;
+    /* The trend file extends past the month being viewed so follow-up
+       cycles have somewhere to land. An activity feed reading its last
+       point would report movement that has not happened yet. */
+    const line = series.filter((p) => p.month <= view.month);
+    if (line.length < 2) continue;
     const first = line[0];
     const last = line[line.length - 1];
     const floor = GOVERNORATE_FLOOR[governorateId] ?? MARKET_FLOOR;

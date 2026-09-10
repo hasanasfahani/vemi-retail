@@ -254,7 +254,31 @@ half-migrated.
 
 ---
 
-## Phase D — the detail view
+## Phase D — the detail view ✅
+
+Done, at the trimmed scope. `InsightDrawer`: the rule's figure and its
+own sentence, the comparison-basis note where a finding claims a change,
+`evidence.formula` + `evidence.table`, the folded children listed, and
+the affected outlets in a `DataTable` — which already brings search,
+facets, pagination and a CSV button, so Phase E's CSV arrives free.
+
+**Findings are addressable.** `?insight=<id>` opens the drawer, read
+straight from the URL rather than copied into state by an effect, so a
+link arrives with the drawer already open on first render. This is what
+PRD §23 needs for one insight to open identically from three pages.
+
+**Two real defects found by looking at it**, neither of which any test
+would have caught:
+
+- R14 read the LAST point of the trend series, and that file now runs to
+  November so the follow-up cycles have somewhere to land. A September
+  finding was citing November movement — Basra inflated from the 4.7pt
+  the thresholds are calibrated against to 6.8pt. `activity()` on the
+  Competition page had the same bug, live. Both now end the window at
+  the month in hand; a regression test pins Basra at 4.7pt.
+- The drawer subtitle printed the raw month key (`2026-09`).
+
+Original spec —
 
 A `Drawer`, reusing `DataTable` and `PosDrawer`.
 

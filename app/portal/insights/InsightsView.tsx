@@ -12,11 +12,14 @@
    breakdown behind it. The count on each card says how many. */
 
 import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import PageShell from "@/components/market/PageShell";
 import InsightCard from "@/components/market/InsightCard";
+import InsightDrawer from "@/components/market/InsightDrawer";
+import PosDrawer from "@/components/market/PosDrawer";
 import { useDecisions } from "@/components/market/useDecisions";
 import { Card, StatCard, Tabs, EmptyState } from "@/components/market/ui";
-import { OUTCOMES, OUTCOME_LABEL, type Outcome } from "@/lib/market/insightModel";
+import { OUTCOMES, OUTCOME_LABEL, type DecisionInsight, type Outcome } from "@/lib/market/insightModel";
 import type { MarketView } from "@/lib/market/filters";
 
 export default function InsightsView() {
@@ -25,7 +28,38 @@ export default function InsightsView() {
 
 function Insights({ view }: { view: MarketView }) {
   const [outcome, setOutcome] = useState<Outcome | "all">("all");
+  /* Two drawers, deliberately stacked rather than exclusive: opening an
+     outlet from inside a finding should not throw the finding away. */
+  const [override, setOverride] = useState<string | null | undefined>(undefined);
+  const [openPos, setOpenPos] = useState<string | null>(null);
   const report = useDecisions(view);
+
+  /* A finding is addressable. `?insight=<id>` opens its drawer, so a
+     link to one lands on the finding rather than on the page it was
+     found on — and the same id opens the same drawer from the
+     dashboard, the Competition page or somebody else's message.
+
+     Held as an ID rather than as the object: the report is recomputed
+     whenever the filters move, and a stored object would go on
+     displaying figures the current filter has already changed.
+
+     Read straight from the URL rather than copied into state by an
+     effect, so a link arrives with the drawer already open in the
+     first render the server sends. `override` is what this session has
+     since clicked; undefined means it has clicked nothing and the URL
+     still speaks. */
+  const params = useSearchParams();
+  const openId = override === undefined ? params.get("insight") : override;
+  const open = openId ? report.all.find((i) => i.id === openId) ?? null : null;
+
+  const show = (insight: DecisionInsight | null) => {
+    setOverride(insight?.id ?? null);
+    const next = new URLSearchParams(window.location.search);
+    if (insight) next.set("insight", insight.id);
+    else next.delete("insight");
+    const query = next.toString();
+    window.history.replaceState(null, "", query ? `?${query}` : window.location.pathname);
+  };
 
   const shown = outcome === "all" ? report.cards : report.byOutcome[outcome];
 
@@ -100,12 +134,22 @@ function Insights({ view }: { view: MarketView }) {
               <InsightCard
                 key={insight.id}
                 insight={insight}
+                onOpen={show}
                 childCount={report.children.get(insight.id)?.length ?? 0}
               />
             ))}
           </div>
         )}
       </section>
+
+      <InsightDrawer
+        insight={open}
+        view={view}
+        childrenFindings={open ? report.children.get(open.id) ?? [] : []}
+        onClose={() => show(null)}
+        onOpenPos={setOpenPos}
+      />
+      <PosDrawer posId={openPos} view={view} onClose={() => setOpenPos(null)} />
     </div>
   );
 }

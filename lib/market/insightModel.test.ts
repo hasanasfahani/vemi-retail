@@ -330,3 +330,17 @@ describe("headline grammar", () => {
     }
   });
 });
+
+describe("the trend window never reads past the month in hand", () => {
+  it("measures competitor movement from April to the viewed month", () => {
+    /* The trend file runs to November so the follow-up cycles have
+       somewhere to land. Reading its last point put November movement
+       inside a September finding and inflated Basra from the 4.7pt the
+       thresholds were calibrated against to 6.8pt. */
+    const basra = report.all.find((i) => i.id === "r14-basra");
+    expect(basra).toBeDefined();
+    expect(basra!.evidence.table.columns).toContain("September 2026");
+    expect(basra!.evidence.table.columns).not.toContain("November 2026");
+    expect(basra!.impact.value).toBeCloseTo(4.7, 1);
+  });
+});

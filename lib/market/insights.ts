@@ -1058,10 +1058,18 @@ function r14CompetitorMovement(ctx: Ctx): RawInsight[] {
 
   const out: RawInsight[] = [];
   for (const governorateId of cityIds) {
-    const points = trends.byGovernorate[governorateId];
-    if (!points || points.length < 2) continue;
-    const first = points[0];
+    const series = trends.byGovernorate[governorateId];
+    if (!series) continue;
+    /* The trend file runs past the month being viewed — October and
+       November exist so the follow-up cycles have somewhere to land.
+       Taking its last point would have this rule report November
+       movement inside a September finding, which is not a forecast, it
+       is a mistake. The window ENDS at the month in hand and reaches
+       back from there. */
+    const points = series.filter((p) => p.month <= view.month);
+    if (points.length < 2) continue;
     const last = points[points.length - 1];
+    const first = points[Math.max(0, points.length - THRESHOLDS.r14Movement.windowMonths)];
     const floor = SHARE_FLOOR_PT[governorateId] ?? SHARE_FLOOR_PT.market;
 
     const moves = brands

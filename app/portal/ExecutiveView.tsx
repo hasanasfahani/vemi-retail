@@ -33,7 +33,8 @@ import MapLegend from "@/components/market/map/legend";
 import { Card, InfoTip } from "@/components/market/ui";
 import { RankedBars } from "@/components/market/charts";
 import { scoreBand, rateBand, type Band } from "@/components/market/ui/health";
-import { topCards } from "@/lib/market/insightModel";
+import { topCards, type DecisionInsight } from "@/lib/market/insightModel";
+import InsightDrawer from "@/components/market/InsightDrawer";
 import { useDecisions } from "@/components/market/useDecisions";
 import {
   isPortfolio, portfolioHealth, portfolioScore, BAND_WORD,
@@ -145,6 +146,7 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
   const [mapMetric, setMapMetric] = useState<MetricId>("score");
   const [governorateMetric, setGovernorateMetric] = useState<MetricId>("score");
   const [openPos, setOpenPos] = useState<string | null>(null);
+  const [openInsight, setOpenInsight] = useState<DecisionInsight | null>(null);
 
   const report = useDecisions(view);
 
@@ -494,6 +496,7 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
             <InsightCard
               key={insight.id}
               insight={insight}
+              onOpen={setOpenInsight}
               childCount={report.children.get(insight.id)?.length ?? 0}
             />
           ))}
@@ -591,6 +594,13 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
         />
       </Card>
 
+      <InsightDrawer
+        insight={openInsight}
+        view={view}
+        childrenFindings={openInsight ? report.children.get(openInsight.id) ?? [] : []}
+        onClose={() => setOpenInsight(null)}
+        onOpenPos={setOpenPos}
+      />
       <PosDrawer posId={openPos} view={view} onClose={() => setOpenPos(null)} />
     </div>
   );
