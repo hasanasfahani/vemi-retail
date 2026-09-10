@@ -242,7 +242,7 @@ block.
 | | | Carries |
 | --- | --- | --- |
 | **A** ✅ | Store + model | `reports.ts`, external store, URL serialisation, 22 tests |
-| **B** | Registry | The block catalogue as data, each entry a pure `(view) => ReactNode`, plus a test that every entry renders under an empty filter and under a narrow one |
+| **B** ✅ | Registry | 21 blocks across 8 groups, each a pure `(view) => ReactNode`. Every block rendered under 8 deliberately awkward scopes, including one that reaches no outlet at all |
 | **C** | The page | Route, header, editable title, empty state, block grid |
 | **D** | Add | The drawer, grouping, search, click-to-add |
 | **E** | Configure | Settings popover, per-block scope with its chip, width, duplicate, remove |
@@ -250,11 +250,15 @@ block.
 | **G** | Nav + index | Rail group, `+`, cap and overflow page |
 | **H** | Export | Print stylesheet, CSV, share link |
 
-B is the one that looks small and is not: every block must be correct
-under a scope it was never designed for. The Competition blocks in
-particular re-derive their own brand-unfiltered view today, and a
-per-block brand override has to interact with that deliberately rather
-than accidentally.
+B was the one that looked small and was not, and the brand-filter
+interaction resolved differently than planned. Handing every block both
+a filtered view and a brand-unfiltered one, and trusting it to pick, is
+a rule a block can silently break — declare `ignoresBrandFilter`, read
+the filtered view anyway, and nothing fails until somebody scopes a
+report to one brand. So the choice is made OUTSIDE the block by
+`scopeForBlock`, and the context carries the single view that choice
+produced. A block cannot get it wrong because it is never offered the
+alternative.
 
 ---
 
