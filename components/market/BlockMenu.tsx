@@ -29,6 +29,7 @@ export default function BlockMenu({
   onMove,
   onDuplicate,
   onRemove,
+  onDownload,
 }: {
   block: ReportBlock;
   def: BlockDef;
@@ -38,6 +39,10 @@ export default function BlockMenu({
   onTitle: (title: string | undefined) => void;
   onMove: (to: number) => void;
   onDuplicate: () => void;
+  /* Absent where the block has no tabular form worth writing. The
+     control is then absent too, rather than present and producing an
+     empty file. */
+  onDownload?: () => void;
   onRemove: () => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -114,6 +119,11 @@ export default function BlockMenu({
               <button type="button" className={item} onClick={() => { onDuplicate(); setOpen(false); }}>
                 Duplicate
               </button>
+              {onDownload && (
+                <button type="button" className={item} onClick={() => { onDownload(); setOpen(false); }}>
+                  Download CSV
+                </button>
+              )}
               <div className="my-1 h-px bg-line" />
               <button
                 type="button"

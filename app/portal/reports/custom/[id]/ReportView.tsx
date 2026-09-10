@@ -28,6 +28,11 @@ import {
 } from "@/lib/market/reports";
 import { BLOCKS, type BlockDef } from "@/lib/market/reportBlocks";
 import { pushToast } from "@/lib/market/toastBus";
+import { csvName, downloadCsv } from "@/lib/market/csv";
+import { encodeReport } from "@/lib/market/reports";
+import { scopeForBlock } from "@/lib/market/reportBlocks";
+import { applyFilters } from "@/lib/market/filters";
+import { resolveScope } from "@/lib/market/reports";
 import type { MarketView } from "@/lib/market/filters";
 import type { MonthData } from "@/lib/market/types";
 
@@ -110,6 +115,18 @@ function Report({ view, data }: { view: MarketView; data: MonthData }) {
     [report, edit]
   );
 
+  /* The share link IS the sharing mechanism: reports live in this
+     browser until there is a server, so a colleague on another machine
+     sees an empty list however many exist here. The link carries the
+     whole definition and builds them their own copy. */
+  const share = () => {
+    const url = `${window.location.origin}/portal/reports/custom?r=${encodeReport(report!)}`;
+    navigator.clipboard
+      ?.writeText(url)
+      .then(() => pushToast("Link copied — it carries the whole report"))
+      .catch(() => pushToast("Could not reach the clipboard; copy the address bar instead", "info"));
+  };
+
   const counts = useMemo(() => {
     const held: Record<string, number> = {};
     for (const block of report?.blocks ?? []) held[block.blockId] = (held[block.blockId] ?? 0) + 1;
@@ -160,13 +177,28 @@ function Report({ view, data }: { view: MarketView; data: MonthData }) {
           autoEdit={fresh}
           onRename={(name) => edit(renameReport(report, name))}
         />
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2 print:hidden">
           <button
             type="button"
             onClick={() => setPicking(true)}
             className="rounded-[9px] bg-violet px-2.5 py-1.5 text-[12px] font-semibold text-white transition-colors hover:bg-violet-ink"
           >
             Add block
+          </button>
+          <button
+            type="button"
+            onClick={share}
+            title="Copy a link that rebuilds this report for someone else"
+            className="rounded-[9px] border border-line-strong bg-white px-2.5 py-1.5 text-[12px] font-semibold text-ink-700 transition-colors hover:border-ink-400"
+          >
+            Copy link
+          </button>
+          <button
+            type="button"
+            onClick={() => window.print()}
+            className="rounded-[9px] border border-line-strong bg-white px-2.5 py-1.5 text-[12px] font-semibold text-ink-700 transition-colors hover:border-ink-400"
+          >
+            Print
           </button>
           <button
             type="button"
@@ -224,6 +256,9 @@ function Report({ view, data }: { view: MarketView; data: MonthData }) {
         <div className="grid gap-4 lg:grid-cols-2">
           {report.blocks.map((block, index) => {
             const def = BLOCKS.find((b) => b.id === block.blockId);
+            /* Captured outside the closure: TypeScript cannot narrow a
+               property access through a callback. */
+            const toCsv = def?.csv;
             const isCarrying = carrying === index;
             const isTarget = over === index && carrying !== null && carrying !== index;
             return (
@@ -270,6 +305,23 @@ function Report({ view, data }: { view: MarketView; data: MonthData }) {
                           onTitle={(title) => edit(setBlockTitle(report, block.id, title))}
                           onMove={(to) => edit(moveBlock(report, block.id, to))}
                           onDuplicate={() => edit(duplicateBlock(report, block.id))}
+                          onDownload={
+                            toCsv
+                              ? () => {
+                                  /* Built over the SAME view the panel
+                                     drew, so the file and the picture
+                                     cannot disagree. */
+                                  const scoped = applyFilters(
+                                    scopeForBlock(def, resolveScope(view.filters, block.scope)),
+                                    data
+                                  );
+                                  downloadCsv(
+                                    csvName("vemi", report.name, def.label, scoped.month),
+                                    toCsv({ view: scoped, targets })
+                                  );
+                                }
+                              : undefined
+                          }
                           onRemove={() => edit(removeBlock(report, block.id))}
                         />
                       </>

@@ -580,8 +580,19 @@ body {
   }
   .print\:hidden,
   aside,
+  nav[aria-label="Sections"],
   header.sticky {
     display: none !important;
+  }
+  /* A custom report is the surface most likely to be printed, and its
+     scope chips are the part that must survive: a block computed over
+     Basra on a page headed "all governorates" is only honest while the
+     chip is beside it. Tailwind's print utilities can hide a control;
+     nothing here may hide a chip. */
+  [data-scope-chip] {
+    display: inline-block !important;
+    border: 1px solid #b9b3ee !important;
+    color: #4a3fd0 !important;
   }
   main {
     padding: 0 !important;

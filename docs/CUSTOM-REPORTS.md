@@ -248,7 +248,7 @@ block.
 | **E** ✅ | Configure | One menu per block: scope (with the chip already on the card), rename, duplicate, move up/down, remove. Width is not offered — the catalogue declares it and the grid packs, so the reader cannot leave a chart in a shape that breaks it |
 | **F** ✅ | Reorder | HTML5 drag from a handle, not a motion library — those measure along ONE axis and this is a two-column grid where a block moves sideways as well as down. A drop is `moveBlock`, the same call the keyboard path already made |
 | **G** ✅ | Nav + index | `+` on the Reports group heading, the reader's reports listed beneath the two standing pages, capped at five with an overflow link to the index |
-| **H** | Export | Print stylesheet, CSV, share link |
+| **H** ✅ | Export | Copy link, browser print with the scope chips forced to survive it, and a per-block CSV computed over the same view the panel drew |
 
 B was the one that looked small and was not, and the brand-filter
 interaction resolved differently than planned. Handing every block both

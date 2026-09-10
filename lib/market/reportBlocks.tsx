@@ -34,6 +34,7 @@ import { KPI_NAME } from "./kpiLabels";
 import { clientBrand, governorates, governorateName, brands, posmTypes } from "./index";
 import type { Targets } from "./settings";
 import type { Filters, MarketView } from "./filters";
+import type { CsvTable } from "./csv";
 
 export type BlockGroup =
   | "headline"
@@ -103,6 +104,12 @@ export type BlockDef = {
      containing only Pepsi, which is true and useless. */
   ignoresBrandFilter?: boolean;
   render: (ctx: BlockContext) => ReactNode;
+  /* THE ROWS BEHIND THE PICTURE. Given, the block offers a download —
+     and it computes them from the same builder the chart used, over
+     the same view, so the file and the panel cannot disagree. Absent
+     means the block has no tabular form worth writing, and the control
+     is then absent rather than present and producing nothing. */
+  csv?: (ctx: BlockContext) => CsvTable;
 };
 
 const pt = (n: number) => Math.round(n * 10) / 10;
@@ -156,6 +163,17 @@ function KpiRow({ view, targets }: BlockContext) {
 export const BLOCKS: BlockDef[] = [
   {
     id: "headline-kpis",
+    csv: ({ view, targets }) => ({
+      columns: ["Measure", "Value", "Target", "Gap"],
+      rows: [
+        [KPI_NAME.availability, view.kpi.availability, targets.availability, pt(view.kpi.availability - targets.availability)],
+        [KPI_NAME.shelfShare, view.client?.share ?? 0, targets.shelfShare, pt((view.client?.share ?? 0) - targets.shelfShare)],
+        [KPI_NAME.assortment, view.kpi.assortment, targets.assortment, pt(view.kpi.assortment - targets.assortment)],
+        [KPI_NAME.price, view.kpi.price, targets.price, pt(view.kpi.price - targets.price)],
+        [KPI_NAME.posm, view.kpi.posm, targets.posm, pt(view.kpi.posm - targets.posm)],
+        [KPI_NAME.score, view.kpi.score, targets.score, pt(view.kpi.score - targets.score)],
+      ],
+    }),
     shape: "tiles",
     label: "The six KPIs",
     group: "headline",
@@ -168,6 +186,10 @@ export const BLOCKS: BlockDef[] = [
   /* ---------- availability ---------- */
   {
     id: "availability-by-governorate",
+    csv: ({ view }) => ({
+      columns: ["Governorate", "Availability %", "Listings", "Outlets"],
+      rows: availability(view).byGovernorate.map((r) => [r.label, r.value, r.listings, r.outlets]),
+    }),
     shape: "bars",
     label: "Availability by governorate",
     group: "availability",
@@ -194,6 +216,10 @@ export const BLOCKS: BlockDef[] = [
   },
   {
     id: "availability-by-sku",
+    csv: ({ view }) => ({
+      columns: ["SKU", "Availability %", "Listings", "Gaps"],
+      rows: availability(view).bySku.map((r) => [r.label, r.value, r.listed, r.out]),
+    }),
     shape: "dots",
     label: "Availability by SKU",
     group: "availability",
@@ -220,6 +246,10 @@ export const BLOCKS: BlockDef[] = [
   },
   {
     id: "availability-by-channel",
+    csv: ({ view }) => ({
+      columns: ["Channel", `${clientBrand.name} %`, "Rest of category %", "Listings"],
+      rows: availability(view).byChannel.map((r) => [r.label, r.client, r.category, r.listings]),
+    }),
     shape: "stacked",
     label: "Availability by channel",
     group: "availability",
@@ -245,6 +275,10 @@ export const BLOCKS: BlockDef[] = [
   },
   {
     id: "availability-reasons",
+    csv: ({ view }) => ({
+      columns: ["Reason", "Gaps"],
+      rows: availability(view).byReason.map((r) => [r.name, r.value]),
+    }),
     shape: "donut",
     label: "Why the shelf was empty",
     group: "availability",
@@ -265,6 +299,16 @@ export const BLOCKS: BlockDef[] = [
   },
   {
     id: "availability-sku-governorate",
+    csv: ({ view }) => {
+      const a = availability(view);
+      return {
+        columns: ["SKU", ...governorates.map((c) => c.name)],
+        rows: a.bySku.map((row) => [
+          row.label,
+          ...governorates.map((c) => a.gapAt(row.id, c.id) ?? 0),
+        ]),
+      };
+    },
     shape: "grid",
     label: "Gaps by SKU and governorate",
     group: "availability",
@@ -290,6 +334,13 @@ export const BLOCKS: BlockDef[] = [
   /* ---------- shelf ---------- */
   {
     id: "shelf-battle-governorate",
+    csv: ({ view }) => ({
+      columns: ["Governorate", ...brands.map((b) => `${b.name} %`)],
+      rows: shelf(view).byGovernorate.map((row) => [
+        String(row.label),
+        ...brands.map((b) => Number(row[b.id] ?? 0)),
+      ]),
+    }),
     shape: "stacked",
     label: "Shelf battle by governorate",
     group: "shelf",
@@ -317,6 +368,10 @@ export const BLOCKS: BlockDef[] = [
   },
   {
     id: "shelf-by-brand",
+    csv: ({ view }) => ({
+      columns: ["Brand", "Share of shelf %", "Facings", "Facings per stocking outlet"],
+      rows: shelf(view).byBrand.map((r) => [r.name, r.share, r.facings, r.perOutlet]),
+    }),
     shape: "bars",
     label: "Shelf share by brand",
     group: "shelf",
@@ -345,6 +400,12 @@ export const BLOCKS: BlockDef[] = [
   /* ---------- pricing ---------- */
   {
     id: "price-distance-by-sku",
+    csv: ({ view }) => ({
+      columns: ["SKU", "Observed", "List", "Distance %", "Readings"],
+      rows: pricing(view).bySku.map((r) => [
+        r.name, r.average, r.rrp, r.rrp === 0 ? 0 : pt(((r.average - r.rrp) / r.rrp) * 100), r.readings,
+      ]),
+    }),
     shape: "gap",
     label: "Distance from list by SKU",
     group: "pricing",
@@ -370,6 +431,10 @@ export const BLOCKS: BlockDef[] = [
   },
   {
     id: "price-compliance-by-governorate",
+    csv: ({ view }) => ({
+      columns: ["Governorate", "Compliance %", "Average price", "Readings"],
+      rows: pricing(view).byGovernorate.map((r) => [r.label, r.compliance, r.average, r.readings]),
+    }),
     shape: "dots",
     label: "Price compliance by governorate",
     group: "pricing",
@@ -390,6 +455,10 @@ export const BLOCKS: BlockDef[] = [
   },
   {
     id: "price-distribution",
+    csv: ({ view }) => ({
+      columns: ["Band", "Readings"],
+      rows: pricing(view).distribution.map((r) => [r.label, r.value]),
+    }),
     shape: "bars",
     label: "How far from list",
     group: "pricing",
@@ -414,6 +483,10 @@ export const BLOCKS: BlockDef[] = [
   /* ---------- assortment ---------- */
   {
     id: "assortment-penetration",
+    csv: ({ view }) => ({
+      columns: ["SKU", "Penetration %", "Outlets listing", "Outlets not listing"],
+      rows: assortment(view).penetration.map((r) => [r.label, r.value, r.outlets, r.missing]),
+    }),
     shape: "dots",
     label: "SKU penetration",
     group: "assortment",
@@ -433,6 +506,10 @@ export const BLOCKS: BlockDef[] = [
   },
   {
     id: "assortment-by-channel",
+    csv: ({ view }) => ({
+      columns: ["Channel", "Range compliance %"],
+      rows: assortment(view).byChannel.map((r) => [r.label, r.value]),
+    }),
     shape: "bars",
     label: "Range compliance by channel",
     group: "assortment",
@@ -453,6 +530,16 @@ export const BLOCKS: BlockDef[] = [
   },
   {
     id: "assortment-heatmap",
+    csv: ({ view }) => {
+      const a = assortment(view);
+      return {
+        columns: ["SKU", ...governorates.map((c) => c.name)],
+        rows: a.penetration.map((row) => [
+          row.label,
+          ...governorates.map((c) => a.penetrationAt(row.id, c.id) ?? ""),
+        ]),
+      };
+    },
     shape: "grid",
     label: "Range by SKU and governorate",
     group: "assortment",
@@ -477,6 +564,10 @@ export const BLOCKS: BlockDef[] = [
   /* ---------- POSM ---------- */
   {
     id: "posm-by-material",
+    csv: ({ view }) => ({
+      columns: ["Material", "Present %", "Present", "Checked"],
+      rows: posm(view).byType.map((r) => [r.label, r.value, r.present, r.checked]),
+    }),
     shape: "bars",
     label: "Presence by material",
     group: "posm",
@@ -505,6 +596,10 @@ export const BLOCKS: BlockDef[] = [
   },
   {
     id: "posm-weakest-governorates",
+    csv: ({ view }) => ({
+      columns: ["Governorate", "Present %", "Checked", "Missing"],
+      rows: posm(view).byGovernorate.map((r) => [r.label, r.value, r.checked, r.missing]),
+    }),
     shape: "split",
     label: "Where POSM is missing",
     group: "posm",
@@ -529,6 +624,10 @@ export const BLOCKS: BlockDef[] = [
   },
   {
     id: "posm-by-channel",
+    csv: ({ view, targets }) => ({
+      columns: ["Channel", "Present %", "Against target"],
+      rows: posm(view).byChannel.map((r) => [r.label, r.value, pt(r.value - targets.posm)]),
+    }),
     shape: "gap",
     label: "POSM by channel",
     group: "posm",
@@ -548,6 +647,12 @@ export const BLOCKS: BlockDef[] = [
   /* ---------- competition ---------- */
   {
     id: "competition-scoreboard",
+    csv: ({ view }) => ({
+      columns: ["Brand", "Availability %", "Share of shelf %", "Facings per outlet", "Eye-level %", "Promotion %", "Price index"],
+      rows: scoreboard(view).map((r) => [
+        r.name, r.availability, r.share, r.perOutlet, r.visibility, r.promo, r.priceIndex,
+      ]),
+    }),
     shape: "table",
     label: "Competitive scoreboard",
     group: "competition",
@@ -597,6 +702,10 @@ export const BLOCKS: BlockDef[] = [
   },
   {
     id: "competition-price-position",
+    csv: ({ view }) => ({
+      columns: ["Brand", "Price index", "Against par", "Average price"],
+      rows: scoreboard(view).map((r) => [r.name, r.priceIndex, pt(r.priceIndex - 100), r.averagePrice]),
+    }),
     shape: "gap",
     label: "Price position",
     group: "competition",
@@ -614,6 +723,17 @@ export const BLOCKS: BlockDef[] = [
   },
   {
     id: "competition-leads",
+    csv: ({ view }) => {
+      const leads = districtLeads(view);
+      const held = new Map<string, number>();
+      for (const lead of leads) held.set(lead.leaderId, (held.get(lead.leaderId) ?? 0) + 1);
+      return {
+        columns: ["Brand", "Districts led", "Districts judged"],
+        rows: [...held]
+          .map(([id, n]) => [brands.find((b) => b.id === id)?.name ?? id, n, leads.length] as (string | number)[])
+          .sort((a, b) => Number(b[1]) - Number(a[1])),
+      };
+    },
     shape: "bars",
     label: "Who leads where",
     group: "competition",
@@ -644,6 +764,10 @@ export const BLOCKS: BlockDef[] = [
   /* ---------- health ---------- */
   {
     id: "health-brands",
+    csv: ({ view }) => ({
+      columns: ["Brand", "Score", "Weakest measure"],
+      rows: portfolioHealth(view).map((r) => [r.name, r.score, r.weakest.label]),
+    }),
     shape: "bars",
     label: "Portfolio brand health",
     group: "health",
@@ -665,6 +789,10 @@ export const BLOCKS: BlockDef[] = [
   },
   {
     id: "health-governorates",
+    csv: ({ view }) => ({
+      columns: ["Governorate", "Score", "Outlets audited", "Weakest measure"],
+      rows: governorateHealth(view).map((r) => [r.name, r.score, r.outlets, r.weakest.label]),
+    }),
     shape: "bars",
     label: "Market health by governorate",
     group: "health",

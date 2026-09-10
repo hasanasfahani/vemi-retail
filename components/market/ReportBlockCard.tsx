@@ -101,12 +101,13 @@ export default function ReportBlockCard({
           {chips.map((chip) => (
             <span
               key={chip}
+              data-scope-chip
               className="rounded-full border border-violet-100 bg-violet-050 px-2 py-[2px] text-[10.5px] font-semibold text-violet-ink"
             >
               {chip}
             </span>
           ))}
-          {action}
+          <span className="print:hidden">{action}</span>
         </span>
       }
       footnote={
