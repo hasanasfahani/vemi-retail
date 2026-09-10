@@ -75,8 +75,17 @@ export type BlockContext = {
   targets: Targets;
 };
 
+/* The SHAPE a block draws, for the picker's thumbnail. Not the chart
+   component's name — a reader choosing between twenty entries is asking
+   "what will this look like on my page", and a five-second answer to
+   that is worth more than a rendered preview that costs a data build
+   per row of the list. */
+export type BlockShape =
+  | "tiles" | "bars" | "dots" | "gap" | "split" | "stacked" | "donut" | "grid" | "table";
+
 export type BlockDef = {
   id: string;
+  shape: BlockShape;
   label: string;
   group: BlockGroup;
   /* One line in the picker, saying what the block answers. */
@@ -147,6 +156,7 @@ function KpiRow({ view, targets }: BlockContext) {
 export const BLOCKS: BlockDef[] = [
   {
     id: "headline-kpis",
+    shape: "tiles",
     label: "The six KPIs",
     group: "headline",
     description: "Every headline measure against its target, in one row.",
@@ -158,6 +168,7 @@ export const BLOCKS: BlockDef[] = [
   /* ---------- availability ---------- */
   {
     id: "availability-by-governorate",
+    shape: "bars",
     label: "Availability by governorate",
     group: "availability",
     description: "Client listings found on shelf, per governorate.",
@@ -183,6 +194,7 @@ export const BLOCKS: BlockDef[] = [
   },
   {
     id: "availability-by-sku",
+    shape: "dots",
     label: "Availability by SKU",
     group: "availability",
     description: "Worst line first — where the shelf is empty.",
@@ -208,6 +220,7 @@ export const BLOCKS: BlockDef[] = [
   },
   {
     id: "availability-by-channel",
+    shape: "stacked",
     label: "Availability by channel",
     group: "availability",
     description: "The client against every other brand in the same format.",
@@ -232,6 +245,7 @@ export const BLOCKS: BlockDef[] = [
   },
   {
     id: "availability-reasons",
+    shape: "donut",
     label: "Why the shelf was empty",
     group: "availability",
     description: "The reason the auditor recorded against each gap.",
@@ -251,6 +265,7 @@ export const BLOCKS: BlockDef[] = [
   },
   {
     id: "availability-sku-governorate",
+    shape: "grid",
     label: "Gaps by SKU and governorate",
     group: "availability",
     description: "Out-of-stock counts, line by line and place by place.",
@@ -275,6 +290,7 @@ export const BLOCKS: BlockDef[] = [
   /* ---------- shelf ---------- */
   {
     id: "shelf-battle-governorate",
+    shape: "stacked",
     label: "Shelf battle by governorate",
     group: "shelf",
     description: "Share of measured facings, every brand, 100% stacked.",
@@ -301,6 +317,7 @@ export const BLOCKS: BlockDef[] = [
   },
   {
     id: "shelf-by-brand",
+    shape: "bars",
     label: "Shelf share by brand",
     group: "shelf",
     description: "Where the fixture actually goes, brand by brand.",
@@ -328,6 +345,7 @@ export const BLOCKS: BlockDef[] = [
   /* ---------- pricing ---------- */
   {
     id: "price-distance-by-sku",
+    shape: "gap",
     label: "Distance from list by SKU",
     group: "pricing",
     description: "How far each line sits from its own recommended price.",
@@ -352,6 +370,7 @@ export const BLOCKS: BlockDef[] = [
   },
   {
     id: "price-compliance-by-governorate",
+    shape: "dots",
     label: "Price compliance by governorate",
     group: "pricing",
     description: "Share of client readings within 5% of list.",
@@ -371,6 +390,7 @@ export const BLOCKS: BlockDef[] = [
   },
   {
     id: "price-distribution",
+    shape: "bars",
     label: "How far from list",
     group: "pricing",
     description: "Client readings, banded by distance from RRP.",
@@ -394,6 +414,7 @@ export const BLOCKS: BlockDef[] = [
   /* ---------- assortment ---------- */
   {
     id: "assortment-penetration",
+    shape: "dots",
     label: "SKU penetration",
     group: "assortment",
     description: "Audited outlets listing each client line.",
@@ -412,6 +433,7 @@ export const BLOCKS: BlockDef[] = [
   },
   {
     id: "assortment-by-channel",
+    shape: "bars",
     label: "Range compliance by channel",
     group: "assortment",
     description: "Against the range each format is expected to carry.",
@@ -431,6 +453,7 @@ export const BLOCKS: BlockDef[] = [
   },
   {
     id: "assortment-heatmap",
+    shape: "grid",
     label: "Range by SKU and governorate",
     group: "assortment",
     description: "Share of outlets in each place carrying each line.",
@@ -454,6 +477,7 @@ export const BLOCKS: BlockDef[] = [
   /* ---------- POSM ---------- */
   {
     id: "posm-by-material",
+    shape: "bars",
     label: "Presence by material",
     group: "posm",
     description: "Where each type was checked, how often it was there.",
@@ -481,6 +505,7 @@ export const BLOCKS: BlockDef[] = [
   },
   {
     id: "posm-weakest-governorates",
+    shape: "split",
     label: "Where POSM is missing",
     group: "posm",
     description: "How much material is missing, not just the rate.",
@@ -504,6 +529,7 @@ export const BLOCKS: BlockDef[] = [
   },
   {
     id: "posm-by-channel",
+    shape: "gap",
     label: "POSM by channel",
     group: "posm",
     description: "Distance from the POSM target, format by format.",
@@ -522,6 +548,7 @@ export const BLOCKS: BlockDef[] = [
   /* ---------- competition ---------- */
   {
     id: "competition-scoreboard",
+    shape: "table",
     label: "Competitive scoreboard",
     group: "competition",
     description: "Every brand on the six measures the audit records.",
@@ -570,6 +597,7 @@ export const BLOCKS: BlockDef[] = [
   },
   {
     id: "competition-price-position",
+    shape: "gap",
     label: "Price position",
     group: "competition",
     description: "Each brand against the category average, indexed.",
@@ -586,6 +614,7 @@ export const BLOCKS: BlockDef[] = [
   },
   {
     id: "competition-leads",
+    shape: "bars",
     label: "Who leads where",
     group: "competition",
     description: "Districts by the brand holding the most shelf.",
@@ -615,6 +644,7 @@ export const BLOCKS: BlockDef[] = [
   /* ---------- health ---------- */
   {
     id: "health-brands",
+    shape: "bars",
     label: "Portfolio brand health",
     group: "health",
     description: "The composite score for each brand in the house.",
@@ -635,6 +665,7 @@ export const BLOCKS: BlockDef[] = [
   },
   {
     id: "health-governorates",
+    shape: "bars",
     label: "Market health by governorate",
     group: "health",
     description: "The composite score for each governorate.",

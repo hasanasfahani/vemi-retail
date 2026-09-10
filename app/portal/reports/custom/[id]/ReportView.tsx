@@ -17,11 +17,15 @@ import { useParams, useSearchParams } from "next/navigation";
 import PageShell from "@/components/market/PageShell";
 import ReportBlockCard from "@/components/market/ReportBlockCard";
 import BlockPicker from "@/components/market/BlockPicker";
+import BlockMenu from "@/components/market/BlockMenu";
 import { useReports } from "@/components/market/useReports";
 import { Card, EmptyState } from "@/components/market/ui";
 import ReportTitle from "@/components/market/ReportTitle";
 import { useTargets } from "@/components/market/useTargets";
-import { addBlock, removeBlock, renameReport, type CustomReport } from "@/lib/market/reports";
+import {
+  addBlock, duplicateBlock, moveBlock, removeBlock, renameReport, setBlockScope, setBlockTitle,
+  type CustomReport,
+} from "@/lib/market/reports";
 import { BLOCKS, type BlockDef } from "@/lib/market/reportBlocks";
 import { pushToast } from "@/lib/market/toastBus";
 import type { MarketView } from "@/lib/market/filters";
@@ -71,6 +75,17 @@ function Report({ view, data }: { view: MarketView; data: MonthData }) {
     for (const block of report?.blocks ?? []) held[block.blockId] = (held[block.blockId] ?? 0) + 1;
     return held;
   }, [report]);
+
+  /* What this reader reaches for, taken from their own reports rather
+     than from a separate "recently used" list that would eventually
+     disagree with them. */
+  const familiar = useMemo(() => {
+    const used = new Map<string, number>();
+    for (const r of reports) {
+      for (const block of r.blocks) used.set(block.blockId, (used.get(block.blockId) ?? 0) + 1);
+    }
+    return [...used].sort((a, b) => b[1] - a[1]).map(([blockId]) => blockId);
+  }, [reports]);
 
   if (!ready) {
     return (
@@ -162,7 +177,7 @@ function Report({ view, data }: { view: MarketView; data: MonthData }) {
         </Card>
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">
-          {report.blocks.map((block) => {
+          {report.blocks.map((block, index) => {
             const def = BLOCKS.find((b) => b.id === block.blockId);
             return (
               <div
@@ -175,13 +190,27 @@ function Report({ view, data }: { view: MarketView; data: MonthData }) {
                   data={data}
                   targets={targets}
                   action={
-                    <button
-                      type="button"
-                      onClick={() => edit(removeBlock(report, block.id))}
-                      className="rounded-[7px] px-1.5 py-[2px] text-[11px] font-semibold text-ink-400 transition-colors hover:bg-canvas hover:text-ink-900"
-                    >
-                      Remove
-                    </button>
+                    def ? (
+                      <BlockMenu
+                        block={block}
+                        def={def}
+                        index={index}
+                        total={report.blocks.length}
+                        onScope={(scope) => edit(setBlockScope(report, block.id, scope))}
+                        onTitle={(title) => edit(setBlockTitle(report, block.id, title))}
+                        onMove={(to) => edit(moveBlock(report, block.id, to))}
+                        onDuplicate={() => edit(duplicateBlock(report, block.id))}
+                        onRemove={() => edit(removeBlock(report, block.id))}
+                      />
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => edit(removeBlock(report, block.id))}
+                        className="rounded-[7px] px-1.5 py-[2px] text-[11px] font-semibold text-ink-400 transition-colors hover:bg-canvas hover:text-ink-900"
+                      >
+                        Remove
+                      </button>
+                    )
                   }
                 />
               </div>
@@ -195,6 +224,7 @@ function Report({ view, data }: { view: MarketView; data: MonthData }) {
         onClose={() => setPicking(false)}
         onAdd={add}
         counts={counts}
+        familiar={familiar}
       />
     </div>
   );

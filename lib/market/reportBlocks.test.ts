@@ -144,3 +144,19 @@ describe("a comparison is not a comparison with five of six brands removed", () 
     ]);
   });
 });
+
+describe("the picker's schematic", () => {
+  it("gives every block a shape the glyph knows how to draw", () => {
+    /* A new block with a typo'd shape would render an empty square in
+       the picker and nowhere else — silent, and exactly the kind of
+       thing nobody notices until a reader asks why one row is blank. */
+    const drawable = ["tiles", "bars", "dots", "gap", "split", "stacked", "donut", "grid", "table"];
+    for (const block of BLOCKS) expect(drawable, block.id).toContain(block.shape);
+  });
+
+  it("does not draw everything the same way", () => {
+    /* Twenty-two entries wearing one glyph would be a list with a
+       decoration rather than a list with a preview. */
+    expect(new Set(BLOCKS.map((b) => b.shape)).size).toBeGreaterThanOrEqual(6);
+  });
+});

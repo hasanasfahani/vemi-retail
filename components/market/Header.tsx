@@ -16,24 +16,10 @@ import { titleFor } from "@/lib/market/nav";
 import {
   FILTER_KEYS, FILTER_META, activeCount, type FilterKey, type Filters,
 } from "@/lib/market/filters";
-import {
-  brands, channels, governorates, months, retailers, skus,
-  brandName, channelName, governorateName, skuName, contract,
-} from "@/lib/market";
+import { months, contract } from "@/lib/market";
 import Dropdown from "./Dropdown";
+import { FILTER_OPTIONS as OPTIONS, FILTER_VALUE_LABEL as LABEL } from "@/lib/market/filterOptions";
 
-const OPTIONS: Record<FilterKey, { value: string; label: string }[]> = {
-  governorates: governorates.map((c) => ({ value: c.id, label: c.name })),
-  channels: channels.map((c) => ({ value: c.id, label: c.name })),
-  retailers: retailers.map((r) => ({ value: r, label: r })),
-  brands: brands.map((b) => ({ value: b.id, label: b.name })),
-  skus: skus.map((s) => ({ value: s.id, label: s.name })),
-};
-
-const LABEL: Record<FilterKey, (v: string) => string> = {
-  governorates: governorateName, channels: channelName, retailers: (v) => v,
-  brands: brandName, skus: skuName,
-};
 
 export default function Header({
   filters,

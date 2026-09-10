@@ -244,8 +244,8 @@ block.
 | **A** ✅ | Store + model | `reports.ts`, external store, URL serialisation, 22 tests |
 | **B** ✅ | Registry | 21 blocks across 8 groups, each a pure `(view) => ReactNode`. Every block rendered under 8 deliberately awkward scopes, including one that reaches no outlet at all |
 | **C** ✅ | The page | Route, header, editable title, empty state, auto-packed grid, scope chips, delete — plus the index page and the share-link landing, so the feature is reachable and a link resolves |
-| **D** | Add | ~~The drawer, grouping, search, click-to-add~~ — landed with C, because a page you cannot put anything on is not a page. What remains: previews in the picker, keyboard navigation, and the recently-used group |
-| **E** | Configure | Settings popover, per-block scope with its chip, width, duplicate, remove |
+| **D** ✅ | Add | Drawer, grouping, search, click-to-add (landed with C), plus a schematic per block, arrow-key walking, and a "You use these" group derived from the reader's own reports rather than a second list to keep in step |
+| **E** ✅ | Configure | One menu per block: scope (with the chip already on the card), rename, duplicate, move up/down, remove. Width is not offered — the catalogue declares it and the grid packs, so the reader cannot leave a chart in a shape that breaks it |
 | **F** | Reorder | Drag with `framer-motion`, keyboard move |
 | **G** | Nav + index | Rail group, `+`, cap and overflow page |
 | **H** | Export | Print stylesheet, CSV, share link |
