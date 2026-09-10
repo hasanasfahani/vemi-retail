@@ -10,6 +10,7 @@ import { useMemo } from "react";
    share figure hides completely. */
 
 import { Card, StatCard } from "@/components/market/ui";
+import WatchEye from "@/components/market/WatchEye";
 import KpiGapBar from "@/components/market/KpiGapBar";
 import DownloadGaps from "@/components/market/DownloadGaps";
 import RequestFollowUp from "@/components/market/RequestFollowUp";
@@ -105,6 +106,16 @@ export default function ShelfTab({ view }: { view: MarketView }) {
               brand.id === clientBrand.id
                 ? `Share of every facing measured in the audited outlets, against the ${par}% par the contract sets.`
                 : "Share of every facing measured in the audited outlets. No band: this brand has no par to be judged against."
+            }
+            watch={
+              <WatchEye
+                kpi="shelfShare"
+                scope={{ brandId: brand.id }}
+                value={brand.share}
+                target={par}
+                month={view.month}
+                size="sm"
+              />
             }
             footnote={`${brand.perOutlet} facings per stocking outlet · ${brand.outlets.toLocaleString()} outlets`}
           />
