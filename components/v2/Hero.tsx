@@ -1,8 +1,9 @@
 import { hero, ids } from "@/lib/v2Content";
+import { Figure } from "@/components/v2/Figure";
 
-/* Deliberately typographic. The product surface is §6 — opening with a
-   second dashboard would spend that reveal early and make the page feel
-   repetitive. A calm statement + the proof bar beneath does more work. */
+/* Typographic by design. The product surface is §4 — opening with a
+   dashboard would spend that reveal early. Proof metrics ride inline
+   here (short set); the fuller credibility strip is §8. */
 
 export default function Hero() {
   return (
@@ -36,6 +37,21 @@ export default function Hero() {
               {hero.secondaryCta.label}
             </a>
           </div>
+
+          {/* inline proof metrics */}
+          <ul className="mx-auto mt-12 flex max-w-2xl flex-wrap items-center justify-center gap-y-4">
+            {hero.metrics.map((m, i) => (
+              <li
+                key={m.label}
+                className={`px-6 ${i > 0 ? "sm:border-l sm:border-line" : ""}`}
+              >
+                <div className="tnum !text-xl text-ink-900">
+                  <Figure value={m.value} placeholder={m.placeholder} />
+                </div>
+                <div className="mt-0.5 text-xs text-ink-500">{m.label}</div>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </section>

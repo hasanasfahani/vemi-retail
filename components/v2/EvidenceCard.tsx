@@ -73,6 +73,15 @@ export default function EvidenceCard() {
           <Icon name="spark" className="h-3 w-3 text-violet-ink" />
           AI confidence {e.confidence}%
         </span>
+        <span
+          className="absolute right-3 top-3 rounded-md px-2 py-1 text-[11px] font-semibold"
+          style={{
+            background: "color-mix(in srgb, var(--color-warn) 18%, #fff)",
+            color: "#8a6a00",
+          }}
+        >
+          Sample record
+        </span>
       </div>
 
       <div className="p-5">

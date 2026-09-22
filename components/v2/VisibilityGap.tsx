@@ -1,21 +1,20 @@
-import { problem, ids } from "@/lib/v2Content";
+import { gap, ids } from "@/lib/v2Content";
 import Reveal from "@/components/ui/Reveal";
 import GapWidget from "@/components/v2/GapWidget";
 
-export default function Problem() {
+export default function VisibilityGap() {
   return (
-    <section id={ids.problem} className="section">
+    <section id={ids.gap} className="section bg-canvas">
       <div className="container-vemi">
         <Reveal>
-          <span className="t-eyebrow">{problem.eyebrow}</span>
-          <h2 className="t-h2 mt-3 max-w-3xl">{problem.headline}</h2>
-          <p className="t-lead mt-5 max-w-2xl">{problem.subhead}</p>
+          <span className="t-eyebrow">{gap.eyebrow}</span>
+          <h2 className="t-h2 mt-3 max-w-3xl">{gap.headline}</h2>
+          <p className="t-lead mt-5 max-w-2xl">{gap.subhead}</p>
         </Reveal>
 
         <div className="mt-12 grid gap-x-12 gap-y-10 lg:grid-cols-[1fr_0.95fr] lg:items-start">
-          {/* what goes unmeasured */}
           <div className="flex flex-col gap-6">
-            {problem.gaps.map((g, i) => (
+            {gap.items.map((g, i) => (
               <Reveal key={g.title} delay={i * 0.05}>
                 <div className="flex gap-4">
                   <span

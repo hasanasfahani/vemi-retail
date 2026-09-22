@@ -69,6 +69,45 @@ export default function BeyondExplorer() {
           </ul>
         </div>
       </div>
+
+      {/* the convergence — closing beat of this section rather than a
+          section of its own, so the expansion story stays at ~25% */}
+      <div className="mt-4 rounded-2xl border border-line bg-white p-6 sm:p-8">
+        <div className="mx-auto max-w-2xl text-center">
+          <h4 className="t-h3 !text-xl">{beyond.convergence.title}</h4>
+          <p className="mt-2 text-sm leading-relaxed text-ink-500">{beyond.convergence.body}</p>
+        </div>
+
+        <div className="mt-6 flex flex-col items-center gap-3 lg:flex-row lg:justify-center">
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            {beyond.convergence.inputs.map((inp) => (
+              <span key={inp} className="chip">
+                {inp}
+              </span>
+            ))}
+          </div>
+
+          <svg
+            viewBox="0 0 24 24"
+            className="h-5 w-5 shrink-0 rotate-90 text-ink-300 lg:rotate-0"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden
+          >
+            <path d="M4 12h15M14 7l5 5-5 5" />
+          </svg>
+
+          <span
+            className="shrink-0 rounded-xl px-5 py-2.5 text-sm font-bold text-white"
+            style={{ background: "var(--color-violet)" }}
+          >
+            {beyond.convergence.output}
+          </span>
+        </div>
+      </div>
     </div>
   );
 }
