@@ -207,6 +207,11 @@ export type SubmitMeta = {
   source?: string;
   referrer?: string;
   company_role?: string; // honeypot — empty for every real submission
+  /* /v2 lead form only. Optional, so the portal modal is unaffected;
+     the route folds them into the stored Source text. */
+  requestType?: string;
+  industry?: string;
+  question?: string;
 };
 
 export async function submitAccessRequest(

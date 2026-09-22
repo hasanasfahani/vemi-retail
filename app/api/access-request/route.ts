@@ -47,7 +47,25 @@ type Payload = Partial<AccessRequest> & {
   source?: string;
   referrer?: string;
   company_role?: string; // honeypot — real people never fill this
+  /* /v2 lead form extras. Folded into `Source` rather than given their
+     own Airtable columns, so capture needs no schema change in the base.
+     If `Industry` / `Question` columns are added later, promote them. */
+  requestType?: string;
+  industry?: string;
+  question?: string;
 };
+
+/* Builds the Source cell: the caller's own source plus whatever the v2
+   form collected, as one readable line. */
+function composeSource(body: Payload): string {
+  const parts = [
+    body.source,
+    body.requestType && `Request: ${body.requestType}`,
+    body.industry && `Industry: ${body.industry}`,
+    body.question && `Asks: ${body.question.replace(/\s+/g, " ").trim()}`,
+  ].filter(Boolean);
+  return parts.join(" · ").slice(0, 2000);
+}
 
 export async function POST(request: Request) {
   let body: Payload;
@@ -114,7 +132,7 @@ export async function POST(request: Request) {
                 Phone: `${lead.dialCode} ${lead.phone}`,
                 Company: lead.company,
                 Submitted: new Date().toISOString(),
-                Source: (body.source ?? "").slice(0, 300),
+                Source: composeSource(body),
                 Referrer: (body.referrer ?? "direct").slice(0, 300),
               },
             },
