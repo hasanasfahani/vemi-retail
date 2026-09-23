@@ -3,9 +3,7 @@
 import { useState } from "react";
 import { finalCta, leadForm, quoteScope, ids } from "@/lib/v2Content";
 import {
-  COUNTRIES,
   DEFAULT_DIAL,
-  formatPhone,
   validateAll,
   validateField,
   submitAccessRequest,
@@ -156,7 +154,7 @@ export default function RequestSection() {
   }
 
   return (
-    <section id={ids.request} className="section">
+    <section id={ids.request} className="section section-v2 bg-white">
       <div className="container-vemi">
         <div className="overflow-hidden rounded-3xl border border-line bg-white shadow-[var(--shadow-surface)]">
           <div className="grid lg:grid-cols-[0.95fr_1.05fr]">
@@ -291,35 +289,23 @@ export default function RequestSection() {
 
                     <div className="sm:col-span-2">
                       <Field label="Phone" htmlFor="v2-phone" error={errors.phone}>
-                        <div className="flex gap-2">
-                          <select
-                            aria-label="Country dial code"
-                            className={`${cls()} w-28 shrink-0`}
-                            value={form.dialCode}
-                            onChange={(event) => setF("dialCode", event.target.value)}
-                          >
-                            {COUNTRIES.map((country) => (
-                              <option key={country.code} value={country.dial}>
-                                {country.code} {country.dial}
-                              </option>
-                            ))}
-                          </select>
-                          <input
-                            id="v2-phone"
-                            inputMode="tel"
-                            className={cls(errors.phone)}
-                            value={form.phone}
-                            onChange={(event) => setF("phone", formatPhone(event.target.value))}
-                            onBlur={(event) =>
-                              setErrors((current) => ({
-                                ...current,
-                                phone: validateField("phone", event.target.value, form) ?? undefined,
-                              }))
-                            }
-                            placeholder="770 123 4567"
-                            autoComplete="tel"
-                          />
-                        </div>
+                        <input
+                          id="v2-phone"
+                          type="tel"
+                          inputMode="tel"
+                          className={cls(errors.phone)}
+                          value={form.phone}
+                          maxLength={24}
+                          onChange={(event) => setF("phone", event.target.value)}
+                          onBlur={(event) =>
+                            setErrors((current) => ({
+                              ...current,
+                              phone: validateField("phone", event.target.value, form) ?? undefined,
+                            }))
+                          }
+                          placeholder="e.g. +964 770 123 4567"
+                          autoComplete="tel"
+                        />
                       </Field>
                     </div>
                   </div>

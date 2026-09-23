@@ -10,7 +10,7 @@ import { Figure, PlaceholderNote } from "@/components/v2/Figure";
 
 export default function ProofStrip() {
   return (
-    <section id={ids.proof} className="section-tight border-t border-line">
+    <section id={ids.proof} className="section-tight section-v2-tight border-y border-line bg-canvas">
       <div className="container-vemi">
         <div className="grid items-center gap-10 lg:grid-cols-[1fr_0.52fr] lg:gap-14">
           <Reveal>

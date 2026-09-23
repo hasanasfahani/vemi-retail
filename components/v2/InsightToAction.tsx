@@ -14,7 +14,7 @@ const tones = {
 
 export default function InsightToAction() {
   return (
-    <section id={ids.action} className="section bg-canvas">
+    <section id={ids.action} className="section section-v2 bg-white">
       <div className="container-vemi">
         <Reveal>
           <div className="max-w-2xl">

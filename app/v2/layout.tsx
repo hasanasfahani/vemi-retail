@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Nav from "@/components/v2/Nav";
 import Footer from "@/components/v2/Footer";
+import AccessRequestModal from "@/components/demo/AccessRequestModal";
 
 /* /v2 — the alternative positioning, running in parallel with the live
    site at `/`. It is a sibling of the (site) group, so it inherits only
@@ -24,6 +25,7 @@ export default function V2Layout({
       <Nav />
       <main>{children}</main>
       <Footer />
+      <AccessRequestModal />
     </>
   );
 }

@@ -5,7 +5,7 @@ import EvidenceCard from "@/components/v2/EvidenceCard";
 
 export default function Trust() {
   return (
-    <section id={ids.trust} className="section bg-canvas">
+    <section id={ids.trust} className="section section-v2 border-y border-line bg-violet-050/50">
       <div className="container-vemi">
         <Reveal>
           <div className="max-w-2xl">

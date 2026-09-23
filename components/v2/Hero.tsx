@@ -42,6 +42,7 @@ export default function Hero() {
           <div className="mt-9 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
             <a
               href={hero.primaryCta.href}
+              data-demo-cta
               className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 text-[15px] font-semibold text-violet-ink shadow-[0_12px_30px_-14px_rgba(20,13,83,0.55)] transition duration-200 hover:-translate-y-0.5 hover:bg-violet-050 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               {hero.primaryCta.label}

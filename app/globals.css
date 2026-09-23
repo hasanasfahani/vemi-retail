@@ -198,9 +198,29 @@ body {
   padding: 72px 0;
 }
 
+/* /v2 uses a slightly tighter cadence so adjacent section padding does
+   not read as an accidental empty band. Background changes and hairline
+   boundaries carry the separation instead of oversized gaps. */
+.section-v2 {
+  padding-top: 84px;
+  padding-bottom: 84px;
+}
+.section-v2-tight {
+  padding-top: 64px;
+  padding-bottom: 64px;
+}
+
 @media (max-width: 768px) {
   .section {
     padding: 68px 0;
+  }
+  .section-v2 {
+    padding-top: 64px;
+    padding-bottom: 64px;
+  }
+  .section-v2-tight {
+    padding-top: 52px;
+    padding-bottom: 52px;
   }
 }
 

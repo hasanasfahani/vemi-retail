@@ -56,8 +56,9 @@ export const nav = {
     { label: "Insight to Action", href: `#${ids.action}` },
     { label: "Trust", href: `#${ids.trust}` },
     { label: "Market Intelligence", href: `#${ids.market}` },
+    { label: "Pricing", href: `#${ids.request}` },
   ],
-  cta: { label: "Get a quote", href: `#${ids.request}` },
+  cta: { label: "Explore Dashboard", href: "/portal/performance" },
 };
 
 /* ---------- §1 Hero ----------------------------------------- */
@@ -65,7 +66,7 @@ export const hero = {
   headlineLines: ["See Every Shelf.", "Understand Your Market.", "Act Faster and Smarter."],
   subhead:
     "Turn verified shelf evidence into faster decisions across availability, execution, pricing, and competition.",
-  primaryCta: { label: "Explore the dashboard", href: "/portal/performance" },
+  primaryCta: { label: "Explore Dashboard", href: "/portal/performance" },
   secondaryCta: { label: "Get a quote", href: `#${ids.request}` },
   image: {
     src: "/images/v2/vemi-performance-dashboard.png",
@@ -389,6 +390,11 @@ export const leadForm = {
 export const footer = {
   brand: "Vemi",
   tagline: "Verified retail and market intelligence for brands operating in Iraq.",
+  eyebrow: "From shelf evidence to market action",
+  headline: "See the market clearly. Move before it changes.",
+  body: "Explore the live workspace or define your coverage to receive a tailored retail-audit quotation.",
+  primaryCta: { label: "Explore Dashboard", href: "/portal/performance" },
+  secondaryCta: { label: "View Pricing", href: `#${ids.request}` },
   columns: [
     {
       title: "Platform",
@@ -396,6 +402,7 @@ export const footer = {
         { label: "Retail Intelligence", href: `#${ids.retail}` },
         { label: "Insight to Action", href: `#${ids.action}` },
         { label: "Market Intelligence", href: `#${ids.market}` },
+        { label: "Pricing", href: `#${ids.request}` },
       ],
     },
     {

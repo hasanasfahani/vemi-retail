@@ -4,7 +4,7 @@ import BeyondExplorer from "@/components/v2/BeyondExplorer";
 
 export default function Beyond() {
   return (
-    <section id={ids.market} className="section bg-canvas">
+    <section id={ids.market} className="section section-v2 bg-white">
       <div className="container-vemi">
         <Reveal>
           <div className="max-w-2xl">

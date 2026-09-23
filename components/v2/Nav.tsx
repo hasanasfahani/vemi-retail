@@ -76,7 +76,11 @@ export default function Nav() {
         </div>
 
         <div className="flex items-center gap-2">
-          <a href={nav.cta.href} className="btn-primary !px-4 !py-2 text-sm">
+          <a
+            href={nav.cta.href}
+            data-demo-cta
+            className="btn-primary !px-4 !py-2 text-sm"
+          >
             {nav.cta.label}
           </a>
 

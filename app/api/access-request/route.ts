@@ -81,6 +81,11 @@ function composeSource(body: Payload): string {
   return parts.join(" · ").slice(0, 2000);
 }
 
+function fullPhone(lead: AccessRequest): string {
+  const phone = lead.phone.trim();
+  return phone.startsWith("+") ? phone : `${lead.dialCode} ${phone}`.trim();
+}
+
 export async function POST(request: Request) {
   let body: Payload;
   try {
@@ -143,7 +148,7 @@ export async function POST(request: Request) {
               fields: {
                 Name: lead.fullName,
                 Email: lead.email,
-                Phone: `${lead.dialCode} ${lead.phone}`,
+                Phone: fullPhone(lead),
                 Company: lead.company,
                 Submitted: new Date().toISOString(),
                 Source: composeSource(body),

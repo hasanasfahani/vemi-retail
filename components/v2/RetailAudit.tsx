@@ -4,7 +4,7 @@ import CapabilityExplorer from "@/components/v2/CapabilityExplorer";
 
 export default function RetailAudit() {
   return (
-    <section id={ids.retail} className="section bg-canvas">
+    <section id={ids.retail} className="section section-v2 border-y border-line bg-canvas">
       <div className="container-vemi">
         <Reveal>
           <div className="max-w-2xl">

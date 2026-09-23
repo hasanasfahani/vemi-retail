@@ -4,7 +4,7 @@ import GapWidget from "@/components/v2/GapWidget";
 
 export default function VisibilityGap() {
   return (
-    <section id={ids.gap} className="section bg-canvas">
+    <section id={ids.gap} className="section section-v2 bg-white">
       <div className="container-vemi">
         <Reveal>
           <span className="t-eyebrow">{gap.eyebrow}</span>
