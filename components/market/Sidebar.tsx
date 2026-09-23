@@ -28,6 +28,7 @@ import { useReports } from "./useReports";
 import { createReport, upsertReport } from "@/lib/market/reports";
 import { contract, coverage } from "@/lib/market";
 import Icon from "./Icon";
+import VemiLogo from "@/components/ui/VemiLogo";
 
 const KEY = "vemi.sidebar.collapsed";
 
@@ -88,10 +89,10 @@ export default function Sidebar() {
         {!collapsed && (
           <Link
             href={withFilters("/portal")}
-            className="flex items-center font-display text-lg font-bold tracking-tight text-ink-900"
+            className="flex items-center"
+            aria-label="Vemi dashboard"
           >
-            Vemi
-            <span style={{ color: "var(--color-violet)" }}>.</span>
+            <VemiLogo className="h-6 w-20" preload />
           </Link>
         )}
         <button

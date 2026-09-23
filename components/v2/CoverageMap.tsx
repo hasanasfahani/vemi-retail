@@ -185,12 +185,11 @@ export default function CoverageMap() {
         )}
       </div>
 
-      <div className="relative mt-3 flex items-center justify-between gap-3 border-t border-violet-100 pt-3 text-[11px] text-ink-500">
+      <div className="relative mt-3 flex items-center gap-3 border-t border-violet-100 pt-3 text-[11px] text-ink-500">
         <span className="inline-flex items-center gap-1.5">
           <span className="h-2 w-2 rounded-full bg-violet" />
           Field coverage hub
         </span>
-        <span>Hover or focus to explore</span>
       </div>
     </div>
   );

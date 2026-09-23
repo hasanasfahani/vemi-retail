@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { retailAudit } from "@/lib/v2Content";
 import Icon from "@/components/v2/Icon";
 import Sparkline from "@/components/ui/Sparkline";
+import PlanogramScene, { type SlotState } from "@/components/v2/PlanogramScene";
 
 /* The eight retail-audit capabilities, each with a representative live
    widget. One preview at a time — the list stays scannable, the panel
@@ -16,6 +18,122 @@ function Row({ children }: { children: React.ReactNode }) {
   return <div className="flex items-center gap-3">{children}</div>;
 }
 
+function AnimatedFill({
+  width,
+  tone,
+  delay = 0,
+  className = "",
+}: {
+  width: string;
+  tone: string;
+  delay?: number;
+  className?: string;
+}) {
+  const reduceMotion = useReducedMotion();
+
+  return (
+    <motion.div
+      className={className}
+      initial={reduceMotion ? false : { width: 0 }}
+      whileInView={{ width }}
+      viewport={{ once: true, amount: 0.65 }}
+      transition={{ duration: 0.75, delay, ease: [0.22, 1, 0.36, 1] }}
+      style={{ background: tone }}
+    />
+  );
+}
+
+function ChartReveal({ children }: { children: React.ReactNode }) {
+  const reduceMotion = useReducedMotion();
+
+  return (
+    <motion.div
+      initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.7 }}
+      transition={{ duration: 0.55, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+/* Counts up from zero.
+
+   requestAnimationFrame is paused entirely while a tab is hidden, so a
+   pure rAF counter can render 0 forever on a page that loads in a
+   background tab. A safety timer therefore lands the final value even
+   when no frames are ever delivered. Both setState calls happen in
+   async callbacks, never synchronously in the effect body. */
+function CountUp({ to, durationMs = 1100 }: { to: number; durationMs?: number }) {
+  const reduceMotion = useReducedMotion();
+  const [display, setDisplay] = useState(0);
+
+  useEffect(() => {
+    if (reduceMotion) {
+      const settle = setTimeout(() => setDisplay(to), 0);
+      return () => clearTimeout(settle);
+    }
+
+    let raf = 0;
+    const start = performance.now();
+    const ease = (t: number) => 1 - Math.pow(1 - t, 3);
+
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / durationMs);
+      setDisplay(Math.round(ease(t) * to));
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+
+    /* Frames may never arrive (hidden tab). Land on the real number. */
+    const settle = setTimeout(() => setDisplay(to), durationMs + 400);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(settle);
+    };
+  }, [to, durationMs, reduceMotion]);
+
+  return <>{display}</>;
+}
+
+/* Visibility score as a sweeping arc. The preview panel remounts on every
+   capability change, so the sweep replays each time Visibility is picked. */
+function ScoreRing({ value, size = 104 }: { value: number; size?: number }) {
+  const reduceMotion = useReducedMotion();
+  const stroke = 9;
+  const r = (size - stroke) / 2;
+  const c = 2 * Math.PI * r;
+
+  return (
+    <div className="relative" style={{ width: size, height: size }}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90" aria-hidden>
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--color-line)" strokeWidth={stroke} />
+        <motion.circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          fill="none"
+          stroke="var(--color-violet)"
+          strokeWidth={stroke}
+          strokeLinecap="round"
+          strokeDasharray={c}
+          initial={reduceMotion ? false : { strokeDashoffset: c }}
+          animate={{ strokeDashoffset: c * (1 - value / 100) }}
+          transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="tnum text-3xl" style={{ color: "var(--color-violet-ink)" }}>
+          <CountUp to={value} />
+        </span>
+        <span className="text-[10px] text-ink-600">/ 100</span>
+      </div>
+    </div>
+  );
+}
+
 function Bar({
   label,
   value,
@@ -23,6 +141,7 @@ function Bar({
   tone = "var(--color-violet)",
   strong,
   suffix = "%",
+  delay = 0,
 }: {
   label: string;
   value: number;
@@ -30,6 +149,7 @@ function Bar({
   tone?: string;
   strong?: boolean;
   suffix?: string;
+  delay?: number;
 }) {
   return (
     <Row>
@@ -37,7 +157,12 @@ function Bar({
         {label}
       </span>
       <div className="h-3 flex-1 overflow-hidden rounded bg-line">
-        <div className="h-full rounded" style={{ width: `${(value / scale) * 100}%`, background: tone }} />
+        <AnimatedFill
+          className="h-full rounded"
+          width={`${(value / scale) * 100}%`}
+          tone={tone}
+          delay={delay}
+        />
       </div>
       <span className="tnum w-10 shrink-0 text-right text-xs">
         {value}
@@ -67,12 +192,14 @@ function Preview({ title }: { title: string }) {
               <span className="t-eyebrow">On-shelf availability</span>
               <div className="tnum text-3xl">73%</div>
             </div>
-            <Sparkline data={[66, 68, 67, 70, 71, 70, 72, 73]} />
+            <ChartReveal>
+              <Sparkline data={[66, 68, 67, 70, 71, 70, 72, 73]} />
+            </ChartReveal>
           </div>
           <div className="mt-4 flex h-3 gap-0.5 overflow-hidden rounded">
-            <div style={{ width: "73%", background: "var(--color-violet)" }} />
-            <div style={{ width: "15%", background: "var(--color-critical)" }} />
-            <div style={{ width: "12%", background: "var(--color-warn)" }} />
+            <AnimatedFill className="h-full shrink-0" width="73%" tone="var(--color-violet)" />
+            <AnimatedFill className="h-full shrink-0" width="15%" tone="var(--color-critical)" delay={0.16} />
+            <AnimatedFill className="h-full shrink-0" width="12%" tone="var(--color-warn)" delay={0.28} />
           </div>
           <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink-500">
             <span className="flex items-center gap-1.5"><span className="dot" style={{ background: "var(--color-violet)" }} />On shelf 73%</span>
@@ -90,10 +217,10 @@ function Preview({ title }: { title: string }) {
             { l: "Competitor A", v: 22, t: comp[0] },
             { l: "Competitor B", v: 18, t: comp[1] },
             { l: "Competitor C", v: 12, t: comp[2] },
-          ].map((b) => (
-            <Bar key={b.l} label={b.l} value={b.v} scale={34} tone={b.t} strong={b.s} />
+          ].map((b, index) => (
+            <Bar key={b.l} label={b.l} value={b.v} scale={34} tone={b.t} strong={b.s} delay={index * 0.08} />
           ))}
-          <p className="mt-1 text-xs text-ink-400">Linear share of the category shelf · 46 facings counted</p>
+          <p className="mt-1 text-xs text-ink-600">Linear share of the category shelf · 46 facings counted</p>
         </div>
       );
 
@@ -101,7 +228,7 @@ function Preview({ title }: { title: string }) {
       return (
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-line text-[11px] uppercase tracking-wide text-ink-400">
+            <tr className="border-b border-line text-[11px] uppercase tracking-wide text-ink-600">
               <th className="pb-2 font-medium">SKU</th>
               <th className="pb-2 text-right font-medium">Shelf</th>
               <th className="pb-2 text-right font-medium">RRP</th>
@@ -127,64 +254,91 @@ function Preview({ title }: { title: string }) {
         </table>
       );
 
-    case "Visibility & Shelf Position":
+    case "Visibility":
       return (
-        <div className="grid grid-cols-[auto_1fr] items-center gap-5">
-          <div className="text-center">
-            <span className="tnum text-5xl" style={{ color: "var(--color-violet-ink)" }}>68</span>
-            <div className="text-xs text-ink-400">score / 100</div>
+        <div className="grid items-center gap-5 sm:grid-cols-[auto_1fr]">
+          <div className="mx-auto flex flex-col items-center sm:mx-0">
+            <ScoreRing value={68} />
+            <div className="mt-2 text-center text-xs text-ink-600">Visibility score</div>
           </div>
+
           <div className="flex flex-col gap-2">
             {[
-              { p: "Eye-level", v: 42 },
-              { p: "End-cap", v: 12 },
-              { p: "Mid-shelf", v: 30 },
-              { p: "Bottom", v: 16 },
-            ].map((x) => (
+              { p: "Eye-level", v: 42, prime: true },
+              { p: "End-cap", v: 12, prime: true },
+              { p: "Mid-shelf", v: 30, prime: false },
+              { p: "Bottom", v: 16, prime: false },
+            ].map((x, index) => (
               <Row key={x.p}>
-                <span className="w-20 shrink-0 text-xs text-ink-500">{x.p}</span>
+                <span className={`w-20 shrink-0 text-xs ${x.prime ? "font-semibold text-ink-900" : "text-ink-500"}`}>
+                  {x.p}
+                </span>
                 <div className="h-2.5 flex-1 overflow-hidden rounded bg-line">
-                  <div className="h-full rounded" style={{ width: `${x.v}%`, background: "var(--color-violet)" }} />
+                  <AnimatedFill
+                    className="h-full rounded"
+                    width={`${x.v}%`}
+                    tone={x.prime ? "var(--color-violet)" : "var(--color-comp-1)"}
+                    delay={index * 0.08}
+                  />
                 </div>
                 <span className="tnum w-8 shrink-0 text-right text-xs">{x.v}%</span>
               </Row>
             ))}
+            <p className="mt-1 text-xs text-ink-600">
+              <span className="font-semibold text-ink-700">54%</span> of your facings sit in prime
+              positions · 46 facings counted
+            </p>
           </div>
         </div>
       );
 
     case "Planogram Compliance": {
-      /* slot states: 1 correct, 2 wrong product, 3 empty */
-      const shelves = [
-        [1, 1, 1, 2, 1, 1],
-        [1, 3, 1, 1, 2, 1],
-        [1, 1, 1, 1, 1, 3],
+      /* Before / after the same bay, the way the portal shows a
+         follow-up audit: the agreed layout, the deviations found, and
+         the corrected shelf on the next visit. */
+      const before: SlotState[][] = [
+        ["planned", "planned", "planned", "wrong", "planned", "planned"],
+        ["planned", "empty", "planned", "planned", "wrong", "planned"],
+        ["planned", "planned", "planned", "planned", "planned", "empty"],
       ];
-      const tone = (s: number) =>
-        s === 1 ? "var(--color-violet)" : s === 2 ? "var(--color-warn)" : "var(--color-critical)";
+      const after: SlotState[][] = [
+        ["planned", "planned", "planned", "planned", "planned", "planned"],
+        ["planned", "planned", "planned", "planned", "planned", "planned"],
+        ["planned", "planned", "planned", "planned", "planned", "planned"],
+      ];
+
       return (
         <div>
-          <div className="flex items-end justify-between">
+          <div className="flex items-end justify-between gap-3">
             <div>
               <span className="t-eyebrow">Compliance</span>
-              <div className="tnum text-3xl">83%</div>
-            </div>
-            <StatusPill tone="warn">3 deviations</StatusPill>
-          </div>
-          <div className="mt-4 flex flex-col gap-1.5 rounded-lg border border-line p-2.5">
-            {shelves.map((row, r) => (
-              <div key={r} className="flex gap-1.5">
-                {row.map((s, c) => (
-                  <div
-                    key={c}
-                    className="h-6 flex-1 rounded-sm"
-                    style={{ background: tone(s), opacity: s === 1 ? 0.85 : 1 }}
-                  />
-                ))}
+              <div className="mt-0.5 flex items-baseline gap-2">
+                <span className="tnum !text-lg text-ink-500 line-through">83%</span>
+                <span aria-hidden className="text-ink-400">&rarr;</span>
+                <span className="tnum text-3xl">
+                  <CountUp to={100} />%
+                </span>
               </div>
-            ))}
+            </div>
+            <StatusPill tone="warn">3 deviations fixed</StatusPill>
           </div>
-          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink-500">
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <figure className="min-w-0">
+              <figcaption className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-ink-600">
+                Before &middot; audit
+              </figcaption>
+              <PlanogramScene rows={before} />
+            </figure>
+            <figure className="min-w-0">
+              <figcaption className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-ink-600">
+                After &middot; re-audit
+              </figcaption>
+              <PlanogramScene rows={after} />
+            </figure>
+          </div>
+
+          <div className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink-500">
             <span className="flex items-center gap-1.5"><span className="dot" style={{ background: "var(--color-violet)" }} />As planned</span>
             <span className="flex items-center gap-1.5"><span className="dot" style={{ background: "var(--color-warn)" }} />Wrong SKU</span>
             <span className="flex items-center gap-1.5"><span className="dot" style={{ background: "var(--color-critical)" }} />Empty slot</span>
@@ -209,7 +363,7 @@ function Preview({ title }: { title: string }) {
                 <p className="truncate text-sm font-medium text-ink-900">{p.w}</p>
                 <p className="truncate text-xs text-ink-500">{p.who}</p>
               </div>
-              <span className="shrink-0 text-xs text-ink-400">{p.t}</span>
+              <span className="shrink-0 text-xs text-ink-600">{p.t}</span>
             </div>
           ))}
         </div>
@@ -219,7 +373,7 @@ function Preview({ title }: { title: string }) {
       return (
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-line text-[11px] uppercase tracking-wide text-ink-400">
+            <tr className="border-b border-line text-[11px] uppercase tracking-wide text-ink-600">
               <th className="pb-2 font-medium">SKU</th>
               <th className="pb-2 text-center font-medium">Listed</th>
               <th className="pb-2 text-center font-medium">In store</th>
@@ -254,7 +408,7 @@ function Preview({ title }: { title: string }) {
       return (
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-line text-[11px] uppercase tracking-wide text-ink-400">
+            <tr className="border-b border-line text-[11px] uppercase tracking-wide text-ink-600">
               <th className="pb-2 font-medium">Brand</th>
               <th className="pb-2 text-right font-medium">Avail.</th>
               <th className="pb-2 text-right font-medium">Share</th>

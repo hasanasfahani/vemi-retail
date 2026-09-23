@@ -1,4 +1,5 @@
 import { footer, ids } from "@/lib/v2Content";
+import VemiLogo from "@/components/ui/VemiLogo";
 
 export default function Footer() {
   return (
@@ -8,8 +9,9 @@ export default function Footer() {
         className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet to-transparent"
       />
 
-      <div className="container-vemi py-12 sm:py-16">
-        <div className="grid items-end gap-8 border-b border-white/10 pb-10 lg:grid-cols-[1fr_auto] lg:gap-16 lg:pb-12">
+      <div className="pb-14 pt-16 sm:pb-16 sm:pt-20">
+        <div className="container-vemi">
+          <div className="grid items-end gap-8 border-b border-white/10 pb-8 lg:grid-cols-[1fr_auto] lg:gap-16 lg:pb-9">
           <div className="max-w-3xl">
             <span className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-100">
               {footer.eyebrow}
@@ -51,15 +53,14 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="grid gap-10 py-10 md:grid-cols-[1.3fr_1fr] md:gap-16">
+          <div className="grid gap-8 py-8 md:grid-cols-[1.3fr_1fr] md:gap-16">
           <div className="max-w-sm">
             <a
               href={`#${ids.top}`}
-              className="inline-flex font-display text-2xl font-bold tracking-tight text-white"
+              className="inline-flex"
               aria-label="Vemi, back to top"
             >
-              {footer.brand}
-              <span className="text-[#8f79ff]">.</span>
+              <VemiLogo className="h-9 w-32" src="/vemi-logo-white.png" />
             </a>
             <p className="mt-4 text-sm leading-6 text-white/50">{footer.tagline}</p>
             <p className="mt-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-white/65">
@@ -90,13 +91,14 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-3 border-t border-white/10 pt-6 text-xs text-white/35 sm:flex-row sm:items-center sm:justify-between">
-          <span>
-            © {new Date().getFullYear()} {footer.brand}. All rights reserved.
-          </span>
-          <a href={`#${ids.top}`} className="font-medium text-white/50 transition-colors hover:text-white">
-            Back to top ↑
-          </a>
+          <div className="flex flex-col gap-3 border-t border-white/10 pt-5 text-xs text-white/35 sm:flex-row sm:items-center sm:justify-between">
+            <span>
+              © {new Date().getFullYear()} {footer.brand}. All rights reserved.
+            </span>
+            <a href={`#${ids.top}`} className="font-medium text-white/50 transition-colors hover:text-white">
+              Back to top ↑
+            </a>
+          </div>
         </div>
       </div>
     </footer>

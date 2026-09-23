@@ -18,10 +18,11 @@ type QuoteScope = {
   cities: number;
 };
 
-type AllErrors = Partial<Record<FieldName, string>>;
+type QuoteField = FieldName | "industry" | "customIndustry";
+type AllErrors = Partial<Record<QuoteField, string>>;
 
 const inputBase =
-  "w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-ink-900 placeholder:text-ink-400 focus:outline-none focus:ring-2 focus:ring-violet/20";
+  "w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-ink-900 placeholder:text-ink-500 focus:outline-none focus:ring-2 focus:ring-violet/20";
 
 function cls(err?: string) {
   return `${inputBase} ${err ? "border-critical" : "border-line focus:border-violet"}`;
@@ -99,7 +100,7 @@ function ScopeRange({
         onChange={(event) => onChange(Number(event.target.value))}
         className="mt-5 h-2 w-full cursor-pointer [accent-color:var(--color-violet)]"
       />
-      <div className="mt-2 flex justify-between text-[11px] font-medium text-ink-400">
+      <div className="mt-2 flex justify-between text-[11px] font-medium text-ink-600">
         <span>{minLabel}</span>
         <span>{maxLabel}</span>
       </div>
@@ -120,6 +121,8 @@ export default function RequestSection() {
     categories: quoteScope.categories.initial,
     cities: quoteScope.cities.initial,
   });
+  const [industry, setIndustry] = useState("");
+  const [customIndustry, setCustomIndustry] = useState("");
   const [honey, setHoney] = useState("");
   const [errors, setErrors] = useState<AllErrors>({});
   const [status, setStatus] = useState<"idle" | "sending" | "done">("idle");
@@ -135,6 +138,11 @@ export default function RequestSection() {
       Object.entries(validateAll(form)).filter(([, value]) => Boolean(value))
     ) as AllErrors;
 
+    if (!industry) clean.industry = "Please choose your industry.";
+    if (industry === "Other" && !customIndustry.trim()) {
+      clean.customIndustry = "Please enter your industry.";
+    }
+
     if (Object.keys(clean).length > 0) {
       setErrors(clean);
       return;
@@ -146,6 +154,7 @@ export default function RequestSection() {
       referrer: typeof document !== "undefined" ? document.referrer || "direct" : "direct",
       company_role: honey,
       requestType: "Pricing quotation",
+      industry: industry === "Other" ? customIndustry.trim() : industry,
       posPerMonth: scope.posPerMonth,
       categories: scope.categories,
       cities: scope.cities,
@@ -159,7 +168,7 @@ export default function RequestSection() {
         <div className="overflow-hidden rounded-3xl border border-line bg-white shadow-[var(--shadow-surface)]">
           <div className="grid lg:grid-cols-[0.95fr_1.05fr]">
             <div className="border-b border-line bg-canvas p-8 sm:p-10 lg:border-b-0 lg:border-r">
-              <span className="t-eyebrow">{finalCta.eyebrow}</span>
+              <span className="t-eyebrow !text-violet-ink">{finalCta.eyebrow}</span>
               <h2 className="t-h2 mt-3 !text-[clamp(30px,3.6vw,44px)]">{finalCta.headline}</h2>
               <p className="t-lead mt-4">{finalCta.subhead}</p>
 
@@ -228,7 +237,7 @@ export default function RequestSection() {
                 </div>
               ) : (
                 <form onSubmit={onSubmit} noValidate>
-                  <span className="t-eyebrow">{leadForm.eyebrow}</span>
+                  <span className="t-eyebrow !text-violet-ink">{leadForm.eyebrow}</span>
                   <h3 className="t-h3 mt-2 !text-2xl">{leadForm.headline}</h3>
                   <p className="mt-2 text-sm text-ink-500">{leadForm.intro}</p>
 
@@ -308,6 +317,82 @@ export default function RequestSection() {
                         />
                       </Field>
                     </div>
+
+                    <div className="sm:col-span-2">
+                      <Field label="Industry" htmlFor="v2-industry" error={errors.industry}>
+                        <div className="relative">
+                          <span className="pointer-events-none absolute left-2.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg bg-violet-050 text-violet-ink">
+                            <Icon name="assortment" className="h-4 w-4" />
+                          </span>
+                          <select
+                            id="v2-industry"
+                            className={`w-full appearance-none rounded-xl border bg-white py-3 pl-12 pr-11 text-sm font-medium outline-none transition focus:border-violet focus:ring-2 focus:ring-violet/20 ${
+                              errors.industry
+                                ? "border-critical text-ink-900"
+                                : `border-line ${industry ? "text-ink-900" : "text-ink-500"}`
+                            }`}
+                            value={industry}
+                            onChange={(event) => {
+                              const value = event.target.value;
+                              setIndustry(value);
+                              if (value !== "Other") {
+                                setCustomIndustry("");
+                                setErrors((current) => ({ ...current, customIndustry: undefined }));
+                              }
+                              if (errors.industry) {
+                                setErrors((current) => ({ ...current, industry: undefined }));
+                              }
+                            }}
+                          >
+                            <option value="">Select your industry</option>
+                            {leadForm.industries.map((option) => (
+                              <option key={option} value={option}>
+                                {option}
+                              </option>
+                            ))}
+                          </select>
+                          <svg
+                            viewBox="0 0 20 20"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-violet-ink"
+                            aria-hidden="true"
+                          >
+                            <path d="m6 8 4 4 4-4" />
+                          </svg>
+                        </div>
+                      </Field>
+
+                      {industry === "Other" ? (
+                        <div className="mt-3">
+                          <Field
+                            label="Specify your industry"
+                            htmlFor="v2-custom-industry"
+                            error={errors.customIndustry}
+                          >
+                            <input
+                              id="v2-custom-industry"
+                              className={cls(errors.customIndustry)}
+                              value={customIndustry}
+                              maxLength={100}
+                              onChange={(event) => {
+                                setCustomIndustry(event.target.value);
+                                if (errors.customIndustry) {
+                                  setErrors((current) => ({
+                                    ...current,
+                                    customIndustry: undefined,
+                                  }));
+                                }
+                              }}
+                              placeholder="Enter your industry"
+                            />
+                          </Field>
+                        </div>
+                      ) : null}
+                    </div>
                   </div>
 
                   <div aria-hidden className="absolute h-0 w-0 overflow-hidden">
@@ -322,15 +407,19 @@ export default function RequestSection() {
                     />
                   </div>
 
+                  <div className="mt-7 rounded-xl border border-violet/15 bg-violet-050 px-4 py-3 text-center text-xs font-medium text-violet-ink">
+                    Quote scope: {scope.posPerMonth.toLocaleString("en-US")} POS / month · {scope.categories} categories · {scope.cities} cities
+                  </div>
+
                   <button
                     type="submit"
                     disabled={status === "sending"}
-                    className="btn-primary mt-7 w-full disabled:opacity-70"
+                    className="btn-primary mt-3 w-full disabled:opacity-70"
                   >
                     {status === "sending" ? "Sending…" : leadForm.submitLabel}
                   </button>
 
-                  <p className="mt-3 text-center text-xs text-ink-400">
+                  <p className="mt-3 text-center text-xs text-ink-600">
                     We use your details only to prepare and respond to this quotation request.
                   </p>
                 </form>

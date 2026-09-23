@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { portalNav, portalNavGroups, scope, coverage } from "@/lib/portal";
 import { useOverdueActionsCount, useOffTrackCount } from "./useActions";
+import VemiLogo from "@/components/ui/VemiLogo";
 
 /* Left rail on desktop, a scrolling tab strip on phones — several
    buyers open this from LinkedIn on a handset. */
@@ -17,10 +18,10 @@ export default function PortalNav() {
     <nav className="hidden w-[232px] shrink-0 flex-col border-r border-line bg-white lg:flex">
         <Link
           href="/"
-          className="flex h-[60px] items-center border-b border-line px-6 font-display text-lg font-bold tracking-tight text-ink-900"
+          className="flex h-[60px] items-center border-b border-line px-6"
+          aria-label="Vemi home"
         >
-          Vemi
-          <span style={{ color: "var(--color-violet)" }}>.</span>
+          <VemiLogo className="h-6 w-20" preload />
         </Link>
 
         <div className="flex-1 overflow-y-auto px-3 py-4">

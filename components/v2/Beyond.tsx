@@ -8,7 +8,7 @@ export default function Beyond() {
       <div className="container-vemi">
         <Reveal>
           <div className="max-w-2xl">
-            <span className="t-eyebrow">{beyond.eyebrow}</span>
+            <span className="t-eyebrow !text-violet-ink">{beyond.eyebrow}</span>
             <h2 className="t-h2 mt-3">{beyond.headline}</h2>
             <p className="t-lead mt-5">{beyond.subhead}</p>
           </div>

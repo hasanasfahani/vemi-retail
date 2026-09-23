@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { nav, ids } from "@/lib/v2Content";
+import VemiLogo from "@/components/ui/VemiLogo";
 
 /* Sticky marketing nav with scroll-spy. The active link is whichever
    tracked section has most recently passed under the header. */
@@ -50,10 +51,10 @@ export default function Nav() {
       >
         <a
           href={`#${ids.top}`}
-          className="font-display text-xl font-bold tracking-tight text-ink-900"
+          className="flex items-center"
+          aria-label={`${nav.brand}, back to top`}
         >
-          {nav.brand}
-          <span style={{ color: "var(--color-violet)" }}>.</span>
+          <VemiLogo preload />
         </a>
 
         {/* desktop links */}

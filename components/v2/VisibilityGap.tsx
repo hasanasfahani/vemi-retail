@@ -7,7 +7,7 @@ export default function VisibilityGap() {
     <section id={ids.gap} className="section section-v2 bg-white">
       <div className="container-vemi">
         <Reveal>
-          <span className="t-eyebrow">{gap.eyebrow}</span>
+          <span className="t-eyebrow !text-violet-ink">{gap.eyebrow}</span>
           <h2 className="t-h2 mt-3 max-w-3xl">{gap.headline}</h2>
           <p className="t-lead mt-5 max-w-2xl">{gap.subhead}</p>
         </Reveal>

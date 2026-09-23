@@ -9,7 +9,7 @@ export default function Trust() {
       <div className="container-vemi">
         <Reveal>
           <div className="max-w-2xl">
-            <span className="t-eyebrow">{trust.eyebrow}</span>
+            <span className="t-eyebrow !text-violet-ink">{trust.eyebrow}</span>
             <h2 className="t-h2 mt-3">{trust.headline}</h2>
             <p className="t-lead mt-5">{trust.subhead}</p>
           </div>
@@ -20,7 +20,7 @@ export default function Trust() {
             {trust.items.map((t, i) => (
               <Reveal key={t.title} delay={i * 0.05} className="h-full">
                 <div className="h-full rounded-2xl border border-line bg-white p-5 shadow-[var(--shadow-card)]">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-line bg-white text-ink-900">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-violet-100 bg-violet-050 text-violet-ink">
                     <Icon name={t.icon} className="h-[18px] w-[18px]" />
                   </span>
                   <h3 className="t-h3 mt-3 !text-base">{t.title}</h3>

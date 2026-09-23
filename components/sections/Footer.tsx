@@ -1,4 +1,5 @@
 import { footer, placeholders } from "@/lib/content";
+import VemiLogo from "@/components/ui/VemiLogo";
 
 export default function Footer() {
   return (
@@ -6,10 +7,7 @@ export default function Footer() {
       <div className="container-vemi py-14">
         <div className="flex flex-col gap-10 md:flex-row md:items-start md:justify-between">
           <div className="max-w-xs">
-            <span className="font-display text-xl font-bold text-ink-900">
-              {footer.brand}
-              <span style={{ color: "var(--color-violet)" }}>.</span>
-            </span>
+            <VemiLogo className="h-7 w-24" />
             <p className="mt-3 text-sm text-ink-500">{footer.tagline}</p>
           </div>
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { nav } from "@/lib/content";
+import VemiLogo from "@/components/ui/VemiLogo";
 
 export default function Nav() {
   const [scrolled, setScrolled] = useState(false);
@@ -25,9 +26,8 @@ export default function Nav() {
       }}
     >
       <nav className="container-vemi flex h-[68px] items-center justify-between">
-        <a href="#top" className="font-display text-xl font-bold tracking-tight text-ink-900">
-          {nav.brand}
-          <span style={{ color: "var(--color-violet)" }}>.</span>
+        <a href="#top" className="flex items-center" aria-label={`${nav.brand}, back to top`}>
+          <VemiLogo preload />
         </a>
 
         <div className="hidden items-center gap-7 md:flex">

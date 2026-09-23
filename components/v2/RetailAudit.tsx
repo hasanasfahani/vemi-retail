@@ -8,7 +8,7 @@ export default function RetailAudit() {
       <div className="container-vemi">
         <Reveal>
           <div className="max-w-2xl">
-            <span className="t-eyebrow">{retailAudit.eyebrow}</span>
+            <span className="t-eyebrow !text-violet-ink">{retailAudit.eyebrow}</span>
             <h2 className="t-h2 mt-3">{retailAudit.headline}</h2>
             <p className="t-lead mt-5">{retailAudit.subhead}</p>
           </div>

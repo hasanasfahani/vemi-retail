@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { insightToAction, ids } from "@/lib/v2Content";
 import Reveal from "@/components/ui/Reveal";
-import { Figure, PlaceholderNote } from "@/components/v2/Figure";
+import { Figure } from "@/components/v2/Figure";
 
 /* §5 is an evidence-led sequence rather than a feature-card grid. Each
    example shows the physical market condition first, then the action
@@ -18,7 +18,7 @@ export default function InsightToAction() {
       <div className="container-vemi">
         <Reveal>
           <div className="max-w-2xl">
-            <span className="t-eyebrow">{insightToAction.eyebrow}</span>
+            <span className="t-eyebrow !text-violet-ink">{insightToAction.eyebrow}</span>
             <h2 className="t-h2 mt-3">{insightToAction.headline}</h2>
             <p className="t-lead mt-5">{insightToAction.subhead}</p>
           </div>
@@ -66,7 +66,7 @@ export default function InsightToAction() {
                           className="absolute -left-[1.44rem] top-1.5 h-2 w-2 rounded-full ring-4 ring-white"
                           style={{ background: "var(--color-violet)" }}
                         />
-                        <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-400">
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-600">
                           Step {stepIndex + 1}
                         </span>
                         <p className="mt-0.5 text-sm leading-relaxed text-ink-700">{step}</p>
@@ -81,10 +81,10 @@ export default function InsightToAction() {
                           {c.outcome.label}
                         </div>
                         <div className="mt-1 flex items-baseline gap-2">
-                          <span className="tnum !text-lg text-ink-400 line-through">{c.outcome.from}</span>
+                          <span className="tnum !text-lg text-ink-500 line-through">{c.outcome.from}</span>
                           <span aria-hidden className="text-ink-400">→</span>
                           <span className="tnum !text-3xl text-ink-900">
-                            <Figure value={c.outcome.to} placeholder={insightToAction.placeholder} />
+                            <Figure value={c.outcome.to} />
                           </span>
                         </div>
                       </div>
@@ -96,10 +96,6 @@ export default function InsightToAction() {
             </Reveal>
           ))}
         </div>
-
-        <Reveal delay={0.1}>
-          <PlaceholderNote className="mt-6" />
-        </Reveal>
       </div>
     </section>
   );

@@ -6,9 +6,8 @@
    only described Vemi (platform tour, process diagram, coverage essay,
    role list) were removed.
 
-   ⚠️ FIGURES: everything in `figures` and any value marked
-   `placeholder: true` is ILLUSTRATIVE. It renders with a visible
-   marker and a footnote. Replace with verified data before launch.
+   Coverage and performance figures are maintained in one place so
+   they can be verified and updated without changing section markup.
    ============================================================ */
 
 /* Anchor ids — the nav and every section agree through these. */
@@ -44,9 +43,6 @@ export const figures = {
   evidence: { value: "Geo-tagged", label: "Evidence on every visit", placeholder: false },
   observations: { value: "41,280", label: "Observations logged", placeholder: true },
 } satisfies Record<string, Figure>;
-
-export const placeholderNote =
-  "Illustrative figures — to be replaced with verified data before launch.";
 
 /* ---------- §1 Navigation ---------------------------------- */
 export const nav = {
@@ -94,8 +90,8 @@ export const gap = {
     reportedValue: 96,
     actualLabel: "Verified on shelf",
     actualValue: 73,
-    gapLabel: "unverified",
-    gapBody: "Distribution your reports count that Vemi could not find on the shelf.",
+    gapLabel: "Shelf verification gap",
+    gapBody: "The red segment shows reported distribution that Vemi could not verify on shelf.",
     tag: "Live audit · Baghdad",
     placeholder: true,
   },
@@ -193,8 +189,8 @@ export const insightToAction = {
       ],
       outcome: { label: "Shelf share defended", from: "24%", to: "28%", note: "over one quarter" },
       image: {
-        src: "/images/v2/insight-iraq-packaged-food.jpg",
-        alt: "Packaged condiments arranged across a supermarket shelf in Iraq",
+        src: "/images/v2/insight-iraq-competitive-shelf.jpg",
+        alt: "Wide Iraqi supermarket aisle with competing packaged-food brands across both shelves",
         caption: "Packaged food",
         position: "50% 50%",
       },
@@ -368,7 +364,7 @@ export const quoteScope = {
     min: 1,
     max: 18,
     step: 1,
-    initial: 1,
+    initial: 12,
     minLabel: "1 city",
     maxLabel: "Up to 18",
   },
@@ -379,6 +375,15 @@ export const leadForm = {
   headline: "Where should we send your quote?",
   intro: "Share your business contact details and our team will confirm the scope with you.",
   subhead: "Your final quotation is confirmed after a short scope review with our team.",
+  industries: [
+    "FMCG",
+    "Dairy",
+    "Electronics",
+    "Pharmacy & Health",
+    "Distributor / Importer",
+    "Agency / Research",
+    "Other",
+  ],
   submitLabel: "Get a Quote",
   success: {
     title: "Quotation request received.",
