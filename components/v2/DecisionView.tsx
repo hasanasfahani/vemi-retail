@@ -38,7 +38,7 @@ export default function DecisionView() {
           <span className="h-3 w-3 rounded-full bg-line-strong" />
           <span className="h-3 w-3 rounded-full bg-line-strong" />
         </div>
-        <div className="mx-auto hidden items-center rounded-md bg-canvas px-3 py-1 text-xs text-ink-400 sm:flex">
+        <div className="mx-auto hidden items-center rounded-md bg-canvas px-3 py-1 text-xs text-ink-600 sm:flex">
           app.vemi.iq / decisions
         </div>
         <span
@@ -78,7 +78,7 @@ export default function DecisionView() {
                 <span className="tnum w-9 shrink-0 text-right text-xs">{r.v}%</span>
                 <span
                   className="w-8 shrink-0 text-right text-xs font-semibold"
-                  style={{ color: r.bad ? "var(--color-critical)" : "var(--color-ink-400)" }}
+                  style={{ color: r.bad ? "var(--color-critical)" : "var(--color-ink-600)" }}
                 >
                   {r.d}
                 </span>
@@ -116,7 +116,7 @@ export default function DecisionView() {
                 <span className="tnum w-9 shrink-0 text-right text-xs">{r.v}%</span>
                 <span
                   className="w-8 shrink-0 text-right text-xs font-semibold"
-                  style={{ color: r.up ? "var(--color-warn)" : "var(--color-ink-400)" }}
+                  style={{ color: r.up ? "var(--color-warn)" : "var(--color-ink-600)" }}
                 >
                   {r.up ? `▲${r.d}` : r.d}
                 </span>
@@ -151,7 +151,7 @@ export default function DecisionView() {
                 </div>
               </div>
             ))}
-            <p className="text-[11px] text-ink-400">Vertical marks show target.</p>
+            <p className="text-[11px] text-ink-600">Vertical marks show target.</p>
           </div>
         </Panel>
 

@@ -82,7 +82,7 @@ export default function EvidenceCard() {
             Linked to dashboard
           </span>
         </div>
-        <p className="mt-3 text-[10px] leading-relaxed text-ink-400">
+        <p className="mt-3 text-[10px] leading-relaxed text-ink-600">
           Analysis overlay is illustrative; the photograph and capture metadata are field evidence.
         </p>
       </div>
