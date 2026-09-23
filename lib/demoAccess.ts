@@ -212,6 +212,9 @@ export type SubmitMeta = {
   requestType?: string;
   industry?: string;
   question?: string;
+  posPerMonth?: number;
+  categories?: number;
+  cities?: number;
 };
 
 export async function submitAccessRequest(

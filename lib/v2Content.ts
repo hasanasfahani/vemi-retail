@@ -27,6 +27,13 @@ export const ids = {
 /* ---------- figures (ALL ILLUSTRATIVE) ---------------------- */
 export type Figure = { value: string; label: string; placeholder?: boolean };
 
+export type Photo = {
+  src: string;
+  alt: string;
+  caption: string;
+  position?: string;
+};
+
 /* `placeholder` is stated on every figure, not just the unverified ones,
    so "is this number real?" is always answered explicitly. */
 export const figures = {
@@ -46,24 +53,25 @@ export const nav = {
   brand: "Vemi",
   links: [
     { label: "Retail Intelligence", href: `#${ids.retail}` },
-    { label: "What You'll See", href: `#${ids.dashboard}` },
     { label: "Insight to Action", href: `#${ids.action}` },
     { label: "Trust", href: `#${ids.trust}` },
-    { label: "Beyond the Shelf", href: `#${ids.market}` },
+    { label: "Market Intelligence", href: `#${ids.market}` },
   ],
-  cta: { label: "Request a Demo", href: `#${ids.request}` },
+  cta: { label: "Get a quote", href: `#${ids.request}` },
 };
 
-/* ---------- §1 Hero (with inline proof metrics) ------------- */
+/* ---------- §1 Hero ----------------------------------------- */
 export const hero = {
-  eyebrow: "Market intelligence for Iraq",
-  headlineLines: ["See Every Shelf.", "Understand Your Market.", "Act Faster."],
+  headlineLines: ["See Every Shelf.", "Understand Your Market.", "Act Faster and Smarter."],
   subhead:
-    "Vemi gives brands verified visibility into retail execution, competitors, consumers, and market signals — starting with real-world retail intelligence.",
-  primaryCta: { label: "Request a Demo", href: `#${ids.request}` },
-  secondaryCta: { label: "See what you'll get", href: `#${ids.dashboard}` },
-  /* short set — the fuller strip lives in §8 */
-  metrics: [figures.pos, figures.governorates, figures.cadence],
+    "Turn verified shelf evidence into faster decisions across availability, execution, pricing, and competition.",
+  primaryCta: { label: "Explore the dashboard", href: "/portal/performance" },
+  secondaryCta: { label: "Get a quote", href: `#${ids.request}` },
+  image: {
+    src: "/images/v2/vemi-performance-dashboard.png",
+    alt: "Vemi performance dashboard showing shelf availability, audit coverage, and channel comparisons",
+    caption: "Vemi performance dashboard",
+  } satisfies Photo,
 };
 
 /* ---------- §2 The Visibility Gap --------------------------- */
@@ -147,6 +155,7 @@ export type ActionCase = {
   detail: string;
   steps: string[];
   outcome: { label: string; from: string; to: string; note: string };
+  image: Photo;
 };
 
 export const insightToAction = {
@@ -156,7 +165,7 @@ export const insightToAction = {
     "Every finding arrives with the next step attached — and Vemi measures whether the fix worked.",
   cases: [
     {
-      signal: "Availability drops in Baghdad",
+      signal: "Availability drops across key outlets",
       tone: "critical",
       detail: "Vemi detects an out-of-stock concentration across outlets in a single week.",
       steps: [
@@ -165,6 +174,12 @@ export const insightToAction = {
         "Request a follow-up audit on the same outlets",
       ],
       outcome: { label: "Availability recovered", from: "71%", to: "84%", note: "two weeks later" },
+      image: {
+        src: "/images/v2/insight-iraq-availability-gap.jpg",
+        alt: "Refrigerated packaged-food shelf with an isolated empty facing in an Iraqi hypermarket",
+        caption: "Availability gap",
+        position: "50% 50%",
+      },
     },
     {
       signal: "A competitor gains shelf space",
@@ -176,6 +191,12 @@ export const insightToAction = {
         "Investigate the assortment and visibility gaps behind it",
       ],
       outcome: { label: "Shelf share defended", from: "24%", to: "28%", note: "over one quarter" },
+      image: {
+        src: "/images/v2/insight-iraq-packaged-food.jpg",
+        alt: "Packaged condiments arranged across a supermarket shelf in Iraq",
+        caption: "Packaged food",
+        position: "50% 50%",
+      },
     },
     {
       signal: "A promotion isn't being executed",
@@ -187,6 +208,12 @@ export const insightToAction = {
         "Verify execution on the next visit",
       ],
       outcome: { label: "Promo compliance", from: "61%", to: "92%", note: "next audit cycle" },
+      image: {
+        src: "/images/v2/insight-iraq-beverages.jpg",
+        alt: "Multiple soft-drink brands displayed across an Iraqi supermarket aisle",
+        caption: "Beverages",
+        position: "50% 50%",
+      },
     },
   ] satisfies ActionCase[],
   placeholder: true,
@@ -208,19 +235,25 @@ export const trust = {
     { title: "Traceable results", body: "Move from a dashboard metric back to the underlying evidence.", icon: "link" },
   ],
   evidence: {
-    outlet: "Al-Mansour Market",
-    location: "Baghdad · Al-Mansour",
-    channel: "Supermarket",
-    captured: "12 Sep 2026 · 10:42",
-    auditor: "Field auditor #114",
-    confidence: 96,
+    outlet: "Dur Nassrawey Center",
+    location: "Erbil · Downtown / Qaysari",
+    channel: "Mini-market",
+    captured: "12 Aug 2026 · 15:10",
+    auditRef: "#22137918",
     status: "Human-verified",
-    finding: "Cola 1L PET — out of stock",
+    finding: "Multiple competing brand blocks detected across the same freezer bay",
+    analysisPoints: ["Brand blocks identified", "Shelf levels mapped", "Facing patterns extracted"],
     placeholder: true,
+    image: {
+      src: "/audit/a_22137918_prg_1725137_q_2556239_i_24.jpg",
+      alt: "Timestamped retail audit photograph showing multiple frozen-food brands in one display bay",
+      caption: "Competitive set · source photograph",
+      position: "50% 43%",
+    } satisfies Photo,
   },
 };
 
-/* ---------- §7 Beyond the Shelf → One Market View ----------- */
+/* ---------- §7 Market Intelligence → One Market View --------- */
 export type Pillar = {
   key: string;
   title: string;
@@ -228,11 +261,12 @@ export type Pillar = {
   icon: string;
   body: string;
   items: string[];
+  image: Photo;
 };
 
 export const beyond = {
-  eyebrow: "Beyond the shelf",
-  headline: "See beyond the shelf.",
+  eyebrow: "Market intelligence",
+  headline: "Understand the market from every angle.",
   subhead:
     "Retail execution is where Vemi starts. The same field network and verification layer extend into the questions that sit behind your numbers.",
   pillars: [
@@ -243,6 +277,12 @@ export const beyond = {
       icon: "swap",
       body: "Closely connected to retail audit — the same store visits that measure your shelf also measure theirs.",
       items: ["Product launches", "Pricing & promotions", "Distribution", "Assortment", "Competitor activity", "Market benchmarking"],
+      image: {
+        src: "/audit/a_22137918_prg_1725137_q_2556239_i_27.jpg",
+        alt: "Multiple competing brands visible together on a retail freezer shelf",
+        caption: "Competitive activity · at the shelf",
+        position: "50% 42%",
+      },
     },
     {
       key: "consumer",
@@ -251,6 +291,12 @@ export const beyond = {
       icon: "people",
       body: "Structured research run through the same field network that already stands in the aisle.",
       items: ["Surveys", "Purchase drivers", "Brand perception", "Satisfaction", "Loyalty", "Switching behavior", "Shopper preferences", "Unmet needs"],
+      image: {
+        src: "/images/v2/consumer-shopper.jpg",
+        alt: "Middle Eastern shopper considering products while pushing a supermarket trolley",
+        caption: "Shopper behavior · in context",
+        position: "50% 45%",
+      },
     },
     {
       key: "market",
@@ -259,6 +305,12 @@ export const beyond = {
       icon: "trend",
       body: "The wider signals that decide whether your category grows next quarter.",
       items: ["Category trends", "Demand signals", "Seasonality", "Geographic dynamics", "Macroeconomic signals", "Regulatory developments", "Market opportunities"],
+      image: {
+        src: "/images/v2/market-demand.jpg",
+        alt: "Local vendor serving customers in a busy Middle Eastern market",
+        caption: "Market activity · demand signals",
+        position: "50% 44%",
+      },
     },
   ] satisfies Pillar[],
   /* the convergence — closing beat of this section, not its own section */
@@ -283,34 +335,53 @@ export const proof = {
   ],
 };
 
-/* ---------- §9 Final CTA + lead form ------------------------ */
+/* ---------- §8 Pricing quotation + contact form ------------- */
 export const finalCta = {
-  headline: "What do you need to understand about your market?",
+  eyebrow: "Pricing quotation",
+  headline: "Build a quote around your coverage.",
   subhead:
-    "Tell us your category, your brands, and the question you need answered — we'll show you what Vemi already sees.",
-  primary: { label: "Request a Demo", interest: "Demo" },
-  secondary: { label: "Discuss Your Market", interest: "Market Discussion" },
+    "Adjust the scope below and we'll prepare a quotation tailored to your retail audit program.",
+};
+
+export const quoteScope = {
+  posPerMonth: {
+    label: "POS per month",
+    min: 100,
+    max: 5000,
+    step: 100,
+    initial: 1000,
+    minLabel: "100 POS",
+    maxLabel: "5,000+ POS",
+  },
+  categories: {
+    label: "Categories",
+    min: 1,
+    max: 4,
+    step: 1,
+    initial: 1,
+    minLabel: "1 category",
+    maxLabel: "Up to 4",
+  },
+  cities: {
+    label: "Cities",
+    min: 1,
+    max: 18,
+    step: 1,
+    initial: 1,
+    minLabel: "1 city",
+    maxLabel: "Up to 18",
+  },
 };
 
 export const leadForm = {
-  eyebrow: "Request a demo",
-  headline: "Tell us what you need to understand.",
-  subhead: "We reply to every request within one business day.",
-  industries: [
-    "FMCG — Food",
-    "FMCG — Beverages",
-    "FMCG — Home & Personal Care",
-    "Dairy",
-    "Tobacco",
-    "Pharmacy & Health",
-    "Distributor / Importer",
-    "Agency / Research",
-    "Other",
-  ],
-  submitLabel: "Request Demo",
+  eyebrow: "Contact information",
+  headline: "Where should we send your quote?",
+  intro: "Share your business contact details and our team will confirm the scope with you.",
+  subhead: "Your final quotation is confirmed after a short scope review with our team.",
+  submitLabel: "Get a Quote",
   success: {
-    title: "Request received.",
-    body: "Thank you — our team will contact you within one business day to set up your session.",
+    title: "Quotation request received.",
+    body: "Thank you — our team will review your scope and contact you within one business day.",
   },
 };
 
@@ -323,9 +394,8 @@ export const footer = {
       title: "Platform",
       links: [
         { label: "Retail Intelligence", href: `#${ids.retail}` },
-        { label: "What You'll See", href: `#${ids.dashboard}` },
         { label: "Insight to Action", href: `#${ids.action}` },
-        { label: "Beyond the Shelf", href: `#${ids.market}` },
+        { label: "Market Intelligence", href: `#${ids.market}` },
       ],
     },
     {
@@ -333,7 +403,7 @@ export const footer = {
       links: [
         { label: "Intelligence You Can Trust", href: `#${ids.trust}` },
         { label: "Proof", href: `#${ids.proof}` },
-        { label: "Request a Demo", href: `#${ids.request}` },
+        { label: "Get a Quote", href: `#${ids.request}` },
       ],
     },
   ],

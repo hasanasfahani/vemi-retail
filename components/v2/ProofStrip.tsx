@@ -12,7 +12,7 @@ export default function ProofStrip() {
   return (
     <section id={ids.proof} className="section-tight border-t border-line">
       <div className="container-vemi">
-        <div className="grid items-center gap-10 lg:grid-cols-[1fr_0.42fr]">
+        <div className="grid items-center gap-10 lg:grid-cols-[1fr_0.52fr] lg:gap-14">
           <Reveal>
             <div>
               <span className="t-eyebrow">{proof.eyebrow}</span>
@@ -34,9 +34,7 @@ export default function ProofStrip() {
           </Reveal>
 
           <Reveal delay={0.08}>
-            <div className="rounded-2xl border border-line bg-white p-4">
-              <CoverageMap />
-            </div>
+            <CoverageMap />
           </Reveal>
         </div>
       </div>

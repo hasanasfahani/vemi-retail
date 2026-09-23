@@ -40,17 +40,14 @@ export default function Nav() {
   }, []);
 
   return (
-    <header
-      className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
-        scrolled || open ? "border-b border-line" : "border-b border-transparent"
-      }`}
-      style={{
-        background: scrolled || open ? "rgba(255,255,255,0.88)" : "transparent",
-        backdropFilter: scrolled || open ? "blur(14px)" : "none",
-        WebkitBackdropFilter: scrolled || open ? "blur(14px)" : "none",
-      }}
-    >
-      <nav className="container-vemi flex h-[68px] items-center justify-between gap-6">
+    <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-5 sm:pt-4">
+      <nav
+        className={`mx-auto flex h-16 max-w-[1240px] items-center justify-between gap-6 rounded-full border border-white/70 bg-white/95 px-5 backdrop-blur-xl transition-shadow duration-300 sm:px-6 ${
+          scrolled || open
+            ? "shadow-[0_16px_42px_-22px_rgba(20,21,26,0.34)]"
+            : "shadow-[0_12px_36px_-24px_rgba(20,21,26,0.28)]"
+        }`}
+      >
         <a
           href={`#${ids.top}`}
           className="font-display text-xl font-bold tracking-tight text-ink-900"
@@ -103,9 +100,9 @@ export default function Nav() {
       </nav>
 
       {/* mobile sheet */}
-      {open && (
-        <div className="border-t border-line lg:hidden">
-          <div className="container-vemi flex flex-col py-3">
+      {open ? (
+        <div className="mx-auto mt-2 max-w-[1240px] rounded-[22px] border border-line bg-white/95 p-3 shadow-[0_18px_44px_-24px_rgba(20,21,26,0.38)] backdrop-blur-xl lg:hidden">
+          <div className="flex flex-col">
             {nav.links.map((l) => (
               <a
                 key={l.href}
@@ -118,7 +115,7 @@ export default function Nav() {
             ))}
           </div>
         </div>
-      )}
+      ) : null}
     </header>
   );
 }

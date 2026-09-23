@@ -15,12 +15,11 @@ export default function Trust() {
           </div>
         </Reveal>
 
-        <div className="mt-12 grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
-          {/* the six guarantees */}
-          <div className="grid gap-x-8 gap-y-7 sm:grid-cols-2">
+        <div className="mt-12 grid gap-8 lg:grid-cols-2 lg:items-stretch lg:gap-10">
+          <div className="grid gap-3 sm:grid-cols-2 lg:h-full lg:grid-rows-3">
             {trust.items.map((t, i) => (
-              <Reveal key={t.title} delay={i * 0.05}>
-                <div>
+              <Reveal key={t.title} delay={i * 0.05} className="h-full">
+                <div className="h-full rounded-2xl border border-line bg-white p-5 shadow-[var(--shadow-card)]">
                   <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-line bg-white text-ink-900">
                     <Icon name={t.icon} className="h-[18px] w-[18px]" />
                   </span>
@@ -31,7 +30,7 @@ export default function Trust() {
             ))}
           </div>
 
-          <Reveal delay={0.1}>
+          <Reveal delay={0.1} className="h-full">
             <EvidenceCard />
           </Reveal>
         </div>

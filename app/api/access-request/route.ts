@@ -47,22 +47,36 @@ type Payload = Partial<AccessRequest> & {
   source?: string;
   referrer?: string;
   company_role?: string; // honeypot — real people never fill this
-  /* /v2 lead form extras. Folded into `Source` rather than given their
-     own Airtable columns, so capture needs no schema change in the base.
-     If `Industry` / `Question` columns are added later, promote them. */
+  /* /v2 quotation extras. Folded into `Source` rather than given their
+     own Airtable columns, so capture needs no schema change in the base. */
   requestType?: string;
   industry?: string;
   question?: string;
+  posPerMonth?: number;
+  categories?: number;
+  cities?: number;
 };
+
+function boundedInteger(value: unknown, min: number, max: number): number | undefined {
+  const parsed = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(parsed)) return undefined;
+  return Math.min(max, Math.max(min, Math.round(parsed)));
+}
 
 /* Builds the Source cell: the caller's own source plus whatever the v2
    form collected, as one readable line. */
 function composeSource(body: Payload): string {
+  const posPerMonth = boundedInteger(body.posPerMonth, 100, 5000);
+  const categories = boundedInteger(body.categories, 1, 4);
+  const cities = boundedInteger(body.cities, 1, 18);
   const parts = [
     body.source,
     body.requestType && `Request: ${body.requestType}`,
     body.industry && `Industry: ${body.industry}`,
     body.question && `Asks: ${body.question.replace(/\s+/g, " ").trim()}`,
+    posPerMonth && `POS/month: ${posPerMonth}`,
+    categories && `Categories: ${categories}`,
+    cities && `Cities: ${cities}`,
   ].filter(Boolean);
   return parts.join(" · ").slice(0, 2000);
 }
