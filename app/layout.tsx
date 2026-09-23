@@ -18,9 +18,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Vemi — Iraq's Real-Time Retail Intelligence",
+  title: "Vemi — Retail & Market Intelligence for Iraq",
   description:
-    "Vemi is Iraq's real-time retail audit platform — availability, shelf share, pricing, and competitor moves across 1,000+ points of sale, updated weekly.",
+    "Vemi gives brands verified visibility into retail execution, competitors, consumers, and market signals — starting with real-world retail intelligence.",
 };
 
 export default function RootLayout({
