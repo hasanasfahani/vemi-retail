@@ -86,6 +86,13 @@ function plural(n: number, one: string, many: string): string {
    Deliberately omits the caller's own `source` string: it was an
    internal marker ("v2 pricing quotation") or a page path, neither of
    which belongs in a notification email. Attribution lives in Referrer. */
+/* The three kinds of lead, as the Airtable single-select spells them. */
+function requestTypeOf(body: Payload): string {
+  if (body.requestType === "Full demo") return "Full demo";
+  if (body.requestType === "Pricing quotation") return "Pricing quotation";
+  return "Platform access";
+}
+
 function composeSource(body: Payload): string {
   const posPerMonth = boundedInteger(body.posPerMonth, 100, 5000);
   const categories = boundedInteger(body.categories, 1, 4);
@@ -168,44 +175,84 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, stored: false });
   }
 
-  try {
-    const res = await fetch(
-      `${AIRTABLE_API}/${baseId}/${encodeURIComponent(table)}`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          typecast: true,
-          records: [
-            {
-              fields: {
-                Name: lead.fullName,
-                Email: lead.email,
-                Phone: fullPhone(lead),
-                Company: lead.company,
-                Submitted: new Date().toISOString(),
-                Source: composeSource(body),
-                Referrer: (body.referrer ?? "direct").slice(0, 300),
-              },
-            },
-          ],
-        }),
-      }
-    );
+  /* The columns that have always existed. If anything goes wrong with
+     the newer ones, a lead still lands here rather than nowhere. */
+  const core: Record<string, unknown> = {
+    Name: lead.fullName,
+    Email: lead.email,
+    Phone: fullPhone(lead),
+    Company: lead.company,
+    Submitted: new Date().toISOString(),
+    Source: composeSource(body),
+    Referrer: (body.referrer ?? "direct").slice(0, 300),
+  };
 
-    if (!res.ok) {
-      const detail = await res.text();
+  /* The columns added for the three request types. Only sent when they
+     carry a value, so an access request does not write empty scope
+     numbers over the quote columns. */
+  const extended: Record<string, unknown> = { ...core, "Request Type": requestTypeOf(body) };
+
+  if (body.industry?.trim()) extended.Industry = body.industry.trim().slice(0, 120);
+
+  const posPerMonth = boundedInteger(body.posPerMonth, 100, 5000);
+  const categories = boundedInteger(body.categories, 1, 4);
+  const cities = boundedInteger(body.cities, 1, 18);
+  if (posPerMonth) extended["POS / month"] = posPerMonth;
+  if (categories) extended.Categories = categories;
+  if (cities) extended.Cities = cities;
+
+  if (body.requestType === "Full demo" && body.question?.trim()) {
+    extended.Module = body.question.replace(/\s+/g, " ").trim().slice(0, 120);
+  }
+
+  async function send(fields: Record<string, unknown>) {
+    const res = await fetch(`${AIRTABLE_API}/${baseId}/${encodeURIComponent(table)}`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      /* typecast lets Airtable create a missing single-select option
+         rather than reject the row — it does NOT forgive a missing
+         column, which is what the retry below is for. */
+      body: JSON.stringify({ typecast: true, records: [{ fields }] }),
+    });
+    return { ok: res.ok, status: res.status, detail: res.ok ? "" : await res.text() };
+  }
+
+  try {
+    const first = await send(extended);
+    if (first.ok) return NextResponse.json({ ok: true, stored: true });
+
+    /* A column name that does not exist in the base rejects the whole
+       record, and this endpoint answers 200 either way — so without
+       this fallback a single spelling mismatch would silently stop
+       every lead from being stored. Retry with the columns we know
+       exist, and name the offending field loudly in the log. */
+    if (first.detail.includes("UNKNOWN_FIELD_NAME")) {
+      console.error(
+        "[access-request] Airtable rejected a column name — the lead was stored " +
+          "WITHOUT the new fields. Fix the column name in the base to match.",
+        { detail: first.detail.slice(0, 300), sent: Object.keys(extended) }
+      );
+      const retry = await send(core);
+      if (retry.ok) return NextResponse.json({ ok: true, stored: true, degraded: true });
       console.error("[access-request] Airtable rejected the row", {
-        status: res.status,
-        detail: detail.slice(0, 500),
+        status: retry.status,
+        detail: retry.detail.slice(0, 500),
         email: lead.email,
         company: lead.company,
       });
       return NextResponse.json({ ok: true, stored: false });
     }
+
+    console.error("[access-request] Airtable rejected the row", {
+      status: first.status,
+      detail: first.detail.slice(0, 500),
+      email: lead.email,
+      company: lead.company,
+    });
+    return NextResponse.json({ ok: true, stored: false });
   } catch (err) {
     console.error("[access-request] Airtable unreachable — lead not stored", {
       err,
