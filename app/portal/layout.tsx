@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import Sidebar from "@/components/market/Sidebar";
 import PortalChrome from "@/components/portal/PortalChrome";
+import PortalGate from "@/components/portal/PortalGate";
 import { contract } from "@/lib/market";
 
 export const metadata: Metadata = {
@@ -15,7 +16,8 @@ export default function PortalLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <div className="flex min-h-screen items-start bg-canvas">
+    <PortalGate>
+      <div className="flex min-h-screen items-start bg-canvas">
       {/* Sidebar reads the URL to keep filters across navigation, so
           it suspends during prerender like the shell does. */}
       <Suspense fallback={<div className="sticky top-0 hidden h-screen w-[236px] shrink-0 border-r border-line bg-white lg:block" />}>
@@ -26,7 +28,8 @@ export default function PortalLayout({
       <div className="flex min-w-0 flex-1 flex-col">
         <PortalChrome />
         {children}
+        </div>
       </div>
-    </div>
+    </PortalGate>
   );
 }
