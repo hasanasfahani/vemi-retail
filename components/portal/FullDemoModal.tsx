@@ -11,6 +11,7 @@ import {
   type AccessRequest,
   type FieldName,
 } from "@/lib/demoAccess";
+import { leadForm } from "@/lib/v2Content";
 
 /* The third lead type: someone who hit a gated page and wants to see
    the whole product. Captured with the same contact fields as
@@ -45,6 +46,9 @@ export default function FullDemoModal({
     company: "",
   });
   const [honey, setHoney] = useState("");
+  const [industry, setIndustry] = useState("");
+  const [customIndustry, setCustomIndustry] = useState("");
+  const [industryError, setIndustryError] = useState<string | undefined>();
   const [errors, setErrors] = useState<Errors>({});
   const [status, setStatus] = useState<"idle" | "sending" | "done">("idle");
 
@@ -57,7 +61,14 @@ export default function FullDemoModal({
       fullName: c.fullName || session.fullName || "",
       email: c.email || session.email || "",
       company: c.company || session.company || "",
+      dialCode: session.dialCode || c.dialCode,
+      phone: c.phone || session.phone || "",
     }));
+    if (session.industry) {
+      const known = leadForm.industries.includes(session.industry);
+      setIndustry(known ? session.industry : "Other");
+      if (!known) setCustomIndustry(session.industry);
+    }
   }
 
   const setF = (key: FieldName, value: string) => {
@@ -70,7 +81,15 @@ export default function FullDemoModal({
     const clean = Object.fromEntries(
       Object.entries(validateAll(form)).filter(([, v]) => Boolean(v))
     ) as Errors;
-    if (Object.keys(clean).length > 0) {
+
+    const badIndustry = !industry
+      ? "Please choose your industry."
+      : industry === "Other" && !customIndustry.trim()
+        ? "Please enter your industry."
+        : undefined;
+    setIndustryError(badIndustry);
+
+    if (Object.keys(clean).length > 0 || badIndustry) {
       setErrors(clean);
       return;
     }
@@ -81,6 +100,7 @@ export default function FullDemoModal({
       company_role: honey,
       requestType: "Full demo",
       question: source,
+      industry: industry === "Other" ? customIndustry.trim() : industry,
     });
     setStatus("done");
   }
@@ -154,6 +174,50 @@ export default function FullDemoModal({
                   maxLength: 24,
                   autoComplete: "tel",
                 })}
+              </div>
+
+              <div className="sm:col-span-2">
+                <label htmlFor="fd-industry" className="mb-1.5 block text-xs font-medium text-ink-700">
+                  Industry
+                </label>
+                <select
+                  id="fd-industry"
+                  value={industry}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setIndustry(value);
+                    if (value !== "Other") setCustomIndustry("");
+                    setIndustryError(undefined);
+                  }}
+                  className={`${inputCls(industryError)} ${industry ? "text-ink-900" : "text-ink-500"}`}
+                >
+                  <option value="">Select your industry</option>
+                  {leadForm.industries.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+
+                {industry === "Other" && (
+                  <input
+                    aria-label="Specify your industry"
+                    value={customIndustry}
+                    maxLength={100}
+                    onChange={(e) => {
+                      setCustomIndustry(e.target.value);
+                      setIndustryError(undefined);
+                    }}
+                    placeholder="Enter your industry"
+                    className={`mt-2 ${inputCls(industryError)}`}
+                  />
+                )}
+
+                {industryError ? (
+                  <p className="mt-1 text-xs" style={{ color: "var(--color-critical)" }}>
+                    {industryError}
+                  </p>
+                ) : null}
               </div>
             </div>
 

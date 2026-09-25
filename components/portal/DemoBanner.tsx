@@ -55,7 +55,10 @@ export default function DemoBanner() {
             fullName: session?.fullName,
             email: session?.email,
             company: session?.company,
+            dialCode: session?.dialCode,
+            phone: session?.phone,
           }}
+          initialIndustry={session?.industry}
         />
       </Modal>
     </>

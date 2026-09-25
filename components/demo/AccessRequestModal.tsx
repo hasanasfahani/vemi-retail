@@ -19,7 +19,6 @@ import { useRouter } from "next/navigation";
 import {
   DEFAULT_DIAL,
   PORTAL_ENTRY,
-  formatPhone,
   grantAccess,
   submitAccessRequest,
   validateAll,
@@ -175,7 +174,12 @@ export default function AccessRequestModal() {
 
   /* ---------- field handling ---------- */
   const setField = (name: FieldName, value: string) => {
-    const next = name === "phone" ? formatPhone(value) : value;
+    /* The phone field is one international number now that the dial-code
+       select is gone, so it is stored exactly as typed. formatPhone used
+       to run here and stripped the leading "+", after which the endpoint
+       prepended the dial code again and the record read "+964 964 770…".
+       Matches the pricing form, which has never formatted. */
+    const next = value;
     setForm((f) => ({ ...f, [name]: next }));
     // Only re-validate live once a field has been left once — no
     // shouting at someone mid-keystroke.
@@ -241,7 +245,7 @@ export default function AccessRequestModal() {
     } finally {
       window.clearInterval(ticker);
     }
-    grantAccess(form);
+    grantAccess(form, { industry: industry === "Other" ? customIndustry.trim() : industry });
     setPhase("ready");
     window.setTimeout(() => {
       router.push(PORTAL_ENTRY);

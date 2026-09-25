@@ -118,11 +118,13 @@ function ScopeRange({
    captured when the visitor opened the dashboard. */
 export default function QuoteForm({
   initialContact,
+  initialIndustry,
   idPrefix = "quote",
   onSubmitted,
 }: {
   /* Prefilled from the portal access session; the visitor can still edit. */
   initialContact?: Partial<AccessRequest>;
+  initialIndustry?: string;
   idPrefix?: string;
   onSubmitted?: () => void;
 }) {
@@ -138,8 +140,15 @@ export default function QuoteForm({
     categories: quoteScope.categories.initial,
     cities: quoteScope.cities.initial,
   });
-  const [industry, setIndustry] = useState("");
-  const [customIndustry, setCustomIndustry] = useState("");
+  /* A stored industry that is not one of the listed options came from
+     the "Other" box, so restore it there rather than dropping it. */
+  const known = initialIndustry && leadForm.industries.includes(initialIndustry);
+  const [industry, setIndustry] = useState(
+    initialIndustry ? (known ? initialIndustry : "Other") : ""
+  );
+  const [customIndustry, setCustomIndustry] = useState(
+    initialIndustry && !known ? initialIndustry : ""
+  );
   const [honey, setHoney] = useState("");
   const [errors, setErrors] = useState<AllErrors>({});
   const [status, setStatus] = useState<"idle" | "sending" | "done">("idle");

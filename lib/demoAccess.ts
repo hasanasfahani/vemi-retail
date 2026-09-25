@@ -140,14 +140,27 @@ export type AccessSession = {
   fullName: string;
   company: string;
   email: string;
+  /* Carried so the quote and full-demo forms can prefill everything the
+     visitor already typed to open the dashboard, rather than asking for
+     the same details twice. Optional because sessions stored before
+     these were added will not have them. */
+  dialCode?: string;
+  phone?: string;
+  industry?: string;
   grantedAt: string;
 };
 
-export function grantAccess(req: AccessRequest): AccessSession {
+export function grantAccess(
+  req: AccessRequest,
+  extra: { industry?: string } = {}
+): AccessSession {
   const session: AccessSession = {
     fullName: req.fullName.trim(),
     company: req.company.trim(),
     email: req.email.trim().toLowerCase(),
+    dialCode: req.dialCode,
+    phone: req.phone.trim(),
+    industry: extra.industry?.trim() || undefined,
     grantedAt: new Date().toISOString(),
   };
   try {
