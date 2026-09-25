@@ -27,6 +27,7 @@ import {
   type AccessRequest,
   type FieldName,
 } from "@/lib/demoAccess";
+import { leadForm } from "@/lib/v2Content";
 
 type Phase = "form" | "provisioning" | "ready";
 
@@ -93,6 +94,10 @@ export default function AccessRequestModal() {
   const [touched, setTouched] = useState<Partial<Record<FieldName, boolean>>>({});
   const [step, setStep] = useState(0);
   const [honeypot, setHoneypot] = useState("");
+  const [industry, setIndustry] = useState("");
+  const [customIndustry, setCustomIndustry] = useState("");
+  /* Industry is not part of AccessRequest, so it carries its own error. */
+  const [industryError, setIndustryError] = useState<string | undefined>();
 
   const panelRef = useRef<HTMLDivElement>(null);
   const firstFieldRef = useRef<HTMLInputElement>(null);
@@ -195,6 +200,13 @@ export default function AccessRequestModal() {
     e.preventDefault();
     const found = validateAll(form);
     setErrors(found);
+
+    const badIndustry = !industry
+      ? "Please choose your industry."
+      : industry === "Other" && !customIndustry.trim()
+        ? "Please enter your industry."
+        : undefined;
+    setIndustryError(badIndustry);
     setTouched({
       fullName: true,
       email: true,
@@ -202,7 +214,7 @@ export default function AccessRequestModal() {
       company: true,
       dialCode: true,
     });
-    if (Object.keys(found).length > 0) {
+    if (Object.keys(found).length > 0 || badIndustry) {
       const firstBad = (
         ["fullName", "email", "phone", "company"] as FieldName[]
       ).find((k) => found[k]);
@@ -224,6 +236,7 @@ export default function AccessRequestModal() {
         source: window.location.pathname + window.location.hash,
         referrer: document.referrer || "direct",
         company_role: honeypot,
+        industry: industry === "Other" ? customIndustry.trim() : industry,
       });
     } finally {
       window.clearInterval(ticker);
@@ -267,8 +280,8 @@ export default function AccessRequestModal() {
                 </h2>
                 <p className="mt-1.5 text-sm text-ink-500">
                   Add your details to open the Vemi dashboard and see how
-                  availability, shelf share, pricing and competitor activity
-                  are tracked.
+                  availability, shelf share and competitor activity are
+                  tracked.
                 </p>
               </div>
               <button
@@ -336,6 +349,64 @@ export default function AccessRequestModal() {
                 onChange={setField}
                 onBlur={blurField}
               />
+
+              {/* Industry, matching the pricing form — it is the one
+                  qualifying answer sales needs before the call. */}
+              <div>
+                <label
+                  htmlFor="access-industry"
+                  className="mb-1.5 block text-[13px] font-semibold text-ink-900"
+                >
+                  Industry
+                </label>
+                <select
+                  id="access-industry"
+                  name="industry"
+                  value={industry}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setIndustry(value);
+                    if (value !== "Other") setCustomIndustry("");
+                    setIndustryError(undefined);
+                  }}
+                  className={`w-full rounded-[10px] border bg-white px-3 py-2.5 text-[15px] outline-none transition-colors focus:border-violet ${
+                    industry ? "text-ink-900" : "text-ink-500"
+                  }`}
+                  style={{
+                    borderColor: industryError
+                      ? "var(--color-critical)"
+                      : "var(--color-line-strong)",
+                  }}
+                >
+                  <option value="">Select your industry</option>
+                  {leadForm.industries.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+
+                {industry === "Other" && (
+                  <input
+                    aria-label="Specify your industry"
+                    value={customIndustry}
+                    maxLength={100}
+                    onChange={(e) => {
+                      setCustomIndustry(e.target.value);
+                      setIndustryError(undefined);
+                    }}
+                    placeholder="Enter your industry"
+                    className="mt-2 w-full rounded-[10px] border bg-white px-3 py-2.5 text-[15px] text-ink-900 outline-none transition-colors focus:border-violet placeholder:text-ink-500"
+                    style={{
+                      borderColor: industryError
+                        ? "var(--color-critical)"
+                        : "var(--color-line-strong)",
+                    }}
+                  />
+                )}
+
+                <FieldError message={industryError} />
+              </div>
 
               {/* Honeypot — off-screen and out of the tab order. Only a
                   bot fills it, and the endpoint drops anything that does. */}
