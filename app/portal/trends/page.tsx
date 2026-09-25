@@ -1,3 +1,4 @@
+import LockedOverlay from "@/components/portal/LockedOverlay";
 import TrendsView from "./TrendsView";
 
 export const metadata = {
@@ -6,5 +7,9 @@ export const metadata = {
 };
 
 export default function Page() {
-  return <TrendsView />;
+  return (
+    <LockedOverlay title="Historical Trends">
+      <TrendsView />
+    </LockedOverlay>
+  );
 }

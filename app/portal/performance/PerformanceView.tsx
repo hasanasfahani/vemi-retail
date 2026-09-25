@@ -18,6 +18,7 @@ import ShelfTab from "./tabs/ShelfTab";
 import PricingTab from "./tabs/PricingTab";
 import AssortmentTab from "./tabs/AssortmentTab";
 import PosmTab from "./tabs/PosmTab";
+import LockedOverlay from "@/components/portal/LockedOverlay";
 import type { MarketView } from "@/lib/market/filters";
 
 const TABS = [
@@ -57,11 +58,26 @@ function Performance({ view }: { view: MarketView }) {
   return (
     <div className="flex flex-col gap-4">
       <Tabs tabs={TABS} active={active} onChange={setTab} />
+      {/* Availability and Shelf & visibility are the open modules; the
+          rest sit behind the full-demo request. The tab strip still
+          shows them, so a visitor can see what the platform covers. */}
       {active === "availability" && <AvailabilityTab view={view} />}
       {active === "shelf" && <ShelfTab view={view} />}
-      {active === "pricing" && <PricingTab view={view} />}
-      {active === "assortment" && <AssortmentTab view={view} />}
-      {active === "posm" && <PosmTab view={view} />}
+      {active === "pricing" && (
+        <LockedOverlay title="Pricing">
+          <PricingTab view={view} />
+        </LockedOverlay>
+      )}
+      {active === "assortment" && (
+        <LockedOverlay title="Assortment">
+          <AssortmentTab view={view} />
+        </LockedOverlay>
+      )}
+      {active === "posm" && (
+        <LockedOverlay title="POSM">
+          <PosmTab view={view} />
+        </LockedOverlay>
+      )}
     </div>
   );
 }

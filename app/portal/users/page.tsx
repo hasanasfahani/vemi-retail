@@ -1,3 +1,4 @@
+import LockedOverlay from "@/components/portal/LockedOverlay";
 import UsersView from "./UsersView";
 
 export const metadata = {
@@ -6,5 +7,9 @@ export const metadata = {
 };
 
 export default function Page() {
-  return <UsersView />;
+  return (
+    <LockedOverlay title="Users & Settings">
+      <UsersView />
+    </LockedOverlay>
+  );
 }

@@ -92,7 +92,7 @@ export default function Sidebar() {
             className="flex items-center"
             aria-label="Vemi dashboard"
           >
-            <VemiLogo className="h-6 w-20" preload />
+            <VemiLogo className="h-6 w-auto" preload />
           </Link>
         )}
         <button

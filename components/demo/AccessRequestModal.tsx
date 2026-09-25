@@ -17,7 +17,6 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import {
-  COUNTRIES,
   DEFAULT_DIAL,
   PORTAL_ENTRY,
   formatPhone,
@@ -39,11 +38,17 @@ const EMPTY: AccessRequest = {
   company: "",
 };
 
-/* Shown one after another while the workspace is prepared. */
+/* Shown one after another while the dashboard opens.
+
+   These describe what the product is loading — not work being done on
+   this visitor's own data. The dashboard is a live demonstration
+   environment, so wording like "preparing your workspace" or
+   "tailoring your dashboard" would promise something personalised that
+   the visitor is not about to receive. */
 const STEPS = [
-  "Verifying your work domain",
-  "Preparing your workspace",
-  "Loading Erbil coverage",
+  "Verifying your details",
+  "Loading store coverage",
+  "Preparing availability and shelf views",
 ];
 
 /* The portal guard redirects to `/?access=1`. Treat that flag as
@@ -258,11 +263,12 @@ export default function AccessRequestModal() {
               <div>
                 <span className="t-eyebrow">Platform access</span>
                 <h2 id="access-title" className="t-h3 mt-2">
-                  Request a Demo
+                  Explore the Dashboard
                 </h2>
                 <p className="mt-1.5 text-sm text-ink-500">
-                  Tell us where you sell and we&apos;ll open the live Erbil
-                  workspace for you.
+                  Add your details to open the Vemi dashboard and see how
+                  availability, shelf share, pricing and competitor activity
+                  are tracked.
                 </p>
               </div>
               <button
@@ -277,6 +283,12 @@ export default function AccessRequestModal() {
               </button>
             </div>
 
+            {/* Same contact block as the pricing section: name, company,
+                work email, then one phone field. The dial-code select was
+                dropped because the placeholder already shows the expected
+                format and a wide select beside a cramped input was hard to
+                type into. `dialCode` stays in state as a fallback — the
+                endpoint only prepends it when the number has no "+". */}
             <div className="space-y-4 px-7 py-6">
               <Field
                 label="Full name"
@@ -284,8 +296,19 @@ export default function AccessRequestModal() {
                 value={form.fullName}
                 error={errors.fullName}
                 autoComplete="name"
-                placeholder="Ahmed Al-Rashid"
+                placeholder="Your name"
                 inputRef={firstFieldRef}
+                onChange={setField}
+                onBlur={blurField}
+              />
+
+              <Field
+                label="Company"
+                name="company"
+                value={form.company}
+                error={errors.company}
+                autoComplete="organization"
+                placeholder="Company name"
                 onChange={setField}
                 onBlur={blurField}
               />
@@ -302,51 +325,17 @@ export default function AccessRequestModal() {
                 onBlur={blurField}
               />
 
-              {/* phone — dial code + national number */}
-              <div>
-                <label
-                  htmlFor="access-phone"
-                  className="mb-1.5 block text-[13px] font-semibold text-ink-900"
-                >
-                  Phone
-                </label>
-                <div
-                  className="flex items-stretch overflow-hidden rounded-[10px] border bg-white transition-colors focus-within:border-violet"
-                  style={{
-                    borderColor: errors.phone
-                      ? "var(--color-critical)"
-                      : "var(--color-line-strong)",
-                  }}
-                >
-                  <select
-                    name="dialCode"
-                    aria-label="Country dialling code"
-                    value={form.dialCode}
-                    onChange={(e) => setField("dialCode", e.target.value)}
-                    className="mono cursor-pointer border-r border-line bg-canvas py-2.5 pl-3 pr-2 text-sm font-semibold text-ink-900 outline-none"
-                  >
-                    {COUNTRIES.map((c) => (
-                      <option key={c.code} value={c.dial}>
-                        {c.code} {c.dial}
-                      </option>
-                    ))}
-                  </select>
-                  <input
-                    id="access-phone"
-                    name="phone"
-                    type="tel"
-                    inputMode="tel"
-                    autoComplete="tel-national"
-                    placeholder="770 123 4567"
-                    value={form.phone}
-                    onChange={(e) => setField("phone", e.target.value)}
-                    onBlur={() => blurField("phone")}
-                    aria-invalid={Boolean(errors.phone)}
-                    className="mono w-full px-3 py-2.5 text-[15px] text-ink-900 outline-none placeholder:text-ink-400"
-                  />
-                </div>
-                <FieldError message={errors.phone} />
-              </div>
+              <Field
+                label="Phone"
+                name="phone"
+                type="tel"
+                value={form.phone}
+                error={errors.phone}
+                autoComplete="tel"
+                placeholder="e.g. +964 770 123 4567"
+                onChange={setField}
+                onBlur={blurField}
+              />
 
               {/* Honeypot — off-screen and out of the tab order. Only a
                   bot fills it, and the endpoint drops anything that does. */}
@@ -360,25 +349,14 @@ export default function AccessRequestModal() {
                 aria-hidden="true"
                 className="absolute left-[-9999px] h-px w-px opacity-0"
               />
-
-              <Field
-                label="Company"
-                name="company"
-                value={form.company}
-                error={errors.company}
-                autoComplete="organization"
-                placeholder="Your company"
-                onChange={setField}
-                onBlur={blurField}
-              />
             </div>
 
             <div className="border-t border-line px-7 py-5">
               <button type="submit" className="btn-primary w-full">
-                Open my workspace
+                Access Dashboard
               </button>
               <p className="mt-3 text-center text-xs text-ink-400">
-                We use your details to configure coverage — no marketing lists.
+                We&apos;ll only use your details to follow up about Vemi.
               </p>
             </div>
           </form>
@@ -389,7 +367,7 @@ export default function AccessRequestModal() {
             {phase === "provisioning" ? (
               <>
                 <Spinner />
-                <p className="t-h3 mt-6">Setting up your workspace</p>
+                <p className="t-h3 mt-6">Opening the dashboard</p>
                 <p className="mt-1.5 h-5 text-sm text-ink-500">{STEPS[step]}</p>
               </>
             ) : (
@@ -399,7 +377,7 @@ export default function AccessRequestModal() {
                   {firstName ? `You're in, ${firstName}` : "You're in"}
                 </p>
                 <p className="mt-1.5 text-sm text-ink-500">
-                  Taking you to Erbil coverage…
+                  Opening the dashboard…
                 </p>
               </>
             )}

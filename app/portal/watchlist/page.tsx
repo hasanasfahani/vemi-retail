@@ -1,3 +1,4 @@
+import LockedOverlay from "@/components/portal/LockedOverlay";
 import WatchlistView from "./WatchlistView";
 
 export const metadata = {
@@ -6,5 +7,9 @@ export const metadata = {
 };
 
 export default function Page() {
-  return <WatchlistView />;
+  return (
+    <LockedOverlay title="Watchlist">
+      <WatchlistView />
+    </LockedOverlay>
+  );
 }

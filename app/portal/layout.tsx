@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import Sidebar from "@/components/market/Sidebar";
+import PortalChrome from "@/components/portal/PortalChrome";
 import { contract } from "@/lib/market";
 
 export const metadata: Metadata = {
@@ -22,7 +23,10 @@ export default function PortalLayout({
       </Suspense>
       {/* min-w-0 so a wide child — the assortment matrix, the POS table —
           scrolls inside its own box and never the page. */}
-      <div className="flex min-w-0 flex-1 flex-col">{children}</div>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <PortalChrome />
+        {children}
+      </div>
     </div>
   );
 }

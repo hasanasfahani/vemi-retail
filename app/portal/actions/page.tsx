@@ -1,3 +1,4 @@
+import LockedOverlay from "@/components/portal/LockedOverlay";
 import ActionsView from "./ActionsView";
 
 export const metadata = {
@@ -6,5 +7,9 @@ export const metadata = {
 };
 
 export default function Page() {
-  return <ActionsView />;
+  return (
+    <LockedOverlay title="Follow-up Audits">
+      <ActionsView />
+    </LockedOverlay>
+  );
 }

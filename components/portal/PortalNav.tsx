@@ -21,7 +21,7 @@ export default function PortalNav() {
           className="flex h-[60px] items-center border-b border-line px-6"
           aria-label="Vemi home"
         >
-          <VemiLogo className="h-6 w-20" preload />
+          <VemiLogo className="h-6 w-auto" preload />
         </Link>
 
         <div className="flex-1 overflow-y-auto px-3 py-4">

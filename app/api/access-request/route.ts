@@ -65,20 +65,56 @@ function boundedInteger(value: unknown, min: number, max: number): number | unde
 
 /* Builds the Source cell: the caller's own source plus whatever the v2
    form collected, as one readable line. */
+/* Thousands separator without depending on the server's ICU locale
+   data, so the value is identical in every environment. */
+function grouped(n: number): string {
+  return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function plural(n: number, one: string, many: string): string {
+  return `${n} ${n === 1 ? one : many}`;
+}
+
+/* Builds the Source cell. An Airtable automation emails this straight
+   through as the "Quote request" line, so it has to read as a sentence
+   a person wrote — not as internal field dumps. Two kinds of lead land
+   in the same table:
+
+     pricing quotation  ->  Dairy · 1,000 POS/month · 1 category · 12 cities
+     dashboard access   ->  Platform access request
+
+   Deliberately omits the caller's own `source` string: it was an
+   internal marker ("v2 pricing quotation") or a page path, neither of
+   which belongs in a notification email. Attribution lives in Referrer. */
 function composeSource(body: Payload): string {
   const posPerMonth = boundedInteger(body.posPerMonth, 100, 5000);
   const categories = boundedInteger(body.categories, 1, 4);
   const cities = boundedInteger(body.cities, 1, 18);
-  const parts = [
-    body.source,
-    body.requestType && `Request: ${body.requestType}`,
-    body.industry && `Industry: ${body.industry}`,
-    body.question && `Asks: ${body.question.replace(/\s+/g, " ").trim()}`,
-    posPerMonth && `POS/month: ${posPerMonth}`,
-    categories && `Categories: ${categories}`,
-    cities && `Cities: ${cities}`,
+  const industry = body.industry?.trim();
+  const question = body.question?.replace(/\s+/g, " ").trim();
+
+  const isQuote = Boolean(
+    body.requestType || industry || posPerMonth || categories || cities
+  );
+
+  /* Full-demo requests come from a gated module in the portal; the
+     module name rides in `question`. */
+  if (body.requestType === "Full demo") {
+    const where = body.question?.replace(/\s+/g, " ").trim();
+    return where ? `Full demo request · ${where}`.slice(0, 2000) : "Full demo request";
+  }
+
+  if (!isQuote) return "Platform access request";
+
+  const scope = [
+    industry,
+    posPerMonth && `${grouped(posPerMonth)} POS/month`,
+    categories && plural(categories, "category", "categories"),
+    cities && plural(cities, "city", "cities"),
   ].filter(Boolean);
-  return parts.join(" · ").slice(0, 2000);
+
+  const line = scope.length > 0 ? scope.join(" · ") : "Pricing quotation";
+  return (question ? `${line} — "${question}"` : line).slice(0, 2000);
 }
 
 function fullPhone(lead: AccessRequest): string {

@@ -40,7 +40,7 @@ export const NAV: NavGroup[] = [
       { href: "/portal/performance", label: "Performance", icon: "performance" },
       { href: "/portal/competition", label: "Competition", icon: "competition" },
       { href: "/portal/insights", label: "Insights", icon: "insights" },
-      { href: "/portal/customers", label: "Customers", icon: "customers", locked: true },
+      { href: "/portal/customers", label: "Consumers", icon: "customers", locked: true },
     ],
   },
   {

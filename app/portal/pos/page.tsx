@@ -1,3 +1,4 @@
+import LockedOverlay from "@/components/portal/LockedOverlay";
 import PosView from "./PosView";
 
 export const metadata = {
@@ -6,5 +7,9 @@ export const metadata = {
 };
 
 export default function Page() {
-  return <PosView />;
+  return (
+    <LockedOverlay title="POS Explorer">
+      <PosView />
+    </LockedOverlay>
+  );
 }

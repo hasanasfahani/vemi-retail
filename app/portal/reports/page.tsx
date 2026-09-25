@@ -1,3 +1,4 @@
+import LockedOverlay from "@/components/portal/LockedOverlay";
 import ReportsView from "./ReportsView";
 
 export const metadata = {
@@ -6,5 +7,9 @@ export const metadata = {
 };
 
 export default function Page() {
-  return <ReportsView />;
+  return (
+    <LockedOverlay title="Monthly Reports">
+      <ReportsView />
+    </LockedOverlay>
+  );
 }

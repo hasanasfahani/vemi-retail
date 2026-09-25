@@ -1,3 +1,4 @@
+import LockedOverlay from "@/components/portal/LockedOverlay";
 import SetupView from "./SetupView";
 
 export const metadata = {
@@ -6,5 +7,9 @@ export const metadata = {
 };
 
 export default function Page() {
-  return <SetupView />;
+  return (
+    <LockedOverlay title="Audit Setup">
+      <SetupView />
+    </LockedOverlay>
+  );
 }

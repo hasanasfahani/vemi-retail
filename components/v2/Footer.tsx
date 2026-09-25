@@ -60,7 +60,7 @@ export default function Footer() {
               className="inline-flex"
               aria-label="Vemi, back to top"
             >
-              <VemiLogo className="h-9 w-32" src="/vemi-logo-white.png" />
+              <VemiLogo className="h-9 w-auto" src="/vemi-logo-white.png" />
             </a>
             <p className="mt-4 text-sm leading-6 text-white/50">{footer.tagline}</p>
             <p className="mt-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-white/65">
