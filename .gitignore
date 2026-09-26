@@ -42,3 +42,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Source artwork — the full-resolution originals the shipped logos
+# in public/ were cropped from. Kept locally, not deployed.
+design/
