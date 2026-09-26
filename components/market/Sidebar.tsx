@@ -28,7 +28,7 @@ import { useReports } from "./useReports";
 import { createReport, upsertReport } from "@/lib/market/reports";
 import { contract, coverage } from "@/lib/market";
 import Icon from "./Icon";
-import VemiLogo from "@/components/ui/VemiLogo";
+import { Logo } from "@/components/vemi/Logo";
 
 const KEY = "vemi.sidebar.collapsed";
 
@@ -92,7 +92,7 @@ export default function Sidebar() {
             className="flex items-center"
             aria-label="Vemi dashboard"
           >
-            <VemiLogo className="h-6 w-auto" preload />
+            <Logo height={24} title="" />
           </Link>
         )}
         <button
