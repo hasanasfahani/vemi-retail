@@ -112,7 +112,7 @@ export default function RequestFollowUp({
         type="button"
         onClick={() => setOpen(true)}
         disabled={issues.length === 0}
-        className="inline-flex items-center gap-1.5 rounded-[9px] bg-violet px-3 py-2 text-[12.5px] font-semibold text-white transition-colors hover:bg-violet-ink disabled:cursor-not-allowed disabled:opacity-45"
+        className="inline-flex items-center gap-1.5 rounded-md bg-violet px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-violet-ink disabled:cursor-not-allowed disabled:opacity-45"
       >
         <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
           <path d="M2.8 8a5.2 5.2 0 1 0 1.7-3.9M4 2.5V5h2.5" />
@@ -128,7 +128,7 @@ export default function RequestFollowUp({
         subtitle={`${KPI_LABEL[kpi]} · ${clientBrand.name} · raised from the ${monthLabel(view.month)} audit`}
         footer={
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <span className="text-[11.5px] text-ink-500">
+            <span className="text-xs text-ink-500">
               {selected.length.toLocaleString()} POS ·{" "}
               {selectedIssues.length.toLocaleString()} issues ·{" "}
               {cycle ? cycleLabel(cycle) : "no cycle"}
@@ -137,7 +137,7 @@ export default function RequestFollowUp({
               type="button"
               onClick={confirm}
               disabled={selected.length === 0 || !cycle}
-              className="rounded-[9px] bg-violet px-3 py-1.5 text-[12.5px] font-semibold text-white transition-colors hover:bg-violet-ink disabled:cursor-not-allowed disabled:opacity-45"
+              className="rounded-md bg-violet px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-violet-ink disabled:cursor-not-allowed disabled:opacity-45"
             >
               Confirm follow-up audit
             </button>
@@ -146,7 +146,7 @@ export default function RequestFollowUp({
       >
         <div className="flex flex-col gap-5">
           {/* what the page found */}
-          <dl className="grid grid-cols-2 gap-x-4 gap-y-2 rounded-[10px] border border-line bg-canvas px-3 py-2.5">
+          <dl className="grid grid-cols-2 gap-x-4 gap-y-2 rounded-md border border-line bg-canvas px-3 py-2.5">
             {[
               { k: "KPI", v: KPI_LABEL[kpi] },
               { k: "Brand", v: clientBrand.name },
@@ -157,16 +157,16 @@ export default function RequestFollowUp({
               },
             ].map((row) => (
               <div key={row.k}>
-                <dt className="text-[10.5px] font-semibold uppercase tracking-wide text-ink-400">
+                <dt className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
                   {row.k}
                 </dt>
-                <dd className="mt-0.5 text-[12.5px] text-ink-900">{row.v}</dd>
+                <dd className="mt-0.5 text-sm text-ink-900">{row.v}</dd>
               </div>
             ))}
           </dl>
 
           {existing && (
-            <p className="rounded-[10px] border border-violet-100 bg-violet-050 px-3 py-2.5 text-[12px] leading-snug text-violet-ink">
+            <p className="rounded-md border border-primary-tint bg-primary-tint px-3 py-2.5 text-xs leading-snug text-violet-ink">
               {/* Reworded to sidestep the article: "A availability
                   request" is what a template gets you when the noun
                   varies. */}
@@ -179,7 +179,7 @@ export default function RequestFollowUp({
 
           {/* which outlets */}
           <section>
-            <h3 className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+            <h3 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
               Which outlets
             </h3>
             <div className="mt-2 flex flex-col gap-1.5">
@@ -202,9 +202,9 @@ export default function RequestFollowUp({
               ].map((option) => (
                 <label
                   key={option.id}
-                  className={`flex cursor-pointer gap-2.5 rounded-[10px] border px-3 py-2.5 transition-colors ${
+                  className={`flex cursor-pointer gap-2.5 rounded-md border px-3 py-2.5 transition-colors ${
                     mode === option.id
-                      ? "border-violet bg-violet-050"
+                      ? "border-violet bg-primary-tint"
                       : "border-line hover:border-ink-400"
                   }`}
                 >
@@ -216,10 +216,10 @@ export default function RequestFollowUp({
                     className="mt-0.5 h-3.5 w-3.5 shrink-0 accent-[color:var(--color-violet)]"
                   />
                   <span className="min-w-0">
-                    <span className="block text-[12.5px] font-semibold text-ink-900">
+                    <span className="block text-sm font-semibold text-ink-900">
                       {option.label}
                     </span>
-                    <span className="mt-0.5 block text-[11px] leading-snug text-ink-500">
+                    <span className="mt-0.5 block text-xs leading-snug text-ink-500">
                       {option.hint}
                     </span>
                   </span>
@@ -234,9 +234,9 @@ export default function RequestFollowUp({
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search the affected outlets…"
-                className="w-full rounded-[9px] border border-line-strong bg-white px-2.5 py-1.5 text-[12.5px] text-ink-900 outline-none transition-colors placeholder:text-ink-400 focus:border-violet"
+                className="w-full rounded-md border border-line-strong bg-white px-2.5 py-1.5 text-sm text-ink-900 outline-none transition-colors placeholder:text-ink-400 focus:border-violet"
               />
-              <ul className="mt-2 max-h-[280px] overflow-y-auto rounded-[10px] border border-line">
+              <ul className="mt-2 max-h-[280px] overflow-y-auto rounded-md border border-line">
                 {listed.map((row) => (
                   <li key={row.posId} className="border-b border-line last:border-0">
                     <label className="flex cursor-pointer items-center gap-2.5 px-3 py-2">
@@ -254,10 +254,10 @@ export default function RequestFollowUp({
                         className="h-3.5 w-3.5 shrink-0 accent-[color:var(--color-violet)]"
                       />
                       <span className="min-w-0 flex-1">
-                        <span className="block truncate text-[12.5px] text-ink-900">
+                        <span className="block truncate text-sm text-ink-900">
                           {row.outlet!.name}
                         </span>
-                        <span className="mono block truncate text-[11px] text-ink-400">
+                        <span className="mono block truncate text-xs text-ink-400">
                           {row.outlet!.district}, {governorateName(row.outlet!.governorateId)}
                         </span>
                       </span>
@@ -271,7 +271,7 @@ export default function RequestFollowUp({
                 ))}
               </ul>
               {affected.length > listed.length && (
-                <p className="mt-1.5 text-[11px] text-ink-400">
+                <p className="mt-1.5 text-xs text-ink-400">
                   Showing {listed.length} of {affected.length.toLocaleString()} affected outlets —
                   search to narrow the list.
                 </p>
@@ -281,7 +281,7 @@ export default function RequestFollowUp({
 
           {/* when */}
           <section>
-            <h3 className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+            <h3 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
               Follow-up cycle
             </h3>
             <div className="mt-2 flex flex-wrap gap-1.5">
@@ -290,9 +290,9 @@ export default function RequestFollowUp({
                   key={id}
                   type="button"
                   onClick={() => setCycle(id)}
-                  className={`rounded-[9px] border px-2.5 py-1.5 text-[12.5px] font-semibold transition-colors ${
+                  className={`rounded-md border px-2.5 py-1.5 text-sm font-semibold transition-colors ${
                     cycle === id
-                      ? "border-violet bg-violet-050 text-violet-ink"
+                      ? "border-violet bg-primary-tint text-violet-ink"
                       : "border-line-strong bg-white text-ink-700 hover:border-ink-400"
                   }`}
                 >
@@ -300,12 +300,12 @@ export default function RequestFollowUp({
                 </button>
               ))}
               {cycles.length === 0 && (
-                <p className="text-[12px] text-ink-500">
+                <p className="text-xs text-ink-500">
                   No cycle after {monthLabel(view.month)} is open for requests.
                 </p>
               )}
             </div>
-            <p className="mt-2 text-[11px] leading-snug text-ink-400">
+            <p className="mt-2 text-xs leading-snug text-ink-400">
               The outlets join that cycle&apos;s route. Results appear as the field team works
               through them, compared against these same outlets rather than against the market.
             </p>

@@ -22,7 +22,7 @@ type QuoteField = FieldName | "industry" | "customIndustry";
 type AllErrors = Partial<Record<QuoteField, string>>;
 
 const inputBase =
-  "w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-ink-900 placeholder:text-ink-500 focus:outline-none focus:ring-2 focus:ring-violet/20";
+  "w-full rounded-md border bg-white px-3 py-2.5 text-sm text-ink-900 placeholder:text-ink-500 focus:outline-none focus:ring-2 focus:ring-violet/20";
 
 function cls(err?: string) {
   return `${inputBase} ${err ? "border-critical" : "border-line focus:border-violet"}`;
@@ -78,14 +78,14 @@ function ScopeRange({
   onChange: (value: number) => void;
 }) {
   return (
-    <div className="rounded-2xl border border-line bg-white p-5 shadow-[var(--shadow-card)]">
+    <div className="rounded-lg border border-line bg-white p-5 shadow-[var(--shadow-card)]">
       <div className="flex items-center justify-between gap-4">
         <label htmlFor={id} className="text-sm font-semibold text-ink-900">
           {label}
         </label>
         <output
           htmlFor={id}
-          className="min-w-20 rounded-lg bg-violet-050 px-3 py-1.5 text-center font-display text-base font-bold text-violet-ink"
+          className="min-w-20 rounded-md bg-primary-tint px-3 py-1.5 text-center font-display text-base font-semibold text-violet-ink"
         >
           {valueLabel}
         </output>
@@ -100,7 +100,7 @@ function ScopeRange({
         onChange={(event) => onChange(Number(event.target.value))}
         className="mt-5 h-2 w-full cursor-pointer [accent-color:var(--color-violet)]"
       />
-      <div className="mt-2 flex justify-between text-[11px] font-medium text-ink-600">
+      <div className="mt-2 flex justify-between text-xs font-medium text-ink-600">
         <span>{minLabel}</span>
         <span>{maxLabel}</span>
       </div>
@@ -247,17 +247,17 @@ export default function QuoteForm({
           <div className="flex h-full min-h-[420px] flex-col items-center justify-center text-center">
             <span
               className="flex h-12 w-12 items-center justify-center rounded-full"
-              style={{ background: "color-mix(in srgb, var(--color-good) 14%, #fff)" }}
+              style={{ background: "var(--vm-primary-tint)" }}
             >
               <Icon name="check" className="h-6 w-6" />
             </span>
-            <h3 className="t-h3 mt-4 !text-xl">{leadForm.success.title}</h3>
+            <h3 className="t-h3 mt-4 !text-[22px]">{leadForm.success.title}</h3>
             <p className="mt-2 max-w-sm text-sm text-ink-500">{leadForm.success.body}</p>
           </div>
         ) : (
           <form onSubmit={onSubmit} noValidate>
             <span className="t-eyebrow !text-violet-ink">{leadForm.eyebrow}</span>
-            <h3 className="t-h3 mt-2 !text-2xl">{leadForm.headline}</h3>
+            <h3 className="t-h3 mt-2 !text-[28px]">{leadForm.headline}</h3>
             <p className="mt-2 text-sm text-ink-500">{leadForm.intro}</p>
 
             <div className="mt-7 grid gap-5 sm:grid-cols-2">
@@ -340,12 +340,12 @@ export default function QuoteForm({
               <div className="sm:col-span-2">
                 <Field label="Industry" htmlFor={id("industry")} error={errors.industry}>
                   <div className="relative">
-                    <span className="pointer-events-none absolute left-2.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg bg-violet-050 text-violet-ink">
+                    <span className="pointer-events-none absolute left-2.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md bg-primary-tint text-violet-ink">
                       <Icon name="assortment" className="h-4 w-4" />
                     </span>
                     <select
                       id={id("industry")}
-                      className={`w-full appearance-none rounded-xl border bg-white py-3 pl-12 pr-11 text-sm font-medium outline-none transition focus:border-violet focus:ring-2 focus:ring-violet/20 ${
+                      className={`w-full appearance-none rounded-md border bg-white py-3 pl-12 pr-11 text-sm font-medium outline-none transition focus:border-violet focus:ring-2 focus:ring-violet/20 ${
                         errors.industry
                           ? "border-critical text-ink-900"
                           : `border-line ${industry ? "text-ink-900" : "text-ink-500"}`
@@ -423,7 +423,7 @@ export default function QuoteForm({
               />
             </div>
 
-            <div className="mt-7 rounded-xl border border-violet/15 bg-violet-050 px-4 py-3 text-center text-xs font-medium text-violet-ink">
+            <div className="mt-7 rounded-md border border-violet/15 bg-primary-tint px-4 py-3 text-center text-xs font-medium text-violet-ink">
               Quote scope: {scope.posPerMonth.toLocaleString("en-US")} POS / month ·{" "}
               {scope.categories} {scope.categories === 1 ? "category" : "categories"} ·{" "}
               {scope.cities} {scope.cities === 1 ? "city" : "cities"}

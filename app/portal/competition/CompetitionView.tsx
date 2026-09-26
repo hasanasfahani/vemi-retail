@@ -106,7 +106,7 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
   return (
     <div className="flex flex-col gap-4">
       {narrowed && (
-        <p className="rounded-[12px] border border-violet-100 bg-violet-050 px-3.5 py-2.5 text-[12.5px] leading-snug text-violet-ink">
+        <p className="rounded-md border border-primary-tint bg-primary-tint px-3.5 py-2.5 text-sm leading-snug text-violet-ink">
           The brand and SKU filters do not apply on this page — a comparison needs every brand in
           it. City, channel and retailer filters are applied as normal.
         </p>
@@ -115,10 +115,10 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
       {/* ---------- A · scoreboard ---------- */}
       <section>
         <div className="mb-2 flex items-baseline justify-between gap-3">
-          <h2 className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+          <h2 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
             Competitive scoreboard
           </h2>
-          <span className="mono text-[11.5px] text-ink-400">
+          <span className="mono text-xs text-ink-400">
             {all.posCount.toLocaleString()} audited outlets · {all.totalFacings.toLocaleString()} facings
           </span>
         </div>
@@ -275,7 +275,7 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
           <div className="flex flex-wrap items-start gap-x-3 gap-y-2">
             {ordered.map((b) => (
               <span key={b.id} className="flex flex-col items-center gap-0.5">
-                <span className="inline-flex items-center gap-1.5 text-[11.5px] text-ink-500">
+                <span className="inline-flex items-center gap-1.5 text-xs text-ink-500">
                   <span
                     className="h-2 w-2 shrink-0 rounded-[2px]"
                     style={{ background: brandColor(b.id) }}
@@ -373,10 +373,10 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
       {/* ---------- E · competitive findings ---------- */}
       <section>
         <div className="mb-2 flex items-baseline justify-between gap-3">
-          <h2 className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+          <h2 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
             Competitive findings
           </h2>
-          <span className="mono text-[11.5px] text-ink-400">
+          <span className="mono text-xs text-ink-400">
             Everything the audit measured against a rival rather than a target
           </span>
         </div>
@@ -432,8 +432,8 @@ function ScoreCard({ row, leader, month }: { row: BrandRow; leader: BrandRow; mo
 
   return (
     <article
-      className={`flex min-w-0 flex-col rounded-[14px] border bg-white p-4 shadow-[var(--shadow-card)] ${
-        row.isClient ? "border-violet-100" : "border-line"
+      className={`flex min-w-0 flex-col rounded-lg border bg-white p-4 shadow-[var(--shadow-card)] ${
+        row.isClient ? "border-primary-tint" : "border-line"
       }`}
     >
       <div className="flex items-start justify-between gap-2">
@@ -444,11 +444,11 @@ function ScoreCard({ row, leader, month }: { row: BrandRow; leader: BrandRow; mo
               style={{ background: brandColor(row.id) }}
               aria-hidden
             />
-            <h3 className="font-display text-[15px] font-bold tracking-tight text-ink-900">
+            <h3 className="font-display text-[15px] font-semibold tracking-tight text-ink-900">
               {row.name}
             </h3>
           </div>
-          <p className="mt-0.5 truncate text-[11.5px] text-ink-400">{row.owner}</p>
+          <p className="mt-0.5 truncate text-xs text-ink-400">{row.owner}</p>
         </div>
         {row.isClient ? (
           <Badge band="average" label="Your brand" size="sm" />
@@ -477,9 +477,9 @@ function ScoreCard({ row, leader, month }: { row: BrandRow; leader: BrandRow; mo
                 />
               )}
             </span>
-            <dt className="w-[104px] shrink-0 text-[11.5px] text-ink-500">{m.label}</dt>
+            <dt className="w-[104px] shrink-0 text-xs text-ink-500">{m.label}</dt>
             <Bar value={m.value} max={m.max} par={m.par} color={brandColor(row.id)} label={`${row.name} ${m.label}`} />
-            <dd className="mono w-[48px] shrink-0 text-right text-[12px] font-semibold text-ink-900">
+            <dd className="mono w-[48px] shrink-0 text-right text-xs font-semibold text-ink-900">
               {m.value}
               {m.unit}
             </dd>
@@ -487,7 +487,7 @@ function ScoreCard({ row, leader, month }: { row: BrandRow; leader: BrandRow; mo
         ))}
       </dl>
 
-      <p className="mono mt-3 border-t border-line pt-2.5 text-[11px] text-ink-400">
+      <p className="mono mt-3 border-t border-line pt-2.5 text-xs text-ink-400">
         {row.outlets.toLocaleString()} outlets stocking · {row.facings.toLocaleString()} facings ·
         price index {row.priceIndex}
       </p>

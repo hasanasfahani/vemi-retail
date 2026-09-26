@@ -236,7 +236,7 @@ export const trust = {
     location: "Erbil · Downtown / Qaysari",
     channel: "Mini-market",
     captured: "12 Aug 2026 · 15:10",
-    auditRef: "#22137918",
+    auditRef: "#22137918", // brand-check-ignore: an audit reference, not a color
     status: "Human-verified",
     finding: "Multiple competing brand blocks detected across the same freezer bay",
     analysisPoints: ["Brand blocks identified", "Shelf levels mapped", "Facing patterns extracted"],

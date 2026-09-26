@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // The brand source kit: reference material, not part of the app.
+    "Vemi Branding/**",
   ]),
 ]);
 

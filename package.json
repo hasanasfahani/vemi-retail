@@ -11,7 +11,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "market:build": "node scripts/build-market-data.mjs",
-    "market:check": "node scripts/check-market-data.mjs"
+    "market:check": "node scripts/check-market-data.mjs",
+    "brand:check": "node scripts/brand-check.mjs"
   },
   "dependencies": {
     "framer-motion": "^12.42.2",

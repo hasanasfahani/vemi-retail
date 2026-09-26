@@ -54,18 +54,18 @@ export default function KpiGapBar({
   const met = gap <= 0;
 
   return (
-    <section className="rounded-[14px] border border-line bg-white p-4 shadow-[var(--shadow-card)] sm:p-5">
+    <section className="rounded-lg border border-line bg-white p-4 shadow-[var(--shadow-card)] sm:p-5">
       <div className="flex flex-wrap items-start justify-between gap-x-8 gap-y-4">
         {/* the figure */}
         <div className="min-w-[210px]">
-          <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+          <p className="flex items-center gap-2 uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
             {label}
             {explain && <InfoTip label={`How ${label} is measured`} align="left">{explain}</InfoTip>}
           </p>
           <p className="mt-1.5 flex items-end gap-2.5">
-            <span className="font-display text-[38px] font-bold leading-none tracking-tight text-ink-900">
+            <span className="font-display text-[36px] font-semibold leading-none tracking-tight text-ink-900">
               {value}
-              <span className="ml-0.5 text-[20px] font-semibold text-ink-500">{unit}</span>
+              <span className="ml-0.5 text-lg font-semibold text-ink-500">{unit}</span>
             </span>
             <span className="mb-1">
               <StatusChip
@@ -84,25 +84,25 @@ export default function KpiGapBar({
         {/* target and gap, which is the sentence the page is about */}
         <dl className="flex min-w-[200px] gap-8">
           <div>
-            <dt className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+            <dt className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
               Target
             </dt>
-            <dd className="mono mt-1 text-[19px] font-semibold text-ink-700">
+            <dd className="mono mt-1 text-lg font-semibold text-ink-700">
               {target}
               {unit}
             </dd>
           </div>
           <div>
-            <dt className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+            <dt className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
               Gap
             </dt>
             <dd
-              className="mono mt-1 text-[19px] font-semibold"
+              className="mono mt-1 text-lg font-semibold"
               style={{ color: met ? "var(--color-good)" : "var(--color-serious)" }}
             >
               {met ? `+${Math.abs(gap)}` : `−${Math.abs(gap)}`}
               {unit}
-              <span className="ml-1.5 text-[11.5px] font-normal text-ink-400">
+              <span className="ml-1.5 text-xs font-normal text-ink-400">
                 {met ? "above target" : "below target"}
               </span>
             </dd>
@@ -111,16 +111,16 @@ export default function KpiGapBar({
 
         {/* scope: the two counts, never merged */}
         <div className="min-w-[190px]">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+          <p className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
             Issue scope
           </p>
           <p className="mono mt-1 text-[15px] font-semibold text-ink-900">
             {affectedPos.toLocaleString()}
-            <span className="ml-1 text-[12px] font-normal text-ink-500">affected POS</span>
+            <span className="ml-1 text-xs font-normal text-ink-500">affected POS</span>
           </p>
-          <p className="mono text-[13px] text-ink-700">
+          <p className="mono text-sm text-ink-700">
             {issues.toLocaleString()}
-            <span className="ml-1 text-[12px] font-normal text-ink-500">{issueNoun}</span>
+            <span className="ml-1 text-xs font-normal text-ink-500">{issueNoun}</span>
           </p>
         </div>
 

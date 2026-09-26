@@ -95,10 +95,10 @@ function Setup({ view }: { view: MarketView }) {
             { k: "Currency", v: contract.currency },
           ].map((item) => (
             <div key={item.k}>
-              <dt className="text-[10.5px] font-semibold uppercase tracking-wide text-ink-400">
+              <dt className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
                 {item.k}
               </dt>
-              <dd className="mt-0.5 text-[13px] font-semibold text-ink-900">{item.v}</dd>
+              <dd className="mt-0.5 text-sm font-semibold text-ink-900">{item.v}</dd>
             </div>
           ))}
         </dl>
@@ -117,7 +117,7 @@ function Setup({ view }: { view: MarketView }) {
                 setDirty(false);
                 push("Targets restored to the contracted values.");
               }}
-              className="rounded-[9px] border border-line-strong bg-white px-2.5 py-1.5 text-[12px] font-semibold text-ink-700 transition-colors hover:border-ink-400"
+              className="rounded-md border border-line-strong bg-white px-2.5 py-1.5 text-xs font-semibold text-ink-700 transition-colors hover:border-ink-400"
             >
               Restore contracted targets
             </button>
@@ -133,8 +133,8 @@ function Setup({ view }: { view: MarketView }) {
               <li key={meta.id} className="border-b border-line py-3 last:border-0">
                 <div className="flex flex-wrap items-center gap-3">
                   <div className="min-w-[210px] flex-1">
-                    <p className="text-[12.5px] font-semibold text-ink-900">{meta.label}</p>
-                    <p className="text-[11px] text-ink-400">{meta.hint}</p>
+                    <p className="text-sm font-semibold text-ink-900">{meta.label}</p>
+                    <p className="text-xs text-ink-400">{meta.hint}</p>
                   </div>
 
                   <input
@@ -156,9 +156,9 @@ function Setup({ view }: { view: MarketView }) {
                       max={100}
                       value={value}
                       onChange={(e) => change(meta.id, Number(e.target.value))}
-                      className="w-[68px] rounded-[8px] border border-line-strong bg-white px-2 py-1 text-right text-[12.5px] font-semibold text-ink-900 outline-none transition-colors focus:border-violet"
+                      className="w-[68px] rounded-md border border-line-strong bg-white px-2 py-1 text-right text-sm font-semibold text-ink-900 outline-none transition-colors focus:border-violet"
                     />
-                    <span className="text-[12px] text-ink-400">
+                    <span className="text-xs text-ink-400">
                       {meta.id === "score" ? "/100" : "%"}
                     </span>
                   </label>
@@ -179,7 +179,7 @@ function Setup({ view }: { view: MarketView }) {
 
       {/* ---------- monitored brands ---------- */}
       <section>
-        <h2 className="mb-2.5 text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+        <h2 className="mb-2.5 uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
           Monitored brands
         </h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
@@ -189,8 +189,8 @@ function Setup({ view }: { view: MarketView }) {
             return (
               <div
                 key={brand.id}
-                className={`flex min-w-0 flex-col rounded-[14px] border bg-white p-3.5 shadow-[var(--shadow-card)] ${
-                  brand.id === clientBrand.id ? "border-violet-100" : "border-line"
+                className={`flex min-w-0 flex-col rounded-lg border bg-white p-3.5 shadow-[var(--shadow-card)] ${
+                  brand.id === clientBrand.id ? "border-primary-tint" : "border-line"
                 }`}
               >
                 <div className="flex items-center gap-2">
@@ -199,16 +199,16 @@ function Setup({ view }: { view: MarketView }) {
                     style={{ background: brandColor(brand.id) }}
                     aria-hidden
                   />
-                  <p className="min-w-0 truncate text-[13px] font-semibold text-ink-900">
+                  <p className="min-w-0 truncate text-sm font-semibold text-ink-900">
                     {brand.name}
                   </p>
                 </div>
-                <p className="mt-0.5 truncate text-[11px] text-ink-400">{brand.owner}</p>
-                <p className="mono mt-2 text-[11.5px] text-ink-500">
+                <p className="mt-0.5 truncate text-xs text-ink-400">{brand.owner}</p>
+                <p className="mono mt-2 text-xs text-ink-500">
                   {own.length} SKU{own.length === 1 ? "" : "s"} monitored
                 </p>
                 {row && (
-                  <p className="mono mt-0.5 text-[11.5px] text-ink-400">
+                  <p className="mono mt-0.5 text-xs text-ink-400">
                     {row.share}% of shelf this cycle
                   </p>
                 )}
@@ -246,7 +246,7 @@ function Setup({ view }: { view: MarketView }) {
 
       {/* ---------- coverage scope ---------- */}
       <section>
-        <h2 className="mb-2.5 text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+        <h2 className="mb-2.5 uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
           Coverage scope
         </h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -270,13 +270,13 @@ function Setup({ view }: { view: MarketView }) {
               return (
                 <li key={city.id} className="border-b border-line py-2.5 last:border-0">
                   <div className="flex items-baseline justify-between gap-2">
-                    <span className="text-[12.5px] font-medium text-ink-700">
+                    <span className="text-sm font-medium text-ink-700">
                       {city.name}
                       {city.capital !== city.name && (
-                        <span className="ml-1.5 text-[11px] text-ink-400">{city.capital}</span>
+                        <span className="ml-1.5 text-xs text-ink-400">{city.capital}</span>
                       )}
                     </span>
-                    <span className="mono text-[12px] text-ink-900">
+                    <span className="mono text-xs text-ink-900">
                       {audited.toLocaleString()} / {city.pos.toLocaleString()}
                       <span className="ml-1.5 text-ink-400">{pct}%</span>
                     </span>
@@ -298,11 +298,11 @@ function Setup({ view }: { view: MarketView }) {
       >
         <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
           {channels.map((channel) => (
-            <li key={channel.id} className="rounded-[10px] border border-line px-3 py-2.5">
-              <p className="text-[12px] font-semibold text-ink-900">{channel.name}</p>
-              <p className="mono mt-0.5 text-[16px] font-bold text-ink-900">
+            <li key={channel.id} className="rounded-md border border-line px-3 py-2.5">
+              <p className="text-xs font-semibold text-ink-900">{channel.name}</p>
+              <p className="mono mt-0.5 text-base font-semibold text-ink-900">
                 {requiredSkus[channel.id] ?? "—"}
-                <span className="ml-1 text-[11px] font-normal text-ink-400">SKUs expected</span>
+                <span className="ml-1 text-xs font-normal text-ink-400">SKUs expected</span>
               </p>
             </li>
           ))}
@@ -316,9 +316,9 @@ function Setup({ view }: { view: MarketView }) {
       >
         <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {auditors.map((auditor) => (
-            <li key={auditor.id} className="rounded-[10px] border border-line px-3 py-2.5">
-              <p className="text-[12.5px] font-semibold text-ink-900">{auditor.name}</p>
-              <p className="mt-0.5 text-[11.5px] text-ink-500">
+            <li key={auditor.id} className="rounded-md border border-line px-3 py-2.5">
+              <p className="text-sm font-semibold text-ink-900">{auditor.name}</p>
+              <p className="mt-0.5 text-xs text-ink-500">
                 {auditor.governorates.map((c) => governorates.find((x) => x.id === c)?.name ?? c).join(" · ")}
               </p>
             </li>

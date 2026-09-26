@@ -14,7 +14,7 @@ const GHOST = "var(--color-line-strong)";
 export default function BlockShapeGlyph({ shape }: { shape: BlockShape }) {
   return (
     <span
-      className="flex h-[26px] w-[34px] shrink-0 items-center justify-center rounded-[5px] border border-line bg-canvas"
+      className="flex h-[26px] w-[34px] shrink-0 items-center justify-center rounded-sm border border-line bg-canvas"
       aria-hidden
     >
       <svg viewBox="0 0 34 26" className="h-[26px] w-[34px]">

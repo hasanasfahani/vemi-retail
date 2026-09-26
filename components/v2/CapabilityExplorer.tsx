@@ -125,10 +125,10 @@ function ScoreRing({ value, size = 104 }: { value: number; size?: number }) {
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="tnum text-3xl" style={{ color: "var(--color-violet-ink)" }}>
+        <span className="tnum text-[28px]" style={{ color: "var(--color-violet-ink)" }}>
           <CountUp to={value} />
         </span>
-        <span className="text-[10px] text-ink-600">/ 100</span>
+        <span className="text-xs text-ink-600">/ 100</span>
       </div>
     </div>
   );
@@ -156,9 +156,9 @@ function Bar({
       <span className={`w-28 shrink-0 truncate text-xs ${strong ? "font-semibold text-ink-900" : "text-ink-500"}`}>
         {label}
       </span>
-      <div className="h-3 flex-1 overflow-hidden rounded bg-line">
+      <div className="h-3 flex-1 overflow-hidden rounded-sm bg-line">
         <AnimatedFill
-          className="h-full rounded"
+          className="h-full rounded-sm"
           width={`${(value / scale) * 100}%`}
           tone={tone}
           delay={delay}
@@ -190,13 +190,13 @@ function Preview({ title }: { title: string }) {
           <div className="flex items-end justify-between">
             <div>
               <span className="t-eyebrow">On-shelf availability</span>
-              <div className="tnum text-3xl">73%</div>
+              <div className="tnum text-[28px]">73%</div>
             </div>
             <ChartReveal>
               <Sparkline data={[66, 68, 67, 70, 71, 70, 72, 73]} />
             </ChartReveal>
           </div>
-          <div className="mt-4 flex h-3 gap-0.5 overflow-hidden rounded">
+          <div className="mt-4 flex h-3 gap-0.5 overflow-hidden rounded-sm">
             <AnimatedFill className="h-full shrink-0" width="73%" tone="var(--color-violet)" />
             <AnimatedFill className="h-full shrink-0" width="15%" tone="var(--color-critical)" delay={0.16} />
             <AnimatedFill className="h-full shrink-0" width="12%" tone="var(--color-warn)" delay={0.28} />
@@ -228,7 +228,7 @@ function Preview({ title }: { title: string }) {
       return (
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-line text-[11px] uppercase tracking-wide text-ink-600">
+            <tr className="border-b border-line uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-600">
               <th className="pb-2 font-medium">SKU</th>
               <th className="pb-2 text-right font-medium">Shelf</th>
               <th className="pb-2 text-right font-medium">RRP</th>
@@ -273,9 +273,9 @@ function Preview({ title }: { title: string }) {
                 <span className={`w-20 shrink-0 text-xs ${x.prime ? "font-semibold text-ink-900" : "text-ink-500"}`}>
                   {x.p}
                 </span>
-                <div className="h-2.5 flex-1 overflow-hidden rounded bg-line">
+                <div className="h-2.5 flex-1 overflow-hidden rounded-sm bg-line">
                   <AnimatedFill
-                    className="h-full rounded"
+                    className="h-full rounded-sm"
                     width={`${x.v}%`}
                     tone={x.prime ? "var(--color-violet)" : "var(--color-comp-1)"}
                     delay={index * 0.08}
@@ -315,7 +315,7 @@ function Preview({ title }: { title: string }) {
               <div className="mt-0.5 flex items-baseline gap-2">
                 <span className="tnum !text-lg text-ink-500 line-through">83%</span>
                 <span aria-hidden className="text-ink-400">&rarr;</span>
-                <span className="tnum text-3xl">
+                <span className="tnum text-[28px]">
                   <CountUp to={100} />%
                 </span>
               </div>
@@ -325,13 +325,13 @@ function Preview({ title }: { title: string }) {
 
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <figure className="min-w-0">
-              <figcaption className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-ink-600">
+              <figcaption className="mb-1.5 uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-600">
                 Before &middot; audit
               </figcaption>
               <PlanogramScene rows={before} />
             </figure>
             <figure className="min-w-0">
-              <figcaption className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-ink-600">
+              <figcaption className="mb-1.5 uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-600">
                 After &middot; re-audit
               </figcaption>
               <PlanogramScene rows={after} />
@@ -356,7 +356,7 @@ function Preview({ title }: { title: string }) {
             { w: "Shelf wobbler + price card", who: "Your brand · Erbil", t: "6d ago" },
           ].map((p) => (
             <div key={p.w} className="flex items-center gap-3 py-2.5 first:pt-0">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-violet-050">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary-tint">
                 <Icon name="photo" className="h-4 w-4 text-violet-ink" />
               </span>
               <div className="min-w-0 flex-1">
@@ -373,7 +373,7 @@ function Preview({ title }: { title: string }) {
       return (
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-line text-[11px] uppercase tracking-wide text-ink-600">
+            <tr className="border-b border-line uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-600">
               <th className="pb-2 font-medium">SKU</th>
               <th className="pb-2 text-center font-medium">Listed</th>
               <th className="pb-2 text-center font-medium">In store</th>
@@ -408,7 +408,7 @@ function Preview({ title }: { title: string }) {
       return (
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-line text-[11px] uppercase tracking-wide text-ink-600">
+            <tr className="border-b border-line uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-600">
               <th className="pb-2 font-medium">Brand</th>
               <th className="pb-2 text-right font-medium">Avail.</th>
               <th className="pb-2 text-right font-medium">Share</th>
@@ -422,7 +422,7 @@ function Preview({ title }: { title: string }) {
               { b: "Competitor B", a: 64, s: 18, p: 1 },
               { b: "Competitor C", a: 59, s: 12, p: 0 },
             ].map((r) => (
-              <tr key={r.b} className={`border-b border-line last:border-0 ${r.me ? "bg-violet-050" : ""}`}>
+              <tr key={r.b} className={`border-b border-line last:border-0 ${r.me ? "bg-primary-tint" : ""}`}>
                 <td className={`py-2 ${r.me ? "font-semibold text-violet-ink" : "font-medium text-ink-900"}`}>{r.b}</td>
                 <td className="mono py-2 text-right text-ink-700">{r.a}%</td>
                 <td className="mono py-2 text-right text-ink-700">{r.s}%</td>
@@ -454,12 +454,12 @@ export default function CapabilityExplorer() {
               onMouseEnter={() => setActive(i)}
               onClick={() => setActive(i)}
               aria-pressed={on}
-              className={`flex items-start gap-3 rounded-xl border px-3.5 py-3 text-left transition-colors ${
-                on ? "border-violet/30 bg-violet-050" : "border-transparent hover:bg-canvas"
+              className={`flex items-start gap-3 rounded-md border px-3.5 py-3 text-left transition-colors ${
+                on ? "border-violet/30 bg-primary-tint" : "border-transparent hover:bg-canvas"
               }`}
             >
               <span
-                className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${
+                className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md border ${
                   on ? "border-transparent bg-violet text-white" : "border-line text-ink-700"
                 }`}
               >
@@ -479,7 +479,7 @@ export default function CapabilityExplorer() {
       {/* live preview */}
       <div className="surface flex flex-col overflow-hidden lg:sticky lg:top-24 lg:self-start">
         <div className="flex items-center justify-between border-b border-line px-4 py-2.5">
-          <span className="text-[13px] font-semibold text-ink-900">{current.title}</span>
+          <span className="text-sm font-semibold text-ink-900">{current.title}</span>
           <span className="inline-flex items-center gap-1.5 text-xs text-ink-500">
             <span className="dot dot-live" style={{ background: "var(--color-good)" }} />
             Live preview

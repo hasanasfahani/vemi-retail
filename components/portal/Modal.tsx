@@ -55,7 +55,7 @@ export default function Modal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto p-4 sm:p-6"
-      style={{ background: "rgba(20,21,26,0.55)" }}
+      style={{ background: "var(--vm-scrim)" }}
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -66,13 +66,13 @@ export default function Modal({
         aria-modal="true"
         aria-labelledby={labelledBy}
         tabIndex={-1}
-        className={`relative my-auto w-full ${width} overflow-hidden rounded-2xl bg-white shadow-[var(--shadow-surface)] outline-none`}
+        className={`relative my-auto w-full ${width} overflow-hidden rounded-lg bg-white shadow-[var(--shadow-surface)] outline-none`}
       >
         <button
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className="absolute right-3 top-3 z-10 rounded-lg p-2 text-ink-500 transition-colors hover:bg-canvas hover:text-ink-900"
+          className="absolute right-3 top-3 z-10 rounded-md p-2 text-ink-500 transition-colors hover:bg-canvas hover:text-ink-900"
         >
           <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden>
             <path d="M5 5l10 10M15 5L5 15" />

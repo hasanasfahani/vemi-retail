@@ -48,7 +48,7 @@ function ShellSkeleton() {
         <div className="h-[57px] border-t border-line" />
       </div>
       <main className="min-w-0 flex-1 px-4 py-5 sm:px-6">
-        <div className="h-40 animate-pulse rounded-[14px] border border-line bg-white" />
+        <div className="h-40 animate-pulse rounded-lg border border-line bg-white" />
       </main>
     </>
   );

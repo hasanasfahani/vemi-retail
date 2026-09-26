@@ -79,11 +79,11 @@ export default function KpiCard({
        button inside an anchor is neither valid nor operable. So the
        link is an overlay underneath the content and the info control
        sits above it. */
-    <article className="group relative flex min-w-0 flex-col rounded-[14px] border border-line bg-white p-3.5 shadow-[var(--shadow-card)] transition-colors hover:border-ink-400 focus-within:border-violet">
+    <article className="group relative flex min-w-0 flex-col rounded-lg border border-line bg-white p-3.5 shadow-[var(--shadow-card)] transition-colors hover:border-ink-400 focus-within:border-violet">
       <Link
         href={href}
         aria-label={`Open ${label} in Performance`}
-        className="absolute inset-0 z-0 rounded-[14px] outline-none"
+        className="absolute inset-0 z-0 rounded-lg outline-none"
       />
 
       {/* The label owns its own line. Sharing a row with the status
@@ -92,7 +92,7 @@ export default function KpiCard({
           1280px. The status moved down beside the movement figure,
           where it has room and reads as part of the same judgement. */}
       <div className="relative z-10 flex items-center justify-between gap-2">
-        <span className="block truncate text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+        <span className="block truncate uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
           {label}
         </span>
         {/* Both controls live in the header row, above the overlay
@@ -116,7 +116,7 @@ export default function KpiCard({
       </div>
 
       <div className="pointer-events-none mt-2 flex items-end justify-between gap-2">
-        <span className="font-display text-[27px] font-bold leading-none tracking-tight text-ink-900">
+        <span className="font-display text-[28px] font-semibold leading-none tracking-tight text-ink-900">
           {value}
           {unit && <span className="ml-0.5 text-[15px] font-semibold text-ink-500">{unit}</span>}
         </span>
@@ -138,10 +138,10 @@ export default function KpiCard({
       </div>
 
       <div className="mt-2 flex flex-wrap items-baseline justify-between gap-x-2 gap-y-1">
-        <span className="mono text-[11.5px] font-semibold" style={{ color: met ? "var(--color-good)" : "var(--color-ink-700)" }}>
+        <span className="mono text-xs font-semibold" style={{ color: met ? "var(--color-good)" : "var(--color-ink-700)" }}>
           {met ? `${Math.abs(gap)}${unit} above target` : `${gap}${unit} to target`}
         </span>
-        <span className="mono text-[11px] text-ink-400">
+        <span className="mono text-xs text-ink-400">
           target {target}
           {unit}
         </span>

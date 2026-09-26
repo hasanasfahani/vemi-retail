@@ -62,7 +62,7 @@ export default function StatCard({
     band ?? (target !== undefined && numeric !== null ? rateBand(numeric, target) : undefined);
 
   return (
-    <div className="flex min-w-0 flex-col rounded-[14px] border border-line bg-white p-3.5 shadow-[var(--shadow-card)]">
+    <div className="flex min-w-0 flex-col rounded-lg border border-line bg-white p-3.5 shadow-[var(--shadow-card)]">
       {/* THE LABEL OWNS ITS OWN ROW, and this is the second time that
           lesson has been learned here. Sharing a row with a status chip
           clipped every KPI tile on the dashboard at 1280px; adding an
@@ -71,7 +71,7 @@ export default function StatCard({
           "BEST MATE…". The controls sit on the row beneath, where they
           have the width they need and still line up across tiles. */}
       <div className="flex items-start justify-between gap-1.5">
-        <span className="min-w-0 flex-1 text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+        <span className="min-w-0 flex-1 uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
           {label}
         </span>
         <span className="flex shrink-0 items-center gap-1">
@@ -90,7 +90,7 @@ export default function StatCard({
       )}
 
       <div className="mt-1.5 flex items-end justify-between gap-2">
-        <span className="font-display text-[26px] font-bold leading-none tracking-tight text-ink-900">
+        <span className="font-display text-[28px] font-semibold leading-none tracking-tight text-ink-900">
           {typeof value === "number" ? value.toLocaleString() : value}
           {unit && (
             <span className="ml-0.5 text-[15px] font-semibold text-ink-500">{unit}</span>
@@ -110,13 +110,13 @@ export default function StatCard({
           />
         )}
         {target !== undefined && (
-          <span className="mono text-[11.5px] text-ink-400">target {target}{unit}</span>
+          <span className="mono text-xs text-ink-400">target {target}{unit}</span>
         )}
         {action}
       </div>
 
       {footnote && (
-        <p className="mt-2 text-[11px] leading-snug text-ink-400">{footnote}</p>
+        <p className="mt-2 text-xs leading-snug text-ink-400">{footnote}</p>
       )}
     </div>
   );

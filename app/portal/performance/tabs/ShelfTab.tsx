@@ -159,7 +159,7 @@ export default function ShelfTab({ view }: { view: MarketView }) {
               meta: `${p.total.toLocaleString()} facings measured at this height`,
               trailing:
                 eye && p.id !== "eye" ? (
-                  <span className="mono shrink-0 text-[11px] text-ink-400">
+                  <span className="mono shrink-0 text-xs text-ink-400">
                     {p.clientShare > eye.clientShare ? "+" : ""}
                     {Math.round((p.clientShare - eye.clientShare) * 10) / 10}pt vs eye
                   </span>
@@ -173,7 +173,7 @@ export default function ShelfTab({ view }: { view: MarketView }) {
       </div>
 
       <section>
-        <h2 className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+        <h2 className="mb-2 uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
           Best executing shelves
         </h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -182,7 +182,7 @@ export default function ShelfTab({ view }: { view: MarketView }) {
       </section>
 
       <section>
-        <h2 className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+        <h2 className="mb-2 uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
           Weakest executing shelves
         </h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

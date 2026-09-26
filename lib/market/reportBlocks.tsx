@@ -131,12 +131,12 @@ function KpiRow({ view, targets }: BlockContext) {
         const band = cell.label === KPI_NAME.score ? scoreBand(cell.value) : rateBand(cell.value, cell.target);
         return (
           <div key={cell.label} className="min-w-0">
-            <span className="block truncate text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+            <span className="block truncate uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
               {cell.label}
             </span>
-            <span className="mt-1 block font-display text-[22px] font-bold leading-none tracking-tight text-ink-900">
+            <span className="mt-1 block font-display text-[22px] font-semibold leading-none tracking-tight text-ink-900">
               {cell.value}
-              {cell.unit && <span className="ml-0.5 text-[13px] font-semibold text-ink-500">{cell.unit}</span>}
+              {cell.unit && <span className="ml-0.5 text-sm font-semibold text-ink-500">{cell.unit}</span>}
             </span>
             <span className="mt-2 block h-1.5 overflow-hidden rounded-full bg-canvas">
               <span
@@ -147,7 +147,7 @@ function KpiRow({ view, targets }: BlockContext) {
                 }}
               />
             </span>
-            <span className="mono mt-1 block text-[11px] text-ink-400">
+            <span className="mono mt-1 block text-xs text-ink-400">
               target {cell.target}
               {cell.unit}
             </span>
@@ -669,7 +669,7 @@ export const BLOCKS: BlockDef[] = [
       ];
       return (
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[520px] border-collapse text-[12px]">
+          <table className="w-full min-w-[520px] border-collapse text-xs">
             <thead>
               <tr className="border-b border-line">
                 <th scope="col" className="py-1.5 pr-3 text-left font-semibold text-ink-400">Brand</th>

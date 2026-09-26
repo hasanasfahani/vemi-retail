@@ -41,7 +41,7 @@ export default function PlanogramScene({
 
   return (
     <svg viewBox={`0 0 ${W} ${height}`} className="w-full" role="img" aria-label="Shelf bay showing planogram compliance">
-      <rect x="0" y="0" width={W} height={height} rx="8" fill="#f2f3f7" />
+      <rect x="0" y="0" width={W} height={height} rx="8" fill="var(--vm-bg)" />
 
       {rows.map((row, r) => {
         const top = r * shelfH;
@@ -50,8 +50,8 @@ export default function PlanogramScene({
         return (
           <g key={r}>
             {/* the board */}
-            <rect x={4} y={base} width={W - 8} height={4.5} rx={1.5} fill="#c9ccd4" />
-            <rect x={4} y={base + 4.5} width={W - 8} height={1.8} fill="#b3b7c1" opacity={0.7} />
+            <rect x={4} y={base} width={W - 8} height={4.5} rx={1.5} fill="var(--vm-line-strong)" />
+            <rect x={4} y={base + 4.5} width={W - 8} height={1.8} fill="var(--vm-line)" opacity={0.7} />
             <text x={8} y={top + 10} fontSize={6.5} fill="var(--color-ink-600)" letterSpacing={0.4}>
               {SHELVES[r]?.toUpperCase()}
             </text>
@@ -100,7 +100,7 @@ export default function PlanogramScene({
                           y={packTop + shape.h * 0.42}
                           width={shape.w}
                           height={shape.h * 0.2}
-                          fill="#ffffff"
+                          fill="var(--vm-surface)"
                           opacity={0.3}
                         />
                         {!shape.can && (

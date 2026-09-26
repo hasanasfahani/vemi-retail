@@ -100,7 +100,7 @@ function FollowUpCenter({ view }: { view: MarketView }) {
   const cycles = [...new Set(rows.map((r) => r.request.cycle))].sort();
 
   if (queue.loading || !ready) {
-    return <div className="h-64 animate-pulse rounded-[14px] border border-line bg-white" />;
+    return <div className="h-64 animate-pulse rounded-lg border border-line bg-white" />;
   }
 
   const toggle = (set: Set<string>, id: string, apply: (next: Set<string>) => void) => {
@@ -112,7 +112,7 @@ function FollowUpCenter({ view }: { view: MarketView }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="rounded-[12px] border border-line bg-white px-3.5 py-2.5 text-[12.5px] leading-snug text-ink-500">
+      <p className="rounded-md border border-line bg-white px-3.5 py-2.5 text-sm leading-snug text-ink-500">
         Gaps you asked Vemi to check again, and what the next audit found. Requests raised here
         and from the Performance tabs live in this browser only.{" "}
         <button type="button" onClick={queue.reset} className="font-semibold text-violet-ink hover:underline">
@@ -142,7 +142,7 @@ function FollowUpCenter({ view }: { view: MarketView }) {
           <Select label="Result" value={resultFilter} onChange={(v) => setResultFilter(v as RevisitResult | "")}
             options={RESULTS.map((r) => ({ value: r, label: RESULT_LABEL[r] }))} />
           <span className="ml-auto flex items-center gap-2">
-            <span className="mono text-[11.5px] text-ink-400">
+            <span className="mono text-xs text-ink-400">
               {shown.length} of {rows.length} requests
             </span>
             <InfoTip label="How these figures are measured">
@@ -167,11 +167,11 @@ function FollowUpCenter({ view }: { view: MarketView }) {
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[980px] border-collapse text-[12.5px]">
+            <table className="w-full min-w-[980px] border-collapse text-sm">
               <thead>
                 <tr className="border-b border-line">
                   {["", "KPI / case", "Scope", "Baseline", "Target", "Follow-up", "Status", "Revisit result", ""].map((h, i) => (
-                    <th key={i} scope="col" className="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+                    <th key={i} scope="col" className="px-3 py-2.5 text-left uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
                       {h}
                     </th>
                   ))}
@@ -261,7 +261,7 @@ function RequestRows({
             onClick={onToggle}
             aria-expanded={expanded}
             aria-label={expanded ? "Collapse" : "Expand"}
-            className="rounded p-1 text-ink-400 transition-colors hover:bg-canvas hover:text-ink-700"
+            className="rounded-sm p-1 text-ink-400 transition-colors hover:bg-canvas hover:text-ink-700"
           >
             <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden
               style={{ transform: expanded ? "rotate(90deg)" : "none" }}>
@@ -273,14 +273,14 @@ function RequestRows({
           <p className="font-medium text-ink-900">
             {KPI_LABEL[row.kpi]} — {clientBrand.name} gaps
           </p>
-          <p className="mono text-[11px] text-ink-400">
+          <p className="mono text-xs text-ink-400">
             raised {monthLabel(row.request.originMonth)}
             {row.request.cancelled ? ` · cancelled: ${row.request.cancelled.reason.toLowerCase()}` : ""}
           </p>
         </td>
         <td className="px-3 py-2.5 align-top">
           <p className="mono text-ink-900">{row.scope.affectedPos.toLocaleString()} POS</p>
-          <p className="mono text-[11px] text-ink-400">{row.scope.issues.toLocaleString()} issues</p>
+          <p className="mono text-xs text-ink-400">{row.scope.issues.toLocaleString()} issues</p>
         </td>
         <td className="px-3 py-2.5 align-top">
           <span className="mono text-ink-700">
@@ -310,12 +310,12 @@ function RequestRows({
         <td className="px-3 py-2.5 align-top">
           <div className="flex items-center gap-1.5">
             <button type="button" onClick={onShare}
-              className="rounded-[7px] border border-line-strong px-1.5 py-1 text-[11px] font-semibold text-ink-600 transition-colors hover:border-ink-400">
+              className="rounded-sm border border-line-strong px-1.5 py-1 text-xs font-semibold text-ink-600 transition-colors hover:border-ink-400">
               Share
             </button>
             {canCancel(row.status, row.cohort.matched.length) && (
               <button type="button" onClick={() => setAsking((v) => !v)}
-                className="rounded-[7px] border border-line-strong px-1.5 py-1 text-[11px] font-semibold text-ink-600 transition-colors hover:border-ink-400">
+                className="rounded-sm border border-line-strong px-1.5 py-1 text-xs font-semibold text-ink-600 transition-colors hover:border-ink-400">
                 Cancel
               </button>
             )}
@@ -325,7 +325,7 @@ function RequestRows({
               {CANCEL_REASONS.map((reason) => (
                 <button key={reason} type="button"
                   onClick={() => { onCancel(reason); setAsking(false); }}
-                  className="rounded-[7px] border border-line px-1.5 py-1 text-left text-[11px] text-ink-700 transition-colors hover:border-ink-400">
+                  className="rounded-sm border border-line px-1.5 py-1 text-left text-xs text-ink-700 transition-colors hover:border-ink-400">
                   {reason}
                 </button>
               ))}
@@ -375,9 +375,9 @@ function GovernorateRows({
             </svg>
             <span className="font-medium text-ink-900">{gov.name}</span>
             {gov.capital !== gov.name && (
-              <span className="text-[11px] text-ink-400">{gov.capital}</span>
+              <span className="text-xs text-ink-400">{gov.capital}</span>
             )}
-            <span className="mono text-[11px] text-ink-400">
+            <span className="mono text-xs text-ink-400">
               {gov.scope.affectedPos} POS · {gov.scope.issues} issues
             </span>
           </button>
@@ -403,7 +403,7 @@ function GovernorateRows({
               <button type="button" onClick={() => onOpenPos(pos.posId)}
                 className="min-w-0 text-left hover:underline">
                 <span className="block truncate text-ink-900">{pos.name}</span>
-                <span className="mono block truncate text-[11px] text-ink-400">
+                <span className="mono block truncate text-xs text-ink-400">
                   {pos.district} · {pos.retailer} · {pos.issues} {pos.issues === 1 ? "issue" : "issues"}
                 </span>
               </button>
@@ -414,19 +414,19 @@ function GovernorateRows({
             <td className="px-3 py-1.5"><span className="mono text-ink-400">{target}%</span></td>
             <td className="px-3 py-1.5" colSpan={2}>
               {pos.revisited ? (
-                <span className="mono text-[11.5px] text-ink-700">
+                <span className="mono text-xs text-ink-700">
                   {pos.after}%
                 </span>
               ) : (
-                <span className="text-[11px] text-ink-400">not yet revisited</span>
+                <span className="text-xs text-ink-400">not yet revisited</span>
               )}
             </td>
             <td className="px-3 py-1.5" colSpan={2}>
               {pos.delta === null ? (
-                <span className="text-[11px] text-ink-400">—</span>
+                <span className="text-xs text-ink-400">—</span>
               ) : (
                 <span
-                  className="mono text-[11.5px] font-semibold"
+                  className="mono text-xs font-semibold"
                   style={{ color: pos.delta >= 0 ? "var(--color-good)" : "var(--color-critical)" }}
                 >
                   {pos.delta > 0 ? "+" : ""}
@@ -450,12 +450,12 @@ function Select({
 }) {
   return (
     <label className="flex items-center gap-1.5">
-      <span className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">{label}</span>
+      <span className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">{label}</span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`rounded-[8px] border bg-white px-2 py-1 text-[12px] outline-none transition-colors ${
-          value ? "border-violet-100 bg-violet-050 font-semibold text-violet-ink" : "border-line-strong text-ink-700 hover:border-ink-400"
+        className={`rounded-md border bg-white px-2 py-1 text-xs outline-none transition-colors ${
+          value ? "border-primary-tint bg-primary-tint font-semibold text-violet-ink" : "border-line-strong text-ink-700 hover:border-ink-400"
         }`}
       >
         <option value="">All</option>

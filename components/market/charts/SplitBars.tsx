@@ -46,7 +46,7 @@ export default function SplitBars({
 
   return (
     <div className="flex flex-col">
-      <p className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-ink-400">
+      <p className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-400">
         <span className="inline-flex items-center gap-1.5">
           <span className="inline-block h-2 w-3 rounded-[2px] bg-[color:var(--color-violet)]" aria-hidden />
           {presentLabel}
@@ -72,14 +72,14 @@ export default function SplitBars({
               <div className="flex items-center justify-between gap-2">
                 <span className="flex min-w-0 items-center gap-1.5">
                   {row.watch}
-                  <span className="truncate text-[12.5px] font-medium text-ink-700">{row.label}</span>
+                  <span className="truncate text-sm font-medium text-ink-700">{row.label}</span>
                 </span>
                 <span className="flex shrink-0 items-baseline gap-2">
-                  <span className="mono text-[12.5px] font-semibold text-ink-900">
+                  <span className="mono text-sm font-semibold text-ink-900">
                     {missing.toLocaleString()}
                     {unit} {missingLabel.toLowerCase()}
                   </span>
-                  <span className="mono text-[11px] text-ink-400">{share}% there</span>
+                  <span className="mono text-xs text-ink-400">{share}% there</span>
                 </span>
               </div>
               <div
@@ -93,7 +93,7 @@ export default function SplitBars({
                   style={{ width: `${fill}%` }}
                 />
               </div>
-              {row.meta && <p className="mt-1 text-[11px] text-ink-400">{row.meta}</p>}
+              {row.meta && <p className="mt-1 text-xs text-ink-400">{row.meta}</p>}
             </li>
           );
         })}

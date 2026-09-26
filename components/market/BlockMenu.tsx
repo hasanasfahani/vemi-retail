@@ -81,7 +81,7 @@ export default function BlockMenu({
   };
 
   const item =
-    "flex w-full items-center justify-between gap-3 rounded-md px-2 py-[6px] text-left text-[12.5px] text-ink-700 transition-colors hover:bg-canvas disabled:opacity-40 disabled:hover:bg-transparent";
+    "flex w-full items-center justify-between gap-3 rounded-sm px-2 py-[6px] text-left text-sm text-ink-700 transition-colors hover:bg-canvas disabled:opacity-40 disabled:hover:bg-transparent";
 
   return (
     <div className="relative" ref={box}>
@@ -94,7 +94,7 @@ export default function BlockMenu({
         aria-expanded={open}
         aria-label={`Settings for ${block.title ?? def.label}`}
         title="Block settings"
-        className="flex h-6 w-6 items-center justify-center rounded-[7px] text-ink-400 transition-colors hover:bg-canvas hover:text-ink-900"
+        className="flex h-6 w-6 items-center justify-center rounded-sm text-ink-400 transition-colors hover:bg-canvas hover:text-ink-900"
       >
         <svg viewBox="0 0 16 16" className="h-4 w-4" fill="currentColor" aria-hidden>
           <circle cx="8" cy="3.5" r="1.3" />
@@ -104,12 +104,12 @@ export default function BlockMenu({
       </button>
 
       {open && (
-        <div className="absolute right-0 z-40 mt-1 w-[248px] rounded-[10px] border border-line bg-white p-1 text-left shadow-[var(--shadow-pop)]">
+        <div className="absolute right-0 z-40 mt-1 w-[248px] rounded-md border border-line bg-white p-1 text-left shadow-[var(--shadow-pop)]">
           {pane === "menu" && (
             <>
               <button type="button" className={item} onClick={() => setPane("scope")}>
                 Scope
-                <span className="mono text-[11px] text-ink-400">
+                <span className="mono text-xs text-ink-400">
                   {hasScope(block.scope) ? "its own" : "the page"}
                 </span>
               </button>
@@ -155,18 +155,18 @@ export default function BlockMenu({
           {pane === "scope" && (
             <div className="flex flex-col gap-2 p-1.5">
               <div className="flex items-baseline justify-between gap-2">
-                <span className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+                <span className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
                   This block only
                 </span>
                 <button
                   type="button"
                   onClick={() => setPane("menu")}
-                  className="text-[11.5px] font-semibold text-ink-500 hover:text-ink-900"
+                  className="text-xs font-semibold text-ink-500 hover:text-ink-900"
                 >
                   Back
                 </button>
               </div>
-              <p className="text-[11.5px] leading-snug text-ink-500">
+              <p className="text-xs leading-snug text-ink-500">
                 Leave a control empty and this block follows the filters at the top of the page.
               </p>
 
@@ -204,7 +204,7 @@ export default function BlockMenu({
               ))}
 
               {def.ignoresBrandFilter && (
-                <p className="text-[11px] leading-snug text-ink-400">
+                <p className="text-xs leading-snug text-ink-400">
                   This block compares every brand, so it has no brand or SKU control — a comparison
                   with five of six brands removed is not a comparison.
                 </p>
@@ -214,7 +214,7 @@ export default function BlockMenu({
                 <button
                   type="button"
                   onClick={() => onScope({})}
-                  className="rounded-[8px] border border-line-strong bg-white px-2 py-1 text-[11.5px] font-semibold text-ink-500 transition-colors hover:border-ink-400 hover:text-ink-900"
+                  className="rounded-md border border-line-strong bg-white px-2 py-1 text-xs font-semibold text-ink-500 transition-colors hover:border-ink-400 hover:text-ink-900"
                 >
                   Follow the page again
                 </button>
@@ -224,7 +224,7 @@ export default function BlockMenu({
 
           {pane === "rename" && (
             <div className="flex flex-col gap-2 p-1.5">
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+              <span className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
                 What this block is here to say
               </span>
               <input
@@ -237,7 +237,7 @@ export default function BlockMenu({
                     setOpen(false);
                   }
                 }}
-                className="w-full rounded-[8px] border border-line-strong px-2 py-1 text-[12.5px] outline-none focus:border-violet"
+                className="w-full rounded-md border border-line-strong px-2 py-1 text-sm outline-none focus:border-violet"
               />
               <div className="flex gap-1.5">
                 <button
@@ -246,14 +246,14 @@ export default function BlockMenu({
                     onTitle(draft === def.label ? undefined : draft);
                     setOpen(false);
                   }}
-                  className="rounded-[8px] bg-violet px-2 py-1 text-[11.5px] font-semibold text-white hover:bg-violet-ink"
+                  className="rounded-md bg-violet px-2 py-1 text-xs font-semibold text-white hover:bg-violet-ink"
                 >
                   Save
                 </button>
                 <button
                   type="button"
                   onClick={() => { setDraft(def.label); onTitle(undefined); setOpen(false); }}
-                  className="rounded-[8px] border border-line-strong bg-white px-2 py-1 text-[11.5px] font-semibold text-ink-500 hover:border-ink-400 hover:text-ink-900"
+                  className="rounded-md border border-line-strong bg-white px-2 py-1 text-xs font-semibold text-ink-500 hover:border-ink-400 hover:text-ink-900"
                 >
                   Use the default
                 </button>

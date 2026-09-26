@@ -72,9 +72,9 @@ export default function WatchEye({
       }}
       aria-pressed={watching}
       title={watching ? `Stop watching ${what}` : `Watch ${what}`}
-      className={`inline-flex shrink-0 items-center justify-center rounded-[7px] transition-colors disabled:opacity-30 ${box} ${
+      className={`inline-flex shrink-0 items-center justify-center rounded-sm transition-colors disabled:opacity-30 ${box} ${
         watching
-          ? "text-violet-ink hover:bg-violet-050"
+          ? "text-violet-ink hover:bg-primary-tint"
           : "text-ink-300 hover:bg-canvas hover:text-ink-700"
       } ${className}`}
     >

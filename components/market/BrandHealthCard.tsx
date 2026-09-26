@@ -50,13 +50,13 @@ export default function BrandHealthCard({
             style={{ background: brandColor(health.brandId) }}
             aria-hidden
           />
-          <span className="truncate font-display text-[14px] font-bold tracking-tight text-ink-900">
+          <span className="truncate font-display text-sm font-semibold tracking-tight text-ink-900">
             {health.name}
           </span>
         </span>
         <span className="flex shrink-0 items-center gap-1">
           {health.isClient && (
-            <span className="mono text-[10px] uppercase tracking-wide text-ink-400">
+            <span className="mono uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
               Lead brand
             </span>
           )}
@@ -80,12 +80,12 @@ export default function BrandHealthCard({
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <span
-              className="font-display font-bold leading-none tracking-tight text-ink-900"
+              className="font-display font-semibold leading-none tracking-tight text-ink-900"
               style={{ fontSize: size * 0.3 }}
             >
               {health.score}
             </span>
-            <span className="mono mt-0.5 text-[10px] text-ink-400">/ 100</span>
+            <span className="mono mt-0.5 text-xs text-ink-400">/ 100</span>
           </div>
         </div>
       </div>
@@ -101,21 +101,21 @@ export default function BrandHealthCard({
 
       <p className="mt-1.5 flex items-center justify-center gap-1.5">
         {health.delta === null ? (
-          <span className="mono text-[11.5px] text-ink-400">loading last cycle…</span>
+          <span className="mono text-xs text-ink-400">loading last cycle…</span>
         ) : (
           <Delta value={health.delta} unit="" floor={1} label="vs last month" />
         )}
       </p>
 
-      <p className="mt-2.5 border-t border-line pt-2.5 text-[11.5px] leading-snug text-ink-500">
+      <p className="mt-2.5 border-t border-line pt-2.5 text-xs leading-snug text-ink-500">
         <span className="font-semibold text-ink-700">{health.weakest.label}</span>{" "}
         {health.weakest.display} · main gap
       </p>
     </>
   );
 
-  const shell = `flex min-w-0 flex-col rounded-[14px] border bg-white p-3.5 shadow-[var(--shadow-card)] transition-colors ${
-    focused ? "border-violet ring-1 ring-violet-100" : "border-line"
+  const shell = `flex min-w-0 flex-col rounded-lg border bg-white p-3.5 shadow-[var(--shadow-card)] transition-colors ${
+    focused ? "border-violet ring-1 ring-primary-tint" : "border-line"
   }`;
 
   return onSelect ? (

@@ -34,7 +34,7 @@ export default function Delta({
   const shown = Math.abs(value).toFixed(Math.abs(value) < 10 ? 1 : 0);
 
   return (
-    <span className={`mono inline-flex items-baseline gap-1 text-[12px] font-semibold ${tone}`}>
+    <span className={`mono inline-flex items-baseline gap-1 text-xs font-semibold ${tone}`}>
       {material ? (
         <>
           <span aria-hidden>{value > 0 ? "▲" : value < 0 ? "▼" : "—"}</span>

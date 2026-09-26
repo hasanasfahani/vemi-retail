@@ -19,7 +19,7 @@ export default function ProofStrip() {
               <ul className="mt-8 grid grid-cols-2 gap-x-6 gap-y-7 sm:grid-cols-3">
                 {proof.strip.map((f) => (
                   <li key={f.label}>
-                    <div className="tnum !text-xl text-ink-900">
+                    <div className="tnum !text-[22px] text-ink-900">
                       <Figure value={f.value} />
                     </div>
                     <div className="mt-1 text-xs text-ink-500">{f.label}</div>

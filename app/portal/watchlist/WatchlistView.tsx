@@ -87,7 +87,7 @@ function Watchlist({ view }: { view: MarketView }) {
       render: (r) => (
         <span className="block min-w-0">
           <span className="block truncate font-semibold text-ink-900">{r.measure}</span>
-          <span className="block truncate text-[11px] text-ink-400">{r.scope}</span>
+          <span className="block truncate text-xs text-ink-400">{r.scope}</span>
         </span>
       ),
       sortValue: (r) => `${r.measure} ${r.scope}`,
@@ -119,7 +119,7 @@ function Watchlist({ view }: { view: MarketView }) {
             {r.watch.baseline}
             {r.unit}
           </span>
-          <span className="block text-[11px] text-ink-400">
+          <span className="block text-xs text-ink-400">
             {monthLabel(r.watch.baselineMonth)}
           </span>
         </span>
@@ -186,7 +186,7 @@ function Watchlist({ view }: { view: MarketView }) {
         <button
           type="button"
           onClick={() => remove(r.watch.id)}
-          className="rounded-[8px] border border-line-strong bg-white px-2 py-1 text-[11.5px] font-semibold text-ink-500 transition-colors hover:border-ink-400 hover:text-ink-900"
+          className="rounded-md border border-line-strong bg-white px-2 py-1 text-xs font-semibold text-ink-500 transition-colors hover:border-ink-400 hover:text-ink-900"
         >
           Stop watching
         </button>
@@ -212,13 +212,13 @@ function Watchlist({ view }: { view: MarketView }) {
         <div className="mt-3 flex flex-wrap gap-2">
           <Link
             href="/portal"
-            className="rounded-[9px] bg-violet px-2.5 py-1.5 text-[12px] font-semibold text-white transition-colors hover:bg-violet-ink"
+            className="rounded-md bg-violet px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-violet-ink"
           >
             Open the dashboard
           </Link>
           <Link
             href="/portal/performance"
-            className="rounded-[9px] border border-line-strong bg-white px-2.5 py-1.5 text-[12px] font-semibold text-ink-700 transition-colors hover:border-ink-400"
+            className="rounded-md border border-line-strong bg-white px-2.5 py-1.5 text-xs font-semibold text-ink-700 transition-colors hover:border-ink-400"
           >
             Open Performance
           </Link>

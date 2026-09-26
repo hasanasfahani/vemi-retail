@@ -113,10 +113,10 @@ function Insights({ view }: { view: MarketView }) {
 
       <section>
         <div className="mb-2.5 flex flex-wrap items-baseline justify-between gap-3">
-          <h2 className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+          <h2 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
             What the audit found
           </h2>
-          <span className="mono text-[11.5px] text-ink-400">
+          <span className="mono text-xs text-ink-400">
             Ranked by size, commercial reach and strength of evidence
           </span>
         </div>

@@ -40,7 +40,7 @@ export default function FollowUpResult({
   return (
     <div className="min-w-0">
       <span
-        className="inline-flex items-center gap-1.5 rounded-full px-2 py-[2px] text-[11px] font-semibold"
+        className="inline-flex items-center gap-1.5 rounded-full px-2 py-[2px] text-xs font-semibold"
         style={{ background: `${color}1a`, color }}
       >
         <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden />
@@ -48,12 +48,12 @@ export default function FollowUpResult({
         {preliminary && <span className="font-normal opacity-80">· preliminary</span>}
       </span>
 
-      <p className="mono mt-1 text-[11px] text-ink-400">
+      <p className="mono mt-1 text-xs text-ink-400">
         {revisited.toLocaleString()} / {requested.toLocaleString()} revisited
       </p>
 
       {cohort.baseline !== null && cohort.followUp !== null && !compact && (
-        <p className="mono mt-0.5 text-[11.5px] text-ink-700">
+        <p className="mono mt-0.5 text-xs text-ink-700">
           {cohort.baseline}
           {unit} → {cohort.followUp}
           {unit}
@@ -68,7 +68,7 @@ export default function FollowUpResult({
       )}
 
       {cohort.baseline !== null && cohort.matched.length > 0 && !compact && (
-        <p className="mono mt-0.5 text-[10.5px] text-ink-400">
+        <p className="mono mt-0.5 text-xs text-ink-400">
           on the same {revisited} outlets · floor {cohort.floor}pt
         </p>
       )}

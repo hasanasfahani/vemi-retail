@@ -22,7 +22,7 @@ const noopSubscribe = () => () => {};
 type Errors = Partial<Record<FieldName, string>>;
 
 const inputCls = (err?: string) =>
-  `w-full rounded-xl border bg-white px-3.5 py-2.5 text-sm text-ink-900 outline-none transition placeholder:text-ink-500 focus:ring-2 focus:ring-violet/20 ${
+  `w-full rounded-md border bg-white px-3.5 py-2.5 text-sm text-ink-900 outline-none transition placeholder:text-ink-500 focus:ring-2 focus:ring-violet/20 ${
     err ? "border-critical" : "border-line focus:border-violet"
   }`;
 
@@ -139,7 +139,7 @@ export default function FullDemoModal({
       <div className="p-7 sm:p-8">
         {status === "done" ? (
           <div className="py-8 text-center">
-            <h2 id="full-demo-title" className="t-h3 !text-xl">
+            <h2 id="full-demo-title" className="t-h3 !text-[22px]">
               Request received.
             </h2>
             <p className="mx-auto mt-2 max-w-sm text-sm text-ink-500">
@@ -153,7 +153,7 @@ export default function FullDemoModal({
         ) : (
           <form onSubmit={onSubmit} noValidate>
             <span className="t-eyebrow !text-violet-ink">Full platform</span>
-            <h2 id="full-demo-title" className="t-h3 mt-2 !text-2xl">
+            <h2 id="full-demo-title" className="t-h3 mt-2 !text-[28px]">
               Request a full demo
             </h2>
             <p className="mt-2 text-sm text-ink-500">

@@ -94,16 +94,16 @@ export default function BlockPicker({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Find a block…"
-          className="w-full rounded-[9px] border border-line-strong bg-white px-2.5 py-1.5 text-[12.5px] text-ink-900 outline-none placeholder:text-ink-400 focus:border-violet"
+          className="w-full rounded-md border border-line-strong bg-white px-2.5 py-1.5 text-sm text-ink-900 outline-none placeholder:text-ink-400 focus:border-violet"
         />
 
         {groups.length === 0 && (
-          <p className="text-[12.5px] text-ink-500">Nothing matches “{query}”.</p>
+          <p className="text-sm text-ink-500">Nothing matches “{query}”.</p>
         )}
 
         {groups.map(({ label, blocks }) => (
           <section key={label}>
-            <h3 className="mb-1.5 text-[10.5px] font-semibold uppercase tracking-wide text-ink-400">
+            <h3 className="mb-1.5 uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
               {label}
             </h3>
             <ul className="flex flex-col gap-1">
@@ -113,19 +113,19 @@ export default function BlockPicker({
                     type="button"
                     data-block={block.id}
                     onClick={() => onAdd(block)}
-                    className="flex w-full items-start gap-2.5 rounded-[10px] border border-line bg-white px-2.5 py-2 text-left transition-colors hover:border-violet hover:bg-violet-050 focus:border-violet focus:outline-none"
+                    className="flex w-full items-start gap-2.5 rounded-md border border-line bg-white px-2.5 py-2 text-left transition-colors hover:border-violet hover:bg-primary-tint focus:border-violet focus:outline-none"
                   >
                     <BlockShapeGlyph shape={block.shape} />
                     <span className="min-w-0 flex-1">
-                      <span className="block text-[12.5px] font-semibold text-ink-900">
+                      <span className="block text-sm font-semibold text-ink-900">
                         {block.label}
                       </span>
-                      <span className="mt-0.5 block text-[11.5px] leading-snug text-ink-500">
+                      <span className="mt-0.5 block text-xs leading-snug text-ink-500">
                         {block.description}
                       </span>
                     </span>
                     {counts[block.id] > 0 && (
-                      <span className="mono shrink-0 rounded-full bg-canvas px-1.5 py-[1px] text-[10.5px] text-ink-500">
+                      <span className="mono shrink-0 rounded-full bg-canvas px-1.5 py-[1px] text-xs text-ink-500">
                         ×{counts[block.id]}
                       </span>
                     )}

@@ -31,7 +31,7 @@ export default function Card({
   const head = title || lead || action;
   return (
     <section
-      className={`rounded-[14px] border border-line bg-white shadow-[var(--shadow-card)] ${className}`}
+      className={`rounded-lg border border-line bg-white shadow-[var(--shadow-card)] ${className}`}
     >
       {/* The header wraps rather than competes: a six-brand legend in
           the action slot squeezed "Shelf battle by city" into 76px and
@@ -41,12 +41,12 @@ export default function Card({
         <header className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2 px-4 pb-3 pt-3.5 sm:px-5">
           <div className="min-w-[210px] flex-1">
             {title && (
-              <h2 className="font-display text-[14.5px] font-bold tracking-tight text-ink-900">
+              <h2 className="font-display text-sm font-semibold tracking-tight text-ink-900">
                 {title}
               </h2>
             )}
             {lead && (
-              <p className="mt-0.5 max-w-[68ch] text-[12.5px] leading-snug text-ink-500">
+              <p className="mt-0.5 max-w-[68ch] text-sm leading-snug text-ink-500">
                 {lead}
               </p>
             )}
@@ -58,7 +58,7 @@ export default function Card({
         {children}
       </div>
       {footnote && (
-        <p className="border-t border-line px-4 py-2.5 text-[11.5px] leading-snug text-ink-400 sm:px-5">
+        <p className="border-t border-line px-4 py-2.5 text-xs leading-snug text-ink-400 sm:px-5">
           {footnote}
         </p>
       )}

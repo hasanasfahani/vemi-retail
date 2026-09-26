@@ -23,7 +23,7 @@ export const BRAND_COLOR: Record<string, string> = {
   "7up": "var(--color-stock-3)",
   mirinda: "var(--color-stock-2)",
   "mountain-dew": "var(--color-stock-1)",
-  "coca-cola": "#7c828f",
+  "coca-cola": "var(--vm-chart-2)",
   "rc-cola": "var(--color-comp-1)",
 };
 

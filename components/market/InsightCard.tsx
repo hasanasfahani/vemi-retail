@@ -56,7 +56,7 @@ export default function InsightCard({
   const basis = BASIS_LABEL[insight.comparisonBasis];
 
   return (
-    <article className="flex min-w-0 flex-col rounded-[14px] border border-line bg-white p-3.5 shadow-[var(--shadow-card)]">
+    <article className="flex min-w-0 flex-col rounded-lg border border-line bg-white p-3.5 shadow-[var(--shadow-card)]">
       <div className="flex items-start justify-between gap-2">
         <Badge
           band={PRIORITY_BAND[insight.priorityBand]}
@@ -68,7 +68,7 @@ export default function InsightCard({
             others as "48 audited outlets", and a card that prints both
             styles in the same corner reads as two different fields. The
             wording belongs in the drawer, where it has room. */}
-        <span className="mono shrink-0 text-[11px] text-ink-400">
+        <span className="mono shrink-0 text-xs text-ink-400">
           {insight.scope.outlets.toLocaleString()}{" "}
           {insight.scope.outlets === 1 ? "outlet" : "outlets"}
         </span>
@@ -76,17 +76,17 @@ export default function InsightCard({
 
       {/* Two lines held open whatever the headline needs, so the
           figures line up across a row instead of stepping. */}
-      <h3 className="mt-2 min-h-[2.7em] font-display text-[14px] font-bold leading-snug tracking-tight text-ink-900">
+      <h3 className="mt-2 min-h-[2.7em] font-display text-sm font-semibold leading-snug tracking-tight text-ink-900">
         {insight.headline}
       </h3>
 
       {/* The measured quantity, given the weight on the card that it
           has in the finding. */}
-      <p className="mono mt-2.5 text-[19px] font-semibold leading-none tracking-tight text-ink-900">
+      <p className="mono mt-2.5 text-lg font-semibold leading-none tracking-tight text-ink-900">
         {insight.impact.label}
       </p>
 
-      <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-ink-400">
+      <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-400">
         <span>
           {insight.confidence === "measured"
             ? "Counted from field rows"
@@ -101,7 +101,7 @@ export default function InsightCard({
         {insight.quality === "limited" && (
           <>
             <span aria-hidden>·</span>
-            <span className="font-semibold text-amber-700">Limited sample</span>
+            <span className="font-semibold text-ink-900">Limited sample</span>
           </>
         )}
         {childCount > 0 && (
@@ -119,14 +119,14 @@ export default function InsightCard({
           <button
             type="button"
             onClick={() => onOpen(insight)}
-            className="rounded-[9px] bg-violet px-2.5 py-1.5 text-[12px] font-semibold text-white transition-colors hover:bg-violet-ink"
+            className="rounded-md bg-violet px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-violet-ink"
           >
             Open analysis
           </button>
         ) : (
           <a
             href={insight.cta.href}
-            className="rounded-[9px] bg-violet px-2.5 py-1.5 text-[12px] font-semibold text-white transition-colors hover:bg-violet-ink"
+            className="rounded-md bg-violet px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-violet-ink"
           >
             {insight.cta.label}
           </a>

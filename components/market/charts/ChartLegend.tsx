@@ -11,7 +11,7 @@ export default function ChartLegend({
   return (
     <ul className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
       {items.map((item) => (
-        <li key={item.id} className="flex items-center gap-1.5 text-[11.5px] text-ink-500">
+        <li key={item.id} className="flex items-center gap-1.5 text-xs text-ink-500">
           {item.dashed ? (
             <span
               className="h-[2px] w-4 shrink-0 rounded-full"

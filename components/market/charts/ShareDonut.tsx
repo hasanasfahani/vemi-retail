@@ -27,7 +27,7 @@ export const CATEGORY_COLORS = [
   "var(--color-stock-2)",
   "var(--color-serious)",
   "var(--color-warn)",
-  "#7c828f",
+  "var(--vm-chart-2)",
   "var(--color-comp-1)",
 ];
 
@@ -91,10 +91,10 @@ export default function ShareDonut({
         </svg>
         {(centerValue || centerLabel) && (
           <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
-            <span className="font-display text-[22px] font-bold leading-none tracking-tight text-ink-900">
+            <span className="font-display text-[22px] font-semibold leading-none tracking-tight text-ink-900">
               {centerValue}
             </span>
-            <span className="mt-1 text-[10.5px] font-semibold uppercase tracking-wide text-ink-400">
+            <span className="mt-1 uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
               {centerLabel}
             </span>
           </div>
@@ -103,7 +103,7 @@ export default function ShareDonut({
 
       <ul className="min-w-[150px] flex-1 flex-col gap-1.5">
         {slices.map((slice, i) => (
-          <li key={slice.id} className="flex items-center gap-2 py-[3px] text-[12.5px]">
+          <li key={slice.id} className="flex items-center gap-2 py-[3px] text-sm">
             <span
               className="h-2.5 w-2.5 shrink-0 rounded-[3px]"
               style={{ background: colorOf(slice.id, i) }}

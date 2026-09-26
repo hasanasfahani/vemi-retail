@@ -151,7 +151,7 @@ function Explorer({ view, query }: { view: MarketView; query: string }) {
       render: (r) => (
         <div className="min-w-0">
           <p className="truncate font-medium text-ink-900">{r.pos.name}</p>
-          <p className="mono truncate text-[11px] text-ink-400">
+          <p className="mono truncate text-xs text-ink-400">
             {r.pos.code} · {r.pos.district}
           </p>
         </div>
@@ -202,7 +202,7 @@ function Explorer({ view, query }: { view: MarketView; query: string }) {
       csv: (r) => r.issues.map((i) => i.label).join("; "),
       render: (r) =>
         r.issues.length === 0 ? (
-          <span className="text-[11.5px] text-ink-400">None</span>
+          <span className="text-xs text-ink-400">None</span>
         ) : (
           <div className="flex flex-wrap gap-1">
             {r.issues.slice(0, 2).map((issue) => (
@@ -214,7 +214,7 @@ function Explorer({ view, query }: { view: MarketView; query: string }) {
               />
             ))}
             {r.issues.length > 2 && (
-              <span className="mono text-[11px] text-ink-400">+{r.issues.length - 2}</span>
+              <span className="mono text-xs text-ink-400">+{r.issues.length - 2}</span>
             )}
           </div>
         ),
@@ -228,7 +228,7 @@ function Explorer({ view, query }: { view: MarketView; query: string }) {
         flagged.has(r.pos.id) ? (
           <Badge band="average" label="Queued" size="sm" />
         ) : (
-          <span className="text-[11.5px] text-ink-400">—</span>
+          <span className="text-xs text-ink-400">—</span>
         ),
     },
   ];
@@ -264,20 +264,20 @@ function Explorer({ view, query }: { view: MarketView; query: string }) {
             onChange={setMode}
           />
           <label className="ml-auto flex items-center gap-1.5">
-            <span className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+            <span className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
               Score
             </span>
             <select
               value={band}
               onChange={(e) => setBand(e.target.value)}
-              className="rounded-[8px] border border-line-strong bg-white px-2 py-1 text-[12px] text-ink-700 outline-none transition-colors hover:border-ink-400"
+              className="rounded-md border border-line-strong bg-white px-2 py-1 text-xs text-ink-700 outline-none transition-colors hover:border-ink-400"
             >
               {SCORE_BANDS.map((b) => (
                 <option key={b.id} value={b.id}>{b.label}</option>
               ))}
             </select>
           </label>
-          <label className="flex items-center gap-1.5 text-[12px] text-ink-700">
+          <label className="flex items-center gap-1.5 text-xs text-ink-700">
             <input
               type="checkbox"
               checked={onlyIssues}
@@ -286,7 +286,7 @@ function Explorer({ view, query }: { view: MarketView; query: string }) {
             />
             Has an issue
           </label>
-          <label className="flex items-center gap-1.5 text-[12px] text-ink-700">
+          <label className="flex items-center gap-1.5 text-xs text-ink-700">
             <input
               type="checkbox"
               checked={onlyFlagged}
@@ -317,7 +317,7 @@ function Explorer({ view, query }: { view: MarketView; query: string }) {
               <MapLegend counts={bandCounts} />
             </div>
             <MarketMap points={points} onSelect={setOpenPos} height={520} bandOf={scoreBand} />
-            <p className="mt-2 text-[11px] leading-snug text-ink-400">
+            <p className="mt-2 text-xs leading-snug text-ink-400">
               Outlets are placed within their district rather than surveyed to the street. A
               cluster shows how its outlets typically score, with a red ring where any of them is
               critical.

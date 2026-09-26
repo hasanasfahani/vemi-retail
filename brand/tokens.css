@@ -1,0 +1,127 @@
+/* ==========================================================================
+   Vemi design tokens (brand v1.0, "The Insight V").
+   THE ONLY PLACE COLOR VALUES LIVE. Everything else reads var(--vm-*),
+   or a Tailwind class that resolves to one (brand/tailwind-v4.css).
+
+   Source: Vemi Branding/Vemi Dashboard Branding/vemi-claude-code-kit,
+   src/brand/tokens.css. Two changes from the kit file:
+   - it holds values only. The kit also styled html/body/a and shipped
+     the type classes; those live in app/globals.css inside cascade
+     layers, so a Tailwind utility can still override them.
+   - the "Vemi additions" block below, each one noted where it is used.
+
+   Light = Paper, dark = Ink (<html data-theme="dark">). The dark set is
+   ready but no toggle ships yet (plan D6).
+   ========================================================================== */
+
+:root,
+[data-theme="light"] {
+  /* Surfaces */
+  --vm-bg: #F5F4EF;            /* page ground (Paper) */
+  --vm-surface: #FFFFFF;       /* cards, inputs, tables, menus */
+  --vm-line: #E2E0D8;          /* decorative borders, dividers */
+  --vm-line-strong: #8A889E;   /* input and control borders (3:1) */
+
+  /* Text */
+  --vm-text: #15133A;          /* Ink: body copy and headings */
+  --vm-text-muted: #6B6A80;    /* Slate: captions, metadata, axis labels */
+
+  /* Brand */
+  --vm-primary: #5E57F1;       /* Vemi Violet */
+  --vm-on-primary: #FFFFFF;    /* text/icons on primary */
+  --vm-primary-hover: #3F37C9;
+  --vm-primary-text: #3F37C9;  /* violet text and links */
+  --vm-primary-tint: #E8E7FD;  /* Violet 100: highlights, selected. Never text */
+  --vm-primary-on-ink: #7F79F6;/* Violet 400: violet on Ink surfaces */
+
+  /* Functional */
+  --vm-signal: #E8A33D;        /* alerts only, max one per view */
+  --vm-on-signal: #15133A;
+  --vm-danger: #B42318;        /* form validation only */
+  --vm-focus: #5E57F1;
+
+  /* Data visualisation */
+  --vm-chart-1: #5E57F1;       /* client brand */
+  --vm-chart-2: #15133A;       /* key competitor */
+  --vm-chart-3: #6B6A80;       /* others */
+  --vm-chart-base: #E8E7FD;    /* market baseline areas */
+  --vm-chart-grid: #E2E0D8;
+
+  /* Elevation */
+  --vm-shadow-raised: 0 1px 2px rgba(21, 19, 58, 0.06);
+  --vm-shadow-overlay: 0 12px 32px rgba(21, 19, 58, 0.14);
+
+  /* ---- Vemi additions ------------------------------------------------ */
+
+  /* Ink 800 from the palette: raised surfaces and pattern blocks on Ink,
+     and the "needs attention" step of the band ramp below. */
+  --vm-ink-800: #2A2766;
+
+  /* Dialog and drawer backdrop (the kit's components.md asks for it to
+     be defined here). */
+  --vm-scrim: rgba(21, 19, 58, 0.4);
+
+  /* Health bands (plan D1). Fills for pins, heat cells and swatches.
+     Darker = needs you sooner; the band word always travels with the
+     color, so nothing is read from hue alone. */
+  --vm-band-strong: #E8E7FD;     /* Violet 100 */
+  --vm-band-average: #7F79F6;    /* Violet 400 */
+  --vm-band-attention: #5E57F1;  /* Violet */
+  --vm-band-critical: #15133A;   /* Ink */
+
+  /* The client's portfolio when a chart splits it (plan D2). Default
+     charts show the portfolio as one chart-1 series. */
+  --vm-portfolio-1: #5E57F1;     /* Violet */
+  --vm-portfolio-2: #7F79F6;     /* Violet 400 */
+  --vm-portfolio-3: #A9A5FA;     /* Violet 300 */
+  --vm-portfolio-4: #E8E7FD;     /* Violet 100, drawn with a violet outline */
+
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --vm-bg: #0F0D2B;
+  --vm-surface: #15133A;
+  --vm-line: #2A2766;
+  --vm-line-strong: #6E6B9E;
+  --vm-text: #F5F4EF;
+  --vm-text-muted: #A9A7C4;
+  --vm-primary: #7F79F6;
+  --vm-on-primary: #0F0D2B;
+  --vm-primary-hover: #A9A5FA;
+  --vm-primary-text: #A9A5FA;
+  --vm-primary-tint: #2A2766;
+  --vm-primary-on-ink: #7F79F6;
+  --vm-signal: #F0B560;
+  --vm-on-signal: #15133A;
+  --vm-danger: #F97066;
+  --vm-focus: #A9A5FA;
+  --vm-chart-1: #7F79F6;
+  --vm-chart-2: #F5F4EF;
+  --vm-chart-3: #8E8CA8;
+  --vm-chart-base: #2A2766;
+  --vm-chart-grid: #2A2766;
+  --vm-shadow-raised: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --vm-shadow-overlay: 0 12px 32px rgba(0, 0, 0, 0.5);
+  --vm-ink-800: #2A2766;
+  --vm-scrim: rgba(0, 0, 0, 0.55);
+  color-scheme: dark;
+}
+
+:root {
+  /* Type. The first family is the next/font face (brand/fonts.ts). */
+  --vm-font-sans: var(--font-instrument-sans), "Instrument Sans", system-ui, sans-serif;
+  --vm-font-mono: var(--font-plex-mono), "IBM Plex Mono", ui-monospace, monospace;
+  --vm-font-arabic: var(--font-plex-arabic), "IBM Plex Sans Arabic", system-ui, sans-serif;
+
+  /* Spacing (4-pt) */
+  --vm-space-1: 4px;  --vm-space-2: 8px;  --vm-space-3: 12px; --vm-space-4: 16px;
+  --vm-space-6: 24px; --vm-space-8: 32px; --vm-space-12: 48px; --vm-space-16: 64px;
+
+  /* Radius */
+  --vm-radius-sm: 6px; --vm-radius-md: 10px; --vm-radius-lg: 16px; --vm-radius-xl: 24px; --vm-radius-pill: 999px;
+
+  /* Controls */
+  --vm-control-height: 44px;
+  --vm-focus-ring: 0 0 0 2px var(--vm-surface), 0 0 0 4px var(--vm-focus);
+}

@@ -1,0 +1,139 @@
+/*
+ * Vemi theme for Tailwind v4 (from the brand kit's src/brand/tailwind-v4.css).
+ * Imported by app/globals.css after tailwindcss and brand/tokens.css.
+ *
+ * The kit also sets `--color-*: initial` to remove Tailwind's default
+ * palette. That switch is held back until the bridge below is gone
+ * (plan §4, stage C), because the bridge names would go with it.
+ */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme inline {
+  --color-transparent: transparent;
+  --color-current: currentColor;
+  --color-white: #ffffff;
+  --color-bg: var(--vm-bg);
+  --color-surface: var(--vm-surface);
+  --color-line: var(--vm-line);
+  --color-line-strong: var(--vm-line-strong);
+  --color-text: var(--vm-text);
+  --color-text-muted: var(--vm-text-muted);
+  --color-primary: var(--vm-primary);
+  --color-primary-hover: var(--vm-primary-hover);
+  --color-primary-text: var(--vm-primary-text);
+  --color-primary-tint: var(--vm-primary-tint);
+  --color-primary-fg: var(--vm-on-primary);
+  --color-primary-on-ink: var(--vm-primary-on-ink);
+  --color-signal: var(--vm-signal);
+  --color-signal-fg: var(--vm-on-signal);
+  --color-danger: var(--vm-danger);
+  --color-ink-800: var(--vm-ink-800);
+  --color-scrim: var(--vm-scrim);
+  --color-chart-1: var(--vm-chart-1);
+  --color-chart-2: var(--vm-chart-2);
+  --color-chart-3: var(--vm-chart-3);
+  --color-chart-base: var(--vm-chart-base);
+  --color-chart-grid: var(--vm-chart-grid);
+  --color-band-strong: var(--vm-band-strong);
+  --color-band-average: var(--vm-band-average);
+  --color-band-attention: var(--vm-band-attention);
+  --color-band-critical: var(--vm-band-critical);
+
+  --font-sans: var(--vm-font-sans);
+  --font-mono: var(--vm-font-mono);
+  --font-arabic: var(--vm-font-arabic);
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  --shadow-raised: var(--vm-shadow-raised);
+  --shadow-overlay: var(--vm-shadow-overlay);
+  --shadow-focus: var(--vm-focus-ring);
+
+  --spacing-control: 44px;
+
+  /* Brand type scale (tokens.md). xs/sm/base/lg keep their Tailwind
+     names at the brand's sizes; the rest are named for their role. */
+  --text-xs: 12px;
+  --text-xs--line-height: 16px;
+  --text-sm: 14px;
+  --text-sm--line-height: 20px;
+  --text-base: 16px;
+  --text-base--line-height: 24px;
+  --text-lg: 18px;
+  --text-lg--line-height: 28px;
+  --text-label: 12px;
+  --text-label--line-height: 16px;
+  --text-label--letter-spacing: 0.1em;
+  --text-label--font-weight: 500;
+  --text-ui: 15px;
+  --text-ui--line-height: 20px;
+  --text-ui--font-weight: 600;
+  --text-h3: 22px;
+  --text-h3--line-height: 28px;
+  --text-h3--font-weight: 600;
+  --text-h2: 32px;
+  --text-h2--line-height: 40px;
+  --text-h2--font-weight: 600;
+  --text-h2--letter-spacing: -0.01em;
+  --text-h1: 44px;
+  --text-h1--line-height: 52px;
+  --text-h1--font-weight: 600;
+  --text-h1--letter-spacing: -0.02em;
+  --text-kpi: 56px;
+  --text-kpi--line-height: 60px;
+  --text-kpi--font-weight: 600;
+  --text-kpi--letter-spacing: -0.02em;
+  --text-display: 72px;
+  --text-display--line-height: 76px;
+  --text-display--font-weight: 600;
+  --text-display--letter-spacing: -0.02em;
+}
+
+/* ------------------------------------------------------------------
+   BRIDGE (plan §4, stage A). Temporary.
+
+   The pre-brand class names, re-pointed at brand values so the whole
+   product recolors without touching ~1,550 class usages at once. Each
+   page renames to the semantic classes above as it is rebuilt
+   (stage B), and this block is deleted at the end (stage C).
+
+   Two names read differently than they sound: `paper` was the old
+   name for the white card surface (brand Paper is --vm-bg), and the
+   four status names no longer mean green / amber / orange / red. They
+   step down the D1 band ramp in colors that stay legible as text,
+   "darker = needs you sooner"; the full band treatment lands with the
+   chart system (plan phase 4).
+
+   `static` because charts and inline styles read many of these as
+   var(--color-…) from JS, which Tailwind cannot see; without it the
+   variables would be pruned and those marks would lose their color.
+------------------------------------------------------------------ */
+@theme inline static {
+  --color-paper: var(--vm-surface);
+  --color-canvas: var(--vm-bg);
+
+  --color-ink-900: var(--vm-text);
+  --color-ink-700: var(--vm-text);
+  --color-ink-600: var(--vm-text-muted);
+  --color-ink-500: var(--vm-text-muted);
+  --color-ink-400: var(--vm-text-muted);
+  --color-ink-300: var(--vm-line-strong);
+
+  --color-violet: var(--vm-primary);
+  --color-violet-ink: var(--vm-primary-text);
+
+  --color-good: var(--vm-primary);
+  --color-warn: var(--vm-text-muted);
+  --color-serious: var(--vm-ink-800);
+  --color-critical: var(--vm-text);
+
+  --color-comp-1: var(--vm-chart-3);
+  --color-comp-2: var(--vm-line-strong);
+  --color-comp-3: var(--vm-line);
+
+  --font-display: var(--vm-font-sans);
+  --font-body: var(--vm-font-sans);
+}

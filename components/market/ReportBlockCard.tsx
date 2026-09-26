@@ -78,7 +78,7 @@ export default function ReportBlockCard({
        beats a gap the reader has to guess at. */
     return (
       <Card title="This block is no longer available">
-        <p className="text-[12.5px] leading-snug text-ink-500">
+        <p className="text-sm leading-snug text-ink-500">
           The report asks for <code className="mono">{block.blockId}</code>, which this version of
           the portal does not offer. Remove it, or open the report where it was made.
         </p>
@@ -102,7 +102,7 @@ export default function ReportBlockCard({
             <span
               key={chip}
               data-scope-chip
-              className="rounded-full border border-violet-100 bg-violet-050 px-2 py-[2px] text-[10.5px] font-semibold text-violet-ink"
+              className="rounded-full border border-primary-tint bg-primary-tint px-2 py-[2px] text-xs font-semibold text-violet-ink"
             >
               {chip}
             </span>

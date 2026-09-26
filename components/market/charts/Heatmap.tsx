@@ -55,13 +55,13 @@ export default function Heatmap({
      for a plain magnitude, red where the magnitude counts failures. */
   const RAMP = {
     neutral: [
-      "var(--color-violet-050)",
-      "var(--color-violet-100)",
+      "var(--vm-primary-tint)",
+      "var(--vm-primary-tint)",
       "var(--color-stock-1)",
       "var(--color-stock-3)",
       "var(--color-violet)",
     ],
-    bad: ["#fdf0ef", "#f8d4d1", "#eda9a4", "#dd6f68", "var(--color-critical)"],
+    bad: ["var(--vm-bg)", "var(--vm-band-strong)", "var(--vm-band-average)", "var(--vm-band-attention)", "var(--vm-band-critical)"],
   } as const;
 
   const fill = (v: number) => {
@@ -71,18 +71,18 @@ export default function Heatmap({
   };
   const ink = (v: number) => {
     const t = hi === lo ? 1 : (v - lo) / (hi - lo);
-    return t >= 0.6 ? "#ffffff" : "var(--color-ink-700)";
+    return t >= 0.6 ? "var(--vm-surface)" : "var(--color-ink-700)";
   };
 
   return (
     <div className="min-w-0">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[520px] border-separate border-spacing-[2px] text-[12px]">
+        <table className="w-full min-w-[520px] border-separate border-spacing-[2px] text-xs">
           <thead>
             <tr>
               <th className="w-[128px]" />
               {columns.map((col) => (
-                <th key={col.id} scope="col" className="px-1 pb-1 text-[10.5px] font-semibold uppercase tracking-wide text-ink-400">
+                <th key={col.id} scope="col" className="px-1 pb-1 uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
                   {col.label}
                 </th>
               ))}
@@ -91,14 +91,14 @@ export default function Heatmap({
           <tbody>
             {rows.map((row) => (
               <tr key={row.id}>
-                <th scope="row" className="pr-2 text-right text-[12px] font-medium text-ink-700">
+                <th scope="row" className="pr-2 text-right text-xs font-medium text-ink-700">
                   {row.label}
                 </th>
                 {columns.map((col) => {
                   const v = value(row.id, col.id);
                   if (v === null)
                     return (
-                      <td key={col.id} className="rounded-[6px] bg-canvas py-2 text-center text-ink-400" title="Not audited">
+                      <td key={col.id} className="rounded-sm bg-canvas py-2 text-center text-ink-400" title="Not audited">
                         —
                       </td>
                     );
@@ -111,7 +111,7 @@ export default function Heatmap({
                   return (
                     <td
                       key={col.id}
-                      className="rounded-[6px]"
+                      className="rounded-sm"
                       style={{ background: fill(v), color: ink(v) }}
                       title={cellLabel?.(row.id, col.id, v) ?? `${row.label} · ${col.label}: ${v}${unit}`}
                     >
@@ -130,7 +130,7 @@ export default function Heatmap({
           </tbody>
         </table>
       </div>
-      {legend && <div className="mt-2 text-[11px] text-ink-400">{legend}</div>}
+      {legend && <div className="mt-2 text-xs text-ink-400">{legend}</div>}
     </div>
   );
 }

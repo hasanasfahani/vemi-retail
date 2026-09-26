@@ -364,11 +364,11 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
       {/* ---------- 1 · market health ---------- */}
       <section>
         <div className="mb-2.5 flex flex-wrap items-baseline justify-between gap-3">
-          <h2 className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+          <h2 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
             Market health
           </h2>
           <span className="flex items-center gap-2">
-            <p className="text-[11.5px] text-ink-400">
+            <p className="text-xs text-ink-400">
               Which execution dimension is weak, across everything audited
             </p>
             <InfoTip label="How these figures are measured">
@@ -393,7 +393,7 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
       {/* ---------- 2 · portfolio brand health ---------- */}
       <section>
         <div className="mb-2.5 flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+          <h2 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
             Portfolio brand health
           </h2>
           <div className="flex items-center gap-3">
@@ -408,19 +408,19 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
               compliance of the outlets that stock it.
             </InfoTip>
             <p className="shrink-0 text-right">
-              <span className="mono text-[11px] uppercase tracking-wide text-ink-400">
+              <span className="mono uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
                 Portfolio
               </span>
-              <span className="ml-2 font-display text-[22px] font-bold leading-none tracking-tight text-ink-900">
+              <span className="ml-2 font-display text-[22px] font-semibold leading-none tracking-tight text-ink-900">
                 {companyScore}
               </span>
-              <span className="mono ml-1 text-[11px] text-ink-400">/ 100</span>
+              <span className="mono ml-1 text-xs text-ink-400">/ 100</span>
             </p>
           </div>
         </div>
 
         {rivalSelected && (
-          <p className="mb-2.5 rounded-[12px] border border-violet-100 bg-violet-050 px-3.5 py-2.5 text-[12px] leading-snug text-violet-ink">
+          <p className="mb-2.5 rounded-md border border-primary-tint bg-primary-tint px-3.5 py-2.5 text-xs leading-snug text-violet-ink">
             This section covers {contract.clientShort}&apos;s own brands, so the brand filter is not
             applied to it — a competitor&apos;s price compliance would be judged against a list
             price this company does not set. Everything below the KPI row still follows the filter.
@@ -455,8 +455,8 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
               as a compact list, because a portfolio manager narrowing
               to Mirinda has not stopped owning the other three. */}
           {focusBrand && (
-            <div className="flex min-w-0 flex-col rounded-[14px] border border-line bg-white p-3.5 shadow-[var(--shadow-card)] sm:col-span-1 lg:col-span-2">
-              <h3 className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+            <div className="flex min-w-0 flex-col rounded-lg border border-line bg-white p-3.5 shadow-[var(--shadow-card)] sm:col-span-1 lg:col-span-2">
+              <h3 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
                 The rest of the portfolio
               </h3>
               <ul className="mt-2 flex flex-col">
@@ -467,16 +467,16 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
                       key={row.brandId}
                       className="flex items-center gap-2.5 border-b border-line py-2 last:border-0"
                     >
-                      <span className="min-w-0 flex-1 truncate text-[12.5px] text-ink-700">
+                      <span className="min-w-0 flex-1 truncate text-sm text-ink-700">
                         {row.name}
                       </span>
-                      <span className="mono text-[11.5px] text-ink-400">
+                      <span className="mono text-xs text-ink-400">
                         {row.weakest.label} {row.weakest.display}
                       </span>
-                      <span className="mono w-[30px] shrink-0 text-right text-[13px] font-semibold text-ink-900">
+                      <span className="mono w-[30px] shrink-0 text-right text-sm font-semibold text-ink-900">
                         {row.score}
                       </span>
-                      <span className="w-[92px] shrink-0 text-right text-[11px] text-ink-500">
+                      <span className="w-[92px] shrink-0 text-right text-xs text-ink-500">
                         {BAND_WORD[row.band]}
                       </span>
                     </li>
@@ -491,7 +491,7 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
       {/* ---------- 3 · key decision insights ---------- */}
       <section>
         <div className="mb-2 flex items-baseline justify-between gap-3">
-          <h2 className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+          <h2 className="flex items-center gap-2 uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
             Key decision insights
             <InfoTip label="How findings are chosen and ranked" align="left">
               Every card comes from a named rule with a stated formula and a threshold it had to
@@ -502,7 +502,7 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
               stockout.
             </InfoTip>
           </h2>
-          <Link href="/portal/insights" className="text-[12px] font-semibold text-violet-ink hover:underline">
+          <Link href="/portal/insights" className="text-xs font-semibold text-violet-ink hover:underline">
             All {report.cards.length.toLocaleString()} findings
           </Link>
         </div>
@@ -522,10 +522,10 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
       <section>
         <div className="mb-2.5 flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0">
-            <h2 className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+            <h2 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
               Market health by governorate
             </h2>
-            <p className="mt-0.5 text-[12px] text-ink-400">
+            <p className="mt-0.5 text-xs text-ink-400">
               Which market to look at, before opening the map to find where inside it
             </p>
           </div>
@@ -657,7 +657,7 @@ function MetricSwitch({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value as MetricId)}
-        className="rounded-[9px] border border-line-strong bg-white px-2 py-1 text-[12px] font-semibold text-ink-700 outline-none transition-colors hover:border-ink-400"
+        className="rounded-md border border-line-strong bg-white px-2 py-1 text-xs font-semibold text-ink-700 outline-none transition-colors hover:border-ink-400"
       >
         {metrics.map((m) => (
           <option key={m.id} value={m.id}>{m.label}</option>

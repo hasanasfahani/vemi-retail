@@ -22,8 +22,8 @@ export default function DemoBanner() {
 
   return (
     <>
-      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-line bg-violet-050 px-4 py-2.5 sm:px-6">
-        <p className="flex items-start gap-2 text-[12.5px] leading-5 text-ink-700">
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-line bg-primary-tint px-4 py-2.5 sm:px-6">
+        <p className="flex items-start gap-2 text-sm leading-5 text-ink-700">
           <span
             aria-hidden
             className="mt-[3px] inline-block h-2 w-2 shrink-0 rounded-full"
@@ -39,7 +39,7 @@ export default function DemoBanner() {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="btn-primary shrink-0 !px-3.5 !py-1.5 text-[13px]"
+          className="btn-primary shrink-0 !px-3.5 !py-1.5 text-sm"
         >
           Request a Quote
         </button>

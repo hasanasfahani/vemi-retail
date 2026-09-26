@@ -50,23 +50,23 @@ export default function CoverageMap() {
 
   return (
     <div
-      className="relative overflow-hidden rounded-[22px] border border-violet-100 p-4 sm:p-5"
-      style={{ background: "radial-gradient(circle at 78% 12%, #ffffff 0%, #f7f5ff 44%, #efecff 100%)" }}
+      className="relative overflow-hidden rounded-xl border border-primary-tint p-4 sm:p-5"
+      style={{ background: "radial-gradient(circle at 78% 12%, var(--vm-surface) 0%, var(--vm-surface) 44%, var(--vm-primary-tint) 100%)" }}
     >
-      <div aria-hidden className="absolute -right-16 -top-16 h-44 w-44 rounded-full bg-violet-100/60 blur-3xl" />
+      <div aria-hidden className="absolute -right-16 -top-16 h-44 w-44 rounded-full bg-primary-tint/60 blur-3xl" />
 
       <div className="relative flex items-center justify-between gap-4">
         <div>
-          <span className="inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-violet-ink">
+          <span className="inline-flex items-center gap-2 uppercase font-mono text-xs font-medium tracking-[0.1em] text-violet-ink">
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full rounded-full bg-violet opacity-30" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-violet" />
             </span>
             Active field network
           </span>
-          <p className="mt-1 font-display text-lg font-bold tracking-tight text-ink-900">Iraq coverage</p>
+          <p className="mt-1 font-display text-lg font-semibold tracking-tight text-ink-900">Iraq coverage</p>
         </div>
-        <span className="rounded-full border border-violet-100 bg-white/80 px-3 py-1.5 text-xs font-semibold text-violet-ink shadow-sm backdrop-blur">
+        <span className="rounded-full border border-primary-tint bg-white/80 px-3 py-1.5 text-xs font-semibold text-violet-ink shadow-sm backdrop-blur">
           {PINS.length} coverage hubs
         </span>
       </div>
@@ -80,18 +80,18 @@ export default function CoverageMap() {
         >
           <defs>
             <linearGradient id="v2IraqFill" x1="0" y1="0" x2="0.5" y2="1">
-              <stop offset="0" stopColor="#ddd5ff" />
-              <stop offset="0.55" stopColor="#f0edff" />
-              <stop offset="1" stopColor="#ffffff" />
+              <stop offset="0" stopColor="var(--vm-primary-tint)" />
+              <stop offset="0.55" stopColor="var(--vm-primary-tint)" />
+              <stop offset="1" stopColor="var(--vm-surface)" />
             </linearGradient>
             <pattern id="v2MapGrid" width="5" height="5" patternUnits="userSpaceOnUse">
-              <path d="M5 0H0V5" fill="none" stroke="#6748fd" strokeOpacity="0.08" strokeWidth="0.25" />
+              <path d="M5 0H0V5" fill="none" stroke="var(--vm-primary)" strokeOpacity="0.08" strokeWidth="0.25" />
             </pattern>
             <clipPath id="v2IraqClip">
               <path d={IRAQ_PATH} />
             </clipPath>
             <filter id="v2MapShadow" x="-25%" y="-25%" width="150%" height="160%">
-              <feDropShadow dx="0" dy="2" stdDeviation="2.2" floodColor="#4932b7" floodOpacity="0.18" />
+              <feDropShadow dx="0" dy="2" stdDeviation="2.2" floodColor="var(--vm-text)" floodOpacity="0.18" />
             </filter>
           </defs>
 
@@ -150,7 +150,7 @@ export default function CoverageMap() {
                   cy={p.y}
                   r={on ? 1.9 : p.capital ? 1.6 : 1.25}
                   fill="var(--color-violet)"
-                  stroke="#fff"
+                  stroke="var(--vm-surface)"
                   strokeWidth="0.75"
                   style={{ transition: "r 180ms ease" }}
                 />
@@ -162,10 +162,10 @@ export default function CoverageMap() {
                     fontSize="2.75"
                     fontWeight={p.capital ? 700 : 600}
                     fill={on ? "var(--color-ink-900)" : "var(--color-ink-700)"}
-                    stroke="#fff"
+                    stroke="var(--vm-surface)"
                     strokeWidth="0.9"
                     paintOrder="stroke"
-                    style={{ fontFamily: "var(--font-inter), sans-serif" }}
+                    style={{ fontFamily: "var(--vm-font-sans)" }}
                   >
                     {p.name}
                   </text>
@@ -177,7 +177,7 @@ export default function CoverageMap() {
 
         {hover && !hover.label && (
           <div
-            className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full rounded-lg border border-violet-100 bg-white px-2.5 py-1 text-xs font-semibold text-ink-900 shadow-[var(--shadow-pop)]"
+            className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full rounded-md border border-primary-tint bg-white px-2.5 py-1 text-xs font-semibold text-ink-900 shadow-[var(--shadow-pop)]"
             style={{ left: `${hover.x}%`, top: `calc(${(hover.y / VIEW.h) * 100}% - 6px)` }}
           >
             {hover.name}
@@ -185,7 +185,7 @@ export default function CoverageMap() {
         )}
       </div>
 
-      <div className="relative mt-3 flex items-center gap-3 border-t border-violet-100 pt-3 text-[11px] text-ink-500">
+      <div className="relative mt-3 flex items-center gap-3 border-t border-primary-tint pt-3 text-xs text-ink-500">
         <span className="inline-flex items-center gap-1.5">
           <span className="h-2 w-2 rounded-full bg-violet" />
           Field coverage hub

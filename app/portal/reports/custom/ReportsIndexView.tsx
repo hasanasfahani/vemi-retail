@@ -53,17 +53,17 @@ function Index() {
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
-          <h1 className="font-display text-[19px] font-bold tracking-tight text-ink-900">
+          <h1 className="font-display text-lg font-semibold tracking-tight text-ink-900">
             Reports you built
           </h1>
-          <p className="mt-0.5 text-[12.5px] text-ink-500">
+          <p className="mt-0.5 text-sm text-ink-500">
             Your own pages, built from the blocks the portal already computes.
           </p>
         </div>
         <button
           type="button"
           onClick={start}
-          className="shrink-0 rounded-[9px] bg-violet px-3 py-1.5 text-[12.5px] font-semibold text-white transition-colors hover:bg-violet-ink"
+          className="shrink-0 rounded-md bg-violet px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-violet-ink"
         >
           New report
         </button>
@@ -82,7 +82,7 @@ function Index() {
           <button
             type="button"
             onClick={start}
-            className="mt-3 rounded-[9px] bg-violet px-2.5 py-1.5 text-[12px] font-semibold text-white transition-colors hover:bg-violet-ink"
+            className="mt-3 rounded-md bg-violet px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-violet-ink"
           >
             Build one
           </button>
@@ -93,12 +93,12 @@ function Index() {
             <li key={report.id}>
               <Link
                 href={`/portal/reports/custom/${report.id}`}
-                className="flex h-full flex-col rounded-[14px] border border-line bg-white p-3.5 shadow-[var(--shadow-card)] transition-colors hover:border-violet"
+                className="flex h-full flex-col rounded-lg border border-line bg-white p-3.5 shadow-[var(--shadow-card)] transition-colors hover:border-violet"
               >
-                <span className="truncate font-display text-[14.5px] font-bold tracking-tight text-ink-900">
+                <span className="truncate font-display text-sm font-semibold tracking-tight text-ink-900">
                   {report.name}
                 </span>
-                <span className="mono mt-1 text-[11.5px] text-ink-400">
+                <span className="mono mt-1 text-xs text-ink-400">
                   {report.blocks.length === 1 ? "1 block" : `${report.blocks.length} blocks`}
                   {" · "}
                   edited {monthLabel(report.updatedAt.slice(0, 7))}
@@ -109,7 +109,7 @@ function Index() {
         </ul>
       )}
 
-      <p className="text-[11.5px] leading-snug text-ink-400">
+      <p className="text-xs leading-snug text-ink-400">
         Reports live in this browser until there is a server to keep them, so a colleague on another
         machine will not see this list. Share one with its link instead — it carries the whole
         definition and builds them their own copy.

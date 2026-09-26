@@ -75,21 +75,21 @@ export default function CoverageRing({
           </g>
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="font-display text-[30px] font-bold leading-none tracking-tight text-ink-900">
+          <span className="font-display text-[28px] font-semibold leading-none tracking-tight text-ink-900">
             {pct}%
           </span>
-          <span className="mono mt-1 text-[11px] text-ink-400">
+          <span className="mono mt-1 text-xs text-ink-400">
             {audited.toLocaleString()} / {contracted.toLocaleString()}
           </span>
         </div>
       </div>
 
       <div className="min-w-[220px] flex-1">
-        <p className="font-display text-[17px] font-bold tracking-tight text-ink-900">
+        <p className="font-display text-lg font-semibold tracking-tight text-ink-900">
           {audited.toLocaleString()} of {contracted.toLocaleString()} outlets audited
         </p>
         <p
-          className="mt-1 inline-flex items-center gap-1.5 rounded-full px-2 py-[2px] text-[11.5px] font-semibold"
+          className="mt-1 inline-flex items-center gap-1.5 rounded-full px-2 py-[2px] text-xs font-semibold"
           style={{ background: `${color}1a`, color }}
         >
           <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden />
@@ -104,11 +104,11 @@ export default function CoverageRing({
             { k: "Rate needed", v: perDayRequired, s: "outlets / day" },
           ].map((row) => (
             <div key={row.k}>
-              <dt className="text-[10.5px] font-semibold uppercase tracking-wide text-ink-400">
+              <dt className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
                 {row.k}
               </dt>
               <dd className="mono mt-0.5 text-[15px] font-semibold text-ink-900">{row.v}</dd>
-              <dd className="text-[11px] text-ink-400">{row.s}</dd>
+              <dd className="text-xs text-ink-400">{row.s}</dd>
             </div>
           ))}
         </dl>

@@ -26,8 +26,8 @@ export const BAND_COLOR: Record<Band, string> = {
 
 export const BAND_CLASS: Record<Band, string> = {
   strong: "bg-[color:var(--color-good)]/10 text-[color:var(--color-good)]",
-  average: "bg-[color:var(--color-warn)]/14 text-[#8a6100]",
-  attention: "bg-[color:var(--color-serious)]/14 text-[#a24c22]",
+  average: "bg-[color:var(--color-warn)]/14 text-[color:var(--vm-text)]",
+  attention: "bg-[color:var(--color-serious)]/14 text-[color:var(--vm-text)]",
   critical: "bg-[color:var(--color-critical)]/10 text-[color:var(--color-critical)]",
 };
 

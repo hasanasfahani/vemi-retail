@@ -101,7 +101,7 @@ export default function Sidebar() {
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           aria-expanded={!collapsed}
           title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className="rounded-md p-1.5 text-ink-400 transition-colors hover:bg-canvas hover:text-ink-700"
+          className="rounded-sm p-1.5 text-ink-400 transition-colors hover:bg-canvas hover:text-ink-700"
         >
           <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
             <path d={collapsed ? "M6.5 4l4 4-4 4" : "M9.5 4 5.5 8l4 4"} />
@@ -114,7 +114,7 @@ export default function Sidebar() {
           <div key={group.label} className={i > 0 ? "mt-4" : undefined}>
             {!collapsed && (
               <div className="flex items-center justify-between gap-2 px-2.5 pb-1.5">
-                <span className="text-[10.5px] font-semibold uppercase tracking-[0.09em] text-ink-400">
+                <span className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
                   {group.label}
                 </span>
                 {group.id === "reports" && (
@@ -130,7 +130,7 @@ export default function Sidebar() {
                       upsertReport(report);
                       router.push(`/portal/reports/custom/${report.id}?new=1`);
                     }}
-                    className="flex h-5 w-5 items-center justify-center rounded-[6px] text-ink-400 transition-colors hover:bg-canvas hover:text-ink-900"
+                    className="flex h-5 w-5 items-center justify-center rounded-sm text-ink-400 transition-colors hover:bg-canvas hover:text-ink-900"
                   >
                     <Icon name="plus" className="h-3.5 w-3.5" />
                   </button>
@@ -149,7 +149,7 @@ export default function Sidebar() {
                     key={item.href}
                     title={`${item.label} — coming soon`}
                     aria-disabled="true"
-                    className={`mb-0.5 flex cursor-default items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13.5px] font-medium text-ink-300 ${
+                    className={`mb-0.5 flex cursor-default items-center gap-2.5 rounded-md px-2.5 py-2 text-sm font-medium text-ink-300 ${
                       collapsed ? "justify-center" : ""
                     }`}
                   >
@@ -183,11 +183,11 @@ export default function Sidebar() {
                   href={withFilters(item.href)}
                   aria-current={active ? "page" : undefined}
                   title={collapsed ? item.label : undefined}
-                  className={`mb-0.5 flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13.5px] transition-colors ${
+                  className={`mb-0.5 flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors ${
                     collapsed ? "justify-center" : ""
                   } ${
                     active
-                      ? "bg-violet-050 font-semibold text-violet-ink"
+                      ? "bg-primary-tint font-semibold text-violet-ink"
                       : "font-medium text-ink-500 hover:bg-canvas hover:text-ink-900"
                   }`}
                 >
@@ -210,11 +210,11 @@ export default function Sidebar() {
                       href={withFilters(href)}
                       aria-current={active ? "page" : undefined}
                       title={collapsed ? report.name : undefined}
-                      className={`mb-0.5 flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13.5px] transition-colors ${
+                      className={`mb-0.5 flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors ${
                         collapsed ? "justify-center" : ""
                       } ${
                         active
-                          ? "bg-violet-050 font-semibold text-violet-ink"
+                          ? "bg-primary-tint font-semibold text-violet-ink"
                           : "font-medium text-ink-500 hover:bg-canvas hover:text-ink-900"
                       }`}
                     >
@@ -226,7 +226,7 @@ export default function Sidebar() {
                 {!collapsed && recent.length > RAIL_CAP && (
                   <Link
                     href={withFilters("/portal/reports/custom")}
-                    className="mb-0.5 block rounded-lg px-2.5 py-1.5 text-[12px] font-semibold text-ink-400 transition-colors hover:bg-canvas hover:text-ink-900"
+                    className="mb-0.5 block rounded-md px-2.5 py-1.5 text-xs font-semibold text-ink-400 transition-colors hover:bg-canvas hover:text-ink-900"
                   >
                     All {recent.length} reports
                   </Link>
@@ -245,7 +245,7 @@ export default function Sidebar() {
             className="flex flex-col items-center gap-1 py-1"
             title={`${coverage.audited.toLocaleString()} of ${coverage.contracted.toLocaleString()} audited · ${coverage.pct}%`}
           >
-            <span className="mono text-[12px] font-bold text-ink-900">{coverage.pct}%</span>
+            <span className="mono text-xs font-semibold text-ink-900">{coverage.pct}%</span>
             <span className="h-1 w-8 overflow-hidden rounded-full bg-line">
               <span
                 className="block h-full rounded-full"
@@ -257,18 +257,18 @@ export default function Sidebar() {
             </span>
           </div>
         ) : (
-          <div className="rounded-lg bg-canvas p-3">
+          <div className="rounded-md bg-canvas p-3">
             <div className="flex items-baseline justify-between">
-              <span className="text-[10.5px] font-semibold uppercase tracking-wide text-ink-400">
+              <span className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
                 This month
               </span>
-              <span className="mono text-[11px] font-semibold" style={{ color: coverage.onTrack ? "var(--color-good)" : "var(--color-warn)" }}>
+              <span className="mono text-xs font-semibold" style={{ color: coverage.onTrack ? "var(--color-good)" : "var(--color-warn)" }}>
                 {coverage.onTrack ? "On track" : "Behind"}
               </span>
             </div>
-            <div className="mono mt-1 text-[15px] font-bold text-ink-900">
+            <div className="mono mt-1 text-[15px] font-semibold text-ink-900">
               {coverage.audited.toLocaleString()}
-              <span className="text-[12px] font-medium text-ink-400">
+              <span className="text-xs font-medium text-ink-400">
                 {" "}/ {coverage.contracted.toLocaleString()}
               </span>
             </div>
@@ -278,7 +278,7 @@ export default function Sidebar() {
                 style={{ width: `${coverage.pct}%`, background: "var(--color-violet)" }}
               />
             </div>
-            <div className="mt-1 text-[11px] text-ink-400">
+            <div className="mt-1 text-xs text-ink-400">
               {coverage.pct}% · {contract.daysRemaining} days left
             </div>
           </div>

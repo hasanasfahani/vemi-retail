@@ -262,7 +262,7 @@ export default function AccessRequestModal() {
   return (
     <div
       className="fixed inset-0 z-[100] flex items-end justify-center overflow-y-auto p-0 sm:items-center sm:p-6"
-      style={{ background: "rgba(20,21,26,0.42)" }}
+      style={{ background: "var(--vm-scrim)" }}
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) close();
       }}
@@ -272,7 +272,7 @@ export default function AccessRequestModal() {
         role="dialog"
         aria-modal="true"
         aria-labelledby="access-title"
-        className="panel-in surface my-auto w-full max-w-[440px] rounded-b-none sm:rounded-b-[18px]"
+        className="panel-in surface my-auto w-full max-w-[440px] rounded-b-none sm:rounded-b-lg"
       >
         {phase === "form" && (
           <form onSubmit={onSubmit} noValidate>
@@ -292,7 +292,7 @@ export default function AccessRequestModal() {
                 type="button"
                 onClick={close}
                 aria-label="Close"
-                className="-mr-2 -mt-1 shrink-0 rounded-lg p-2 text-ink-400 transition-colors hover:bg-canvas hover:text-ink-900"
+                className="-mr-2 -mt-1 shrink-0 rounded-md p-2 text-ink-400 transition-colors hover:bg-canvas hover:text-ink-900"
               >
                 <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden>
                   <path d="M5 5l10 10M15 5L5 15" />
@@ -359,7 +359,7 @@ export default function AccessRequestModal() {
               <div>
                 <label
                   htmlFor="access-industry"
-                  className="mb-1.5 block text-[13px] font-semibold text-ink-900"
+                  className="mb-1.5 block text-sm font-semibold text-ink-900"
                 >
                   Industry
                 </label>
@@ -373,7 +373,7 @@ export default function AccessRequestModal() {
                     if (value !== "Other") setCustomIndustry("");
                     setIndustryError(undefined);
                   }}
-                  className={`w-full rounded-[10px] border bg-white px-3 py-2.5 text-[15px] outline-none transition-colors focus:border-violet ${
+                  className={`w-full rounded-md border bg-white px-3 py-2.5 text-[15px] outline-none transition-colors focus:border-violet ${
                     industry ? "text-ink-900" : "text-ink-500"
                   }`}
                   style={{
@@ -400,7 +400,7 @@ export default function AccessRequestModal() {
                       setIndustryError(undefined);
                     }}
                     placeholder="Enter your industry"
-                    className="mt-2 w-full rounded-[10px] border bg-white px-3 py-2.5 text-[15px] text-ink-900 outline-none transition-colors focus:border-violet placeholder:text-ink-500"
+                    className="mt-2 w-full rounded-md border bg-white px-3 py-2.5 text-[15px] text-ink-900 outline-none transition-colors focus:border-violet placeholder:text-ink-500"
                     style={{
                       borderColor: industryError
                         ? "var(--color-critical)"
@@ -493,7 +493,7 @@ function Field({
     <div>
       <label
         htmlFor={id}
-        className="mb-1.5 block text-[13px] font-semibold text-ink-900"
+        className="mb-1.5 block text-sm font-semibold text-ink-900"
       >
         {label}
       </label>
@@ -508,7 +508,7 @@ function Field({
         aria-invalid={Boolean(error)}
         onChange={(e) => onChange(name, e.target.value)}
         onBlur={() => onBlur(name)}
-        className="w-full rounded-[10px] border bg-white px-3 py-2.5 text-[15px] text-ink-900 outline-none transition-colors focus:border-violet placeholder:text-ink-400"
+        className="w-full rounded-md border bg-white px-3 py-2.5 text-[15px] text-ink-900 outline-none transition-colors focus:border-violet placeholder:text-ink-400"
         style={{
           borderColor: error
             ? "var(--color-critical)"
@@ -524,7 +524,7 @@ function FieldError({ message }: { message?: string }) {
   if (!message) return null;
   return (
     <p
-      className="mt-1.5 text-[13px] font-medium"
+      className="mt-1.5 text-sm font-medium"
       style={{ color: "var(--color-critical)" }}
     >
       {message}

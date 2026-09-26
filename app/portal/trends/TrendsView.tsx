@@ -124,7 +124,7 @@ function Trends({ view }: { view: MarketView }) {
       render: (r) => (
         <div className="min-w-0">
           <p className="truncate font-medium text-ink-900">{r.name}</p>
-          <p className="mono truncate text-[11px] text-ink-400">{r.location}</p>
+          <p className="mono truncate text-xs text-ink-400">{r.location}</p>
         </div>
       ),
     },
@@ -169,7 +169,7 @@ function Trends({ view }: { view: MarketView }) {
 
   return (
     <div className="flex flex-col gap-5">
-      <p className="rounded-[12px] border border-line bg-white px-3.5 py-2.5 text-[12.5px] leading-relaxed text-ink-500">
+      <p className="rounded-md border border-line bg-white px-3.5 py-2.5 text-sm leading-relaxed text-ink-500">
         Vemi audits a rotating panel, so a month-to-month movement can be the market changing or
         the sample changing. Every chart below draws both: the whole audited market for the level,
         and the {contract.corePanel}-outlet core panel — the same doors every month — for movement.
@@ -259,10 +259,10 @@ function Trends({ view }: { view: MarketView }) {
       {/* ---------- repeated outlets ---------- */}
       <section>
         <div className="mb-2.5 flex flex-wrap items-baseline justify-between gap-3">
-          <h2 className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+          <h2 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
             Repeated outlets
           </h2>
-          <span className="mono text-[11.5px] text-ink-400">
+          <span className="mono text-xs text-ink-400">
             {improved} improved · {worsened} declined · {repeatedRows.length - improved - worsened} unchanged
           </span>
         </div>

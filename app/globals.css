@@ -7,349 +7,360 @@
 @import "leaflet.markercluster/dist/MarkerCluster.css";
 
 /* ============================================================
-   VEMI — PRODUCT-LED DESIGN SYSTEM
-   Restraint + one accent + credible data. No gradients, no glows.
+   VEMI — brand v1.0, "The Insight V"
+   Values live in brand/tokens.css; the Tailwind theme (and the
+   temporary bridge from the pre-brand class names) in
+   brand/tailwind-v4.css. Nothing below writes a raw color.
    ============================================================ */
-@theme {
-  /* neutrals — cool paper, real 4-step ink ramp */
-  --color-paper: #ffffff;
-  --color-canvas: #f6f7f9;
-  --color-ink-900: #14151a;
-  --color-ink-700: #3d3f47;
-  --color-ink-500: #6b6e78;
-  --color-ink-400: #9a9ca5;
-  /* TWO STEPS THAT WERE BEING USED BEFORE THEY EXISTED. Six places
-     across the portal asked for ink-300 or ink-600 — the unwatched
-     state of every eye among them — and Tailwind generates nothing for
-     a token that is not declared, so each silently inherited its
-     parent's colour. The unwatched eye was rendering nearly as dark as
-     the watching one, which is the single thing that control has to
-     tell apart. 300 sits between 400 and the line colour; 600 between
-     500 and 700. */
-  --color-ink-300: #b9bbc4;
-  --color-ink-600: #54565f;
-  --color-line: #e7e8ec;
-  --color-line-strong: #d8dae0;
-
-  /* accent — used sparingly */
-  --color-violet: #6748fd;
-  --color-violet-ink: #4b30e0;
-  --color-violet-050: #f1eeff;
-  --color-violet-100: #e3ddff;
-
-  /* status (reserved — never used as decoration) */
-  --color-good: #0ca30c;
-  --color-warn: #fab219;
-  --color-serious: #ec835a;
-  --color-critical: #d03b3b;
-
-  /* chart neutrals for recessive competitor series */
-  --color-comp-1: #b9bdc7;
-  --color-comp-2: #cdd0d8;
-  --color-comp-3: #e0e2e8;
-
-  --font-display: var(--font-space-grotesk);
-  --font-body: var(--font-inter);
-
-  --radius-card: 14px;
-  --radius-surface: 18px;
-}
+@import "../brand/tokens.css";
+@import "../brand/tailwind-v4.css";
 
 /* ---- portal chart palette ------------------------------------
-   Emphasis form: the client brand carries the accent, every other
-   brand is de-emphasis gray. Identity comes from direct labels,
-   never from hue alone.
-
-   Validated with the data-viz palette checker (light surface):
-     #6748fd / #6b6e78  — CVD ΔE 21.7 protan, contrast ≥ 3:1
-     #6748fd / #d03b3b  — all checks pass, ΔE 30.0 protan
-     stock ramp         — monotone L, single hue, light end 2.07:1
-   `--color-ink-400` was the first choice for context and failed
-   contrast at 2.67:1, hence the darker step.
-
-   Declared on :root rather than in @theme on purpose — these are
-   read only through var() in inline styles, and Tailwind v4 drops
-   theme tokens that no utility class references. */
+   The client carries the accent, everyone else sits in neutrals, and
+   identity comes from direct labels, never from hue alone. Declared on
+   :root because charts read them through var() in inline styles, which
+   Tailwind cannot see. These re-point the pre-brand chart names; the
+   chart system rebuild (plan phase 4) replaces them with the brand's
+   chart-1/2/3 series and the D2 portfolio ramp directly. */
 :root {
-  --color-chart-context: #6b6e78;
-  --color-stock-1: #b7a6fe;
-  --color-stock-2: #9a83fd;
-  --color-stock-3: #8064fd;
-  --color-stock-4: #6748fd;
+  --color-chart-context: var(--vm-chart-3);
+  --color-stock-1: var(--vm-portfolio-4);
+  --color-stock-2: var(--vm-portfolio-3);
+  --color-stock-3: var(--vm-portfolio-2);
+  --color-stock-4: var(--vm-portfolio-1);
+  /* Dumbbell "earlier point": drawn hollow, always direct-labelled. */
+  --color-chart-prior: var(--vm-portfolio-2);
+  --color-context-prior: var(--vm-line-strong);
 
-  /* Dumbbell "earlier point" marks — the only palette addition in
-     Phase 13, and both ran through the checker before shipping:
-
-       #6748fd / #9a83fd  CVD ΔE 11.6 protan, normal 15.6 — PASS
-       #6b6e78 / #a8adb8  ΔE 20.8, inside the lightness band
-
-     Both carry a sub-3:1 contrast WARN against the surface, which the
-     checker allows only with relief — here the earlier mark is drawn
-     hollow (shape, not just hue), every dumbbell is direct-labelled,
-     and each has a table view. #b7a6fe was the first choice for the
-     violet and failed outright at 2.07:1; #8064fd failed CVD
-     separation at ΔE 4.2. Don't substitute either back in. */
-  --color-chart-prior: #9a83fd;
-  --color-context-prior: #a8adb8;
-}
-
-:root {
-  --shadow-surface: 0 1px 2px rgba(20, 21, 26, 0.05),
-    0 24px 60px -24px rgba(20, 21, 26, 0.22);
-  --shadow-card: 0 1px 2px rgba(20, 21, 26, 0.04);
-  --shadow-pop: 0 12px 32px -8px rgba(20, 21, 26, 0.18);
-}
-
-html {
-  scroll-behavior: smooth;
-  scroll-padding-top: 80px;
-}
-
-body {
-  background: var(--color-paper);
-  color: var(--color-ink-700);
-  font-family: var(--font-body), "Inter", system-ui, sans-serif;
-  font-weight: 400;
-  font-size: 16px;
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
-  letter-spacing: -0.011em;
-  overflow-x: hidden;
-}
-
-::selection {
-  background: var(--color-violet-100);
+  /* Border-first: cards carry no shadow. Only menus, popovers,
+     drawers and dialogs float. */
+  --shadow-card: none;
+  --shadow-surface: none;
+  --shadow-pop: var(--vm-shadow-overlay);
 }
 
 /* ============================================================
-   TYPOGRAPHY
+   BASE
    ============================================================ */
-.font-display {
-  font-family: var(--font-display), "Space Grotesk", system-ui, sans-serif;
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 88px;
+    background: var(--vm-bg);
+  }
+
+  body {
+    background: var(--vm-bg);
+    color: var(--vm-text);
+    font-family: var(--vm-font-sans);
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 24px;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  [lang="ar"],
+  [dir="rtl"] {
+    font-family: var(--vm-font-arabic);
+    letter-spacing: 0;
+  }
+
+  ::selection {
+    background: var(--vm-primary-tint);
+    color: var(--vm-text);
+  }
+
+  /* One focus ring for every control on the site and in the portal:
+     2px Violet with a 2px gap. An outline rather than the kit's
+     box-shadow so it survives elements that set their own shadow, and
+     it follows the element's radius. */
+  :focus-visible {
+    outline: 2px solid var(--vm-focus);
+    outline-offset: 2px;
+  }
 }
 
-.t-display {
-  font-family: var(--font-display), "Space Grotesk", sans-serif;
-  font-size: clamp(42px, 6.4vw, 84px);
-  line-height: 0.98;
-  letter-spacing: -0.04em;
-  font-weight: 700;
-  color: var(--color-ink-900);
-}
+/* ============================================================
+   TYPE — the brand scale (tokens.md). The t-* names are the
+   pre-brand classes, now drawn on the brand scale; they are renamed
+   to the vm-* classes as each page is rebuilt.
+   ============================================================ */
+@layer components {
+  .vm-display,
+  .t-display {
+    font-family: var(--vm-font-sans);
+    font-size: clamp(44px, 6vw, 72px);
+    line-height: 1.06;
+    letter-spacing: -0.02em;
+    font-weight: 600;
+    color: var(--vm-text);
+  }
 
-.t-h2 {
-  font-family: var(--font-display), "Space Grotesk", sans-serif;
-  font-size: clamp(30px, 4vw, 52px);
-  line-height: 1.02;
-  letter-spacing: -0.035em;
-  font-weight: 700;
-  color: var(--color-ink-900);
-}
+  .vm-h1 {
+    font-size: 44px;
+    line-height: 52px;
+    letter-spacing: -0.02em;
+    font-weight: 600;
+  }
 
-.t-h3 {
-  font-family: var(--font-display), "Space Grotesk", sans-serif;
-  font-size: 19px;
-  line-height: 1.25;
-  letter-spacing: -0.02em;
-  font-weight: 600;
-  color: var(--color-ink-900);
-}
+  /* Marketing section titles run at the h1 size; inside the portal a
+     section title is .vm-h2. */
+  .t-h2 {
+    font-family: var(--vm-font-sans);
+    font-size: clamp(32px, 4vw, 44px);
+    line-height: 1.18;
+    letter-spacing: -0.02em;
+    font-weight: 600;
+    color: var(--vm-text);
+  }
 
-.t-eyebrow {
-  font-size: 12px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  font-weight: 600;
-  color: var(--color-ink-400);
-}
+  .vm-h2 {
+    font-size: 32px;
+    line-height: 40px;
+    letter-spacing: -0.01em;
+    font-weight: 600;
+  }
 
-.t-lead {
-  font-size: clamp(16px, 1.4vw, 19px);
-  line-height: 1.55;
-  color: var(--color-ink-500);
-}
+  .vm-h3,
+  .t-h3 {
+    font-family: var(--vm-font-sans);
+    font-size: 22px;
+    line-height: 28px;
+    font-weight: 600;
+    color: var(--vm-text);
+  }
 
-.tnum {
-  font-family: var(--font-display), "Space Grotesk", sans-serif;
-  font-feature-settings: "tnum";
-  letter-spacing: -0.03em;
-  font-weight: 700;
-  color: var(--color-ink-900);
-}
+  .vm-body-lg,
+  .t-lead {
+    font-size: 18px;
+    line-height: 28px;
+    color: var(--vm-text-muted);
+  }
 
-.mono {
-  font-variant-numeric: tabular-nums;
+  .vm-body-sm {
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  /* Eyebrows, KPI labels, table headers: mono, uppercase, tracked. */
+  .vm-label,
+  .t-eyebrow {
+    font-family: var(--vm-font-mono);
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--vm-text-muted);
+  }
+
+  .vm-data {
+    font-family: var(--vm-font-mono);
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  /* Big figures: the sans face with tabular numbers. */
+  .tnum {
+    font-family: var(--vm-font-sans);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    font-weight: 600;
+    color: var(--vm-text);
+  }
+
+  .vm-num,
+  .mono {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .vm-muted {
+    color: var(--vm-text-muted);
+  }
 }
 
 /* ============================================================
    LAYOUT
    ============================================================ */
-.container-vemi {
-  max-width: 1160px;
-  margin: 0 auto;
-  padding: 0 24px;
-}
+@layer components {
+  .container-vemi {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
 
-.section {
-  padding: 104px 0;
-  position: relative;
-}
-.section-tight {
-  padding: 72px 0;
-}
-
-/* /v2 uses a slightly tighter cadence so adjacent section padding does
-   not read as an accidental empty band. Background changes and hairline
-   boundaries carry the separation instead of oversized gaps. */
-.section-v2 {
-  padding-top: 84px;
-  padding-bottom: 84px;
-}
-.section-v2-tight {
-  padding-top: 64px;
-  padding-bottom: 64px;
-}
-
-@media (max-width: 768px) {
   .section {
-    padding: 68px 0;
+    padding: 96px 0;
+    position: relative;
+  }
+  .section-tight {
+    padding: 64px 0;
   }
   .section-v2 {
+    padding-top: 96px;
+    padding-bottom: 96px;
+  }
+  .section-v2-tight {
     padding-top: 64px;
     padding-bottom: 64px;
   }
-  .section-v2-tight {
-    padding-top: 52px;
-    padding-bottom: 52px;
+
+  @media (max-width: 768px) {
+    .container-vemi {
+      padding: 0 16px;
+    }
+    .section,
+    .section-v2 {
+      padding-top: 64px;
+      padding-bottom: 64px;
+    }
+    .section-v2-tight {
+      padding-top: 48px;
+      padding-bottom: 48px;
+    }
+  }
+
+  .hairline {
+    border-top: 1px solid var(--vm-line);
   }
 }
 
-.hairline {
-  border-top: 1px solid var(--color-line);
+/* ============================================================
+   BUTTONS — 44px, radius 10, 15/600. One primary per view.
+   Calm: color changes on hover, nothing moves.
+   ============================================================ */
+@layer components {
+  .btn-primary,
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: var(--vm-control-height);
+    padding: 0 20px;
+    border: 1px solid transparent;
+    border-radius: var(--vm-radius-md);
+    font-size: 15px;
+    line-height: 20px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+  }
+
+  .btn-primary {
+    background: var(--vm-primary);
+    color: var(--vm-on-primary);
+  }
+  .btn-primary:hover {
+    background: var(--vm-primary-hover);
+  }
+
+  .btn-secondary {
+    background: var(--vm-surface);
+    color: var(--vm-text);
+    border-color: var(--vm-line-strong);
+  }
+  .btn-secondary:hover {
+    background: var(--vm-bg);
+  }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--vm-primary-text);
+    font-weight: 600;
+    font-size: 15px;
+    line-height: 20px;
+  }
+  .btn-ghost:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
 }
 
 /* ============================================================
-   BUTTONS — tool-like, 10px radius
+   SURFACES — white, 1px Line, radius 16, no shadow.
    ============================================================ */
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background: var(--color-violet);
-  color: #fff;
-  border-radius: 10px;
-  padding: 12px 20px;
-  font-weight: 600;
-  font-size: 15px;
-  letter-spacing: -0.01em;
-  transition: background 160ms ease, transform 160ms ease;
-}
-.btn-primary:hover {
-  background: var(--color-violet-ink);
-  transform: translateY(-1px);
-}
+@layer components {
+  .card {
+    background: var(--vm-surface);
+    border: 1px solid var(--vm-line);
+    border-radius: var(--vm-radius-lg);
+    padding: 24px;
+    transition: border-color 160ms ease;
+  }
+  .card-hover:hover {
+    border-color: var(--vm-line-strong);
+  }
 
-.btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background: #fff;
-  color: var(--color-ink-900);
-  border: 1px solid var(--color-line-strong);
-  border-radius: 10px;
-  padding: 12px 20px;
-  font-weight: 600;
-  font-size: 15px;
-  transition: border-color 160ms ease, background 160ms ease;
-}
-.btn-secondary:hover {
-  border-color: var(--color-ink-400);
-  background: var(--color-canvas);
-}
+  .surface {
+    background: var(--vm-surface);
+    border: 1px solid var(--vm-line);
+    border-radius: var(--vm-radius-lg);
+  }
 
-.btn-ghost {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--color-violet-ink);
-  font-weight: 600;
-  font-size: 15px;
-}
-.btn-ghost:hover {
-  color: var(--color-violet);
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid var(--vm-line);
+    border-radius: var(--vm-radius-pill);
+    padding: 4px 12px;
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 500;
+    color: var(--vm-text-muted);
+    background: var(--vm-surface);
+  }
+
+  /* Band chips (plan D1): fill style carries the band, the word always
+     travels with it. */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border: 1px solid transparent;
+    border-radius: var(--vm-radius-sm);
+    padding: 2px 8px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 18px;
+  }
+  .pill-good {
+    background: var(--vm-primary-tint);
+    color: var(--vm-primary-text);
+  }
+  .pill-warn {
+    background: var(--vm-surface);
+    border-color: var(--vm-line-strong);
+    color: var(--vm-text);
+  }
+  .pill-critical {
+    background: var(--vm-text);
+    color: var(--vm-bg);
+  }
+
+  .dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+  }
+
+  .grid-line {
+    stroke: var(--vm-chart-grid);
+    stroke-width: 1;
+  }
 }
 
 /* ============================================================
-   SURFACES
+   MOTION — quiet. 160–220ms, color and opacity; nothing bounces.
    ============================================================ */
-.card {
-  background: #fff;
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-card);
-  padding: 24px;
-  transition: border-color 180ms ease, box-shadow 180ms ease;
-}
-.card-hover:hover {
-  border-color: var(--color-line-strong);
-  box-shadow: var(--shadow-card);
-}
-
-.surface {
-  background: #fff;
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-surface);
-  box-shadow: var(--shadow-surface);
-}
-
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  border: 1px solid var(--color-line-strong);
-  border-radius: 999px;
-  padding: 5px 12px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--color-ink-500);
-  background: #fff;
-}
-
-.pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  border-radius: 6px;
-  padding: 2px 8px;
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 1.5;
-}
-.pill-good {
-  background: color-mix(in srgb, var(--color-good) 12%, #fff);
-  color: #0a7a0a;
-}
-.pill-critical {
-  background: color-mix(in srgb, var(--color-critical) 12%, #fff);
-  color: #b52d2d;
-}
-.pill-warn {
-  background: color-mix(in srgb, var(--color-warn) 18%, #fff);
-  color: #8a6a00;
-}
-
-.dot {
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  border-radius: 999px;
-}
-
-/* status dot with soft ring */
 @keyframes ping-soft {
   0% {
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-critical) 55%, transparent);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--vm-primary) 45%, transparent);
   }
   70%,
   100% {
@@ -360,21 +371,12 @@ body {
   animation: ping-soft 2s ease-out infinite;
 }
 
-/* sparkline / chart helpers */
-.grid-line {
-  stroke: var(--color-line);
-  stroke-width: 1;
-}
-
 @keyframes mapPing {
   0% {
     opacity: 0.55;
     transform: scale(0.5);
   }
-  70% {
-    opacity: 0;
-    transform: scale(2.1);
-  }
+  70%,
   100% {
     opacity: 0;
     transform: scale(2.1);
@@ -389,7 +391,7 @@ body {
 @keyframes panelIn {
   from {
     opacity: 0;
-    transform: translateY(5px);
+    transform: translateY(4px);
   }
   to {
     opacity: 1;
@@ -401,9 +403,9 @@ body {
 }
 
 /* ============================================================
-   PORTAL — route transition
-   A short skeleton beat on navigation. Costs no server latency:
-   the content is already there, the skeleton just fades off it.
+   PORTAL — route transition and loading skeleton.
+   Skeleton blocks are flat Violet 100 at the size of the content
+   they stand in for (brand: no spinners, no shimmer gradient).
    ============================================================ */
 .portal-page {
   position: relative;
@@ -444,34 +446,27 @@ body {
   }
 }
 
-/* skeleton furniture — same rhythm as a real page */
 .sk-line,
 .sk-block,
 .sk-panel {
-  background: linear-gradient(
-    90deg,
-    var(--color-line) 0%,
-    #eef0f3 50%,
-    var(--color-line) 100%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.1s linear infinite;
-  border-radius: 8px;
+  background: var(--vm-primary-tint);
+  border-radius: var(--vm-radius-sm);
+  animation: skeletonPulse 1.2s ease-in-out infinite;
 }
 
 .sk-title {
-  height: 26px;
+  height: 28px;
   width: 190px;
 }
 .sk-lead {
-  height: 14px;
+  height: 16px;
   width: 300px;
-  margin-top: 10px;
+  margin-top: 12px;
 }
 .sk-kpis {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 24px;
   margin-top: 24px;
 }
 @media (min-width: 1024px) {
@@ -481,29 +476,22 @@ body {
 }
 .sk-block {
   height: 92px;
-  border-radius: 14px;
+  border-radius: var(--vm-radius-lg);
 }
 .sk-panel {
   height: 320px;
-  margin-top: 16px;
-  border-radius: 18px;
+  margin-top: 24px;
+  border-radius: var(--vm-radius-lg);
 }
 
-@keyframes shimmer {
-  from {
-    background-position: 200% 0;
+@keyframes skeletonPulse {
+  0%,
+  100% {
+    opacity: 1;
   }
-  to {
-    background-position: -200% 0;
+  50% {
+    opacity: 0.55;
   }
-}
-
-/* Keyboard users get a visible ring everywhere in the portal. */
-.portal-page :focus-visible,
-.portal-shell :focus-visible {
-  outline: 2px solid var(--color-violet);
-  outline-offset: 2px;
-  border-radius: 4px;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -515,7 +503,6 @@ body {
   .sk-panel {
     animation: none;
   }
-  /* no skeleton beat, no fade — content is simply there */
   .portal-content {
     animation: none;
   }
@@ -527,63 +514,49 @@ body {
   }
 }
 
-/* Digest is the one page meant to leave the screen — printed or saved
-   as a PDF and forwarded. Strip the workspace chrome, keep the
-   content full-width and ink-only. */
-@media print {
-  .portal-shell > nav,
-  .portal-shell header,
-  .portal-shell nav[class*="overflow-x-auto"] {
-    display: none !important;
-  }
-  .portal-shell,
-  .portal-shell main {
-    display: block !important;
-    overflow: visible !important;
-  }
-  body {
-    background: #fff;
-  }
-}
-
 /* ------------------------------------------------------------------
    MAP CHROME
 
    Leaflet ships a look of its own — heavy panel borders, blue focus
    rings, a white tooltip with a hard shadow. These pull it onto the
-   portal's own surfaces so a map reads as one more panel rather than
-   an embedded widget from another product.
+   brand's surfaces so a map reads as one more panel rather than an
+   embedded widget from another product.
 ------------------------------------------------------------------ */
 .leaflet-container {
-  font-family: var(--font-body), system-ui, sans-serif;
-  background: var(--color-canvas);
+  font-family: var(--vm-font-sans);
+  background: var(--vm-bg);
 }
 .leaflet-control-attribution {
-  background: rgba(255, 255, 255, 0.86);
-  color: var(--color-ink-400);
-  font-size: 10.5px;
+  background: color-mix(in srgb, var(--vm-surface) 86%, transparent);
+  color: var(--vm-text-muted);
+  font-size: 12px;
 }
-.leaflet-control-attribution a { color: var(--color-ink-500); }
+.leaflet-control-attribution a {
+  color: var(--vm-text-muted);
+}
 .leaflet-bar a {
-  border-color: var(--color-line);
-  color: var(--color-ink-700);
+  border-color: var(--vm-line);
+  color: var(--vm-text);
 }
 .leaflet-tooltip {
-  border: 1px solid var(--color-line);
-  border-radius: 9px;
-  box-shadow: var(--shadow-pop);
-  color: var(--color-ink-700);
+  border: 1px solid var(--vm-line);
+  border-radius: var(--vm-radius-md);
+  box-shadow: var(--vm-shadow-overlay);
+  color: var(--vm-text);
   font-size: 12px;
-  line-height: 1.35;
-  padding: 6px 9px;
+  line-height: 16px;
+  padding: 6px 10px;
 }
-.leaflet-tooltip strong { color: var(--color-ink-900); }
-.vemi-cluster { background: none; border: 0; }
+.leaflet-tooltip strong {
+  color: var(--vm-text);
+}
+.vemi-cluster {
+  background: none;
+  border: 0;
+}
 
 /* A strip that can still be dragged or swiped, without the permanent
-   grey bar macOS paints when "show scroll bars" is set to always. The
-   tab strips are the case that needs it: five tabs almost never
-   overflow, so the bar was pure furniture sitting across the row. */
+   grey bar macOS paints when "show scroll bars" is set to always. */
 .no-scrollbar {
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -605,8 +578,9 @@ body {
   @page {
     margin: 14mm;
   }
-  html, body {
-    background: #ffffff;
+  html,
+  body {
+    background: var(--vm-surface);
   }
   .print\:hidden,
   aside,
@@ -621,16 +595,15 @@ body {
      nothing here may hide a chip. */
   [data-scope-chip] {
     display: inline-block !important;
-    border: 1px solid #b9b3ee !important;
-    color: #4a3fd0 !important;
+    border: 1px solid var(--vm-primary) !important;
+    color: var(--vm-primary-text) !important;
   }
   main {
     padding: 0 !important;
     overflow: visible !important;
   }
-  /* Cards keep their edges but lose the shadow, which prints as a
-     grey smear. */
-  section, article {
+  section,
+  article {
     box-shadow: none !important;
     break-inside: avoid;
   }

@@ -13,15 +13,15 @@ export default function ChartTooltip({
 }: Partial<TooltipContentProps<number, string>> & { format?: Fmt }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-[10px] border border-line bg-white px-2.5 py-2 shadow-[var(--shadow-pop)]">
+    <div className="rounded-md border border-line bg-white px-2.5 py-2 shadow-[var(--shadow-pop)]">
       {label !== undefined && (
-        <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+        <p className="mb-1 uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
           {String(label)}
         </p>
       )}
       <ul className="flex flex-col gap-0.5">
         {payload.map((row) => (
-          <li key={String(row.dataKey)} className="flex items-center gap-2 text-[12px]">
+          <li key={String(row.dataKey)} className="flex items-center gap-2 text-xs">
             <span
               className="h-2 w-2 shrink-0 rounded-[2px]"
               style={{ background: row.color }}

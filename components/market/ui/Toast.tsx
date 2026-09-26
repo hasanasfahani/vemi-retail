@@ -58,7 +58,7 @@ export default function Toasts({
       {toasts.map((toast) => (
         <div
           key={toast.id}
-          className="pointer-events-auto flex max-w-[360px] items-start gap-2.5 rounded-[12px] border border-line bg-white px-3.5 py-2.5 shadow-[var(--shadow-pop)]"
+          className="pointer-events-auto flex max-w-[360px] items-start gap-2.5 rounded-md border border-line bg-white px-3.5 py-2.5 shadow-[var(--shadow-pop)]"
         >
           <span
             className="mt-[3px] h-2 w-2 shrink-0 rounded-full"
@@ -68,12 +68,12 @@ export default function Toasts({
             }}
             aria-hidden
           />
-          <p className="min-w-0 flex-1 text-[12.5px] leading-snug text-ink-900">{toast.text}</p>
+          <p className="min-w-0 flex-1 text-sm leading-snug text-ink-900">{toast.text}</p>
           <button
             type="button"
             onClick={() => onDismiss(toast.id)}
             aria-label="Dismiss"
-            className="shrink-0 rounded p-0.5 text-ink-400 transition-colors hover:text-ink-700"
+            className="shrink-0 rounded-sm p-0.5 text-ink-400 transition-colors hover:text-ink-700"
           >
             <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden>
               <path d="m4 4 8 8M12 4l-8 8" />

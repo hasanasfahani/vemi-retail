@@ -191,8 +191,8 @@ export default function MarketMap({
           const n = bands.length;
           const size = n > 200 ? 46 : n > 50 ? 40 : n > 10 ? 34 : 28;
           const ring = criticals
-            ? `0 0 0 3px rgba(255,255,255,.9), 0 0 0 5px ${BAND_COLOR.critical}`
-            : `0 0 0 3px rgba(255,255,255,.85)`;
+            ? `0 0 0 3px color-mix(in srgb, var(--vm-surface) 90%, transparent), 0 0 0 5px ${BAND_COLOR.critical}`
+            : `0 0 0 3px color-mix(in srgb, var(--vm-surface) 85%, transparent)`;
 
           return L.divIcon({
             html: `<span title="${n} outlets${
@@ -200,9 +200,9 @@ export default function MarketMap({
             }${criticals ? ` · ${criticals} critical` : ""}" style="
               display:flex;align-items:center;justify-content:center;
               width:${size}px;height:${size}px;border-radius:999px;
-              background:${BAND_COLOR[typical]};color:#fff;
+              background:${BAND_COLOR[typical]};color:var(--vm-surface);
               font:600 ${size > 34 ? 13 : 11.5}px/1 var(--font-body,system-ui);
-              box-shadow:${ring}, 0 2px 8px rgba(20,21,26,.28);
+              box-shadow:${ring}, 0 2px 8px color-mix(in srgb, var(--vm-text) 28%, transparent);
             ">${n}</span>`,
             className: "vemi-cluster",
             iconSize: [size, size],
@@ -215,7 +215,7 @@ export default function MarketMap({
         const marker = L.circleMarker([p.lat, p.lng], {
           radius: p.radius ?? 6,
           weight: 2,
-          color: "#ffffff",
+          color: "var(--vm-surface)",
           fillColor: p.color ?? BAND_COLOR[p.band],
           fillOpacity: p.color ? 0.85 : 1,
         }) as import("leaflet").CircleMarker & {
@@ -243,10 +243,10 @@ export default function MarketMap({
   }, [points, ready, onSelect, unit, cluster, bandOf]);
 
   return (
-    <div className="relative overflow-hidden rounded-[12px] border border-line">
+    <div className="relative overflow-hidden rounded-md border border-line">
       <div ref={host} style={{ height }} className="z-0 w-full bg-canvas" />
       {!ready && (
-        <div className="absolute inset-0 flex items-center justify-center text-[12.5px] text-ink-400">
+        <div className="absolute inset-0 flex items-center justify-center text-sm text-ink-400">
           Loading map…
         </div>
       )}

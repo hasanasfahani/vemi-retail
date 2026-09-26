@@ -178,7 +178,7 @@ export default function AvailabilityTab({ view }: { view: MarketView }) {
                   eyes sit beside the legend that names the formats. */}
               <span className="flex items-center gap-0.5">
                 {a.byChannel.map((row) => (
-                  <span key={row.id} className="inline-flex items-center gap-0.5 text-[11px] text-ink-400">
+                  <span key={row.id} className="inline-flex items-center gap-0.5 text-xs text-ink-400">
                     {row.label}
                     <WatchEye
                       kpi="availability"

@@ -10,7 +10,7 @@ export default function MapLegend({ counts }: { counts?: Record<Band, number> })
   return (
     <ul className="flex flex-wrap items-center gap-x-3.5 gap-y-1.5">
       {BANDS.map((band) => (
-        <li key={band} className="flex items-center gap-1.5 text-[11.5px] text-ink-500">
+        <li key={band} className="flex items-center gap-1.5 text-xs text-ink-500">
           <span
             className="h-2.5 w-2.5 shrink-0 rounded-full ring-2 ring-white"
             style={{ background: BAND_COLOR[band] }}

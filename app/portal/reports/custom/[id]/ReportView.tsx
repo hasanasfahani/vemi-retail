@@ -73,7 +73,7 @@ function DragHandle({
       onDragEnd={onRelease}
       title={`Drag to move ${label}`}
       aria-hidden
-      className="flex h-6 w-5 cursor-grab items-center justify-center rounded-[7px] text-ink-300 transition-colors hover:bg-canvas hover:text-ink-700 active:cursor-grabbing"
+      className="flex h-6 w-5 cursor-grab items-center justify-center rounded-sm text-ink-300 transition-colors hover:bg-canvas hover:text-ink-700 active:cursor-grabbing"
     >
       <svg viewBox="0 0 16 16" className="h-4 w-4" fill="currentColor">
         <circle cx="6" cy="4" r="1.2" /><circle cx="10" cy="4" r="1.2" />
@@ -161,7 +161,7 @@ function Report({ view, data }: { view: MarketView; data: MonthData }) {
         />
         <Link
           href="/portal/reports/custom"
-          className="mt-3 inline-block rounded-[9px] bg-violet px-2.5 py-1.5 text-[12px] font-semibold text-white transition-colors hover:bg-violet-ink"
+          className="mt-3 inline-block rounded-md bg-violet px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-violet-ink"
         >
           All reports
         </Link>
@@ -181,7 +181,7 @@ function Report({ view, data }: { view: MarketView; data: MonthData }) {
           <button
             type="button"
             onClick={() => setPicking(true)}
-            className="rounded-[9px] bg-violet px-2.5 py-1.5 text-[12px] font-semibold text-white transition-colors hover:bg-violet-ink"
+            className="rounded-md bg-violet px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-violet-ink"
           >
             Add block
           </button>
@@ -189,14 +189,14 @@ function Report({ view, data }: { view: MarketView; data: MonthData }) {
             type="button"
             onClick={share}
             title="Copy a link that rebuilds this report for someone else"
-            className="rounded-[9px] border border-line-strong bg-white px-2.5 py-1.5 text-[12px] font-semibold text-ink-700 transition-colors hover:border-ink-400"
+            className="rounded-md border border-line-strong bg-white px-2.5 py-1.5 text-xs font-semibold text-ink-700 transition-colors hover:border-ink-400"
           >
             Copy link
           </button>
           <button
             type="button"
             onClick={() => window.print()}
-            className="rounded-[9px] border border-line-strong bg-white px-2.5 py-1.5 text-[12px] font-semibold text-ink-700 transition-colors hover:border-ink-400"
+            className="rounded-md border border-line-strong bg-white px-2.5 py-1.5 text-xs font-semibold text-ink-700 transition-colors hover:border-ink-400"
           >
             Print
           </button>
@@ -208,7 +208,7 @@ function Report({ view, data }: { view: MarketView; data: MonthData }) {
               pushToast(`Deleted ${report.name}`, "info");
               window.location.href = "/portal/reports/custom";
             }}
-            className="rounded-[9px] border border-line-strong bg-white px-2.5 py-1.5 text-[12px] font-semibold text-ink-500 transition-colors hover:border-ink-400 hover:text-ink-900"
+            className="rounded-md border border-line-strong bg-white px-2.5 py-1.5 text-xs font-semibold text-ink-500 transition-colors hover:border-ink-400 hover:text-ink-900"
           >
             Delete report
           </button>
@@ -221,13 +221,13 @@ function Report({ view, data }: { view: MarketView; data: MonthData }) {
             <button
               type="button"
               onClick={() => setPicking(true)}
-              className="flex h-28 w-full max-w-[420px] flex-col items-center justify-center gap-1.5 rounded-[14px] border-2 border-dashed border-line-strong text-ink-500 transition-colors hover:border-violet hover:text-violet-ink"
+              className="flex h-28 w-full max-w-[420px] flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed border-line-strong text-ink-500 transition-colors hover:border-violet hover:text-violet-ink"
             >
-              <span className="text-[26px] leading-none">+</span>
-              <span className="text-[13px] font-semibold">Add your first block</span>
+              <span className="text-[28px] leading-none">+</span>
+              <span className="text-sm font-semibold">Add your first block</span>
             </button>
             <div className="flex flex-col items-center gap-2">
-              <span className="text-[11.5px] text-ink-400">or start with one of these</span>
+              <span className="text-xs text-ink-400">or start with one of these</span>
               <div className="flex flex-wrap justify-center gap-1.5">
                 {STARTERS.map((blockId) => {
                   const block = BLOCKS.find((b) => b.id === blockId);
@@ -237,7 +237,7 @@ function Report({ view, data }: { view: MarketView; data: MonthData }) {
                       key={block.id}
                       type="button"
                       onClick={() => add(block)}
-                      className="rounded-[9px] border border-line-strong bg-white px-2.5 py-1.5 text-[12px] font-semibold text-ink-700 transition-colors hover:border-violet hover:text-violet-ink"
+                      className="rounded-md border border-line-strong bg-white px-2.5 py-1.5 text-xs font-semibold text-ink-700 transition-colors hover:border-violet hover:text-violet-ink"
                     >
                       {block.label}
                     </button>
@@ -276,7 +276,7 @@ function Report({ view, data }: { view: MarketView; data: MonthData }) {
                   setCarrying(null);
                   setOver(null);
                 }}
-                className={`${def?.width === "half" ? "min-w-0" : "min-w-0 lg:col-span-2"} rounded-[15px] transition-all ${
+                className={`${def?.width === "half" ? "min-w-0" : "min-w-0 lg:col-span-2"} rounded-lg transition-all ${
                   isCarrying ? "opacity-40" : ""
                 } ${isTarget ? "ring-2 ring-violet ring-offset-2" : ""}`}
               >
@@ -329,7 +329,7 @@ function Report({ view, data }: { view: MarketView; data: MonthData }) {
                       <button
                         type="button"
                         onClick={() => edit(removeBlock(report, block.id))}
-                        className="rounded-[7px] px-1.5 py-[2px] text-[11px] font-semibold text-ink-400 transition-colors hover:bg-canvas hover:text-ink-900"
+                        className="rounded-sm px-1.5 py-[2px] text-xs font-semibold text-ink-400 transition-colors hover:bg-canvas hover:text-ink-900"
                       >
                         Remove
                       </button>

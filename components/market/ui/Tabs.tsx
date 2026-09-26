@@ -27,7 +27,7 @@ export default function Tabs({
             type="button"
             aria-selected={on}
             onClick={() => onChange(tab.id)}
-            className={`-mb-px shrink-0 border-b-2 px-3 py-2 text-[13px] transition-colors ${
+            className={`-mb-px shrink-0 border-b-2 px-3 py-2 text-sm transition-colors ${
               on
                 ? "border-violet font-semibold text-ink-900"
                 : "border-transparent font-medium text-ink-500 hover:text-ink-700"
@@ -35,7 +35,7 @@ export default function Tabs({
           >
             {tab.label}
             {tab.count !== undefined && (
-              <span className="mono ml-1.5 text-[11px] text-ink-400">{tab.count}</span>
+              <span className="mono ml-1.5 text-xs text-ink-400">{tab.count}</span>
             )}
           </button>
         );

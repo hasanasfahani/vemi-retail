@@ -64,7 +64,7 @@ export default function GapBars({
               {/* Leading, so the eyes read as one column rather than
                   as punctuation at the end of each row. */}
               {row.watch && <span className="shrink-0">{row.watch}</span>}
-              <span className="min-w-0 flex-1 truncate text-[12px] text-ink-700" title={row.label}>
+              <span className="min-w-0 flex-1 truncate text-xs text-ink-700" title={row.label}>
                 {row.label}
               </span>
 
@@ -100,7 +100,7 @@ export default function GapBars({
               </span>
 
               <span
-                className="mono w-[4.75rem] shrink-0 text-right text-[12px] font-semibold"
+                className="mono w-[4.75rem] shrink-0 text-right text-xs font-semibold"
                 style={{
                   color: parLabel
                     ? "var(--color-ink-900)"
@@ -118,7 +118,7 @@ export default function GapBars({
                   list price at zero the gap and the level are the same
                   number, and printing it twice reads as two facts. */}
               {par !== 0 && (
-                <span className="mono w-[3.5rem] shrink-0 text-right text-[12px] text-ink-500">
+                <span className="mono w-[3.5rem] shrink-0 text-right text-xs text-ink-500">
                   {r1(row.value)}
                   {unit}
                 </span>
@@ -128,7 +128,7 @@ export default function GapBars({
           );
         })}
       </ul>
-      <p className="mt-1.5 text-[11px] text-ink-400">
+      <p className="mt-1.5 text-xs text-ink-400">
         {parLabel ? (
           <>Bars run from {parLabel} — left is under it, right is over. The second figure is the level itself.</>
         ) : (

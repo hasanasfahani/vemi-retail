@@ -10,7 +10,7 @@ export default function RequestSection() {
   return (
     <section id={ids.request} className="section section-v2 bg-white">
       <div className="container-vemi">
-        <div className="overflow-hidden rounded-3xl border border-line bg-white shadow-[var(--shadow-surface)]">
+        <div className="overflow-hidden rounded-xl border border-line bg-white shadow-[var(--shadow-surface)]">
           <QuoteForm idPrefix="v2" />
         </div>
       </div>

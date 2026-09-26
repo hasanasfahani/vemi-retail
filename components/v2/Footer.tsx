@@ -3,7 +3,7 @@ import VemiLogo from "@/components/ui/VemiLogo";
 
 export default function Footer() {
   return (
-    <footer className="relative overflow-hidden bg-[#111017] text-white">
+    <footer className="relative overflow-hidden bg-[color:var(--vm-text)] text-white">
       <div
         aria-hidden="true"
         className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet to-transparent"
@@ -13,10 +13,10 @@ export default function Footer() {
         <div className="container-vemi">
           <div className="grid items-end gap-8 border-b border-white/10 pb-8 lg:grid-cols-[1fr_auto] lg:gap-16 lg:pb-9">
           <div className="max-w-3xl">
-            <span className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-100">
+            <span className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-primary-tint">
               {footer.eyebrow}
             </span>
-            <h2 className="mt-4 max-w-2xl font-display text-[clamp(30px,4vw,52px)] font-bold leading-[1.02] tracking-[-0.04em] text-white">
+            <h2 className="mt-4 max-w-2xl font-display text-[clamp(30px,4vw,52px)] font-semibold leading-[1.02] tracking-[-0.02em] text-white">
               {footer.headline}
             </h2>
             <p className="mt-4 max-w-xl text-sm leading-6 text-white/55 sm:text-base">
@@ -28,7 +28,7 @@ export default function Footer() {
             <a
               href={footer.primaryCta.href}
               data-demo-cta
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-violet px-5 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-violet-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-violet px-5 py-3 text-sm font-semibold text-white transition hover:bg-violet-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               {footer.primaryCta.label}
               <svg
@@ -46,7 +46,7 @@ export default function Footer() {
             </a>
             <a
               href={footer.secondaryCta.href}
-              className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:border-white/30 hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="inline-flex min-h-12 items-center justify-center rounded-md border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/30 hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               {footer.secondaryCta.label}
             </a>
@@ -64,7 +64,7 @@ export default function Footer() {
             </a>
             <p className="mt-4 text-sm leading-6 text-white/50">{footer.tagline}</p>
             <p className="mt-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-white/65">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#8f79ff]" aria-hidden="true" />
+              <span className="h-1.5 w-1.5 rounded-full bg-primary-on-ink" aria-hidden="true" />
               {footer.credibility}
             </p>
           </div>
@@ -72,7 +72,7 @@ export default function Footer() {
           <div className="grid grid-cols-2 gap-8 sm:gap-12">
             {footer.columns.map((column) => (
               <div key={column.title}>
-                <span className="text-xs font-semibold uppercase tracking-[0.14em] text-white/35">
+                <span className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-white/35">
                   {column.title}
                 </span>
                 <nav className="mt-4 flex flex-col gap-3" aria-label={`${column.title} links`}>

@@ -106,7 +106,7 @@ export default function InfoTip({
         <span
           id={id}
           role="note"
-          className={`absolute top-[calc(100%+7px)] z-40 block w-[min(330px,74vw)] rounded-[12px] border border-line bg-white p-3 text-[11.5px] font-normal leading-relaxed text-ink-500 shadow-[var(--shadow-pop)] ${
+          className={`absolute top-[calc(100%+7px)] z-40 block w-[min(330px,74vw)] rounded-md border border-line bg-white p-3 text-xs font-normal leading-relaxed text-ink-500 shadow-[var(--shadow-pop)] ${
             side === "right" ? "right-0" : "left-0"
           }`}
         >

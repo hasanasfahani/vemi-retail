@@ -36,14 +36,14 @@ export default function ScoreRing({
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="font-display font-bold leading-none tracking-tight text-ink-900" style={{ fontSize: size * 0.28 }}>
+          <span className="font-display font-semibold leading-none tracking-tight text-ink-900" style={{ fontSize: size * 0.28 }}>
             {Math.round(score)}
           </span>
-          <span className="mono mt-0.5 text-[10px] text-ink-400">/ 100</span>
+          <span className="mono mt-0.5 text-xs text-ink-400">/ 100</span>
         </div>
       </div>
-      <span className="mt-2 text-[12px] font-semibold text-ink-700">{BAND_LABEL[band]}</span>
-      {caption && <span className="mt-0.5 text-[11px] text-ink-400">{caption}</span>}
+      <span className="mt-2 text-xs font-semibold text-ink-700">{BAND_LABEL[band]}</span>
+      {caption && <span className="mt-0.5 text-xs text-ink-400">{caption}</span>}
     </div>
   );
 }

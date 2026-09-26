@@ -40,21 +40,21 @@ export default function GovernorateHealthCard({
     : 0;
 
   return (
-    <article className="flex min-w-0 flex-col rounded-[14px] border border-line bg-white p-3.5 shadow-[var(--shadow-card)]">
+    <article className="flex min-w-0 flex-col rounded-lg border border-line bg-white p-3.5 shadow-[var(--shadow-card)]">
       <div className="flex items-baseline justify-between gap-2">
-        <h3 className="min-w-0 truncate font-display text-[14px] font-bold tracking-tight text-ink-900">
+        <h3 className="min-w-0 truncate font-display text-sm font-semibold tracking-tight text-ink-900">
           {health.name}
           {/* Five governorates share a name with their capital; Nineveh
               does not, and a reader who knows the audit works Mosul
               needs to see that this is the same place. */}
           {health.capital !== health.name && (
-            <span className="ml-1.5 text-[11px] font-normal text-ink-400">
+            <span className="ml-1.5 text-xs font-normal text-ink-400">
               {health.capital}
             </span>
           )}
         </h3>
         <span className="flex shrink-0 items-center gap-1">
-          <span className="mono text-[10.5px] text-ink-400">
+          <span className="mono text-xs text-ink-400">
             {health.outlets.toLocaleString()} audited
           </span>
           {watch}
@@ -74,12 +74,12 @@ export default function GovernorateHealthCard({
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <span
-              className="font-display font-bold leading-none tracking-tight text-ink-900"
+              className="font-display font-semibold leading-none tracking-tight text-ink-900"
               style={{ fontSize: size * 0.3 }}
             >
               {health.score}
             </span>
-            <span className="mono mt-0.5 text-[10px] text-ink-400">/ 100</span>
+            <span className="mono mt-0.5 text-xs text-ink-400">/ 100</span>
           </div>
         </div>
       </div>
@@ -95,18 +95,18 @@ export default function GovernorateHealthCard({
 
       <p className="mt-1.5 flex justify-center">
         {health.delta === null ? (
-          <span className="mono text-[11.5px] text-ink-400">loading last cycle…</span>
+          <span className="mono text-xs text-ink-400">loading last cycle…</span>
         ) : (
           <Delta value={health.delta} unit="" floor={1} label="vs last month" />
         )}
       </p>
 
-      <p className="mt-2.5 border-t border-line pt-2.5 text-[11.5px] leading-snug text-ink-500">
+      <p className="mt-2.5 border-t border-line pt-2.5 text-xs leading-snug text-ink-500">
         <span className="font-semibold text-ink-700">{health.weakest.label}</span>{" "}
         {health.weakest.display} · main gap
       </p>
 
-      <p className="mono mt-1.5 flex items-center justify-between gap-2 text-[10.5px] text-ink-400">
+      <p className="mono mt-1.5 flex items-center justify-between gap-2 text-xs text-ink-400">
         <span>{covered}% of the city covered</span>
         <Link
           href={`/portal/pos?governorate=${health.governorateId}`}

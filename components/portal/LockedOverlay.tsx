@@ -43,10 +43,10 @@ export default function LockedOverlay({
       </div>
 
       <div className="absolute inset-0 flex items-start justify-center px-4 py-16">
-        <div className="sticky top-28 w-full max-w-md rounded-2xl border border-line bg-white/95 p-7 text-center shadow-[var(--shadow-surface)] backdrop-blur-sm">
+        <div className="sticky top-28 w-full max-w-md rounded-lg border border-line bg-white/95 p-7 text-center shadow-[var(--shadow-surface)] backdrop-blur-sm">
           <span
             className="mx-auto flex h-11 w-11 items-center justify-center rounded-full"
-            style={{ background: "var(--color-violet-050)" }}
+            style={{ background: "var(--vm-primary-tint)" }}
           >
             <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="var(--color-violet-ink)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
               <rect x="4.5" y="10.5" width="15" height="10" rx="2" />

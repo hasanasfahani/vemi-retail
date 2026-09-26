@@ -53,10 +53,10 @@ export default function Header({
     <header className="sticky top-0 z-30 border-b border-line bg-white/95 backdrop-blur">
       <div className="flex h-[60px] items-center justify-between gap-4 px-4 sm:px-6">
         <div className="flex min-w-0 items-baseline gap-3">
-          <h1 className="truncate font-display text-[17px] font-bold tracking-tight text-ink-900">
+          <h1 className="truncate font-display text-lg font-semibold tracking-tight text-ink-900">
             {titleFor(pathname)}
           </h1>
-          <span className="hidden shrink-0 text-[12.5px] text-ink-400 md:inline">
+          <span className="hidden shrink-0 text-sm text-ink-400 md:inline">
             {contract.clientShort} · {contract.brand} · {contract.country}
           </span>
         </div>
@@ -72,7 +72,7 @@ export default function Header({
                 value={search ?? ""}
                 onChange={(e) => onSearch(e.target.value)}
                 placeholder={searchPlaceholder}
-                className="w-[190px] rounded-[9px] border border-line-strong bg-white py-1.5 pl-8 pr-3 text-[13px] text-ink-900 outline-none placeholder:text-ink-400 focus:border-violet"
+                className="w-[190px] rounded-md border border-line-strong bg-white py-1.5 pl-8 pr-3 text-sm text-ink-900 outline-none placeholder:text-ink-400 focus:border-violet"
               />
             </label>
           )}
@@ -81,7 +81,7 @@ export default function Header({
             type="button"
             onClick={() => setNotifOpen((v) => !v)}
             aria-label="Notifications"
-            className="relative rounded-lg p-2 text-ink-500 hover:bg-canvas hover:text-ink-900"
+            className="relative rounded-md p-2 text-ink-500 hover:bg-canvas hover:text-ink-900"
           >
             <svg viewBox="0 0 20 20" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
               <path d="M10 3a4.5 4.5 0 0 0-4.5 4.5c0 3.5-1.5 4.5-1.5 4.5h12s-1.5-1-1.5-4.5A4.5 4.5 0 0 0 10 3zM8.5 15a1.6 1.6 0 0 0 3 0" />
@@ -93,8 +93,8 @@ export default function Header({
           </button>
 
           <span
-            className="flex h-8 w-8 items-center justify-center rounded-full text-[12px] font-semibold"
-            style={{ background: "var(--color-violet-050)", color: "var(--color-violet-ink)" }}
+            className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold"
+            style={{ background: "var(--vm-primary-tint)", color: "var(--color-violet-ink)" }}
             title="Commercial Director"
           >
             HA
@@ -135,7 +135,7 @@ export default function Header({
           <button
             type="button"
             onClick={onClear}
-            className="mb-[1px] ml-auto rounded-[9px] px-2.5 py-2 text-[12.5px] font-semibold text-violet-ink hover:bg-violet-050"
+            className="mb-[1px] ml-auto rounded-md px-2.5 py-2 text-sm font-semibold text-violet-ink hover:bg-primary-tint"
           >
             Clear {active} filter{active === 1 ? "" : "s"}
           </button>
@@ -147,7 +147,7 @@ export default function Header({
           title says "market". */}
       {active > 0 && (
         <div className="flex flex-wrap items-center gap-1.5 border-t border-line bg-canvas px-4 py-2 sm:px-6">
-          <span className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+          <span className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
             Showing
           </span>
           {filters.month !== contract.currentMonth && (
@@ -175,13 +175,13 @@ export default function Header({
 
 function Chip({ label, onRemove }: { label: string; onRemove: () => void }) {
   return (
-    <span className="flex items-center gap-1 rounded-full border border-violet-100 bg-violet-050 py-0.5 pl-2.5 pr-1 text-[12px] font-medium text-violet-ink">
+    <span className="flex items-center gap-1 rounded-full border border-primary-tint bg-primary-tint py-0.5 pl-2.5 pr-1 text-xs font-medium text-violet-ink">
       {label}
       <button
         type="button"
         onClick={onRemove}
         aria-label={`Remove ${label}`}
-        className="rounded-full p-0.5 hover:bg-violet-100"
+        className="rounded-full p-0.5 hover:bg-primary-tint"
       >
         <svg viewBox="0 0 12 12" className="h-2.5 w-2.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
           <path d="M3 3l6 6M9 3l-6 6" />
@@ -210,20 +210,20 @@ function NotificationPanel({ onClose }: { onClose: () => void }) {
         onClick={onClose}
         className="fixed inset-0 z-20 cursor-default"
       />
-      <div className="absolute right-4 top-[58px] z-30 w-[320px] rounded-[12px] border border-line bg-white p-2 shadow-[var(--shadow-pop)] sm:right-6">
-        <div className="px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+      <div className="absolute right-4 top-[58px] z-30 w-[320px] rounded-md border border-line bg-white p-2 shadow-[var(--shadow-pop)] sm:right-6">
+        <div className="px-2 py-1.5 uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
           Notifications
         </div>
         {items.map((n) => (
-          <div key={n.title} className="flex gap-2 rounded-lg px-2 py-2 hover:bg-canvas">
+          <div key={n.title} className="flex gap-2 rounded-md px-2 py-2 hover:bg-canvas">
             <span
               className="mt-[6px] h-[7px] w-[7px] shrink-0 rounded-full"
               style={{ background: colour[n.tone] }}
               aria-hidden
             />
             <span className="min-w-0">
-              <span className="block text-[13px] leading-snug text-ink-900">{n.title}</span>
-              <span className="block text-[11.5px] text-ink-400">{n.when}</span>
+              <span className="block text-sm leading-snug text-ink-900">{n.title}</span>
+              <span className="block text-xs text-ink-400">{n.when}</span>
             </span>
           </div>
         ))}

@@ -27,7 +27,7 @@ export default function BeyondExplorer() {
           return (
             <article
               key={pillar.key}
-              className={`relative min-w-0 overflow-hidden rounded-3xl border bg-white transition-colors duration-300 motion-reduce:transition-none ${
+              className={`relative min-w-0 overflow-hidden rounded-xl border bg-white transition-colors duration-300 motion-reduce:transition-none ${
                 on ? "border-violet/30" : "border-line hover:border-line-strong"
               }`}
             >
@@ -55,10 +55,10 @@ export default function BeyondExplorer() {
                 />
 
                 <span
-                  className={`absolute bottom-4 left-4 right-4 rounded-2xl border border-white/70 bg-white/90 p-4 shadow-sm backdrop-blur ${on ? "lg:right-[50%]" : ""}`}
+                  className={`absolute bottom-4 left-4 right-4 rounded-lg border border-white/70 bg-white/90 p-4 shadow-sm backdrop-blur ${on ? "lg:right-[50%]" : ""}`}
                 >
                   <span className="flex items-center justify-between gap-3">
-                    <span className="font-display text-lg font-bold leading-tight tracking-tight text-ink-900">
+                    <span className="font-display text-lg font-semibold leading-tight tracking-tight text-ink-900">
                       {pillar.title}
                     </span>
                     <span
@@ -87,13 +87,13 @@ export default function BeyondExplorer() {
                     : "pointer-events-none grid-rows-[0fr] opacity-0 lg:invisible lg:translate-x-2"
                 }`}
               >
-                <div className="min-h-0 overflow-hidden border-t border-line bg-white lg:overflow-y-auto lg:rounded-2xl lg:border lg:shadow-[var(--shadow-pop)]">
+                <div className="min-h-0 overflow-hidden border-t border-line bg-white lg:overflow-y-auto lg:rounded-lg lg:border lg:shadow-[var(--shadow-pop)]">
                   <div className="p-6 lg:p-7">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet text-white">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-md bg-violet text-white">
                       <Icon name={pillar.icon} className="h-5 w-5" />
                     </span>
                     <span className="t-eyebrow mt-6 block">What we track</span>
-                    <h3 className="t-h3 mt-2 !text-2xl">{pillar.title}</h3>
+                    <h3 className="t-h3 mt-2 !text-[28px]">{pillar.title}</h3>
                     <p className="mt-3 text-sm leading-relaxed text-ink-500">{pillar.body}</p>
 
                     <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
@@ -116,11 +116,11 @@ export default function BeyondExplorer() {
         })}
       </div>
 
-      <div className="mt-5 overflow-hidden rounded-3xl bg-ink-900 px-6 py-8 text-white sm:px-8 lg:px-10">
+      <div className="mt-5 overflow-hidden rounded-xl bg-ink-900 px-6 py-8 text-white sm:px-8 lg:px-10">
         <div className="grid items-center gap-8 lg:grid-cols-[0.68fr_1.32fr]">
           <div>
-            <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-300">Connected intelligence</span>
-            <h3 className="mt-2 font-display text-2xl font-bold tracking-tight text-white">{beyond.convergence.title}</h3>
+            <span className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-300">Connected intelligence</span>
+            <h3 className="mt-2 font-display text-[28px] font-semibold tracking-tight text-white">{beyond.convergence.title}</h3>
             <p className="mt-2 max-w-md text-sm leading-relaxed text-ink-300">{beyond.convergence.body}</p>
           </div>
 
@@ -129,7 +129,7 @@ export default function BeyondExplorer() {
               <span aria-hidden className="absolute left-4 right-4 top-1/2 hidden h-px bg-white/20 sm:block" />
               <div className="relative grid grid-cols-2 gap-2 sm:flex sm:flex-nowrap sm:justify-between">
                 {beyond.convergence.inputs.map((input) => (
-                  <span key={input} className="whitespace-nowrap rounded-full border border-white/25 bg-ink-900 px-3 py-1.5 text-center text-[11px] font-medium text-white">
+                  <span key={input} className="whitespace-nowrap rounded-full border border-white/25 bg-ink-900 px-3 py-1.5 text-center text-xs font-medium text-white">
                     {input}
                   </span>
                 ))}
@@ -141,7 +141,7 @@ export default function BeyondExplorer() {
               <svg
                 viewBox="0 0 24 24"
                 className="h-4 w-4 shrink-0"
-                style={{ color: "var(--color-violet-100)" }}
+                style={{ color: "var(--vm-primary-tint)" }}
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="1.8"
@@ -150,7 +150,7 @@ export default function BeyondExplorer() {
               >
                 <path d="M5 12h14M14 7l5 5-5 5" />
               </svg>
-              <span className="shrink-0 rounded-xl bg-violet px-5 py-3 text-sm font-bold text-white shadow-[0_8px_30px_rgba(105,70,255,0.3)]">
+              <span className="shrink-0 rounded-md bg-violet px-5 py-3 text-sm font-semibold text-white">
                 {beyond.convergence.output}
               </span>
             </div>

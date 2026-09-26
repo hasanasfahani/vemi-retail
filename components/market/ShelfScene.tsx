@@ -96,8 +96,8 @@ export default function ShelfScene({
 
   return (
     <div
-      className="relative overflow-hidden rounded-[10px] border border-line"
-      style={{ background: "linear-gradient(#f8f8fa, #eef0f4)" }}
+      className="relative overflow-hidden rounded-md border border-line"
+      style={{ background: "var(--vm-bg)" }}
     >
       <svg
         viewBox={`0 0 320 ${height}`}
@@ -152,8 +152,8 @@ export default function ShelfScene({
           return (
             <g key={shelf.id}>
               {/* the board */}
-              <rect x={4} y={base} width={312} height={5} rx={1.5} fill="#c9ccd4" />
-              <rect x={4} y={base + 5} width={312} height={2} fill="#b3b7c1" opacity={0.7} />
+              <rect x={4} y={base} width={312} height={5} rx={1.5} fill="var(--vm-line-strong)" />
+              <rect x={4} y={base + 5} width={312} height={2} fill="var(--vm-line)" opacity={0.7} />
               <text x={8} y={top + 12} fontSize={7.5} fill="var(--color-ink-400)" letterSpacing={0.4}>
                 {shelf.label.toUpperCase()}
               </text>
@@ -188,7 +188,7 @@ export default function ShelfScene({
                       {overlays && (
                         <text
                           x={left + 2} y={packTop - 3}
-                          fontSize={6.5} fontWeight={700} fill="var(--color-critical)"
+                          fontSize={6.5} fontWeight={600} fill="var(--color-critical)"
                         >
                           OUT OF STOCK · {slot.name}
                         </text>
@@ -213,7 +213,7 @@ export default function ShelfScene({
                           <rect
                             x={px} y={packTop + shape.h * 0.42}
                             width={shape.w} height={shape.h * 0.2}
-                            fill="#ffffff" opacity={0.28}
+                            fill="var(--vm-surface)" opacity={0.28}
                           />
                           {!shape.can && (
                             <rect
@@ -235,7 +235,7 @@ export default function ShelfScene({
                         />
                         <text
                           x={left} y={packTop - 4}
-                          fontSize={6.5} fontWeight={700} fill="var(--color-violet-ink)"
+                          fontSize={6.5} fontWeight={600} fill="var(--color-violet-ink)"
                         >
                           {brandOf(slot.brandId)?.name ?? slot.brandId} · {n}
                         </text>

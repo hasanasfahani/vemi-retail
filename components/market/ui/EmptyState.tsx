@@ -21,8 +21,8 @@ export default function EmptyState({
         <circle cx="11" cy="11" r="7" />
         <path d="m16.5 16.5 4 4" />
       </svg>
-      <p className="mt-3 font-display text-[14.5px] font-bold text-ink-900">{title}</p>
-      {lead && <p className="mt-1 max-w-[46ch] text-[12.5px] leading-snug text-ink-500">{lead}</p>}
+      <p className="mt-3 font-display text-sm font-semibold text-ink-900">{title}</p>
+      {lead && <p className="mt-1 max-w-[46ch] text-sm leading-snug text-ink-500">{lead}</p>}
       {action && <div className="mt-3">{action}</div>}
     </div>
   );

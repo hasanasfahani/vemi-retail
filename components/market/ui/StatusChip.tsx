@@ -57,7 +57,7 @@ export default function StatusChip({
   const chip = (
     <span
       className={`inline-flex items-center gap-1.5 rounded-full font-semibold ${BAND_CLASS[band]} ${
-        size === "sm" ? "px-1.5 py-[1px] text-[10.5px]" : "px-2 py-[2px] text-[11.5px]"
+        size === "sm" ? "px-1.5 py-[1px] text-xs" : "px-2 py-[2px] text-xs"
       } ${detail ? "cursor-help" : ""}`}
     >
       <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-current" aria-hidden />
@@ -88,14 +88,14 @@ export default function StatusChip({
         <span
           id={id}
           role="tooltip"
-          className={`absolute top-[calc(100%+6px)] z-50 block w-[300px] rounded-[12px] border border-line bg-white p-3 text-left font-normal shadow-[var(--shadow-pop)] ${
+          className={`absolute top-[calc(100%+6px)] z-50 block w-[300px] rounded-md border border-line bg-white p-3 text-left font-normal shadow-[var(--shadow-pop)] ${
             side === "left" ? "left-0" : "right-0"
           }`}
         >
-          <span className="block text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+          <span className="block uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
             {title ?? `Why ${BAND_LABEL[band].toLowerCase()}`}
           </span>
-          <span className="mt-1 block text-[11.5px] leading-snug text-ink-700">
+          <span className="mt-1 block text-xs leading-snug text-ink-700">
             {detail.lead}
           </span>
 
@@ -103,7 +103,7 @@ export default function StatusChip({
             {detail.rows.map((row) => (
               <span
                 key={row.label}
-                className={`flex items-center gap-2 border-b border-line py-1 text-[11.5px] last:border-0 ${
+                className={`flex items-center gap-2 border-b border-line py-1 text-xs last:border-0 ${
                   row.here ? "font-semibold text-ink-900" : "text-ink-500"
                 }`}
               >
@@ -117,14 +117,14 @@ export default function StatusChip({
                 <span className="min-w-0 flex-1 truncate">{row.label}</span>
                 <span className="mono shrink-0">{row.value}</span>
                 {row.here && (
-                  <span className="mono shrink-0 text-[10px] text-violet-ink">here</span>
+                  <span className="mono shrink-0 text-xs text-violet-ink">here</span>
                 )}
               </span>
             ))}
           </span>
 
           {detail.footnote && (
-            <span className="mt-2 block text-[11px] leading-snug text-ink-400">
+            <span className="mt-2 block text-xs leading-snug text-ink-400">
               {detail.footnote}
             </span>
           )}

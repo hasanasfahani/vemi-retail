@@ -50,12 +50,12 @@ export default function FollowUpEvidence({
   const afterBy = cyclePair ? auditorName(cyclePair.view.auditedBy.get(c.posId) ?? "") : "";
 
   return (
-    <div className="flex flex-col gap-5 rounded-[12px] border border-violet-100 bg-violet-050/40 p-3.5">
+    <div className="flex flex-col gap-5 rounded-md border border-primary-tint bg-primary-tint/40 p-3.5">
       <div>
-        <h3 className="text-[11px] font-semibold uppercase tracking-wide text-violet-ink">
+        <h3 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-violet-ink">
           Follow-up audit · {KPI_LABEL[c.kpi]}
         </h3>
-        <p className="mt-0.5 text-[11.5px] text-ink-500">
+        <p className="mt-0.5 text-xs text-ink-500">
           Raised from {monthLabel(originMonth)}, checked in {monthLabel(cycle)}.
         </p>
       </div>
@@ -63,16 +63,16 @@ export default function FollowUpEvidence({
       {/* the comparison */}
       <div className="flex flex-wrap items-end gap-x-6 gap-y-2">
         <p className="flex items-baseline gap-2">
-          <span className="mono text-[19px] font-semibold text-ink-400">
+          <span className="mono text-lg font-semibold text-ink-400">
             {c.before === null ? "—" : `${c.before}%`}
           </span>
           <span aria-hidden className="text-ink-400">→</span>
-          <span className="mono text-[24px] font-bold text-ink-900">
+          <span className="mono text-[22px] font-semibold text-ink-900">
             {c.after === null ? "—" : `${c.after}%`}
           </span>
         </p>
         {c.delta !== null && <Delta value={c.delta} unit="pt" floor={0} />}
-        <p className="mono text-[11.5px] text-ink-500">
+        <p className="mono text-xs text-ink-500">
           {c.revisited
             ? `${c.resolved} resolved · ${c.unresolved} still there`
             : "not yet revisited"}
@@ -81,11 +81,11 @@ export default function FollowUpEvidence({
 
       {/* what was wrong, and what happened to it */}
       <section>
-        <h4 className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+        <h4 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
           Original issues
         </h4>
         {c.issues.length === 0 ? (
-          <p className="mt-1.5 text-[12px] text-ink-500">
+          <p className="mt-1.5 text-xs text-ink-500">
             Nothing was raised against this outlet for this KPI.
           </p>
         ) : (
@@ -93,14 +93,14 @@ export default function FollowUpEvidence({
             {c.issues.map((row) => (
               <li
                 key={row.issue.id}
-                className="flex items-center gap-2 border-b border-line py-1.5 text-[12px] last:border-0"
+                className="flex items-center gap-2 border-b border-line py-1.5 text-xs last:border-0"
               >
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-ink-900">
                     {row.skuName ?? row.issue.type}
                   </span>
                   {row.skuName && (
-                    <span className="block truncate text-[11px] text-ink-400">
+                    <span className="block truncate text-xs text-ink-400">
                       {row.issue.type}
                     </span>
                   )}
@@ -116,10 +116,10 @@ export default function FollowUpEvidence({
       <div className="grid gap-3 sm:grid-cols-2">
         <figure className="min-w-0">
           <figcaption className="mb-1.5 flex items-baseline justify-between gap-2">
-            <span className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+            <span className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
               Before · {monthLabel(originMonth)}
             </span>
-            <span className="mono text-[10.5px] text-ink-400">
+            <span className="mono text-xs text-ink-400">
               {beforeVisit?.slice(5)} · {beforeBy}
             </span>
           </figcaption>
@@ -128,24 +128,24 @@ export default function FollowUpEvidence({
 
         <figure className="min-w-0">
           <figcaption className="mb-1.5 flex items-baseline justify-between gap-2">
-            <span className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+            <span className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
               After · {monthLabel(cycle)}
             </span>
-            <span className="mono text-[10.5px] text-ink-400">
+            <span className="mono text-xs text-ink-400">
               {afterVisit ? `${afterVisit.slice(5)} · ${afterBy}` : "not yet visited"}
             </span>
           </figcaption>
           {afterCells.length > 0 ? (
             <ShelfScene cells={afterCells} height={150} />
           ) : (
-            <div className="flex h-[150px] items-center justify-center rounded-[10px] border border-dashed border-line-strong text-[11.5px] text-ink-400">
+            <div className="flex h-[150px] items-center justify-center rounded-md border border-dashed border-line-strong text-xs text-ink-400">
               Awaiting the {monthLabel(cycle)} visit
             </div>
           )}
         </figure>
       </div>
 
-      <p className="text-[11px] leading-snug text-ink-400">
+      <p className="text-xs leading-snug text-ink-400">
         Two audits of the same outlet, side by side. They show what changed between visits — not
         that the follow-up request caused it. One outlet, no control group: a delivery that finally
         arrived would look identical here.

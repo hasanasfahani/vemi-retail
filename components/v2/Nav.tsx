@@ -45,8 +45,8 @@ export default function Nav() {
       <nav
         className={`mx-auto flex h-16 max-w-[1240px] items-center justify-between gap-6 rounded-full border border-white/70 bg-white/95 px-5 backdrop-blur-xl transition-shadow duration-300 sm:px-6 ${
           scrolled || open
-            ? "shadow-[0_16px_42px_-22px_rgba(20,21,26,0.34)]"
-            : "shadow-[0_12px_36px_-24px_rgba(20,21,26,0.28)]"
+            ? ""
+            : ""
         }`}
       >
         <a
@@ -91,7 +91,7 @@ export default function Nav() {
             onClick={() => setOpen((o) => !o)}
             aria-expanded={open}
             aria-label={open ? "Close menu" : "Open menu"}
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-line text-ink-700 lg:hidden"
+            className="flex h-9 w-9 items-center justify-center rounded-md border border-line text-ink-700 lg:hidden"
           >
             <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" aria-hidden>
               {open ? (
@@ -106,14 +106,14 @@ export default function Nav() {
 
       {/* mobile sheet */}
       {open ? (
-        <div className="mx-auto mt-2 max-w-[1240px] rounded-[22px] border border-line bg-white/95 p-3 shadow-[0_18px_44px_-24px_rgba(20,21,26,0.38)] backdrop-blur-xl lg:hidden">
+        <div className="mx-auto mt-2 max-w-[1240px] rounded-xl border border-line bg-white/95 p-3 backdrop-blur-xl lg:hidden">
           <div className="flex flex-col">
             {nav.links.map((l) => (
               <a
                 key={l.href}
                 href={l.href}
                 onClick={() => setOpen(false)}
-                className="rounded-lg px-2 py-2.5 text-sm font-medium text-ink-700 hover:bg-canvas"
+                className="rounded-md px-2 py-2.5 text-sm font-medium text-ink-700 hover:bg-canvas"
               >
                 {l.label}
               </a>

@@ -34,10 +34,10 @@ export default function CoverageStrip({
   const color = onTrack ? BAND_COLOR.strong : BAND_COLOR.attention;
 
   return (
-    <section className="rounded-[14px] border border-line bg-white px-4 py-3 shadow-[var(--shadow-card)]">
+    <section className="rounded-lg border border-line bg-white px-4 py-3 shadow-[var(--shadow-card)]">
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-        <p className="mono flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[12.5px] text-ink-500">
-          <span className="text-[13.5px] font-semibold text-ink-900">
+        <p className="mono flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm text-ink-500">
+          <span className="text-sm font-semibold text-ink-900">
             {audited.toLocaleString()} / {contracted.toLocaleString()} audited
           </span>
           <span aria-hidden>·</span>
@@ -49,14 +49,14 @@ export default function CoverageStrip({
         </p>
 
         <span
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2 py-[2px] text-[11.5px] font-semibold"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2 py-[2px] text-xs font-semibold"
           style={{ background: `${color}1a`, color }}
         >
           <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden />
           {onTrack ? "On track" : "Behind plan"}
         </span>
 
-        <span className="mono ml-auto shrink-0 text-[11px] text-ink-400">
+        <span className="mono ml-auto shrink-0 text-xs text-ink-400">
           {perDaySoFar}/day so far · {perDayRequired}/day needed
         </span>
       </div>

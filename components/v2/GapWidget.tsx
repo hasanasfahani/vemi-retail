@@ -78,7 +78,7 @@ export default function GapWidget() {
                 transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
                 style={{
                   background:
-                    "repeating-linear-gradient(45deg, color-mix(in srgb, var(--color-critical) 34%, #fff) 0 4px, color-mix(in srgb, var(--color-critical) 14%, #fff) 4px 8px)",
+                    "repeating-linear-gradient(45deg, color-mix(in srgb, var(--color-critical) 34%, var(--vm-surface)) 0 4px, color-mix(in srgb, var(--color-critical) 14%, var(--vm-surface)) 4px 8px)",
                 }}
               />
             </motion.div>
@@ -86,8 +86,8 @@ export default function GapWidget() {
         </div>
       </div>
 
-      <div className="mt-6 flex items-center gap-4 rounded-xl border border-line bg-canvas p-4">
-        <span className="tnum shrink-0 text-4xl" style={{ color: "var(--color-critical)" }}>
+      <div className="mt-6 flex items-center gap-4 rounded-md border border-line bg-canvas p-4">
+        <span className="tnum shrink-0 text-[36px]" style={{ color: "var(--color-critical)" }}>
           {delta}%
         </span>
         <p className="text-sm leading-snug text-ink-700">

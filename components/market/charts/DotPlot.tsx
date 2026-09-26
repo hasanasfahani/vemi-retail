@@ -89,7 +89,7 @@ export default function DotPlot({
                 style={{ minHeight: height }}
               >
                 {row.watch && <span className="shrink-0">{row.watch}</span>}
-                <span className="w-[34%] shrink-0 truncate text-[12px] text-ink-700" title={row.label}>
+                <span className="w-[34%] shrink-0 truncate text-xs text-ink-700" title={row.label}>
                   {row.label}
                 </span>
 
@@ -135,7 +135,7 @@ export default function DotPlot({
                   />
                 </span>
 
-                <span className="mono w-[4.5rem] shrink-0 text-right text-[12px] font-semibold text-ink-900">
+                <span className="mono w-[4.5rem] shrink-0 text-right text-xs font-semibold text-ink-900">
                   {show(row.value)}
                 </span>
                 {row.trailing}
@@ -145,7 +145,7 @@ export default function DotPlot({
         </ul>
       </div>
 
-      <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-ink-400">
+      <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-400">
         <span>
           Scale {show(lo)} to {show(hi)}
         </span>

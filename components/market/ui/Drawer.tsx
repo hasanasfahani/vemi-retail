@@ -64,18 +64,18 @@ export default function Drawer({
       >
         <header className="flex items-start justify-between gap-3 border-b border-line px-5 py-3.5">
           <div className="min-w-0">
-            <h2 className="font-display text-[15px] font-bold tracking-tight text-ink-900">
+            <h2 className="font-display text-[15px] font-semibold tracking-tight text-ink-900">
               {title}
             </h2>
             {subtitle && (
-              <p className="mt-0.5 truncate text-[12.5px] text-ink-500">{subtitle}</p>
+              <p className="mt-0.5 truncate text-sm text-ink-500">{subtitle}</p>
             )}
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close panel"
-            className="shrink-0 rounded-md p-1 text-ink-400 transition-colors hover:bg-canvas hover:text-ink-700"
+            className="shrink-0 rounded-sm p-1 text-ink-400 transition-colors hover:bg-canvas hover:text-ink-700"
           >
             <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden>
               <path d="m4 4 8 8M12 4l-8 8" />

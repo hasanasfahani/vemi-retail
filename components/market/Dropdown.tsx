@@ -48,7 +48,7 @@ export default function Dropdown({
 
   return (
     <div className="relative min-w-0" ref={box}>
-      <span className="mb-1 block text-[10.5px] font-semibold uppercase tracking-wide text-ink-400">
+      <span className="mb-1 block uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
         {label}
       </span>
       <button
@@ -56,9 +56,9 @@ export default function Dropdown({
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-haspopup="listbox"
-        className={`flex w-[152px] items-center justify-between gap-2 rounded-[9px] border px-2.5 py-1.5 text-left text-[12.5px] transition-colors ${
+        className={`flex min-w-[152px] max-w-[240px] items-center justify-between gap-2 rounded-md border px-2.5 py-1.5 text-left text-sm transition-colors ${
           active
-            ? "border-violet-100 bg-violet-050 font-semibold text-violet-ink"
+            ? "border-primary-tint bg-primary-tint font-semibold text-violet-ink"
             : "border-line-strong bg-white text-ink-700 hover:border-ink-400"
         }`}
       >
@@ -79,7 +79,7 @@ export default function Dropdown({
         <div
           role="listbox"
           aria-multiselectable={!single}
-          className="absolute left-0 z-40 mt-1 max-h-[280px] w-[228px] overflow-y-auto rounded-[10px] border border-line bg-white p-1 shadow-[var(--shadow-pop)]"
+          className="absolute left-0 z-40 mt-1 max-h-[280px] w-[228px] overflow-y-auto rounded-md border border-line bg-white p-1 shadow-[var(--shadow-pop)]"
         >
           {options.map((option) => {
             const on = selected.includes(option.value);
@@ -93,13 +93,13 @@ export default function Dropdown({
                   onToggle(option.value);
                   if (single) setOpen(false);
                 }}
-                className={`flex w-full items-center gap-2 rounded-md px-2 py-[6px] text-left text-[13px] transition-colors hover:bg-canvas ${
+                className={`flex w-full items-center gap-2 rounded-sm px-2 py-[6px] text-left text-sm transition-colors hover:bg-canvas ${
                   on ? "font-semibold text-ink-900" : "text-ink-700"
                 }`}
               >
                 {!single && (
                   <span
-                    className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-[4px] border ${
+                    className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-sm border ${
                       on ? "border-violet bg-violet" : "border-line-strong bg-white"
                     }`}
                     aria-hidden

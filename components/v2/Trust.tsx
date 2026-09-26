@@ -5,7 +5,7 @@ import EvidenceCard from "@/components/v2/EvidenceCard";
 
 export default function Trust() {
   return (
-    <section id={ids.trust} className="section section-v2 border-y border-line bg-violet-050/50">
+    <section id={ids.trust} className="section section-v2 border-y border-line bg-primary-tint/50">
       <div className="container-vemi">
         <Reveal>
           <div className="max-w-2xl">
@@ -19,8 +19,8 @@ export default function Trust() {
           <div className="grid gap-3 sm:grid-cols-2 lg:h-full lg:grid-rows-3">
             {trust.items.map((t, i) => (
               <Reveal key={t.title} delay={i * 0.05} className="h-full">
-                <div className="h-full rounded-2xl border border-line bg-white p-5 shadow-[var(--shadow-card)]">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-violet-100 bg-violet-050 text-violet-ink">
+                <div className="h-full rounded-lg border border-line bg-white p-5 shadow-[var(--shadow-card)]">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-md border border-primary-tint bg-primary-tint text-violet-ink">
                     <Icon name={t.icon} className="h-[18px] w-[18px]" />
                   </span>
                   <h3 className="t-h3 mt-3 !text-base">{t.title}</h3>
@@ -37,7 +37,7 @@ export default function Trust() {
 
         {/* the claim, stated plainly */}
         <Reveal delay={0.1}>
-          <p className="mt-12 border-t border-line pt-8 text-center font-display text-xl font-bold tracking-tight text-ink-900 sm:text-2xl">
+          <p className="mt-12 border-t border-line pt-8 text-center font-display text-[22px] font-semibold tracking-tight text-ink-900 sm:text-[28px]">
             {trust.supportingLine}
           </p>
         </Reveal>

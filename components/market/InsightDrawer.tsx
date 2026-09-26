@@ -110,7 +110,7 @@ export default function InsightDrawer({
       render: (r) => (
         <span className="block min-w-0">
           <span className="block truncate font-semibold text-ink-900">{r.name}</span>
-          <span className="mono block text-[10.5px] text-ink-400">{r.code}</span>
+          <span className="mono block text-xs text-ink-400">{r.code}</span>
         </span>
       ),
       sortValue: (r) => r.name,
@@ -146,7 +146,7 @@ export default function InsightDrawer({
       subtitle={
         <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
           <Badge band={PRIORITY_BAND[insight.priorityBand]} label={OUTCOME_LABEL[insight.outcome]} size="sm" />
-          <span className="mono text-[11px] text-ink-400">
+          <span className="mono text-xs text-ink-400">
             {insight.scope.label} · {monthLabel(view.month)}
           </span>
         </span>
@@ -159,19 +159,19 @@ export default function InsightDrawer({
           <button
             type="button"
             onClick={openMail}
-            className="rounded-[9px] border border-line-strong bg-white px-2.5 py-1.5 text-[12px] font-semibold text-ink-700 transition-colors hover:border-ink-400"
+            className="rounded-md border border-line-strong bg-white px-2.5 py-1.5 text-xs font-semibold text-ink-700 transition-colors hover:border-ink-400"
           >
             Email
           </button>
           <button
             type="button"
             onClick={() => window.print()}
-            className="rounded-[9px] border border-line-strong bg-white px-2.5 py-1.5 text-[12px] font-semibold text-ink-700 transition-colors hover:border-ink-400"
+            className="rounded-md border border-line-strong bg-white px-2.5 py-1.5 text-xs font-semibold text-ink-700 transition-colors hover:border-ink-400"
           >
             Print
           </button>
           {blocked && (
-            <p className="basis-full text-[11.5px] leading-snug text-ink-400">{blocked}</p>
+            <p className="basis-full text-xs leading-snug text-ink-400">{blocked}</p>
           )}
         </div>
       }
@@ -179,14 +179,14 @@ export default function InsightDrawer({
       <div className="flex flex-col gap-5">
         {/* ---------- what was found ---------- */}
         <section>
-          <p className="mono text-[24px] font-semibold leading-none tracking-tight text-ink-900">
+          <p className="mono text-[22px] font-semibold leading-none tracking-tight text-ink-900">
             {insight.impact.label}
           </p>
-          <p className="mt-2.5 max-w-[68ch] text-[12.5px] leading-relaxed text-ink-700">
+          <p className="mt-2.5 max-w-[68ch] text-sm leading-relaxed text-ink-700">
             {insight.detail}
           </p>
           {basis && (
-            <p className="mt-2 rounded-[10px] border border-line bg-canvas px-3 py-2 text-[11.5px] leading-snug text-ink-500">
+            <p className="mt-2 rounded-md border border-line bg-canvas px-3 py-2 text-xs leading-snug text-ink-500">
               {basis}
             </p>
           )}
@@ -194,14 +194,14 @@ export default function InsightDrawer({
 
         {/* ---------- the arithmetic ---------- */}
         <section>
-          <h3 className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+          <h3 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
             How this was calculated
           </h3>
-          <p className="mono mt-1.5 max-w-[76ch] text-[11.5px] leading-relaxed text-ink-500">
+          <p className="mono mt-1.5 max-w-[76ch] text-xs leading-relaxed text-ink-500">
             {insight.evidence.formula}
           </p>
-          <div className="mt-2.5 overflow-x-auto rounded-[10px] border border-line">
-            <table className="w-full border-collapse text-[12px]">
+          <div className="mt-2.5 overflow-x-auto rounded-md border border-line">
+            <table className="w-full border-collapse text-xs">
               <thead>
                 <tr className="border-b border-line bg-canvas">
                   {insight.evidence.table.columns.map((col) => (
@@ -224,7 +224,7 @@ export default function InsightDrawer({
               </tbody>
             </table>
           </div>
-          <p className="mt-2 text-[11.5px] text-ink-400">
+          <p className="mt-2 text-xs text-ink-400">
             {insight.confidence === "measured"
               ? "Counted from field rows."
               : "Projected from a measured gap."}{" "}
@@ -240,18 +240,18 @@ export default function InsightDrawer({
             need an empty heading explaining that it stands alone. */}
         {childrenFindings.length > 0 && (
           <section>
-            <h3 className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+            <h3 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
               The {childrenFindings.length} findings behind it
             </h3>
-            <p className="mt-1 max-w-[68ch] text-[11.5px] leading-snug text-ink-500">
+            <p className="mt-1 max-w-[68ch] text-xs leading-snug text-ink-500">
               Each of these was found separately and says the same thing about one outlet. They
               are here rather than on the page so a single market fact is stated once.
             </p>
-            <ul className="mt-2 max-h-[220px] divide-y divide-line overflow-y-auto rounded-[10px] border border-line">
+            <ul className="mt-2 max-h-[220px] divide-y divide-line overflow-y-auto rounded-md border border-line">
               {childrenFindings.map((child) => (
                 <li key={child.id} className="flex items-baseline justify-between gap-3 px-3 py-1.5">
-                  <span className="min-w-0 truncate text-[12px] text-ink-700">{child.headline}</span>
-                  <span className="mono shrink-0 text-[11px] text-ink-400">{child.impact.label}</span>
+                  <span className="min-w-0 truncate text-xs text-ink-700">{child.headline}</span>
+                  <span className="mono shrink-0 text-xs text-ink-400">{child.impact.label}</span>
                 </li>
               ))}
             </ul>
@@ -261,7 +261,7 @@ export default function InsightDrawer({
         {/* ---------- the doors ---------- */}
         {outlets.length > 0 && (
           <section>
-            <h3 className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+            <h3 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
               Outlets this touches
             </h3>
             <div className="mt-2">

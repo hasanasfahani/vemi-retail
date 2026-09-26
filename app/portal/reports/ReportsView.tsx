@@ -83,15 +83,15 @@ function Reports({ view }: { view: MarketView }) {
   return (
     <div className="flex flex-col gap-5">
       {/* ---------- masthead ---------- */}
-      <header className="flex flex-wrap items-start justify-between gap-4 rounded-[14px] border border-line bg-white p-4 shadow-[var(--shadow-card)] sm:p-5">
+      <header className="flex flex-wrap items-start justify-between gap-4 rounded-lg border border-line bg-white p-4 shadow-[var(--shadow-card)] sm:p-5">
         <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+          <p className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
             Monthly retail execution report
           </p>
-          <h1 className="mt-1 font-display text-[24px] font-bold leading-tight tracking-tight text-ink-900">
+          <h1 className="mt-1 font-display text-[22px] font-semibold leading-tight tracking-tight text-ink-900">
             {contract.client} · {report.monthLabel}
           </h1>
-          <p className="mt-1.5 max-w-[76ch] text-[12.5px] leading-relaxed text-ink-500">
+          <p className="mt-1.5 max-w-[76ch] text-sm leading-relaxed text-ink-500">
             {headline(report)}
           </p>
         </div>
@@ -100,14 +100,14 @@ function Reports({ view }: { view: MarketView }) {
           <button
             type="button"
             onClick={exportPdf}
-            className="rounded-[9px] bg-violet px-3 py-1.5 text-[12.5px] font-semibold text-white transition-colors hover:bg-violet-ink"
+            className="rounded-md bg-violet px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-violet-ink"
           >
             Export PDF
           </button>
           <button
             type="button"
             onClick={exportCsv}
-            className="rounded-[9px] border border-line-strong bg-white px-3 py-1.5 text-[12.5px] font-semibold text-ink-700 transition-colors hover:border-ink-400"
+            className="rounded-md border border-line-strong bg-white px-3 py-1.5 text-sm font-semibold text-ink-700 transition-colors hover:border-ink-400"
           >
             Export Excel
           </button>
@@ -116,7 +116,7 @@ function Reports({ view }: { view: MarketView }) {
             onClick={() =>
               push("Sharing is not wired up in this build — export the file and send it on.", "info")
             }
-            className="rounded-[9px] border border-line-strong bg-white px-3 py-1.5 text-[12.5px] font-semibold text-ink-700 transition-colors hover:border-ink-400"
+            className="rounded-md border border-line-strong bg-white px-3 py-1.5 text-sm font-semibold text-ink-700 transition-colors hover:border-ink-400"
           >
             Share
           </button>
@@ -152,7 +152,7 @@ function Reports({ view }: { view: MarketView }) {
           <div className="flex flex-wrap items-center gap-6">
             <ScoreRing score={report.score.value} size={128} caption={`Target ${report.score.target}`} />
             <div className="min-w-[260px] flex-1">
-              <p className="text-[12.5px] leading-relaxed text-ink-700">
+              <p className="text-sm leading-relaxed text-ink-700">
                 The composite weighs availability at 30%, shelf share 25%, assortment 20%, price
                 15% and POSM 10%. It is an average over{" "}
                 {report.coverage.audited.toLocaleString()} audited outlets, so a single door
@@ -160,7 +160,7 @@ function Reports({ view }: { view: MarketView }) {
               </p>
               <ul className="mt-3 flex flex-col gap-1.5">
                 {report.governorates.slice(0, 3).map((city) => (
-                  <li key={city.id} className="flex items-center gap-2 text-[12.5px]">
+                  <li key={city.id} className="flex items-center gap-2 text-sm">
                     <span className="w-[74px] shrink-0 text-ink-500">{city.label}</span>
                     <Bar value={city.score} max={100} par={report.score.target} />
                     <span className="mono w-[34px] shrink-0 text-right font-semibold text-ink-900">
@@ -215,12 +215,12 @@ function Reports({ view }: { view: MarketView }) {
                 key={item.id}
                 className="flex min-w-0 items-center gap-3 border-b border-line px-4 py-2.5 last:border-0"
               >
-                <span className="mono shrink-0 text-[12px] font-semibold text-ink-400">
+                <span className="mono shrink-0 text-xs font-semibold text-ink-400">
                   {index + 1}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[12.5px] font-medium text-ink-900">{item.headline}</p>
-                  <p className="mono truncate text-[11px] text-ink-400">
+                  <p className="truncate text-sm font-medium text-ink-900">{item.headline}</p>
+                  <p className="mono truncate text-xs text-ink-400">
                     {item.scope.outlets.toLocaleString()} outlets ·{" "}
                     {item.concentration
                       ? `${item.concentration.share}% in ${governorateName(item.concentration.governorateId)}`
@@ -233,7 +233,7 @@ function Reports({ view }: { view: MarketView }) {
                   max={report.opportunities[0]?.money ?? 1}
                   label={item.headline}
                 />
-                <span className="mono w-[86px] shrink-0 text-right text-[12.5px] font-semibold text-ink-900">
+                <span className="mono w-[86px] shrink-0 text-right text-sm font-semibold text-ink-900">
                   {formatIqd(item.money ?? 0)} IQD
                 </span>
               </li>
@@ -241,7 +241,7 @@ function Reports({ view }: { view: MarketView }) {
           </ul>
         </Card>
         {impactAssumption && (
-          <p className="mt-2.5 max-w-[92ch] text-[11px] leading-relaxed text-ink-400">
+          <p className="mt-2.5 max-w-[92ch] text-xs leading-relaxed text-ink-400">
             {impactAssumption}
           </p>
         )}
@@ -255,7 +255,7 @@ function Reports({ view }: { view: MarketView }) {
               {report.competitive.map((brand) => (
                 <li key={brand.id} className="border-b border-line px-4 py-2.5 last:border-0">
                   <div className="flex items-baseline justify-between gap-2">
-                    <span className="flex items-center gap-2 text-[12.5px] font-medium text-ink-900">
+                    <span className="flex items-center gap-2 text-sm font-medium text-ink-900">
                       <span
                         className="h-2.5 w-2.5 rounded-[3px]"
                         style={{ background: brandColor(brand.id) }}
@@ -264,14 +264,14 @@ function Reports({ view }: { view: MarketView }) {
                       {brand.name}
                       {brand.isClient && <Badge band="average" label="Your brand" size="sm" />}
                     </span>
-                    <span className="mono text-[12.5px] font-semibold text-ink-900">
+                    <span className="mono text-sm font-semibold text-ink-900">
                       {brand.share}%
                     </span>
                   </div>
                   <div className="mt-1.5">
                     <Bar value={brand.share} max={45} color={brandColor(brand.id)} label={brand.name} />
                   </div>
-                  <p className="mono mt-1 text-[11px] text-ink-400">
+                  <p className="mono mt-1 text-xs text-ink-400">
                     availability {brand.availability}% · {brand.perOutlet} facings per outlet ·
                     price index {brand.priceIndex} · promoting in {brand.promo}%
                   </p>
@@ -311,12 +311,12 @@ function Reports({ view }: { view: MarketView }) {
           <ul className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {report.governorates.map((city) => (
               <li key={city.id} className="flex items-center gap-2">
-                <span className="w-[74px] shrink-0 text-[12px] text-ink-500">{city.label}</span>
+                <span className="w-[74px] shrink-0 text-xs text-ink-500">{city.label}</span>
                 <Bar value={city.score} max={100} par={report.score.target} />
-                <span className="mono w-[30px] shrink-0 text-right text-[12px] font-semibold text-ink-900">
+                <span className="mono w-[30px] shrink-0 text-right text-xs font-semibold text-ink-900">
                   {city.score}
                 </span>
-                <span className="mono w-[62px] shrink-0 text-right text-[11px] text-ink-400">
+                <span className="mono w-[62px] shrink-0 text-right text-xs text-ink-400">
                   {city.outlets} POS
                 </span>
               </li>
@@ -331,12 +331,12 @@ function Reports({ view }: { view: MarketView }) {
           <ol className="flex flex-col">
             {report.recommended.map((item, index) => (
               <li key={item.id} className="flex min-w-0 gap-3 border-b border-line px-4 py-3 last:border-0">
-                <span className="mono mt-0.5 shrink-0 text-[12px] font-semibold text-ink-400">
+                <span className="mono mt-0.5 shrink-0 text-xs font-semibold text-ink-400">
                   {index + 1}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="text-[12.5px] font-medium text-ink-900">{item.headline}</p>
-                  <p className="mt-0.5 text-[11.5px] leading-snug text-ink-500">{item.detail}</p>
+                  <p className="text-sm font-medium text-ink-900">{item.headline}</p>
+                  <p className="mt-0.5 text-xs leading-snug text-ink-500">{item.detail}</p>
                 </div>
                 <div className="shrink-0 text-right">
                   <Delta
@@ -345,7 +345,7 @@ function Reports({ view }: { view: MarketView }) {
                     goodUp={false}
                     floor={0}
                   />
-                  <p className="mono mt-0.5 text-[11px] text-ink-400">{item.impact.label}</p>
+                  <p className="mono mt-0.5 text-xs text-ink-400">{item.impact.label}</p>
                 </div>
               </li>
             ))}
@@ -353,7 +353,7 @@ function Reports({ view }: { view: MarketView }) {
         </Card>
       </Section>
 
-      <p className="text-[11px] leading-relaxed text-ink-400">
+      <p className="text-xs leading-relaxed text-ink-400">
         Prepared from the {monthLabel(report.month)} audit of{" "}
         {report.coverage.audited.toLocaleString()} outlets against a{" "}
         {report.coverage.contracted.toLocaleString()}-outlet contract. Movement figures are stated
@@ -377,11 +377,11 @@ function Section({
   return (
     <section>
       <div className="mb-2.5 flex flex-wrap items-baseline justify-between gap-3">
-        <h2 className="flex items-baseline gap-2 text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+        <h2 className="flex items-baseline gap-2 uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
           <span className="mono text-ink-400">{String(n).padStart(2, "0")}</span>
           {title}
         </h2>
-        {aside && <span className="mono text-[11.5px] text-ink-400">{aside}</span>}
+        {aside && <span className="mono text-xs text-ink-400">{aside}</span>}
       </div>
       {children}
     </section>

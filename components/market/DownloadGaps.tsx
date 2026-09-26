@@ -46,7 +46,7 @@ export default function DownloadGaps({
         type="button"
         onClick={download}
         disabled={issues.length === 0}
-        className="inline-flex items-center gap-1.5 rounded-[9px] border border-line-strong bg-white px-3 py-2 text-[12.5px] font-semibold text-ink-700 transition-colors hover:border-ink-400 disabled:cursor-not-allowed disabled:opacity-45"
+        className="inline-flex items-center gap-1.5 rounded-md border border-line-strong bg-white px-3 py-2 text-sm font-semibold text-ink-700 transition-colors hover:border-ink-400 disabled:cursor-not-allowed disabled:opacity-45"
       >
         <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
           <path d="M8 2v8m0 0 3-3m-3 3L5 7M3 12.5h10" />
