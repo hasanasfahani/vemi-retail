@@ -18,16 +18,16 @@
 
 import type { DecisionInsight } from "@/lib/market/insightModel";
 import { OUTCOME_LABEL } from "@/lib/market/insightModel";
-import Badge from "./ui/Badge";
-import type { Band } from "./ui/health";
+import { ConfidenceBadge } from "@/components/vemi/ConfidenceBadge";
+import { Button, buttonClass } from "@/components/vemi/Button";
 
-/* Priority is how loud, outcome is what kind of conversation. The pill
-   carries the outcome and takes its colour from priority, so both facts
-   land in one badge rather than two competing for the same corner. */
-const PRIORITY_BAND: Record<DecisionInsight["priorityBand"], Band> = {
-  high: "critical",
-  medium: "attention",
-  low: "average",
+/* Priority is how loud, outcome is what kind of conversation. Both are
+   said in one mono tag (the drawer's header chip carries priority as a
+   band). */
+const PRIORITY_WORD: Record<DecisionInsight["priorityBand"], string> = {
+  high: "High",
+  medium: "Medium",
+  low: "Low",
 };
 
 /* Stated on any finding that claims a change, and only on those. A
@@ -56,78 +56,47 @@ export default function InsightCard({
   const basis = BASIS_LABEL[insight.comparisonBasis];
 
   return (
-    <article className="flex min-w-0 flex-col rounded-lg border border-line bg-white p-3.5 shadow-[var(--shadow-card)]">
-      <div className="flex items-start justify-between gap-2">
-        <Badge
-          band={PRIORITY_BAND[insight.priorityBand]}
-          label={OUTCOME_LABEL[insight.outcome]}
-          size="sm"
-        />
-        {/* The count, not the rule's own scope wording. Some rules
-            phrase their scope as "outlets with a client stockout" and
-            others as "48 audited outlets", and a card that prints both
-            styles in the same corner reads as two different fields. The
-            wording belongs in the drawer, where it has room. */}
-        <span className="mono shrink-0 text-xs text-ink-400">
-          {insight.scope.outlets.toLocaleString()}{" "}
-          {insight.scope.outlets === 1 ? "outlet" : "outlets"}
+    <article className="flex min-w-0 flex-col rounded-lg border border-line bg-white p-6">
+      {/* The outcome is a neutral mono tag (brand: colour is not a
+          category); priority is said in words, and only the high one is
+          set in Ink so the loudest cards still find the eye. */}
+      <div className="flex items-start justify-between gap-3">
+        <span className={`font-mono text-xs font-medium uppercase tracking-[0.1em] ${insight.priorityBand === "high" ? "text-ink-900" : "text-ink-500"}`}>
+          {PRIORITY_WORD[insight.priorityBand]} · {OUTCOME_LABEL[insight.outcome]}
+        </span>
+        {/* The count, not the rule's own scope wording, so every card
+            prints the same field in the same corner. */}
+        <span className="shrink-0 font-mono text-xs text-ink-500">
+          {insight.scope.outlets.toLocaleString()} {insight.scope.outlets === 1 ? "outlet" : "outlets"}
         </span>
       </div>
 
       {/* Two lines held open whatever the headline needs, so the
           figures line up across a row instead of stepping. */}
-      <h3 className="mt-2 min-h-[2.7em] font-display text-sm font-semibold leading-snug tracking-tight text-ink-900">
-        {insight.headline}
-      </h3>
+      <h3 className="mt-3 min-h-[56px] text-lg font-semibold leading-7 text-ink-900">{insight.headline}</h3>
 
       {/* The measured quantity, given the weight on the card that it
           has in the finding. */}
-      <p className="mono mt-2.5 text-lg font-semibold leading-none tracking-tight text-ink-900">
-        {insight.impact.label}
-      </p>
+      <p className="tnum mt-3 text-[28px] leading-9">{insight.impact.label}</p>
 
-      <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-400">
-        <span>
-          {insight.confidence === "measured"
-            ? "Counted from field rows"
-            : "Projected from a measured gap"}
-        </span>
-        {basis && (
-          <>
-            <span aria-hidden>·</span>
-            <span className="font-semibold text-ink-500">{basis}</span>
-          </>
-        )}
-        {insight.quality === "limited" && (
-          <>
-            <span aria-hidden>·</span>
-            <span className="font-semibold text-ink-900">Limited sample</span>
-          </>
-        )}
+      <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-2 text-sm text-ink-500">
+        <ConfidenceBadge level={insight.confidence === "measured" ? "measured" : "estimated"} size="sm" />
+        {basis && <span className="font-medium text-ink-700">{basis}</span>}
+        {insight.quality === "limited" && <ConfidenceBadge level="stale" size="sm">Limited sample</ConfidenceBadge>}
         {childCount > 0 && (
-          <>
-            <span aria-hidden>·</span>
-            <span>
-              {childCount} {childCount === 1 ? "outlet" : "outlets"} behind it
-            </span>
-          </>
+          <span>
+            {childCount} {childCount === 1 ? "outlet" : "outlets"} behind it
+          </span>
         )}
       </div>
 
-      <div className="mt-3 flex items-center gap-2 pt-0.5 [margin-top:auto]">
+      <div className="mt-auto pt-5">
         {onOpen ? (
-          <button
-            type="button"
-            onClick={() => onOpen(insight)}
-            className="rounded-md bg-violet px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-violet-ink"
-          >
+          <Button variant="secondary" size="sm" onClick={() => onOpen(insight)}>
             Open analysis
-          </button>
+          </Button>
         ) : (
-          <a
-            href={insight.cta.href}
-            className="rounded-md bg-violet px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-violet-ink"
-          >
+          <a href={insight.cta.href} className={buttonClass("secondary", { size: "sm" })}>
             {insight.cta.label}
           </a>
         )}

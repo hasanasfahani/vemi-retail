@@ -1,5 +1,6 @@
 "use client";
 
+import { asOf } from "@/lib/market/asOf";
 import { useMemo } from "react";
 
 /* ASSORTMENT — is the right range listed, format by format.
@@ -43,8 +44,22 @@ export default function AssortmentTab({ view }: { view: MarketView }) {
   const clientSkus = skus.filter((s) => s.brandId === clientBrand.id);
   const worstSku = a.penetration[a.penetration.length - 1];
 
+  /* ---------- what each chart found ---------- */
+  const basis = { asOf: asOf(view.month), base: `${view.posCount.toLocaleString()} outlets` };
+  const thin = a.penetration[a.penetration.length - 1];
+  const penSoWhat = thin
+    ? `${thin.label} is the thinnest line: listed in ${thin.value}% of audited outlets, missing from ${thin.missing.toLocaleString()}.`
+    : "No client line is listed in this view.";
+  const chLow = a.byChannel[a.byChannel.length - 1];
+  const chSoWhat = chLow
+    ? `${chLow.label} carries the least of its expected range: ${chLow.value}% compliance against ${chLow.required} required lines.`
+    : "No channel has audited outlets in this view.";
+  const matrixSoWhat = thin
+    ? `The widest listing gap is ${thin.label}; read across its row for the governorates where it is missing.`
+    : "No client line is listed in this view.";
+
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6">
       <KpiGapBar
         label="Assortment compliance"
         value={a.compliance}
@@ -61,7 +76,7 @@ export default function AssortmentTab({ view }: { view: MarketView }) {
         }
       />
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label="SKUs in range"
           value={clientSkus.length}
@@ -131,6 +146,9 @@ export default function AssortmentTab({ view }: { view: MarketView }) {
       <Card
         title="Range by SKU and governorate"
         lead="Share of audited outlets in each governorate that list the SKU."
+        soWhat={matrixSoWhat}
+        {...basis}
+        confidence="measured"
         footnote="Penetration, not stock: this says whether the door carries the line at all. Whether it was on shelf that day is the Availability tab's question."
       >
         {/* One eye per line, above the grid — a heatmap cell is a
@@ -168,8 +186,8 @@ export default function AssortmentTab({ view }: { view: MarketView }) {
         />
       </Card>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card title="SKU penetration" lead="Audited outlets listing each client line.">
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card title="SKU penetration" lead="Audited outlets listing each client line." soWhat={penSoWhat} {...basis} confidence="measured">
           <DotPlot
             rows={a.penetration.map((row) => ({
               id: row.id,
@@ -195,6 +213,9 @@ export default function AssortmentTab({ view }: { view: MarketView }) {
         <Card
           title="Compliance by channel"
           lead="Against the range each format is expected to carry."
+          soWhat={chSoWhat}
+          {...basis}
+          confidence="measured"
           footnote={`Expected range: ${Object.entries(requiredSkus)
             .map(([channel, n]) => `${channel.replace("-", " ")} ${n}`)
             .join(" · ")}`}

@@ -20,6 +20,10 @@ import AssortmentTab from "./tabs/AssortmentTab";
 import PosmTab from "./tabs/PosmTab";
 import LockedOverlay from "@/components/portal/LockedOverlay";
 import type { MarketView } from "@/lib/market/filters";
+import { PageHeader } from "@/components/vemi/PageHeader";
+import { useTargets } from "@/components/market/useTargets";
+import { clientBrand, contract, governorateName } from "@/lib/market";
+import { monthShort } from "@/lib/market/asOf";
 
 const TABS = [
   { id: "availability", label: "Availability" },
@@ -55,9 +59,32 @@ function Performance({ view }: { view: MarketView }) {
     [params, pathname, router]
   );
 
+  /* The page's title is the active tab's finding, stated against its
+     target (brand copy: lead with the decision). */
+  const targets = useTargets();
+  const scopeName =
+    view.filters.governorates.length === 1 ? governorateName(view.filters.governorates[0]) : contract.country;
+  const measure = {
+    availability: { label: "Availability", value: view.kpi.availability, target: targets.availability },
+    shelf: { label: "Shelf share", value: view.client?.share ?? 0, target: targets.shelfShare },
+    pricing: { label: "Price compliance", value: view.kpi.price, target: targets.price },
+    assortment: { label: "Assortment", value: view.kpi.assortment, target: targets.assortment },
+    posm: { label: "POSM compliance", value: view.kpi.posm, target: targets.posm },
+  }[active as "availability" | "shelf" | "pricing" | "assortment" | "posm"];
+  const gap = Math.round((measure.target - measure.value) * 10) / 10;
+  const title =
+    gap > 0
+      ? `${clientBrand.name} ${measure.label.toLowerCase()} is ${measure.value}%, ${gap} pts short of the ${measure.target}% target.`
+      : `${clientBrand.name} ${measure.label.toLowerCase()} is ${measure.value}%, ${Math.abs(gap)} pts above the ${measure.target}% target.`;
+
   return (
-    <div className="flex flex-col gap-4">
-      <Tabs tabs={TABS} active={active} onChange={setTab} />
+    <div className="flex flex-col gap-8">
+      <PageHeader
+        eyebrow={`${scopeName} · ${contract.category} · ${monthShort(view.month)}`}
+        title={title}
+        description={`How ${clientBrand.name} executes on the shelf across ${view.posCount.toLocaleString()} audited outlets, one measure per tab.`}
+      />
+      <Tabs tabs={TABS} active={active} onChange={setTab} label="Performance measures" />
       {/* Availability and Shelf & visibility are the open modules; the
           rest sit behind the full-demo request. The tab strip still
           shows them, so a visitor can see what the platform covers. */}

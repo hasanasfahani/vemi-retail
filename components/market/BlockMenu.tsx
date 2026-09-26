@@ -104,7 +104,7 @@ export default function BlockMenu({
       </button>
 
       {open && (
-        <div className="absolute right-0 z-40 mt-1 w-[248px] rounded-md border border-line bg-white p-1 text-left shadow-[var(--shadow-pop)]">
+        <div className="absolute right-0 z-40 mt-1 w-[248px] rounded-md border border-line bg-white p-1 text-left shadow-[var(--vm-shadow-overlay)]">
           {pane === "menu" && (
             <>
               <button type="button" className={item} onClick={() => setPane("scope")}>
@@ -214,7 +214,7 @@ export default function BlockMenu({
                 <button
                   type="button"
                   onClick={() => onScope({})}
-                  className="rounded-md border border-line-strong bg-white px-2 py-1 text-xs font-semibold text-ink-500 transition-colors hover:border-ink-400 hover:text-ink-900"
+                  className="vm-btn vm-btn--secondary vm-btn--sm"
                 >
                   Follow the page again
                 </button>
@@ -246,14 +246,14 @@ export default function BlockMenu({
                     onTitle(draft === def.label ? undefined : draft);
                     setOpen(false);
                   }}
-                  className="rounded-md bg-violet px-2 py-1 text-xs font-semibold text-white hover:bg-violet-ink"
+                  className="vm-btn vm-btn--primary vm-btn--sm"
                 >
                   Save
                 </button>
                 <button
                   type="button"
                   onClick={() => { setDraft(def.label); onTitle(undefined); setOpen(false); }}
-                  className="rounded-md border border-line-strong bg-white px-2 py-1 text-xs font-semibold text-ink-500 hover:border-ink-400 hover:text-ink-900"
+                  className="vm-btn vm-btn--secondary vm-btn--sm"
                 >
                   Use the default
                 </button>

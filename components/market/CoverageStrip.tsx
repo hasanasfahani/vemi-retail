@@ -35,14 +35,15 @@ export default function CoverageStrip({
   const color = "var(--vm-primary)";
 
   return (
-    <section className="rounded-lg border border-line bg-white px-4 py-3 shadow-[var(--shadow-card)]">
+    <section className="rounded-lg border border-line bg-white px-6 py-5">
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-        <p className="mono flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm text-ink-500">
-          <span className="text-sm font-semibold text-ink-900">
+        <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1 font-mono text-sm text-ink-500">
+          <span className="vm-label mr-1">Audit coverage</span>
+          <span className="font-medium text-ink-900">
             {audited.toLocaleString()} / {contracted.toLocaleString()} audited
           </span>
           <span aria-hidden>·</span>
-          <span className="font-semibold text-ink-900">{pct}%</span>
+          <span className="font-medium text-ink-900">{pct}%</span>
           <span aria-hidden>·</span>
           <span>{remaining.toLocaleString()} remaining</span>
           <span aria-hidden>·</span>
@@ -51,13 +52,13 @@ export default function CoverageStrip({
 
         <BandChip band={onTrack ? "strong" : "attention"} label={onTrack ? "On track" : "Behind plan"} size="sm" />
 
-        <span className="mono ml-auto shrink-0 text-xs text-ink-400">
+        <span className="ml-auto shrink-0 font-mono text-xs text-ink-500">
           {perDaySoFar}/day so far · {perDayRequired}/day needed
         </span>
       </div>
 
       <div
-        className="relative mt-2.5 h-2 overflow-hidden rounded-full bg-canvas"
+        className="vm-gauge mt-4 overflow-hidden"
         role="img"
         aria-label={`${pct}% of the contracted outlets audited`}
       >
@@ -70,7 +71,7 @@ export default function CoverageStrip({
         {[25, 50, 75].map((mark) => (
           <span
             key={mark}
-            className="absolute top-0 h-full w-px bg-white/85"
+            className="absolute top-0 h-full w-[2px] bg-white"
             style={{ left: `${mark}%` }}
             aria-hidden
           />

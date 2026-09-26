@@ -18,6 +18,8 @@
    the same one every other list in the portal uses, so it sorts,
    filters and exports without inventing anything. */
 
+import { PageHeader } from "@/components/vemi/PageHeader";
+import { contract } from "@/lib/market";
 import { useMemo } from "react";
 import Link from "next/link";
 import PageShell from "@/components/market/PageShell";
@@ -186,7 +188,7 @@ function Watchlist({ view }: { view: MarketView }) {
         <button
           type="button"
           onClick={() => remove(r.watch.id)}
-          className="rounded-md border border-line-strong bg-white px-2 py-1 text-xs font-semibold text-ink-500 transition-colors hover:border-ink-400 hover:text-ink-900"
+          className="vm-btn vm-btn--secondary vm-btn--sm"
         >
           Stop watching
         </button>
@@ -204,32 +206,42 @@ function Watchlist({ view }: { view: MarketView }) {
 
   if (rows.length === 0) {
     return (
+      <div className="flex flex-col gap-8">
+      <PageHeader
+        eyebrow={`${contract.country} · ${contract.category} · Watchlist`}
+        title="Nothing is on the watchlist yet."
+        description="Pin any figure with its eye and it lands here with the reading it had on the day."
+      />
       <Card>
         <EmptyState
           title="Nothing on the watchlist yet"
           lead="Anywhere a figure is shown — a KPI tile, a brand card, a row in a chart — there is an eye. Click it and the figure lands here with the reading it had on the day, so this page can tell you what has changed since."
         />
-        <div className="mt-3 flex flex-wrap gap-2">
-          <Link
-            href="/portal"
-            className="rounded-md bg-violet px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-violet-ink"
-          >
+        <div className="flex flex-wrap justify-center gap-3 pb-6">
+          <Link href="/portal" className="vm-btn vm-btn--primary">
             Open the dashboard
           </Link>
-          <Link
-            href="/portal/performance"
-            className="rounded-md border border-line-strong bg-white px-2.5 py-1.5 text-xs font-semibold text-ink-700 transition-colors hover:border-ink-400"
-          >
+          <Link href="/portal/performance" className="vm-btn vm-btn--secondary">
             Open Performance
           </Link>
         </div>
       </Card>
+      </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-5">
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="flex flex-col gap-8">
+      <PageHeader
+        eyebrow={`${contract.country} · ${contract.category} · Watchlist`}
+        title={
+          slipping > 0
+            ? `${slipping} of ${rows.length} watched figures are moving away from target.`
+            : `None of your ${rows.length} watched figures is moving away from target.`
+        }
+        description="The figures you pinned, with the reading they had on the day and what has happened since."
+      />
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <StatCard label="Watching" value={rows.length} footnote="Figures pinned in this browser" />
         <StatCard
           label="At target"

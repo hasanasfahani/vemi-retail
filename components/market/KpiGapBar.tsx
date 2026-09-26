@@ -15,6 +15,7 @@
    issues; showing only the larger reads as reach the audit does not
    have, and showing only the smaller hides the work. */
 
+import { Gauge } from "@/components/vemi/Gauge";
 import type { ReactNode } from "react";
 import InfoTip from "./ui/InfoTip";
 import StatusChip from "./ui/StatusChip";
@@ -53,21 +54,26 @@ export default function KpiGapBar({
   const gap = Math.round((target - value) * 10) / 10;
   const met = gap <= 0;
 
+  const ceiling = Math.max(target, value) * 1.06;
+
   return (
-    <section className="rounded-lg border border-line bg-white p-4 shadow-[var(--shadow-card)] sm:p-5">
-      <div className="flex flex-wrap items-start justify-between gap-x-8 gap-y-4">
+    /* The tab's hero figure (brand KPI hero: mono label, 56px value),
+       drawn against its target, then the two counts that scope the
+       problem, then the tab's actions. */
+    <section className="rounded-lg border border-line bg-white p-6">
+      <div className="flex flex-wrap items-start justify-between gap-x-10 gap-y-6">
         {/* the figure */}
-        <div className="min-w-[210px]">
-          <p className="flex items-center gap-2 uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
-            {label}
+        <div className="min-w-[240px] flex-1">
+          <p className="flex items-center gap-2">
+            <span className="vm-label">{label}</span>
             {explain && <InfoTip label={`How ${label} is measured`} align="left">{explain}</InfoTip>}
           </p>
-          <p className="mt-1.5 flex items-end gap-2.5">
-            <span className="font-display text-[36px] font-semibold leading-none tracking-tight text-ink-900">
+          <p className="mt-2 flex flex-wrap items-end gap-3">
+            <span className="vm-kpi__value">
               {value}
-              <span className="ml-0.5 text-lg font-semibold text-ink-500">{unit}</span>
+              <span className="vm-kpi__unit">{unit}</span>
             </span>
-            <span className="mb-1">
+            <span className="mb-2">
               <StatusChip
                 band={band}
                 detail={
@@ -79,53 +85,51 @@ export default function KpiGapBar({
               />
             </span>
           </p>
+          <Gauge
+            className="mt-3 max-w-[420px]"
+            value={value}
+            max={ceiling}
+            target={target}
+            label={`${value}${unit} against a ${target}${unit} target`}
+          />
         </div>
 
         {/* target and gap, which is the sentence the page is about */}
-        <dl className="flex min-w-[200px] gap-8">
+        <dl className="flex min-w-[200px] gap-10">
           <div>
-            <dt className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
-              Target
-            </dt>
-            <dd className="mono mt-1 text-lg font-semibold text-ink-700">
+            <dt className="vm-label">Target</dt>
+            <dd className="tnum mt-2 text-[28px] leading-8">
               {target}
-              {unit}
+              <span className="text-lg text-ink-500">{unit}</span>
             </dd>
           </div>
           <div>
-            <dt className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
-              Gap
-            </dt>
-            <dd
-              className="mono mt-1 text-lg font-semibold"
-              style={{ color: met ? "var(--vm-primary-text)" : "var(--vm-text)" }}
-            >
+            <dt className="vm-label">Gap</dt>
+            <dd className={`tnum mt-2 text-[28px] leading-8 ${met ? "!text-primary-text" : ""}`}>
               {met ? `+${Math.abs(gap)}` : `−${Math.abs(gap)}`}
-              {unit}
-              <span className="ml-1.5 text-xs font-normal text-ink-400">
-                {met ? "above target" : "below target"}
-              </span>
+              <span className="text-lg">{unit}</span>
             </dd>
+            <dd className="mt-1 text-sm text-ink-500">{met ? "above target" : "below target"}</dd>
           </div>
         </dl>
 
         {/* scope: the two counts, never merged */}
-        <div className="min-w-[190px]">
-          <p className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
-            Issue scope
+        <div className="min-w-[200px]">
+          <p className="vm-label">Issue scope</p>
+          <p className="mt-2 text-base">
+            <span className="tnum text-[28px] leading-8">{affectedPos.toLocaleString()}</span>
+            <span className="ml-2 text-sm text-ink-500">affected POS</span>
           </p>
-          <p className="mono mt-1 text-[15px] font-semibold text-ink-900">
-            {affectedPos.toLocaleString()}
-            <span className="ml-1 text-xs font-normal text-ink-500">affected POS</span>
-          </p>
-          <p className="mono text-sm text-ink-700">
+          <p className="mt-1 font-mono text-sm text-ink-900">
             {issues.toLocaleString()}
-            <span className="ml-1 text-xs font-normal text-ink-500">{issueNoun}</span>
+            <span className="ml-1.5 font-sans text-ink-500">{issueNoun}</span>
           </p>
         </div>
-
-        {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
       </div>
+
+      {actions && (
+        <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-line pt-5">{actions}</div>
+      )}
     </section>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { asOf } from "@/lib/market/asOf";
 import { useMemo } from "react";
 
 /* POSM — is the brand supported at the point of sale.
@@ -56,8 +57,23 @@ export default function PosmTab({ view }: { view: MarketView }) {
     );
   };
 
+  /* ---------- what each chart found ---------- */
+  const basis = { asOf: asOf(view.month), base: `${p.checked.toLocaleString()} material checks` };
+  const typeLow = p.byType[p.byType.length - 1];
+  const typeSoWhat = typeLow
+    ? `${typeLow.label} is the material most often missing: present in ${typeLow.value}% of the outlets where it was checked.`
+    : "No material was checked in this view.";
+  const govMost = [...p.byGovernorate].sort((x, y) => y.missing - x.missing)[0];
+  const govSoWhat = govMost
+    ? `${govMost.label} has the most missing material (${govMost.missing.toLocaleString()} items), so a deployment run pays most there.`
+    : "No governorate had material checked in this view.";
+  const chLow = p.byChannel[p.byChannel.length - 1];
+  const chSoWhat = chLow
+    ? `${chLow.label} is furthest from the POSM target at ${chLow.value}%.`
+    : "No channel had material checked in this view.";
+
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6">
       <KpiGapBar
         label="POSM compliance"
         value={p.compliance}
@@ -74,7 +90,7 @@ export default function PosmTab({ view }: { view: MarketView }) {
         }
       />
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label="Items checked"
           value={p.checked}
@@ -130,10 +146,13 @@ export default function PosmTab({ view }: { view: MarketView }) {
         />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2">
         <Card
           title="Presence by material"
           lead="Where each type was checked, how often it was there."
+          soWhat={typeSoWhat}
+          {...basis}
+          confidence="measured"
           action={
             <WatchEye
               kpi="posm"
@@ -173,10 +192,13 @@ export default function PosmTab({ view }: { view: MarketView }) {
           />
         </Card>
 
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-6">
           <Card
             title="Weakest governorates"
             lead="Where a deployment run would pay — how much is missing, not just the rate."
+            soWhat={govSoWhat}
+            {...basis}
+            confidence="measured"
             footnote="Bar length is how many items were checked there, and the hollow part is what was missing. A place with a poor rate over eighty checks has fewer items missing than a middling one over four hundred, and a chart drawn in percentages ranks those the wrong way round for anyone loading a van."
           >
             <SplitBars
@@ -204,6 +226,9 @@ export default function PosmTab({ view }: { view: MarketView }) {
           <Card
             title="By channel"
             lead="Distance from the POSM target, format by format."
+            soWhat={chSoWhat}
+            {...basis}
+            confidence="measured"
             footnote="Measured against the same target as everywhere else, so a format cannot look compliant by being compared only to its peers. This is the compliance question; the card beside it is the volume one."
           >
             <GapBars
@@ -229,19 +254,19 @@ export default function PosmTab({ view }: { view: MarketView }) {
       </div>
 
       <section>
-        <h2 className="mb-2 uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
+        <h2 className="vm-h2 mb-4 text-ink-900">
           Best supported outlets
         </h2>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {p.best.map((row) => cardFor(row, "Fully supported"))}
         </div>
       </section>
 
       <section>
-        <h2 className="mb-2 uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
+        <h2 className="vm-h2 mb-4 text-ink-900">
           Least supported outlets
         </h2>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {p.worst.map((row) => cardFor(row, "No material"))}
         </div>
       </section>

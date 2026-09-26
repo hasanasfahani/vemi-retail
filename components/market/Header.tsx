@@ -83,7 +83,9 @@ export default function Header({
       <div className="flex h-16 items-center justify-between gap-4 px-4 sm:px-6">
         <MobileNav />
         <div className="mr-auto flex min-w-0 flex-col justify-center sm:flex-row sm:items-baseline sm:gap-3">
-          <h1 className="truncate text-lg font-semibold leading-7 text-ink-900">{titleFor(pathname)}</h1>
+          {/* A label, not the page heading: each page opens with its own
+              PageHeader h1, written as the decision it supports. */}
+          <p className="truncate text-lg font-semibold leading-7 text-ink-900">{titleFor(pathname)}</p>
           <span className="hidden truncate font-mono text-xs font-medium uppercase tracking-[0.1em] text-ink-500 md:inline">
             {contract.clientShort} · {contract.brand} · {contract.country}
           </span>

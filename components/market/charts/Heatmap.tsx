@@ -80,7 +80,7 @@ export default function Heatmap({
         <table className="w-full min-w-[520px] border-separate border-spacing-[2px] text-xs">
           <thead>
             <tr>
-              <th className="w-[128px]" />
+              <th className="sticky left-0 z-10 w-[140px] bg-white" />
               {columns.map((col) => (
                 <th key={col.id} scope="col" className="px-1 pb-1 uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
                   {col.label}
@@ -91,7 +91,7 @@ export default function Heatmap({
           <tbody>
             {rows.map((row) => (
               <tr key={row.id}>
-                <th scope="row" className="pr-2 text-right text-xs font-medium text-ink-700">
+                <th scope="row" className="sticky left-0 z-10 bg-white pr-3 text-right text-sm font-medium text-ink-900">
                   {row.label}
                 </th>
                 {columns.map((col) => {

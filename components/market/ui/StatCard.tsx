@@ -5,6 +5,7 @@
    tile bands itself and says the gap. Without a target it stays
    neutral: a count of outlets has no "good". */
 
+import { ConfidenceBadge, type Confidence } from "@/components/vemi/ConfidenceBadge";
 import type { ReactNode } from "react";
 import Delta from "./Delta";
 import Sparkline from "./Sparkline";
@@ -31,6 +32,7 @@ export default function StatCard({
   detail,
   explain,
   watch,
+  confidence,
 }: {
   label: string;
   value: number | string;
@@ -56,6 +58,8 @@ export default function StatCard({
   /* The Watch control, given where the figure is one the watchlist can
      find again next cycle. */
   watch?: ReactNode;
+  /* How the figure was obtained (brand ConfidenceBadge). */
+  confidence?: Confidence;
 }) {
   const numeric = typeof value === "number" ? value : null;
   const resolved =
@@ -71,6 +75,7 @@ export default function StatCard({
       <div className="vm-kpi__top">
         <span className="vm-label min-w-0 flex-1">{label}</span>
         <span className="flex shrink-0 items-center gap-1">
+          {confidence && <ConfidenceBadge level={confidence} size="sm" />}
           {explain && <InfoTip label={`How ${label} is measured`}>{explain}</InfoTip>}
           {watch}
         </span>

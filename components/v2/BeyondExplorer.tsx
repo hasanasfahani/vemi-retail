@@ -87,7 +87,7 @@ export default function BeyondExplorer() {
                     : "pointer-events-none grid-rows-[0fr] opacity-0 lg:invisible lg:translate-x-2"
                 }`}
               >
-                <div className="min-h-0 overflow-hidden border-t border-line bg-white lg:overflow-y-auto lg:rounded-lg lg:border lg:shadow-[var(--shadow-pop)]">
+                <div className="min-h-0 overflow-hidden border-t border-line bg-white lg:overflow-y-auto lg:rounded-lg lg:border lg:shadow-[var(--vm-shadow-overlay)]">
                   <div className="p-6 lg:p-7">
                     <span className="flex h-10 w-10 items-center justify-center rounded-md bg-violet text-white">
                       <Icon name={pillar.icon} className="h-5 w-5" />

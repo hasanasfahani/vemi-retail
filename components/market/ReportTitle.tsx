@@ -47,14 +47,14 @@ export default function ReportTitle({
         type="button"
         onClick={startEditing}
         title="Rename this report"
-        className="group flex min-w-0 items-center gap-2 rounded-md px-1 py-0.5 text-left transition-colors hover:bg-canvas"
+        className="group -mx-2 flex min-w-0 items-center gap-3 rounded-md px-2 py-1 text-left transition-colors hover:bg-canvas"
       >
-        <span className="truncate font-display text-lg font-semibold tracking-tight text-ink-900">
+        <span className="truncate text-[32px] font-semibold leading-10 tracking-[-0.01em] text-ink-900 sm:text-[44px] sm:leading-[52px] sm:tracking-[-0.02em]">
           {name}
         </span>
         <svg
           viewBox="0 0 16 16"
-          className="h-3.5 w-3.5 shrink-0 text-ink-300 transition-colors group-hover:text-ink-700"
+          className="h-5 w-5 shrink-0 text-line-strong transition-colors group-hover:text-ink-900"
           fill="none" stroke="currentColor" strokeWidth="1.6"
           strokeLinecap="round" strokeLinejoin="round" aria-hidden
         >
@@ -85,7 +85,7 @@ export default function ReportTitle({
         }
       }}
       aria-label="Report name"
-      className="min-w-0 max-w-[420px] flex-1 rounded-md border border-violet bg-white px-2 py-1 font-display text-lg font-semibold tracking-tight text-ink-900 outline-none"
+      className="min-w-0 max-w-[720px] flex-1 rounded-md border border-primary bg-white px-3 py-1 text-[32px] font-semibold leading-10 text-ink-900 outline-none sm:text-[44px] sm:leading-[52px]"
     />
   );
 }

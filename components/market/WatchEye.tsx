@@ -72,10 +72,14 @@ export default function WatchEye({
       }}
       aria-pressed={watching}
       title={watching ? `Stop watching ${what}` : `Watch ${what}`}
-      className={`inline-flex shrink-0 items-center justify-center rounded-sm transition-colors disabled:opacity-30 ${box} ${
+      /* The glyph stays small so a column of eyes does not dominate a
+         row, but the hit area reaches past it (a 36–40px target) through
+         an invisible ::after. Watching is Violet; not watching is the
+         Line-strong outline. */
+      className={`relative inline-flex shrink-0 items-center justify-center rounded-sm transition-colors after:absolute after:-inset-2 after:content-[''] disabled:opacity-30 ${box} ${
         watching
-          ? "text-violet-ink hover:bg-primary-tint"
-          : "text-ink-300 hover:bg-canvas hover:text-ink-700"
+          ? "text-primary hover:bg-primary-tint"
+          : "text-line-strong hover:bg-canvas hover:text-ink-900"
       } ${className}`}
     >
       <span className="sr-only">

@@ -72,4 +72,5 @@ export const ALL_ITEMS = NAV.flatMap((g) => g.items);
 /* Locked items are not destinations, so they never name a page. */
 export const REACHABLE = ALL_ITEMS.filter((i) => !i.locked);
 export const titleFor = (pathname: string) =>
-  ALL_ITEMS.find((i) => i.href === pathname)?.label ?? "Vemi";
+  ALL_ITEMS.find((i) => i.href === pathname)?.label ??
+  (pathname.startsWith("/portal/reports/custom") ? "Custom reports" : "Vemi");

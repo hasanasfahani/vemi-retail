@@ -128,7 +128,7 @@ function KpiRow({ view, targets }: BlockContext) {
     { label: KPI_NAME.score, value: view.kpi.score, target: targets.score, unit: "" },
   ];
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
       {cells.map((cell) => {
         const band = cell.label === KPI_NAME.score ? scoreBand(cell.value) : rateBand(cell.value, cell.target);
         return (

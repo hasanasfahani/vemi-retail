@@ -10,18 +10,18 @@
    words, and the movement figure states its direction in text as well
    as in tint. */
 
+import { Gauge } from "@/components/vemi/Gauge";
+import { vsPrior } from "@/lib/market/asOf";
 import type { ReactNode } from "react";
 import { BAND_WORD, type BrandHealth } from "@/lib/market/brandHealth";
 import StatusChip from "./ui/StatusChip";
 import { componentDetail } from "@/lib/market/bandDetail";
-import { BAND_COLOR } from "./ui/health";
 import { brandSwatch } from "./charts/theme";
 import Delta from "./ui/Delta";
 
 export default function BrandHealthCard({
   health,
   focused,
-  size = 128,
   onSelect,
   watch,
 }: {
@@ -35,11 +35,6 @@ export default function BrandHealthCard({
      ring below it is a different height on every card. */
   watch?: ReactNode;
 }) {
-  const stroke = 11;
-  const r = (size - stroke) / 2;
-  const c = 2 * Math.PI * r;
-  const filled = (Math.max(0, Math.min(100, health.score)) / 100) * c;
-  const color = BAND_COLOR[health.band];
 
   const body = (
     <>
@@ -50,7 +45,7 @@ export default function BrandHealthCard({
             style={brandSwatch(health.brandId)}
             aria-hidden
           />
-          <span className="truncate font-display text-sm font-semibold tracking-tight text-ink-900">
+          <span className="truncate text-lg font-semibold text-ink-900">
             {health.name}
           </span>
         </span>
@@ -64,57 +59,37 @@ export default function BrandHealthCard({
         </span>
       </div>
 
-      <div className="mt-3 flex justify-center">
-        <div className="relative" style={{ width: size, height: size }}>
-          <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden>
-            <circle
-              cx={size / 2} cy={size / 2} r={r}
-              fill="none" stroke="var(--color-line)" strokeWidth={stroke}
-            />
-            <circle
-              cx={size / 2} cy={size / 2} r={r}
-              fill="none" stroke={color} strokeWidth={stroke} strokeLinecap="round"
-              strokeDasharray={`${filled} ${c - filled}`}
-              transform={`rotate(-90 ${size / 2} ${size / 2})`}
-            />
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span
-              className="font-display font-semibold leading-none tracking-tight text-ink-900"
-              style={{ fontSize: size * 0.3 }}
-            >
-              {health.score}
-            </span>
-            <span className="mono mt-0.5 text-xs text-ink-400">/ 100</span>
-          </div>
-        </div>
+      {/* Was a ring; the brand avoids donut forms. The figure, then a
+          linear 0-100 gauge, then the band in words. */}
+      <div className="mt-4 flex items-baseline gap-1">
+        <span className="tnum text-[44px] leading-[48px]">{health.score}</span>
+        <span className="font-mono text-xs text-ink-500">/ 100</span>
       </div>
+      <Gauge className="mt-3" value={health.score} max={100} label={`${health.name} score ${health.score} of 100`} />
 
-      <p className="mt-2.5 flex justify-center">
+      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
         <StatusChip
           band={health.band}
           label={BAND_WORD[health.band]}
+          size="sm"
           title={`${health.name}: what makes the score`}
           detail={componentDetail(health.score, health.components)}
         />
-      </p>
-
-      <p className="mt-1.5 flex items-center justify-center gap-1.5">
         {health.delta === null ? (
-          <span className="mono text-xs text-ink-400">loading last cycle…</span>
+          <span className="font-mono text-xs text-ink-500">loading last cycle…</span>
         ) : (
-          <Delta value={health.delta} unit="" floor={1} label="vs last month" />
+          <Delta value={health.delta} unit="" floor={1} label={vsPrior()} />
         )}
-      </p>
+      </div>
 
-      <p className="mt-2.5 border-t border-line pt-2.5 text-xs leading-snug text-ink-500">
-        <span className="font-semibold text-ink-700">{health.weakest.label}</span>{" "}
+      <p className="mt-4 border-t border-line pt-3 text-sm text-ink-500">
+        <span className="font-semibold text-ink-900">{health.weakest.label}</span>{" "}
         {health.weakest.display} · main gap
       </p>
     </>
   );
 
-  const shell = `flex min-w-0 flex-col rounded-lg border bg-white p-3.5 shadow-[var(--shadow-card)] transition-colors ${
+  const shell = `flex min-w-0 flex-col rounded-lg border bg-white p-6  transition-colors ${
     focused ? "border-violet ring-1 ring-primary-tint" : "border-line"
   }`;
 

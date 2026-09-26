@@ -12,37 +12,32 @@
    score over two hundred, and a reader deciding where to send someone
    needs to know which one they are looking at. */
 
+import { Gauge } from "@/components/vemi/Gauge";
+import { vsPrior } from "@/lib/market/asOf";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { BAND_WORD } from "@/lib/market/brandHealth";
 import type { GovernorateHealth } from "@/lib/market/governorateHealth";
 import StatusChip from "./ui/StatusChip";
 import { componentDetail } from "@/lib/market/bandDetail";
-import { BAND_COLOR } from "./ui/health";
 import Delta from "./ui/Delta";
 
 export default function GovernorateHealthCard({
   health,
-  size = 108,
   watch,
 }: {
   health: GovernorateHealth;
   size?: number;
   watch?: ReactNode;
 }) {
-  const stroke = 10;
-  const r = (size - stroke) / 2;
-  const c = 2 * Math.PI * r;
-  const filled = (Math.max(0, Math.min(100, health.score)) / 100) * c;
-  const color = BAND_COLOR[health.band];
   const covered = health.inScope
     ? Math.round((health.outlets / health.inScope) * 1000) / 10
     : 0;
 
   return (
-    <article className="flex min-w-0 flex-col rounded-lg border border-line bg-white p-3.5 shadow-[var(--shadow-card)]">
+    <article className="flex min-w-0 flex-col rounded-lg border border-line bg-white p-6 ">
       <div className="flex items-baseline justify-between gap-2">
-        <h3 className="min-w-0 truncate font-display text-sm font-semibold tracking-tight text-ink-900">
+        <h3 className="min-w-0 truncate text-lg font-semibold text-ink-900">
           {health.name}
           {/* Five governorates share a name with their capital; Nineveh
               does not, and a reader who knows the audit works Mosul
@@ -61,48 +56,30 @@ export default function GovernorateHealthCard({
         </span>
       </div>
 
-      <div className="mt-2.5 flex justify-center">
-        <div className="relative" style={{ width: size, height: size }}>
-          <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden>
-            <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--color-line)" strokeWidth={stroke} />
-            <circle
-              cx={size / 2} cy={size / 2} r={r}
-              fill="none" stroke={color} strokeWidth={stroke} strokeLinecap="round"
-              strokeDasharray={`${filled} ${c - filled}`}
-              transform={`rotate(-90 ${size / 2} ${size / 2})`}
-            />
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span
-              className="font-display font-semibold leading-none tracking-tight text-ink-900"
-              style={{ fontSize: size * 0.3 }}
-            >
-              {health.score}
-            </span>
-            <span className="mono mt-0.5 text-xs text-ink-400">/ 100</span>
-          </div>
-        </div>
+      {/* Was a ring; the brand avoids donut forms. */}
+      <div className="mt-4 flex items-baseline gap-1">
+        <span className="tnum text-[44px] leading-[48px]">{health.score}</span>
+        <span className="font-mono text-xs text-ink-500">/ 100</span>
       </div>
+      <Gauge className="mt-3" value={health.score} max={100} label={`${health.name} score ${health.score} of 100`} />
 
-      <p className="mt-2 flex justify-center">
+      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
         <StatusChip
           band={health.band}
           label={BAND_WORD[health.band]}
+          size="sm"
           title={`${health.name}: what makes the score`}
           detail={componentDetail(health.score, health.components)}
         />
-      </p>
-
-      <p className="mt-1.5 flex justify-center">
         {health.delta === null ? (
-          <span className="mono text-xs text-ink-400">loading last cycle…</span>
+          <span className="font-mono text-xs text-ink-500">loading last cycle…</span>
         ) : (
-          <Delta value={health.delta} unit="" floor={1} label="vs last month" />
+          <Delta value={health.delta} unit="" floor={1} label={vsPrior()} />
         )}
-      </p>
+      </div>
 
-      <p className="mt-2.5 border-t border-line pt-2.5 text-xs leading-snug text-ink-500">
-        <span className="font-semibold text-ink-700">{health.weakest.label}</span>{" "}
+      <p className="mt-4 border-t border-line pt-3 text-sm text-ink-500">
+        <span className="font-semibold text-ink-900">{health.weakest.label}</span>{" "}
         {health.weakest.display} · main gap
       </p>
 

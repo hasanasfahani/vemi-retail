@@ -8,13 +8,13 @@ import Icon from "./Icon";
  * and one text action.
  */
 export function LockedRegion({
-  title, lead, action, className,
-}: { title: ReactNode; lead?: ReactNode; action?: ReactNode; className?: string }) {
+  title, lead, action, label = "Not in your plan", className,
+}: { title: ReactNode; lead?: ReactNode; action?: ReactNode; label?: string; className?: string }) {
   return (
     <section className={cx("vm-locked", className)}>
       <span className="vm-label inline-flex items-center gap-2">
         <Icon name="lock" size={16} />
-        Not in your plan
+        {label}
       </span>
       <h2 className="vm-locked__title">{title}</h2>
       {lead && <p className="vm-locked__lead">{lead}</p>}

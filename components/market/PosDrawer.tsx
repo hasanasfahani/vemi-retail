@@ -115,7 +115,7 @@ export default function PosDrawer({
             {/* ---------- who and when ---------- */}
             <dl className="grid grid-cols-2 gap-x-4 gap-y-2 rounded-md border border-line bg-canvas px-3 py-2.5">
               {[
-                { k: "Last visit", v: row.auditedAt || "—" },
+                { k: "Audited on", v: row.auditedAt || "—" },
                 { k: "Collector", v: row.collector },
                 { k: "Cycle", v: monthLabel(view.month) },
                 { k: "Category", v: contract.category },
@@ -329,7 +329,7 @@ export default function PosDrawer({
             role="dialog"
             aria-modal="true"
             aria-label={`Shelf view, ${row.pos.name}`}
-            className="relative w-full max-w-[880px] rounded-lg border border-line bg-white p-4 shadow-[var(--shadow-pop)]"
+            className="relative w-full max-w-[880px] rounded-lg border border-line bg-white p-6 shadow-[var(--vm-shadow-overlay)]"
           >
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
               <div className="min-w-0">

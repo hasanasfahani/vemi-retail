@@ -11,6 +11,7 @@
    the catalogue and the grid packs them; the reader places nothing and
    so cannot leave the page in a shape that breaks a chart. */
 
+import Icon from "@/components/vemi/Icon";
 import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
@@ -161,7 +162,7 @@ function Report({ view, data }: { view: MarketView; data: MonthData }) {
         />
         <Link
           href="/portal/reports/custom"
-          className="mt-3 inline-block rounded-md bg-violet px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-violet-ink"
+          className="vm-btn vm-btn--primary vm-btn--sm mt-3 inline-block"
         >
           All reports
         </Link>
@@ -170,18 +171,21 @@ function Report({ view, data }: { view: MarketView; data: MonthData }) {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-wrap items-end justify-between gap-6">
+        <div className="flex min-w-0 flex-col gap-2">
+        <span className="vm-label">Custom report · {report.blocks.length === 1 ? "1 block" : `${report.blocks.length} blocks`}</span>
         <ReportTitle
           name={report.name}
           autoEdit={fresh}
           onRename={(name) => edit(renameReport(report, name))}
         />
-        <div className="flex shrink-0 items-center gap-2 print:hidden">
+        </div>
+        <div className="flex shrink-0 flex-wrap items-center gap-3 print:hidden">
           <button
             type="button"
             onClick={() => setPicking(true)}
-            className="rounded-md bg-violet px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-violet-ink"
+            className="vm-btn vm-btn--primary"
           >
             Add block
           </button>
@@ -189,14 +193,14 @@ function Report({ view, data }: { view: MarketView; data: MonthData }) {
             type="button"
             onClick={share}
             title="Copy a link that rebuilds this report for someone else"
-            className="rounded-md border border-line-strong bg-white px-2.5 py-1.5 text-xs font-semibold text-ink-700 transition-colors hover:border-ink-400"
+            className="vm-btn vm-btn--secondary"
           >
             Copy link
           </button>
           <button
             type="button"
             onClick={() => window.print()}
-            className="rounded-md border border-line-strong bg-white px-2.5 py-1.5 text-xs font-semibold text-ink-700 transition-colors hover:border-ink-400"
+            className="vm-btn vm-btn--secondary"
           >
             Print
           </button>
@@ -208,7 +212,7 @@ function Report({ view, data }: { view: MarketView; data: MonthData }) {
               pushToast(`Deleted ${report.name}`, "info");
               window.location.href = "/portal/reports/custom";
             }}
-            className="rounded-md border border-line-strong bg-white px-2.5 py-1.5 text-xs font-semibold text-ink-500 transition-colors hover:border-ink-400 hover:text-ink-900"
+            className="vm-btn vm-btn--text"
           >
             Delete report
           </button>
@@ -217,17 +221,17 @@ function Report({ view, data }: { view: MarketView; data: MonthData }) {
 
       {report.blocks.length === 0 ? (
         <Card>
-          <div className="flex flex-col items-center gap-4 py-10 text-center">
+          <div className="flex flex-col items-center gap-6 py-10 text-center">
             <button
               type="button"
               onClick={() => setPicking(true)}
-              className="flex h-28 w-full max-w-[420px] flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed border-line-strong text-ink-500 transition-colors hover:border-violet hover:text-violet-ink"
+              className="flex h-28 w-full max-w-[420px] flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-line-strong text-ink-700 transition-colors hover:border-primary hover:bg-primary-tint hover:text-primary-text"
             >
-              <span className="text-[28px] leading-none">+</span>
+              <Icon name="plus" size={24} />
               <span className="text-sm font-semibold">Add your first block</span>
             </button>
             <div className="flex flex-col items-center gap-2">
-              <span className="text-xs text-ink-400">or start with one of these</span>
+              <span className="text-sm text-ink-500">or start with one of these</span>
               <div className="flex flex-wrap justify-center gap-1.5">
                 {STARTERS.map((blockId) => {
                   const block = BLOCKS.find((b) => b.id === blockId);
@@ -237,7 +241,7 @@ function Report({ view, data }: { view: MarketView; data: MonthData }) {
                       key={block.id}
                       type="button"
                       onClick={() => add(block)}
-                      className="rounded-md border border-line-strong bg-white px-2.5 py-1.5 text-xs font-semibold text-ink-700 transition-colors hover:border-violet hover:text-violet-ink"
+                      className="vm-btn vm-btn--secondary vm-btn--sm"
                     >
                       {block.label}
                     </button>
@@ -253,7 +257,7 @@ function Report({ view, data }: { view: MarketView; data: MonthData }) {
            block can move sideways as well as down. Dropping on a
            position is `moveBlock`, which the keyboard path in each
            block's menu already calls — one operation, two ways in. */
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid gap-6 lg:grid-cols-2">
           {report.blocks.map((block, index) => {
             const def = BLOCKS.find((b) => b.id === block.blockId);
             /* Captured outside the closure: TypeScript cannot narrow a

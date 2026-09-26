@@ -20,6 +20,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import Icon from "@/components/vemi/Icon";
+import { buttonClass } from "@/components/vemi/Button";
 import PageShell from "@/components/market/PageShell";
 import { useTargets } from "@/components/market/useTargets";
 import BrandHealthCard from "@/components/market/BrandHealthCard";
@@ -30,7 +32,12 @@ import InsightCard from "@/components/market/InsightCard";
 import PosDrawer from "@/components/market/PosDrawer";
 import MarketMap, { type MapPoint } from "@/components/market/map/MarketMap";
 import MapLegend from "@/components/market/map/legend";
-import { Card, InfoTip } from "@/components/market/ui";
+import { InfoTip } from "@/components/market/ui";
+import SectionHead from "@/components/market/SectionHead";
+import { PageHeader } from "@/components/vemi/PageHeader";
+import { AlertChip } from "@/components/vemi/AlertChip";
+import { ChartCard } from "@/components/vemi/ChartCard";
+import { asOf, vsPrior, monthShort } from "@/lib/market/asOf";
 import { RankedBars } from "@/components/market/charts";
 import { scoreBand, rateBand, type Band } from "@/components/market/ui/health";
 import { topCards, type DecisionInsight } from "@/lib/market/insightModel";
@@ -346,12 +353,80 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
     return Math.round((last - prior) * 10) / 10;
   };
 
+  /* ---------- the page's words, computed from the same view ----------
+     The title states the decision (brand copy: lead with the finding,
+     not the name of the page); the one alert names the worst problem
+     and where it is. Nothing here is written by hand per month. */
+  const scopeName =
+    view.filters.governorates.length === 1 ? governorateName(view.filters.governorates[0]) : contract.country;
+  const kpiGaps = (
+    [
+      { id: "availability", label: KPI_NAME.availability, value: view.kpi.availability, target: targets.availability, unit: "%" },
+      { id: "shelfShare", label: KPI_NAME.shelfShare, value: view.client?.share ?? 0, target: targets.shelfShare, unit: "%" },
+      { id: "assortment", label: KPI_NAME.assortment, value: view.kpi.assortment, target: targets.assortment, unit: "%" },
+      { id: "price", label: KPI_NAME.price, value: view.kpi.price, target: targets.price, unit: "%" },
+      { id: "posm", label: KPI_NAME.posm, value: view.kpi.posm, target: targets.posm, unit: "%" },
+    ] as const
+  )
+    .map((k) => ({ ...k, gap: Math.round((k.target - k.value) * 10) / 10 }))
+    /* Ranked by the gap relative to its own target, so a 7-point miss
+       on a 95 target and a 7-point miss on a 40 target are not equal. */
+    .sort((a, b) => b.gap / b.target - a.gap / a.target);
+  const worst = kpiGaps[0];
+  const headline =
+    worst && worst.gap > 0
+      ? `${worst.label} is ${worst.gap} pts short of target in ${scopeName}, the widest gap this cycle.`
+      : `Every execution measure is at or above target in ${scopeName}.`;
+
+  const criticalByGov = new Map<string, number>();
+  for (const sc of view.scores) {
+    if (scoreBand(sc.score) !== "critical") continue;
+    const gov = view.outlets.find((o) => o.id === sc.posId)?.governorateId;
+    if (gov) criticalByGov.set(gov, (criticalByGov.get(gov) ?? 0) + 1);
+  }
+  const criticalTotal = [...criticalByGov.values()].reduce((a, b) => a + b, 0);
+  const worstGov = [...criticalByGov.entries()].sort((a, b) => b[1] - a[1])[0];
+  const basis = `${asOf(view.month)} · ${view.posCount.toLocaleString()} outlets`;
+  const deltaLabel = vsPrior(contract.currentMonth);
+
+  const mapMetricDef = metricOf(mapMetric);
+  const mapSoWhat =
+    bandCounts.critical > 0
+      ? `${bandCounts.critical.toLocaleString()} of ${points.length.toLocaleString()} outlets are critical on ${mapMetricDef.label.toLowerCase()}${
+          worstGov && mapMetric === "score" ? `; ${governorateName(worstGov[0])} holds ${worstGov[1]} of them` : ""
+        }.`
+      : `No outlet is critical on ${mapMetricDef.label.toLowerCase()}; ${bandCounts.attention.toLocaleString()} need attention.`;
+
+  const compareDef = metricOf(governorateMetric);
+  const lowest = governorateRows[governorateRows.length - 1];
+  const highest = governorateRows[0];
+  const compareSoWhat =
+    lowest && highest
+      ? `${lowest.label} is lowest on ${compareDef.label.toLowerCase()} at ${lowest.value}${compareDef.unit}, ${Math.abs(
+          Math.round((compareDef.target - lowest.value) * 10) / 10
+        )} ${lowest.value < compareDef.target ? "below" : "above"} the ${compareDef.target}${compareDef.unit} target; ${highest.label} leads at ${highest.value}${compareDef.unit}.`
+      : "No governorate has audited outlets in this view.";
+
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-12">
+      <div className="flex flex-col gap-6">
+        <PageHeader
+          eyebrow={`${scopeName} · ${contract.category} · ${monthShort(view.month)}`}
+          title={headline}
+          description={`Where ${contract.clientShort} is winning and losing the shelf across ${view.posCount.toLocaleString()} audited outlets, and what to fix first.`}
+        />
+        {criticalTotal > 0 && (
+          <div>
+            <AlertChip>
+              Critical · {criticalTotal.toLocaleString()} outlets
+              {worstGov ? `, ${worstGov[1]} in ${governorateName(worstGov[0])}` : ""}
+            </AlertChip>
+          </div>
+        )}
       {/* ---------- coverage, demoted to a strip ---------- */}
       <div className="relative">
         <CoverageStrip {...coverage} />
-        <span className="absolute right-3.5 top-3">
+        <span className="absolute right-4 top-4">
           <InfoTip label="How coverage is measured">
             Outlets audited against the outlets the current filter selects — not against the
             national contract — so a filtered view answers the question it appears to ask.{" "}
@@ -360,67 +435,63 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
           </InfoTip>
         </span>
       </div>
+      </div>
 
       {/* ---------- 1 · market health ---------- */}
       <section>
-        <div className="mb-2.5 flex flex-wrap items-baseline justify-between gap-3">
-          <h2 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
-            Market health
-          </h2>
-          <span className="flex items-center gap-2">
-            <p className="text-xs text-ink-400">
-              Which execution dimension is weak, across everything audited
-            </p>
+        <SectionHead
+          title="Market health"
+          lead="Which execution dimension is weak, across everything audited."
+          actions={
             <InfoTip label="How these figures are measured">
               Each tile is a rate over what was actually observed this cycle across{" "}
               {view.posCount.toLocaleString()} audited outlets, with the target drawn on the track
               and through the trend. {EXPLAIN.movement}
             </InfoTip>
-          </span>
+          }
+        />
+        {/* Hero row: the three measures the business is judged on, at the
+            brand's 56px. The rest sit in a compact row beneath. */}
+        <div className="grid gap-6 lg:grid-cols-3">
+          <KpiCard size="hero" basis={basis} deltaLabel={deltaLabel} explain={EXPLAIN.availability} label={KPI_NAME.availability} value={view.kpi.availability} target={targets.availability} trend={series.availability} spread={spread.availability} watch={{ kpi: "availability", month: view.month }} delta={move("availability")} deltaFloor={1.73} href="/portal/performance?tab=availability" />
+          <KpiCard size="hero" basis={basis} deltaLabel={deltaLabel} explain={EXPLAIN.shelfShare} label={KPI_NAME.shelfShare} value={view.client?.share ?? 0} target={targets.shelfShare} trend={series.shelfShare} spread={spread.shelfShare} watch={{ kpi: "shelfShare", month: view.month }} delta={move("shelfShare")} deltaFloor={1.81} href="/portal/performance?tab=shelf" />
+          <KpiCard size="hero" basis={basis} deltaLabel={deltaLabel} isScore explain={EXPLAIN.score} label={KPI_NAME.score} value={view.kpi.score} unit="" target={targets.score} trend={series.score} watch={{ kpi: "score", month: view.month }} delta={move("score")} deltaFloor={1.8} band={scoreBand(view.kpi.score)} href="/portal/performance" />
         </div>
-        {/* Six across only above 1536px. At 1280 the tiles were 154px
-            wide, which is narrower than the words on them. */}
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
-          <KpiCard explain={EXPLAIN.availability} label={KPI_NAME.availability} value={view.kpi.availability} target={targets.availability} trend={series.availability} spread={spread.availability} watch={{ kpi: "availability", month: view.month }} delta={move("availability")} deltaFloor={1.73} href="/portal/performance?tab=availability" />
-          <KpiCard explain={EXPLAIN.shelfShare} label={KPI_NAME.shelfShare} value={view.client?.share ?? 0} target={targets.shelfShare} trend={series.shelfShare} spread={spread.shelfShare} watch={{ kpi: "shelfShare", month: view.month }} delta={move("shelfShare")} deltaFloor={1.81} href="/portal/performance?tab=shelf" />
-          <KpiCard explain={EXPLAIN.assortment} label={KPI_NAME.assortment} value={view.kpi.assortment} target={targets.assortment} trend={series.assortment} spread={spread.assortment} watch={{ kpi: "assortment", month: view.month }} delta={move("assortment")} deltaFloor={1.8} href="/portal/performance?tab=assortment" />
-          <KpiCard explain={EXPLAIN.price} label={KPI_NAME.price} value={view.kpi.price} target={targets.price} trend={series.price} spread={spread.price} watch={{ kpi: "price", month: view.month }} delta={move("price")} deltaFloor={1.8} href="/portal/performance?tab=pricing" />
-          <KpiCard explain={EXPLAIN.posm} label={KPI_NAME.posm} value={view.kpi.posm} target={targets.posm} trend={series.posm} spread={spread.posm} watch={{ kpi: "posm", month: view.month }} delta={move("posm")} deltaFloor={1.8} href="/portal/performance?tab=posm" />
-          <KpiCard isScore explain={EXPLAIN.score} label={KPI_NAME.score} value={view.kpi.score} unit="" target={targets.score} trend={series.score} watch={{ kpi: "score", month: view.month }} delta={move("score")} deltaFloor={1.8} band={scoreBand(view.kpi.score)} href="/portal/performance" />
+        <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <KpiCard basis={basis} deltaLabel={deltaLabel} explain={EXPLAIN.assortment} label={KPI_NAME.assortment} value={view.kpi.assortment} target={targets.assortment} trend={series.assortment} spread={spread.assortment} watch={{ kpi: "assortment", month: view.month }} delta={move("assortment")} deltaFloor={1.8} href="/portal/performance?tab=assortment" />
+          <KpiCard basis={basis} deltaLabel={deltaLabel} explain={EXPLAIN.price} label={KPI_NAME.price} value={view.kpi.price} target={targets.price} trend={series.price} spread={spread.price} watch={{ kpi: "price", month: view.month }} delta={move("price")} deltaFloor={1.8} href="/portal/performance?tab=pricing" />
+          <KpiCard basis={basis} deltaLabel={deltaLabel} explain={EXPLAIN.posm} label={KPI_NAME.posm} value={view.kpi.posm} target={targets.posm} trend={series.posm} spread={spread.posm} watch={{ kpi: "posm", month: view.month }} delta={move("posm")} deltaFloor={1.8} href="/portal/performance?tab=posm" />
         </div>
       </section>
 
       {/* ---------- 2 · portfolio brand health ---------- */}
       <section>
-        <div className="mb-2.5 flex flex-wrap items-center justify-between gap-3">
-          <h2 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
-            Portfolio brand health
-          </h2>
-          <div className="flex items-center gap-3">
-            <InfoTip label="How this is scored">
-              Each brand takes the portal&apos;s own composite — availability 30, shelf 25,
-              assortment 20, price 15, POSM 10.{" "}
-              <strong className="font-semibold text-ink-900">Shelf is scored as conversion</strong>{" "}
-              here: the share of facings a brand holds against the share of shelf slots it is
-              listed in. Judging Mountain Dew&apos;s 4% against {clientBrand.name}&apos;s 40% par
-              would rate a small brand as failing for being small, which is size rather than
-              health. POSM is recorded per outlet, not per brand, so each brand takes the material
-              compliance of the outlets that stock it.
-            </InfoTip>
-            <p className="shrink-0 text-right">
-              <span className="mono uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
-                Portfolio
-              </span>
-              <span className="ml-2 font-display text-[22px] font-semibold leading-none tracking-tight text-ink-900">
-                {companyScore}
-              </span>
-              <span className="mono ml-1 text-xs text-ink-400">/ 100</span>
-            </p>
-          </div>
-        </div>
+        <SectionHead
+          title="Portfolio brand health"
+          lead={`${contract.clientShort}'s own brands on the portal's composite score.`}
+          actions={
+            <>
+              <InfoTip label="How this is scored">
+                Each brand takes the portal&apos;s own composite — availability 30, shelf 25,
+                assortment 20, price 15, POSM 10.{" "}
+                <strong className="font-semibold text-ink-900">Shelf is scored as conversion</strong>{" "}
+                here: the share of facings a brand holds against the share of shelf slots it is
+                listed in. Judging Mountain Dew&apos;s 4% against {clientBrand.name}&apos;s 40% par
+                would rate a small brand as failing for being small, which is size rather than
+                health. POSM is recorded per outlet, not per brand, so each brand takes the material
+                compliance of the outlets that stock it.
+              </InfoTip>
+              <p className="flex items-baseline gap-2">
+                <span className="vm-label">Portfolio</span>
+                <span className="tnum text-[28px] leading-8">{companyScore}</span>
+                <span className="font-mono text-xs text-ink-500">/ 100</span>
+              </p>
+            </>
+          }
+        />
 
         {rivalSelected && (
-          <p className="mb-2.5 rounded-md border border-primary-tint bg-primary-tint px-3.5 py-2.5 text-xs leading-snug text-violet-ink">
+          <p className="mb-6 rounded-md bg-primary-tint px-4 py-3 text-sm text-primary-text">
             This section covers {contract.clientShort}&apos;s own brands, so the brand filter is not
             applied to it — a competitor&apos;s price compliance would be judged against a list
             price this company does not set. Everything below the KPI row still follows the filter.
@@ -428,7 +499,7 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
         )}
 
         <div
-          className={`grid gap-3 ${
+          className={`grid gap-6 ${
             focusBrand ? "sm:grid-cols-2 lg:grid-cols-3" : "sm:grid-cols-2 xl:grid-cols-4"
           }`}
         >
@@ -455,10 +526,8 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
               as a compact list, because a portfolio manager narrowing
               to Mirinda has not stopped owning the other three. */}
           {focusBrand && (
-            <div className="flex min-w-0 flex-col rounded-lg border border-line bg-white p-3.5 shadow-[var(--shadow-card)] sm:col-span-1 lg:col-span-2">
-              <h3 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
-                The rest of the portfolio
-              </h3>
+            <div className="flex min-w-0 flex-col rounded-lg border border-line bg-white p-6 sm:col-span-1 lg:col-span-2">
+              <h3 className="vm-label">The rest of the portfolio</h3>
               <ul className="mt-2 flex flex-col">
                 {health
                   .filter((row) => row.brandId !== focusBrand)
@@ -490,23 +559,26 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
 
       {/* ---------- 3 · key decision insights ---------- */}
       <section>
-        <div className="mb-2 flex items-baseline justify-between gap-3">
-          <h2 className="flex items-center gap-2 uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
-            Key decision insights
-            <InfoTip label="How findings are chosen and ranked" align="left">
-              Every card comes from a named rule with a stated formula and a threshold it had to
-              clear to appear at all. Ranking weighs three measured things: how large the finding
-              is by its own rule&rsquo;s scale, how much of the market&rsquo;s trading weight it
-              touches, and how strong the evidence behind it is. No card is chosen by hand. The
-              board takes one finding per rule, so it cannot fill with five versions of the same
-              stockout.
-            </InfoTip>
-          </h2>
-          <Link href="/portal/insights" className="text-xs font-semibold text-violet-ink hover:underline">
-            All {report.cards.length.toLocaleString()} findings
-          </Link>
-        </div>
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <SectionHead
+          title="Key decision insights"
+          lead="The findings to act on first, each from a named rule with a stated threshold."
+          actions={
+            <>
+              <InfoTip label="How findings are chosen and ranked" align="left">
+                Every card comes from a named rule with a stated formula and a threshold it had to
+                clear to appear at all. Ranking weighs three measured things: how large the finding
+                is by its own rule&rsquo;s scale, how much of the market&rsquo;s trading weight it
+                touches, and how strong the evidence behind it is. No card is chosen by hand. The
+                board takes one finding per rule, so it cannot fill with five versions of the same
+                stockout.
+              </InfoTip>
+              <Link href="/portal/insights" className={buttonClass("text")}>
+                All {report.cards.length.toLocaleString()} findings
+              </Link>
+            </>
+          }
+        />
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {topCards(report, 5).map((insight) => (
             <InsightCard
               key={insight.id}
@@ -520,25 +592,20 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
 
       {/* ---------- 4 · market health by governorate ---------- */}
       <section>
-        <div className="mb-2.5 flex flex-wrap items-center justify-between gap-3">
-          <div className="min-w-0">
-            <h2 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
-              Market health by governorate
-            </h2>
-            <p className="mt-0.5 text-xs text-ink-400">
-              Which market to look at, before opening the map to find where inside it
-            </p>
-          </div>
-          <InfoTip label="How this is scored">
-            Governorates take the same composite as the brands — availability 30, shelf 25, assortment
-            20, price 15, POSM 10 — but shelf is scored against the contracted{" "}
-            {targets.shelfShare}% par rather than as conversion. This is one brand across several
-            places, so the par is the right yardstick: {clientBrand.name} holding less than it
-            should in a city is a real shortfall, not an artefact of that city&apos;s size.
-          </InfoTip>
-        </div>
-
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
+        <SectionHead
+          title="Market health by governorate"
+          lead="Which market to look at, before opening the map to find where inside it."
+          actions={
+            <InfoTip label="How this is scored">
+              Governorates take the same composite as the brands — availability 30, shelf 25, assortment
+              20, price 15, POSM 10 — but shelf is scored against the contracted{" "}
+              {targets.shelfShare}% par rather than as conversion. This is one brand across several
+              places, so the par is the right yardstick: {clientBrand.name} holding less than it
+              should in a city is a real shortfall, not an artefact of that city&apos;s size.
+            </InfoTip>
+          }
+        />
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {governorateHealthRows.map((row) => (
             <GovernorateHealthCard
               key={row.governorateId}
@@ -559,25 +626,16 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
       </section>
 
       {/* ---------- 5 · where it is happening ---------- */}
-      <Card
+      <ChartCard
         title="Where it is happening"
-        lead={`${points.length.toLocaleString()} audited outlets, coloured by ${metricOf(mapMetric).label.toLowerCase()}.`}
-        action={
-          <span className="flex items-center gap-2">
-            <InfoTip label="How the map is coloured">
-              Each point is one audited outlet, placed inside its district rather than surveyed to
-              the street. A cluster is coloured by how its outlets <strong>typically</strong>{" "}
-              score and ringed in red when any of them is critical — hover it for the count.
-              Colouring a cluster by its worst outlet, as this once did, painted every bubble red
-              at country zoom and told the reader nothing. Outlets with nothing to measure on the
-              chosen metric are left off rather than shown at zero.
-            </InfoTip>
-            <MetricSwitch value={mapMetric} onChange={setMapMetric} metrics={METRICS} />
-          </span>
-        }
-        footnote="Outlets are placed within their district rather than surveyed to the street. A cluster is coloured by how its outlets typically score (darker needs you sooner) and ringed in Ink when any of them is critical — hover it for the count."
+        soWhat={mapSoWhat}
+        howToRead="Each point is one audited outlet, placed inside its district rather than surveyed to the street. Colour is the outlet's band on the chosen measure: darker needs you sooner. A cluster takes how its outlets typically score and is ringed in Ink when any of them is critical; hover it for the count. Outlets with nothing to measure on the chosen metric are left off rather than shown at zero."
+        asOf={asOf(view.month)}
+        base={`${points.length.toLocaleString()} outlets`}
+        confidence="measured"
+        actions={<MetricSwitch value={mapMetric} onChange={setMapMetric} metrics={METRICS} />}
       >
-        <div className="mb-2.5">
+        <div className="mb-3">
           <MapLegend counts={bandCounts} />
         </div>
         <MarketMap
@@ -591,23 +649,22 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
               : rateBand(value, metricOf(mapMetric).target)
           }
         />
-      </Card>
+      </ChartCard>
 
       {/* ---------- 6 · market comparison ---------- */}
-      <Card
+      <ChartCard
         title="Market comparison"
-        lead={`${metricOf(governorateMetric).label} by governorate, across audited outlets.`}
-        action={
-          <span className="flex items-center gap-2">
-            <InfoTip label="How governorates are compared">
-              The mean of the chosen measure across each governorate&apos;s audited outlets, with the tick
-              on each bar marking the target. Coverage differs by governorate — Baghdad contributes 230
-              outlets and Karbala 64 — so a governorate with fewer audited doors carries a wider margin
-              of error than its bar suggests.
-            </InfoTip>
-            <MetricSwitch value={governorateMetric} onChange={setGovernorateMetric} metrics={METRICS} />
-          </span>
-        }
+        soWhat={compareSoWhat}
+        howToRead={`The mean of ${compareDef.label.toLowerCase()} across each governorate's audited outlets; the Ink tick on each bar marks the ${compareDef.target}${compareDef.unit} target. Coverage differs by governorate, so one with fewer audited doors carries a wider margin of error than its bar suggests.`}
+        asOf={asOf(view.month)}
+        base={`${view.posCount.toLocaleString()} outlets`}
+        confidence="measured"
+        actions={<MetricSwitch value={governorateMetric} onChange={setGovernorateMetric} metrics={METRICS} />}
+        table={{
+          columns: ["Governorate", compareDef.label, "Audited outlets"],
+          numeric: [false, true, true],
+          rows: governorateRows.map((r) => [r.label, `${r.value}${compareDef.unit}`, r.outlets.toLocaleString()]),
+        }}
       >
         <RankedBars
           rows={governorateRows.map((row) => ({
@@ -630,7 +687,7 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
           par={metricOf(governorateMetric).target}
           unit={metricOf(governorateMetric).unit}
         />
-      </Card>
+      </ChartCard>
 
       <InsightDrawer
         insight={openInsight}
@@ -652,17 +709,18 @@ function MetricSwitch({
   metrics: { id: MetricId; label: string }[];
 }) {
   return (
-    <label className="flex items-center gap-1.5">
-      <span className="sr-only">Metric</span>
+    <label className="vm-select">
+      <span className="sr-only">Measure</span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value as MetricId)}
-        className="rounded-md border border-line-strong bg-white px-2 py-1 text-xs font-semibold text-ink-700 outline-none transition-colors hover:border-ink-400"
+        className="vm-input !h-9 !w-auto !pr-9 !text-sm font-medium"
       >
         {metrics.map((m) => (
           <option key={m.id} value={m.id}>{m.label}</option>
         ))}
       </select>
+      <span className="vm-select__chevron"><Icon name="chevron-down" size={16} /></span>
     </label>
   );
 }

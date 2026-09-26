@@ -18,7 +18,8 @@ import RequestFollowUp from "@/components/market/RequestFollowUp";
 import { ChartLegend, DotPlot, Heatmap, RankedBars, ShareDonut, StackedBars, brandColor, MEASURE } from "@/components/market/charts";
 import { scoreBand } from "@/components/market/ui/health";
 import { availability } from "@/lib/market/performance";
-import { governorates, governorateName } from "@/lib/market";
+import { clientBrand, governorates, governorateName } from "@/lib/market";
+import { asOf } from "@/lib/market/asOf";
 import { useTargets } from "@/components/market/useTargets";
 import { issuesFor, scopeOf } from "@/lib/market/issues";
 import type { MarketView } from "@/lib/market/filters";
@@ -40,8 +41,42 @@ export default function AvailabilityTab({ view }: { view: MarketView }) {
   );
 
 
+  /* ---------- what each chart found (brand: every chart says it) ---------- */
+  const basis = { asOf: asOf(view.month), base: `${a.listings.toLocaleString()} listings` };
+  const govSorted = [...a.byGovernorate].sort((x, y) => x.value - y.value);
+  const govLow = govSorted[0];
+  const govHigh = govSorted[govSorted.length - 1];
+  const govSoWhat = govLow
+    ? `${govLow.label} is lowest at ${govLow.value}%, ${Math.round((targets.availability - govLow.value) * 10) / 10} pts under the ${targets.availability}% target; ${govHigh.label} is highest at ${govHigh.value}%.`
+    : "No governorate has listings in this view.";
+  const channelGaps = a.byChannel.map((r) => ({ ...r, gap: Math.round((r.client - r.category) * 10) / 10 }));
+  const channelWorst = [...channelGaps].sort((x, y) => x.gap - y.gap)[0];
+  const channelSoWhat = !channelWorst
+    ? "No channel has listings in this view."
+    : channelWorst.gap < 0
+      ? `${clientBrand.name} trails the rest of the category most in ${channelWorst.label}: ${channelWorst.client}% against ${channelWorst.category}%.`
+      : `${clientBrand.name} is at or ahead of the rest of the category in every format; the narrowest lead is ${channelWorst.label} at ${channelWorst.gap} pts.`;
+  const skuWorst = [...a.bySku].sort((x, y) => x.value - y.value)[0];
+  const skuSoWhat = skuWorst
+    ? `${skuWorst.label} is the line to fix: ${skuWorst.value}% available where listed, ${Math.round((targets.availability - skuWorst.value) * 10) / 10} pts under target.`
+    : "No client line is listed in this view.";
+  const reasonTotal = a.byReason.reduce((t, r) => t + r.value, 0) || 1;
+  const reasonTop = [...a.byReason].sort((x, y) => y.value - x.value)[0];
+  const reasonSoWhat = reasonTop
+    ? `${reasonTop.name} explains ${Math.round((reasonTop.value / reasonTotal) * 1000) / 10}% of the ${a.gaps.toLocaleString()} gaps, the first conversation to have.`
+    : "No gaps were found in this view.";
+  let hot = { sku: "", gov: "", n: 0 };
+  for (const sku of a.bySku)
+    for (const g of governorates) {
+      const n = a.gapAt(sku.id, g.id) ?? 0;
+      if (n > hot.n) hot = { sku: sku.label, gov: g.name, n };
+    }
+  const heatSoWhat = hot.n
+    ? `${hot.sku} in ${hot.gov} has the most empty listings (${hot.n}); start the route there.`
+    : "No listed line was found empty in this view.";
+
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6">
       <KpiGapBar
         label={KPI_NAME.availability}
         value={a.rate}
@@ -58,7 +93,7 @@ export default function AvailabilityTab({ view }: { view: MarketView }) {
         }
       />
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label="Listings checked"
           value={a.listings}
@@ -138,8 +173,8 @@ export default function AvailabilityTab({ view }: { view: MarketView }) {
         />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card title="Availability by governorate" lead="Client listings on shelf, per governorate.">
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card title="Availability by governorate" lead="Client listings on shelf, per governorate." soWhat={govSoWhat} {...basis} confidence="measured" footnote={`Each bar is the share of client listings found in stock; the Ink tick marks the ${targets.availability}% target.`}>
           <RankedBars
             rows={a.byGovernorate.map((row) => ({
               id: row.id,
@@ -166,6 +201,10 @@ export default function AvailabilityTab({ view }: { view: MarketView }) {
         <Card
           title="Availability by channel"
           lead="The client against every other brand in the same format."
+          soWhat={channelSoWhat}
+          {...basis}
+          confidence="measured"
+          table={{ columns: ["Channel", clientBrand.name, "Rest of category"], numeric: [false, true, true], rows: a.byChannel.map((r) => [r.label, `${r.client}%`, `${r.category}%`]) }}
           action={
             <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
               <ChartLegend
@@ -212,10 +251,13 @@ export default function AvailabilityTab({ view }: { view: MarketView }) {
         </Card>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+      <div className="grid gap-6 lg:grid-cols-[1.35fr_1fr]">
         <Card
           title="Availability by SKU"
           lead="Worst first — the line to fix, not the range to admire."
+          soWhat={skuSoWhat}
+          {...basis}
+          confidence="measured"
           footnote="Measured only where the SKU is listed, so a SKU nobody stocks cannot look like one everybody has run out of. One dot per line on a shared scale, which stays readable as the range grows."
         >
           <DotPlot
@@ -245,6 +287,11 @@ export default function AvailabilityTab({ view }: { view: MarketView }) {
         <Card
           title="Why the shelf was empty"
           lead="Reason recorded by the auditor who found the gap."
+          soWhat={reasonSoWhat}
+          asOf={basis.asOf}
+          base={`${a.gaps.toLocaleString()} gaps`}
+          confidence="measured"
+          footnote="Each segment is the share of gaps the auditor attributed to that reason; the list carries every value."
           action={
             /* A reason is not a slice the audit can be re-run against,
                so the eye pins the gap count the ring totals rather than
@@ -271,6 +318,9 @@ export default function AvailabilityTab({ view }: { view: MarketView }) {
       <Card
         title="Where each SKU is failing"
         lead="Out-of-stock counts by SKU and governorate."
+        soWhat={heatSoWhat}
+        {...basis}
+        confidence="measured"
         footnote="Cells count listed lines found empty. A dash means no audited outlet in that governorate listed the SKU."
       >
         <Heatmap

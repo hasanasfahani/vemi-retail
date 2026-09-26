@@ -19,12 +19,12 @@
    follow-up and the change together rather than leaving a filtered row
    list under an unfiltered headline. */
 
+import { PageHeader } from "@/components/vemi/PageHeader";
 import { useMemo, useState } from "react";
 import PageShell from "@/components/market/PageShell";
 import PosDrawer from "@/components/market/PosDrawer";
 import FollowUpResult from "@/components/market/FollowUpResult";
 import { Card, EmptyState, InfoTip, StatCard, Toasts, useToasts } from "@/components/market/ui";
-import Badge from "@/components/market/ui/Badge";
 import { useFollowUps } from "@/components/market/useFollowUps";
 import { useFollowUpMonths } from "@/components/market/useFollowUpMonths";
 import { useTargets } from "@/components/market/useTargets";
@@ -111,18 +111,26 @@ function FollowUpCenter({ view }: { view: MarketView }) {
   };
 
   return (
-    <div className="flex flex-col gap-4">
-      <p className="rounded-md border border-line bg-white px-3.5 py-2.5 text-sm leading-snug text-ink-500">
-        Gaps you asked Vemi to check again, and what the next audit found. Requests raised here
-        and from the Performance tabs live in this browser only.{" "}
-        <button type="button" onClick={queue.reset} className="font-semibold text-violet-ink hover:underline">
+    <div className="flex flex-col gap-8">
+      <PageHeader
+        eyebrow={`${contract.country} · ${contract.category} · Follow-up audits`}
+        title={
+          stats.posRequested > 0
+            ? `${stats.posRevisited.toLocaleString()} of ${stats.posRequested.toLocaleString()} requested outlets have been revisited.`
+            : "No follow-up audit is live yet."
+        }
+        description="Gaps you asked Vemi to check again, and whether the fix held. Verification comes only from re-running the rule that raised the request."
+      />
+      <p className="rounded-md bg-canvas px-4 py-3 text-sm text-ink-700">
+        Requests raised here and from the Performance tabs live in this browser only.{" "}
+        <button type="button" onClick={queue.reset} className="font-semibold text-primary-text underline-offset-2 hover:underline">
           Reset the queue
         </button>
         .
       </p>
 
       {/* ---------- summary ---------- */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
         <StatCard label="Active requests" value={stats.active} footnote="Raised and not yet complete" />
         <StatCard label="POS requested" value={stats.posRequested} footnote="Outlets across live requests" />
         <StatCard label="POS scheduled" value={stats.posScheduled} footnote="On a cycle that has started" />
@@ -132,7 +140,7 @@ function FollowUpCenter({ view }: { view: MarketView }) {
 
       {/* ---------- local filters ---------- */}
       <Card padded={false}>
-        <div className="flex flex-wrap items-center gap-2 border-b border-line px-3 py-2.5">
+        <div className="flex flex-wrap items-center gap-3 border-b border-line px-6 py-4">
           <Select label="KPI" value={kpiFilter} onChange={(v) => setKpiFilter(v as IssueKpi | "")}
             options={KPIS.map((k) => ({ value: k, label: KPI_LABEL[k] }))} />
           <Select label="Cycle" value={cycleFilter} onChange={setCycleFilter}
@@ -142,7 +150,7 @@ function FollowUpCenter({ view }: { view: MarketView }) {
           <Select label="Result" value={resultFilter} onChange={(v) => setResultFilter(v as RevisitResult | "")}
             options={RESULTS.map((r) => ({ value: r, label: RESULT_LABEL[r] }))} />
           <span className="ml-auto flex items-center gap-2">
-            <span className="mono text-xs text-ink-400">
+            <span className="font-mono text-xs text-ink-500">
               {shown.length} of {rows.length} requests
             </span>
             <InfoTip label="How these figures are measured">
@@ -171,7 +179,7 @@ function FollowUpCenter({ view }: { view: MarketView }) {
               <thead>
                 <tr className="border-b border-line">
                   {["", "KPI / case", "Scope", "Baseline", "Target", "Follow-up", "Status", "Revisit result", ""].map((h, i) => (
-                    <th key={i} scope="col" className="px-3 py-2.5 text-left uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
+                    <th key={i} scope="col" className="whitespace-nowrap px-3 py-2.5 text-left font-mono text-xs font-medium uppercase tracking-[0.1em] text-ink-500">
                       {h}
                     </th>
                   ))}
@@ -294,28 +302,30 @@ function RequestRows({
           <span className="text-ink-700">{cycleLabel(row.request.cycle)}</span>
         </td>
         <td className="px-3 py-2.5 align-top">
-          <Badge
-            band={
-              row.status === "completed" ? "strong"
-                : row.status === "cancelled" ? "average"
-                : row.status === "in-progress" ? "attention" : "average"
-            }
-            label={status.label}
-            size="sm"
-          />
+          {/* A request's status is a stage, not a health band: neutral
+              mono tags, filled only once the cycle is complete. */}
+          <span
+            className={`inline-flex rounded-full px-2.5 py-1 font-mono text-xs font-medium uppercase tracking-[0.08em] ${
+              row.status === "completed"
+                ? "bg-primary-tint text-primary-text"
+                : row.status === "cancelled"
+                  ? "bg-canvas text-ink-500"
+                  : "border border-line-strong text-ink-900"
+            }`}
+          >
+            {status.label}
+          </span>
         </td>
         <td className="px-3 py-2.5 align-top">
           <FollowUpResult cohort={row.cohort} result={row.result} preliminary={isPreliminary(row)} />
         </td>
         <td className="px-3 py-2.5 align-top">
           <div className="flex items-center gap-1.5">
-            <button type="button" onClick={onShare}
-              className="rounded-sm border border-line-strong px-1.5 py-1 text-xs font-semibold text-ink-600 transition-colors hover:border-ink-400">
+            <button type="button" onClick={onShare} className="vm-btn vm-btn--secondary vm-btn--sm">
               Share
             </button>
             {canCancel(row.status, row.cohort.matched.length) && (
-              <button type="button" onClick={() => setAsking((v) => !v)}
-                className="rounded-sm border border-line-strong px-1.5 py-1 text-xs font-semibold text-ink-600 transition-colors hover:border-ink-400">
+              <button type="button" onClick={() => setAsking((v) => !v)} className="vm-btn vm-btn--text vm-btn--sm">
                 Cancel
               </button>
             )}
@@ -325,7 +335,7 @@ function RequestRows({
               {CANCEL_REASONS.map((reason) => (
                 <button key={reason} type="button"
                   onClick={() => { onCancel(reason); setAsking(false); }}
-                  className="rounded-sm border border-line px-1.5 py-1 text-left text-xs text-ink-700 transition-colors hover:border-ink-400">
+                  className="min-h-8 rounded-sm border border-line px-2 py-1 text-left text-sm text-ink-900 transition-colors hover:bg-canvas">
                   {reason}
                 </button>
               ))}
@@ -449,13 +459,13 @@ function Select({
   options: { value: string; label: string }[];
 }) {
   return (
-    <label className="flex items-center gap-1.5">
-      <span className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">{label}</span>
+    <label className="flex items-center gap-2">
+      <span className="vm-label">{label}</span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`rounded-md border bg-white px-2 py-1 text-xs outline-none transition-colors ${
-          value ? "border-primary-tint bg-primary-tint font-semibold text-violet-ink" : "border-line-strong text-ink-700 hover:border-ink-400"
+        className={`h-9 rounded-md border bg-white px-2.5 text-sm outline-none transition-colors focus:border-primary ${
+          value ? "border-primary-tint bg-primary-tint font-semibold text-primary-text" : "border-line-strong text-ink-900 hover:bg-canvas"
         }`}
       >
         <option value="">All</option>

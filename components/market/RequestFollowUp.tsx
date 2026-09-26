@@ -112,7 +112,7 @@ export default function RequestFollowUp({
         type="button"
         onClick={() => setOpen(true)}
         disabled={issues.length === 0}
-        className="inline-flex items-center gap-1.5 rounded-md bg-violet px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-violet-ink disabled:cursor-not-allowed disabled:opacity-45"
+        className="vm-btn vm-btn--primary"
       >
         <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
           <path d="M2.8 8a5.2 5.2 0 1 0 1.7-3.9M4 2.5V5h2.5" />
@@ -137,7 +137,7 @@ export default function RequestFollowUp({
               type="button"
               onClick={confirm}
               disabled={selected.length === 0 || !cycle}
-              className="rounded-md bg-violet px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-violet-ink disabled:cursor-not-allowed disabled:opacity-45"
+              className="vm-btn vm-btn--primary vm-btn--sm"
             >
               Confirm follow-up audit
             </button>

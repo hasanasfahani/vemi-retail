@@ -12,6 +12,9 @@
    downloads the report's real numbers. Share is a toast, because
    there is nobody to share with. */
 
+import { Logo } from "@/components/vemi/Logo";
+import { SignalField } from "@/components/vemi/SignalField";
+import { asOf, vsPrior } from "@/lib/market/asOf";
 import { useMemo } from "react";
 import PageShell from "@/components/market/PageShell";
 import CoverageRing from "@/components/market/CoverageRing";
@@ -20,7 +23,6 @@ import { classify } from "@/lib/market/insightModel";
 import MarketMap, { type MapPoint } from "@/components/market/map/MarketMap";
 import MapLegend from "@/components/market/map/legend";
 import { Card, ScoreRing, StatCard, Toasts, useToasts } from "@/components/market/ui";
-import Badge from "@/components/market/ui/Badge";
 import Bar from "@/components/market/ui/Bar";
 import Delta from "@/components/market/ui/Delta";
 import { ChartLegend, StackedBars, brandColor, brandSwatch, SERIES3, threeSeriesRows } from "@/components/market/charts";
@@ -62,6 +64,17 @@ function Reports({ view }: { view: MarketView }) {
     [view]
   );
 
+  /* What the report's two charts found, from the same rows. */
+  const battleRows = threeSeriesRows(s.byGovernorate);
+  const battleWorst = [...battleRows].sort((x, y) => (x.portfolio - x.competitor) - (y.portfolio - y.competitor))[0];
+  const battleSoWhat = battleWorst
+    ? `The widest shelf gap is ${battleWorst.label}: your portfolio ${battleWorst.portfolio}% against ${SERIES3[1].name} ${battleWorst.competitor}%.`
+    : "No facings were measured this cycle.";
+  const govLow = [...report.governorates].sort((x, y) => x.score - y.score)[0];
+  const geoSoWhat = govLow
+    ? `${govLow.label} scores lowest at ${govLow.score}, against a target of ${report.score.target}.`
+    : "No governorate was audited this cycle.";
+
   const exportCsv = () => {
     const blob = new Blob([reportCsv(report)], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -80,46 +93,54 @@ function Reports({ view }: { view: MarketView }) {
   };
 
   return (
-    <div className="flex flex-col gap-5">
-      {/* ---------- masthead ---------- */}
-      <header className="flex flex-wrap items-start justify-between gap-4 rounded-lg border border-line bg-white p-4 shadow-[var(--shadow-card)] sm:p-5">
-        <div className="min-w-0">
-          <p className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
-            Monthly retail execution report
-          </p>
-          <h1 className="mt-1 font-display text-[22px] font-semibold leading-tight tracking-tight text-ink-900">
-            {contract.client} · {report.monthLabel}
-          </h1>
-          <p className="mt-1.5 max-w-[76ch] text-sm leading-relaxed text-ink-500">
-            {headline(report)}
-          </p>
+    <div className="flex flex-col gap-12">
+      {/* ---------- cover ----------
+          The brand's report-cover style (Brand Guide, "Report cover"):
+          a Violet panel, the reversed logo, a mono eyebrow, the title,
+          and a block field thinning in from the corner. On paper the
+          panel drops to white with the colour logo, because browsers do
+          not print backgrounds and white type would vanish. */}
+      <header className="relative isolate overflow-hidden rounded-xl bg-primary p-8 text-white sm:p-10 print:rounded-none print:bg-white print:p-0 print:text-ink-900">
+        <SignalField colorway="violet" fadeFrom="right" cols={16} rows={9} className="absolute inset-y-0 right-0 -z-10 h-full w-[55%] opacity-90 print:hidden" />
+        <div className="flex flex-wrap items-start justify-between gap-6">
+          <span className="print:hidden">
+            <Logo height={26} tone="reversed" title="Vemi" />
+          </span>
+          <span className="hidden print:inline-flex">
+            <Logo height={26} title="Vemi" />
+          </span>
+          <div className="flex flex-wrap items-center gap-3 print:hidden">
+            <button type="button" onClick={exportPdf} className="vm-btn bg-white text-primary-text hover:bg-primary-tint">
+              Export PDF
+            </button>
+            <button
+              type="button"
+              onClick={exportCsv}
+              className="vm-btn border-white/60 bg-transparent text-white hover:bg-white/10"
+            >
+              Export Excel
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                push("Sharing is not wired up in this build — export the file and send it on.", "info")
+              }
+              className="vm-btn vm-btn--text text-white hover:bg-white/10"
+            >
+              Share
+            </button>
+          </div>
         </div>
-
-        <div className="flex flex-wrap items-center gap-2 print:hidden">
-          <button
-            type="button"
-            onClick={exportPdf}
-            className="rounded-md bg-violet px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-violet-ink"
-          >
-            Export PDF
-          </button>
-          <button
-            type="button"
-            onClick={exportCsv}
-            className="rounded-md border border-line-strong bg-white px-3 py-1.5 text-sm font-semibold text-ink-700 transition-colors hover:border-ink-400"
-          >
-            Export Excel
-          </button>
-          <button
-            type="button"
-            onClick={() =>
-              push("Sharing is not wired up in this build — export the file and send it on.", "info")
-            }
-            className="rounded-md border border-line-strong bg-white px-3 py-1.5 text-sm font-semibold text-ink-700 transition-colors hover:border-ink-400"
-          >
-            Share
-          </button>
-        </div>
+        <p className="mt-16 font-mono text-xs font-medium uppercase tracking-[0.12em] text-white/80 print:mt-8 print:text-ink-500">
+          Monthly market report
+        </p>
+        <h1 className="mt-3 max-w-[18ch] text-[44px] font-semibold leading-[52px] tracking-[-0.02em]">
+          {contract.country} {contract.category.toLowerCase()} market monitor
+        </h1>
+        <p className="mt-3 font-mono text-sm text-white/85 print:text-ink-500">
+          {contract.client} · {report.monthLabel}
+        </p>
+        <p className="mt-6 max-w-[64ch] text-lg text-white/90 print:text-ink-900">{headline(report)}</p>
       </header>
 
       {/* ---------- 1 · coverage ---------- */}
@@ -175,7 +196,7 @@ function Reports({ view }: { view: MarketView }) {
 
       {/* ---------- 3 · KPI results ---------- */}
       <Section n={3} title="KPI results">
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
           {report.kpis.map((kpi) => (
             <StatCard
               key={kpi.id}
@@ -186,7 +207,7 @@ function Reports({ view }: { view: MarketView }) {
               band={kpi.band}
               delta={kpi.delta}
               deltaFloor={kpi.floor}
-              deltaLabel="vs last month"
+              deltaLabel={vsPrior(view.month)}
             />
           ))}
         </div>
@@ -194,7 +215,7 @@ function Reports({ view }: { view: MarketView }) {
 
       {/* ---------- 4 · risks ---------- */}
       <Section n={4} title="Biggest risks">
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {report.risks.map((risk) => (
             <InsightCard key={risk.id} insight={classify(risk, view)} />
           ))}
@@ -248,7 +269,7 @@ function Reports({ view }: { view: MarketView }) {
 
       {/* ---------- 6 · competitive summary ---------- */}
       <Section n={6} title="Competitive summary">
-        <div className="grid gap-4 lg:grid-cols-[1fr_1.1fr]">
+        <div className="grid gap-6 lg:grid-cols-[1fr_1.1fr]">
           <Card title="Where each brand stands" padded={false}>
             <ul className="flex flex-col">
               {report.competitive.map((brand) => (
@@ -261,7 +282,11 @@ function Reports({ view }: { view: MarketView }) {
                         aria-hidden
                       />
                       {brand.name}
-                      {brand.isClient && <Badge band="average" label="Your brand" size="sm" />}
+                      {brand.isClient && (
+                        <span className="rounded-full bg-primary-tint px-2 py-0.5 font-mono text-xs font-medium uppercase tracking-[0.08em] text-primary-text">
+                          Your brand
+                        </span>
+                      )}
                     </span>
                     <span className="mono text-sm font-semibold text-ink-900">
                       {brand.share}%
@@ -282,6 +307,10 @@ function Reports({ view }: { view: MarketView }) {
           <Card
             title="Shelf battle by governorate"
             lead="Share of measured facings."
+            soWhat={battleSoWhat}
+            asOf={asOf(view.month)}
+            base={`${view.posCount.toLocaleString()} outlets`}
+            confidence="measured"
             action={
               <ChartLegend items={SERIES3.map((x) => ({ id: x.key, name: x.name, color: x.color }))} />
             }
@@ -299,7 +328,12 @@ function Reports({ view }: { view: MarketView }) {
       {/* ---------- 7 · geographic performance ---------- */}
       <Section n={7} title="Geographic performance">
         <Card
-          footnote="Outlets are placed within their district rather than surveyed to the street."
+          title="Execution score by outlet"
+          soWhat={geoSoWhat}
+          asOf={asOf(view.month)}
+          base={`${view.posCount.toLocaleString()} outlets`}
+          confidence="measured"
+          footnote="Outlets are placed within their district rather than surveyed to the street. Darker needs you sooner."
         >
           <div className="mb-2.5">
             <MapLegend />
@@ -373,12 +407,12 @@ function Section({
 }) {
   return (
     <section>
-      <div className="mb-2.5 flex flex-wrap items-baseline justify-between gap-3">
-        <h2 className="flex items-baseline gap-2 uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
-          <span className="mono text-ink-400">{String(n).padStart(2, "0")}</span>
+      <div className="mb-6 flex flex-wrap items-baseline justify-between gap-3">
+        <h2 className="vm-h2 flex items-baseline gap-3 text-ink-900">
+          <span className="font-mono text-base font-medium text-ink-500">{String(n).padStart(2, "0")}</span>
           {title}
         </h2>
-        {aside && <span className="mono text-xs text-ink-400">{aside}</span>}
+        {aside && <span className="font-mono text-xs text-ink-500">{aside}</span>}
       </div>
       {children}
     </section>

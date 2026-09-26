@@ -7,6 +7,8 @@
    than joining a shared object — two people editing one id would be two
    people disagreeing about one document with no server to arbitrate. */
 
+import { PageHeader } from "@/components/vemi/PageHeader";
+import { contract } from "@/lib/market";
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -50,24 +52,21 @@ function Index() {
   };
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="min-w-0">
-          <h1 className="font-display text-lg font-semibold tracking-tight text-ink-900">
-            Reports you built
-          </h1>
-          <p className="mt-0.5 text-sm text-ink-500">
-            Your own pages, built from the blocks the portal already computes.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={start}
-          className="shrink-0 rounded-md bg-violet px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-violet-ink"
-        >
-          New report
-        </button>
-      </div>
+    <div className="flex flex-col gap-8">
+      <PageHeader
+        eyebrow={`${contract.country} · ${contract.category} · Custom reports`}
+        title={
+          ready && recent.length > 0
+            ? `You have built ${recent.length} ${recent.length === 1 ? "report" : "reports"}.`
+            : "Build a report around the question you need answered."
+        }
+        description="Your own pages, built from the blocks the portal already computes."
+        actions={
+          <button type="button" onClick={start} className="vm-btn vm-btn--primary shrink-0">
+            New report
+          </button>
+        }
+      />
 
       {!ready ? (
         <Card>
@@ -79,26 +78,22 @@ function Index() {
             title="No reports yet"
             lead="A report is a page you assemble: pick the blocks that answer your question, give any of them a scope of its own, and the figures recompute from the same audit rows every other page reads."
           />
-          <button
-            type="button"
-            onClick={start}
-            className="mt-3 rounded-md bg-violet px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-violet-ink"
-          >
-            Build one
-          </button>
+          <div className="flex justify-center pb-6">
+            <button type="button" onClick={start} className="vm-btn vm-btn--secondary">
+              Build one
+            </button>
+          </div>
         </Card>
       ) : (
-        <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <ul className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
           {recent.map((report) => (
             <li key={report.id}>
               <Link
                 href={`/portal/reports/custom/${report.id}`}
-                className="flex h-full flex-col rounded-lg border border-line bg-white p-3.5 shadow-[var(--shadow-card)] transition-colors hover:border-violet"
+                className="flex h-full flex-col rounded-lg border border-line bg-white p-6 transition-colors hover:border-primary"
               >
-                <span className="truncate font-display text-sm font-semibold tracking-tight text-ink-900">
-                  {report.name}
-                </span>
-                <span className="mono mt-1 text-xs text-ink-400">
+                <span className="truncate text-lg font-semibold text-ink-900">{report.name}</span>
+                <span className="mt-1 font-mono text-xs text-ink-500">
                   {report.blocks.length === 1 ? "1 block" : `${report.blocks.length} blocks`}
                   {" · "}
                   edited {monthLabel(report.updatedAt.slice(0, 7))}
@@ -109,7 +104,7 @@ function Index() {
         </ul>
       )}
 
-      <p className="text-xs leading-snug text-ink-400">
+      <p className="max-w-[72ch] text-sm text-ink-500">
         Reports live in this browser until there is a server to keep them, so a colleague on another
         machine will not see this list. Share one with its link instead — it carries the whole
         definition and builds them their own copy.

@@ -16,6 +16,8 @@
    Nothing here implies the two are interchangeable, and the legend
    says which is which on every chart. */
 
+import { PageHeader } from "@/components/vemi/PageHeader";
+import { asOf, monthShort } from "@/lib/market/asOf";
 import { useMemo, useState } from "react";
 import PageShell from "@/components/market/PageShell";
 import { useTargets } from "@/components/market/useTargets";
@@ -164,19 +166,39 @@ function Trends({ view }: { view: MarketView }) {
     },
   ];
 
+  /* ---------- the page's words ---------- */
+  const r1 = (n: number) => Math.round(n * 10) / 10;
+  const since = `vs ${monthShort(trends.months[0].id)}`;
+  const marketMove = r1((last?.[measure] ?? 0) - (first?.[measure] ?? 0));
+  const coreMove = r1((coreLast?.[measure] ?? 0) - (coreFirst?.[measure] ?? 0));
+  const moved = (n: number) => (n === 0 ? "held flat" : `${n > 0 ? "rose" : "fell"} ${Math.abs(n)}${active.unit === "%" ? " pts" : ""}`);
+  const headline = `${active.label} ${moved(marketMove)} across the half; on the same ${contract.corePanel} doors it ${moved(coreMove)}.`;
+  const shares = threeSeriesRows(brandSeries);
+  const shareFirst = shares[0];
+  const shareLast = shares[shares.length - 1];
+  const shareMove = shareFirst && shareLast ? r1(shareLast.portfolio - shareFirst.portfolio) : 0;
+  const shareSoWhat = shareLast
+    ? `Your portfolio holds ${shareLast.portfolio}% of the shelf, ${shareMove === 0 ? "unchanged" : `${shareMove > 0 ? "up" : "down"} ${Math.abs(shareMove)} pts`} ${since}; ${SERIES3[1].name} holds ${shareLast.competitor}%.`
+    : "No shares were measured across the half.";
+
   const improved = repeatedRows.filter((r) => r.delta > 0).length;
   const worsened = repeatedRows.filter((r) => r.delta < 0).length;
 
   return (
-    <div className="flex flex-col gap-5">
-      <p className="rounded-md border border-line bg-white px-3.5 py-2.5 text-sm leading-relaxed text-ink-500">
+    <div className="flex flex-col gap-8">
+      <PageHeader
+        eyebrow={`${contract.country} · ${contract.category} · ${monthShort(trends.months[0].id)} to ${monthShort(trends.months[trends.months.length - 1].id)}`}
+        title={headline}
+        description="Six cycles of the same measures, with the core panel beside the whole market so a moving sample is never mistaken for a moving market."
+      />
+      <p className="rounded-md bg-canvas px-4 py-3 text-sm text-ink-700">
         Vemi audits a rotating panel, so a month-to-month movement can be the market changing or
         the sample changing. Every chart below draws both: the whole audited market for the level,
         and the {contract.corePanel}-outlet core panel — the same doors every month — for movement.
         Where the two diverge, the sample is doing some of the talking.
       </p>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label={`${active.label}, all audited`}
           value={last?.[measure] ?? 0}
@@ -184,7 +206,7 @@ function Trends({ view }: { view: MarketView }) {
           target={active.target}
           delta={Math.round(((last?.[measure] ?? 0) - (first?.[measure] ?? 0)) * 10) / 10}
           deltaFloor={1.81}
-          deltaLabel="across the half"
+          deltaLabel={since}
         />
         <StatCard
           label={`${active.label}, core panel`}
@@ -193,7 +215,7 @@ function Trends({ view }: { view: MarketView }) {
           target={active.target}
           delta={Math.round(((coreLast?.[measure] ?? 0) - (coreFirst?.[measure] ?? 0)) * 10) / 10}
           deltaFloor={2.66}
-          deltaLabel="across the half"
+          deltaLabel={since}
         />
         <StatCard
           label="Outlets audited"
@@ -210,6 +232,10 @@ function Trends({ view }: { view: MarketView }) {
       <Card
         title={active.label}
         lead="Six cycles, both populations."
+        soWhat={headline}
+        asOf={asOf(view.month)}
+        base={`${last?.outlets ?? 0} outlets · ${contract.corePanel} core`}
+        confidence="measured"
         action={
           <ChartLegend
             items={[
@@ -235,12 +261,18 @@ function Trends({ view }: { view: MarketView }) {
           ]}
           unit={active.unit}
           height={280}
+          target={active.target}
+          label={`${active.label} over six cycles, all audited and core panel, against a ${active.target}${active.unit} target`}
         />
       </Card>
 
       <Card
         title="Brand share across the half"
         lead={`${clientBrand.name} against the rest of the category, all audited outlets.`}
+        soWhat={shareSoWhat}
+        asOf={asOf(view.month)}
+        base="all audited outlets"
+        confidence="measured"
         action={
           <ChartLegend items={SERIES3.map((x) => ({ id: x.key, name: x.name, color: x.color }))} />
         }
@@ -257,7 +289,7 @@ function Trends({ view }: { view: MarketView }) {
       {/* ---------- repeated outlets ---------- */}
       <section>
         <div className="mb-2.5 flex flex-wrap items-baseline justify-between gap-3">
-          <h2 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
+          <h2 className="vm-h2 mb-4 text-ink-900">
             Repeated outlets
           </h2>
           <span className="mono text-xs text-ink-400">

@@ -11,6 +11,10 @@
    Findings that only restate a wider one are not here — they are the
    breakdown behind it. The count on each card says how many. */
 
+import { PageHeader } from "@/components/vemi/PageHeader";
+import SectionHead from "@/components/market/SectionHead";
+import { monthShort } from "@/lib/market/asOf";
+import { contract, governorateName } from "@/lib/market";
 import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import PageShell from "@/components/market/PageShell";
@@ -81,9 +85,27 @@ function Insights({ view }: { view: MarketView }) {
     [report]
   );
 
+  const scopeName =
+    view.filters.governorates.length === 1 ? governorateName(view.filters.governorates[0]) : contract.country;
+  const top = report.cards[0];
+
   return (
-    <div className="flex flex-col gap-5">
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="flex flex-col gap-12">
+      <div className="flex flex-col gap-6">
+      <PageHeader
+        eyebrow={`${scopeName} · ${contract.category} · ${monthShort(view.month)}`}
+        title={
+          report.cards.length === 0
+            ? `No finding clears its threshold in ${scopeName} this cycle.`
+            : `${report.cards.length} findings this cycle, ${high} of them high priority.`
+        }
+        description={
+          top
+            ? `Ranked by size, reach and evidence. The largest finding: ${top.headline.replace(/\.$/, "")}.`
+            : "Every rule states a condition and a size it must reach before it speaks."
+        }
+      />
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label="Findings"
           value={report.cards.length}
@@ -110,18 +132,12 @@ function Insights({ view }: { view: MarketView }) {
           footnote="Single-outlet findings folded into the market finding they belong to"
         />
       </div>
+      </div>
 
       <section>
-        <div className="mb-2.5 flex flex-wrap items-baseline justify-between gap-3">
-          <h2 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
-            What the audit found
-          </h2>
-          <span className="mono text-xs text-ink-400">
-            Ranked by size, commercial reach and strength of evidence
-          </span>
-        </div>
+        <SectionHead title="What the audit found" lead="Ranked by size, commercial reach and strength of evidence." />
 
-        <div className="mb-3">
+        <div className="mb-6">
           <Tabs tabs={tabs} active={outcome} onChange={(id) => setOutcome(id as Outcome | "all")} />
         </div>
 
@@ -133,7 +149,7 @@ function Insights({ view }: { view: MarketView }) {
             />
           </Card>
         ) : (
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {shown.map((insight) => (
               <InsightCard
                 key={insight.id}

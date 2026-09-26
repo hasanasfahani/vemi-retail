@@ -1,5 +1,6 @@
 "use client";
 
+import { asOf } from "@/lib/market/asOf";
 import { useMemo } from "react";
 
 /* PRICING — is the brand sold at the price it is supposed to be.
@@ -18,7 +19,7 @@ import RequestFollowUp from "@/components/market/RequestFollowUp";
 import { DotPlot, GapBars, RankedBars } from "@/components/market/charts";
 import Badge from "@/components/market/ui/Badge";
 import { pricing } from "@/lib/market/performance";
-import { governorateName, contract } from "@/lib/market";
+import { governorateName, contract , clientBrand } from "@/lib/market";
 import { useTargets } from "@/components/market/useTargets";
 import { issuesFor, scopeOf } from "@/lib/market/issues";
 import type { MarketView } from "@/lib/market/filters";
@@ -105,8 +106,26 @@ export default function PricingTab({ view }: { view: MarketView }) {
     { id: "sku", label: "SKU", value: (r) => r.sku?.name ?? r.skuId },
   ];
 
+  /* ---------- what each chart found ---------- */
+  const basis = { asOf: asOf(view.month), base: `${p.readings.toLocaleString()} price readings` };
+  const clientSkus = p.bySku.filter((row) => row.brandId === clientBrand.id);
+  const skuWorst = [...clientSkus].sort((x, y) => x.compliance - y.compliance)[0];
+  const skuSoWhat = skuWorst
+    ? `${skuWorst.name} drifts furthest from list: ${skuWorst.compliance}% of readings within 5% of its ${skuWorst.rrp.toLocaleString()} ${contract.currency} RRP.`
+    : "No client price was read in this view.";
+  const distTotal = p.distribution.reduce((t, b) => t + b.value, 0) || 1;
+  const atList = p.distribution.find((b) => b.id === "at-list");
+  const distSoWhat = atList
+    ? `${Math.round((atList.value / distTotal) * 1000) / 10}% of client readings sit at list; the rest is spread across the bands either side.`
+    : "No client price was read in this view.";
+  const govLow = p.byGovernorate[p.byGovernorate.length - 1];
+  const govSoWhat = govLow
+    ? `${govLow.label} has the loosest pricing: ${govLow.compliance}% of readings within 5% of list.`
+    : "No governorate has client price readings in this view.";
+  const outlierSoWhat = `${p.outliers.length.toLocaleString()} readings sit furthest from list; the worst is first.`;
+
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6">
       <KpiGapBar
         label={KPI_NAME.price}
         value={p.compliance}
@@ -123,7 +142,7 @@ export default function PricingTab({ view }: { view: MarketView }) {
         }
       />
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label="Readings taken"
           value={p.readings}
@@ -224,10 +243,13 @@ export default function PricingTab({ view }: { view: MarketView }) {
         />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2">
         <Card
           title="Average price by SKU"
           lead="How far each line sits from its own recommended price."
+          soWhat={skuSoWhat}
+          {...basis}
+          confidence="measured"
           footnote="Every SKU has a different list price, so absolute dinars cannot be compared down a column. The distance from list can: each bar runs from that line's own RRP, which makes the chart read the same whether a SKU sells for 500 or 5,000."
         >
           <GapBars
@@ -253,10 +275,13 @@ export default function PricingTab({ view }: { view: MarketView }) {
           />
         </Card>
 
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-6">
           <Card
             title="How far from list"
             lead="Client readings, banded by distance from RRP."
+            soWhat={distSoWhat}
+            {...basis}
+            confidence="measured"
             footnote="A tight peak on list is discipline; a long tail on either side is a conversation with the retailer."
           >
             <RankedBars
@@ -269,7 +294,7 @@ export default function PricingTab({ view }: { view: MarketView }) {
             />
           </Card>
 
-          <Card title="Compliance by governorate" lead="Share of client readings within 5% of list.">
+          <Card title="Compliance by governorate" lead="Share of client readings within 5% of list." soWhat={govSoWhat} {...basis} confidence="measured">
             <DotPlot
               rows={p.byGovernorate.map((row) => ({
                 id: row.id,
@@ -297,6 +322,9 @@ export default function PricingTab({ view }: { view: MarketView }) {
 
       <Card
         title="Price outliers"
+        soWhat={outlierSoWhat}
+        {...basis}
+        confidence="measured"
         lead="The readings furthest from list, worst first. Filter by city or SKU to find the ones that are yours to fix."
         padded={false}
       >

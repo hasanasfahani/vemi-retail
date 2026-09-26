@@ -1,5 +1,7 @@
 "use client";
 
+import SectionHead from "@/components/market/SectionHead";
+import { asOf } from "@/lib/market/asOf";
 import { SegmentedControl } from "@/components/vemi/SegmentedControl";
 import { useMemo, useState } from "react";
 
@@ -75,6 +77,32 @@ export default function ShelfTab({ view }: { view: MarketView }) {
 
   const eye = s.positions.find((p) => p.id === "eye");
 
+  /* ---------- what each chart found ---------- */
+  const basis = { asOf: asOf(view.month), base: `${view.posCount.toLocaleString()} outlets` };
+  const r1 = (n: number) => Math.round(n * 10) / 10;
+  const govRows = threeSeriesRows(s.byGovernorate);
+  const govWorst = [...govRows].sort((x, y) => (x.portfolio - x.competitor) - (y.portfolio - y.competitor))[0];
+  const govSoWhat = govWorst
+    ? govWorst.portfolio < govWorst.competitor
+      ? `The portfolio trails ${keyCompetitor.name} most in ${govWorst.label}: ${govWorst.portfolio}% of the fixture against ${govWorst.competitor}%.`
+      : `The portfolio holds more shelf than ${keyCompetitor.name} in every governorate; the closest is ${govWorst.label} (${govWorst.portfolio}% against ${govWorst.competitor}%).`
+    : "No facings were measured in this view.";
+  const chRows = threeSeriesRows(s.byChannel);
+  const chWorst = [...chRows].sort((x, y) => (x.portfolio - x.competitor) - (y.portfolio - y.competitor))[0];
+  const chSoWhat = chWorst
+    ? `${chWorst.label} is where the portfolio is weakest against ${keyCompetitor.name}: ${chWorst.portfolio}% against ${chWorst.competitor}%.`
+    : "No facings were measured in this view.";
+  const splitTotal = slices.reduce((t, x) => t + x.value, 0) || 1;
+  const splitSoWhat = `${clientBrand.name} holds ${s.clientShare}% of every audited facing, ${
+    s.clientShare >= par ? `${r1(s.clientShare - par)} pts above` : `${r1(par - s.clientShare)} pts under`
+  } the ${par}% par; ${slices[0]?.name ?? "the portfolio"} as a whole holds ${r1(((slices[0]?.value ?? 0) / splitTotal) * 100)}%.`;
+  const lowPos = [...s.positions].sort((x, y) => x.clientShare - y.clientShare)[0];
+  const posSoWhat = eye
+    ? `${clientBrand.name} holds ${eye.clientShare}% at eye level${
+        lowPos && lowPos.id !== "eye" ? ` and is thinnest on the ${lowPos.label.toLowerCase()} (${lowPos.clientShare}%)` : ""
+      }.`
+    : "No shelf positions were recorded in this view.";
+
   const cardFor = (row: { posId: string; share: number }, caption: string) => {
     const outlet = view.outlets.find((p) => p.id === row.posId);
     if (!outlet) return null;
@@ -91,7 +119,7 @@ export default function ShelfTab({ view }: { view: MarketView }) {
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6">
       <KpiGapBar
         label="Share of shelf"
         value={s.clientShare}
@@ -108,7 +136,7 @@ export default function ShelfTab({ view }: { view: MarketView }) {
         }
       />
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {s.byBrand.slice(0, 4).map((brand) => (
           <StatCard
             key={brand.id}
@@ -152,10 +180,15 @@ export default function ShelfTab({ view }: { view: MarketView }) {
         ))}
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+      <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
         <Card
           title="Shelf battle by governorate"
           lead="Share of measured facings, 100% stacked."
+          soWhat={govSoWhat}
+          {...basis}
+          confidence="measured"
+          footnote={`Each bar is one governorate's measured fixture. Violet is your portfolio, Ink is ${keyCompetitor.name}, Slate is every other brand. Split portfolio breaks the violet into its brands.`}
+          table={{ columns: ["Governorate", "Your portfolio", keyCompetitor.name, "Others"], numeric: [false, true, true, true], rows: govRows.map((r) => [r.label, `${r.portfolio}%`, `${r.competitor}%`, `${r.others}%`]) }}
           action={
             <div className="flex flex-col items-end gap-3">
               {splitControl}
@@ -166,7 +199,7 @@ export default function ShelfTab({ view }: { view: MarketView }) {
           <StackedBars data={threeSeriesRows(s.byGovernorate)} series={stack} max={100} height={250} />
         </Card>
 
-        <Card title="Shelf split this month" lead="Every audited facing, by brand.">
+        <Card title="Shelf split this month" lead="Every audited facing, by brand." soWhat={splitSoWhat} {...basis} confidence="measured">
           <ShareDonut
             slices={slices}
             palette={split ? "brand" : "category"}
@@ -176,14 +209,17 @@ export default function ShelfTab({ view }: { view: MarketView }) {
         </Card>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card title="Shelf battle by channel" lead="The same fixture question, by retail format.">
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card title="Shelf battle by channel" lead="The same fixture question, by retail format." soWhat={chSoWhat} {...basis} confidence="measured" footnote="Each bar is one retail format's measured fixture, in the same three series as above.">
           <StackedBars data={threeSeriesRows(s.byChannel)} series={stack} max={100} height={230} />
         </Card>
 
         <Card
           title="Position on the shelf"
           lead={`${clientBrand.name}'s share of facings at each height.`}
+          soWhat={posSoWhat}
+          {...basis}
+          confidence="measured"
           footnote="Eye level is the space worth negotiating for. Holding par overall while losing it is a different problem from losing share outright."
         >
           <RankedBars
@@ -195,7 +231,7 @@ export default function ShelfTab({ view }: { view: MarketView }) {
               meta: `${p.total.toLocaleString()} facings measured at this height`,
               trailing:
                 eye && p.id !== "eye" ? (
-                  <span className="mono shrink-0 text-xs text-ink-400">
+                  <span className="shrink-0 font-mono text-xs text-ink-500">
                     {p.clientShare > eye.clientShare ? "+" : ""}
                     {Math.round((p.clientShare - eye.clientShare) * 10) / 10}pt vs eye
                   </span>
@@ -209,19 +245,15 @@ export default function ShelfTab({ view }: { view: MarketView }) {
       </div>
 
       <section>
-        <h2 className="mb-2 uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
-          Best executing shelves
-        </h2>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <SectionHead title="Best executing shelves" lead="Drawn from each outlet's own audit rows, so the picture and the numbers cannot disagree." />
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {s.best.map((row) => cardFor(row, "Best in class"))}
         </div>
       </section>
 
       <section>
-        <h2 className="mb-2 uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
-          Weakest executing shelves
-        </h2>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <SectionHead title="Weakest executing shelves" lead="The shelves to visit first, with what is missing marked on them." />
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {s.worst.map((row) => cardFor(row, "Needs attention"))}
         </div>
       </section>

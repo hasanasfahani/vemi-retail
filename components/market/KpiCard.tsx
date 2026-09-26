@@ -38,6 +38,9 @@ export default function KpiCard({
   spread,
   isScore,
   watch,
+  size = "compact",
+  deltaLabel,
+  basis,
 }: {
   label: string;
   value: number;
@@ -61,6 +64,13 @@ export default function KpiCard({
      figure can be pinned with an honest baseline. Omitted where a tile
      shows something the watchlist cannot recompute. */
   watch?: { kpi: WatchRecord["kpi"]; month: string; scope?: WatchScope };
+  /* `hero`: the first KPI row of a page (56px figure). `compact`: a
+     secondary grid (36px). Both are on the brand scale. */
+  size?: "hero" | "compact";
+  /* The named comparison window, e.g. "vs Aug 2026" (plan D5). */
+  deltaLabel?: string;
+  /* The basis line: "As of 21 Sep 2026 · 742 outlets". */
+  basis?: string;
 }) {
   const resolved = band ?? rateBand(value, target);
   const gap = Math.round((target - value) * 10) / 10;
@@ -76,30 +86,23 @@ export default function KpiCard({
   return (
     /* The whole tile is a link, but the explanation is a button, and a
        button inside an anchor is neither valid nor operable. So the
-       link is an overlay underneath the content and the info control
-       sits above it. */
-    <article className="group relative flex min-w-0 flex-col rounded-lg border border-line bg-white p-3.5 shadow-[var(--shadow-card)] transition-colors hover:border-ink-400 focus-within:border-violet">
+       link is an overlay underneath the content and the controls sit
+       above it. */
+    <article
+      className={`vm-kpi ${size === "compact" ? "vm-kpi--compact" : ""} group relative transition-colors hover:border-line-strong focus-within:border-primary`}
+    >
       <Link
         href={href}
         aria-label={`Open ${label} in Performance`}
         className="absolute inset-0 z-0 rounded-lg outline-none"
       />
 
-      {/* The label owns its own line. Sharing a row with the status
-          pill, the pill won and "Shelf share" was rendered in 16px of
-          the 78px it needs — every one of the six tiles was clipped at
-          1280px. The status moved down beside the movement figure,
-          where it has room and reads as part of the same judgement. */}
-      <div className="relative z-10 flex items-center justify-between gap-2">
-        <span className="block truncate uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
-          {label}
-        </span>
-        {/* Both controls live in the header row, above the overlay
-            link, so they sit at the same height on every tile whatever
-            the body below them turns out to be. */}
-        <span className="relative z-10 flex shrink-0 items-center gap-0.5">
-          {/* The label keeps its own casing — lowercasing turned "POSM"
-              into "posm" for a screen reader. */}
+      {/* The label owns its own line; the status moved down beside the
+          movement figure, where it has room (it clipped every tile at
+          1280px when it shared this row). */}
+      <div className="vm-kpi__top relative z-10">
+        <span className="vm-label min-w-0 truncate">{label}</span>
+        <span className="relative z-10 flex shrink-0 items-center gap-1">
           {explain && <InfoTip label={`How ${label} is measured`}>{explain}</InfoTip>}
           {watch && (
             <WatchEye
@@ -114,41 +117,38 @@ export default function KpiCard({
         </span>
       </div>
 
-      <div className="pointer-events-none mt-2 flex items-end justify-between gap-2">
-        <span className="font-display text-[28px] font-semibold leading-none tracking-tight text-ink-900">
+      <div className="pointer-events-none flex items-end justify-between gap-3">
+        <span className="vm-kpi__value">
           {value}
-          {unit && <span className="ml-0.5 text-[15px] font-semibold text-ink-500">{unit}</span>}
+          {unit && <span className="vm-kpi__unit">{unit}</span>}
         </span>
-        <TargetSpark points={trend} target={target} />
+        <TargetSpark points={trend} target={target} width={size === "hero" ? 140 : 112} height={size === "hero" ? 52 : 40} />
       </div>
 
-      {/* value against target, drawn */}
+      {/* value against target, drawn: the track runs past the target so
+          a met goal does not read as an empty bar */}
       <div
-        className="relative mt-3 h-1.5 overflow-hidden rounded-full bg-canvas"
+        className="vm-gauge mt-1"
         role="img"
         aria-label={`${value}${unit} against a target of ${target}${unit}`}
       >
-        <div className="h-full rounded-full" style={{ width: `${fill}%`, background: "var(--vm-primary)" }} />
-        <span
-          className="absolute top-[-3px] h-[12px] w-[2px] rounded-full bg-ink-900"
-          style={{ left: `${mark}%` }}
-          aria-hidden
-        />
+        <div className="vm-gauge__fill" style={{ width: `${fill}%` }} />
+        <span className="vm-gauge__target" style={{ insetInlineStart: `${mark}%` }} />
       </div>
 
-      <div className="mt-2 flex flex-wrap items-baseline justify-between gap-x-2 gap-y-1">
-        <span className="mono text-xs font-semibold" style={{ color: met ? "var(--vm-primary-text)" : "var(--vm-text)" }}>
+      <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-1 text-sm">
+        <span className={`font-medium ${met ? "text-primary-text" : "text-ink-900"}`}>
           {met ? `${Math.abs(gap)}${unit} above target` : `${gap}${unit} to target`}
         </span>
-        <span className="mono text-xs text-ink-400">
+        <span className="font-mono text-xs text-ink-500">
           target {target}
           {unit}
         </span>
       </div>
 
-      <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
-        {/* Above the card's overlay link, so the chip can be hovered
-            and focused without navigating. */}
+      <div className="vm-kpi__meta">
+        {/* Above the overlay link, so the chip can be hovered and
+            focused without navigating. */}
         <span className="relative z-10">
           <StatusChip
             band={resolved}
@@ -160,17 +160,15 @@ export default function KpiCard({
                   ? distributionDetail(spread, target, unit)
                   : rateBandDetail(value, target, unit)
             }
-            title={
-              spread && spread.length && !isScore
-                ? `${label}: where the market sits`
-                : undefined
-            }
+            title={spread && spread.length && !isScore ? `${label}: where the market sits` : undefined}
           />
         </span>
         <span className="pointer-events-none">
-          <Delta value={delta} floor={deltaFloor} label="vs last month" />
+          <Delta value={delta} floor={deltaFloor} label={deltaLabel ?? "vs the prior cycle"} />
         </span>
       </div>
+
+      {basis && <div className="vm-kpi__foot">{basis}</div>}
     </article>
   );
 }

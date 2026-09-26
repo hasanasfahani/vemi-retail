@@ -34,7 +34,7 @@ export default function ShelfCard({
 
   return (
     <>
-      <figure className="flex min-w-0 flex-col overflow-hidden rounded-lg border border-line bg-white shadow-[var(--shadow-card)]">
+      <figure className="flex min-w-0 flex-col overflow-hidden rounded-lg border border-line bg-white">
         <button
           type="button"
           onClick={() => setOpen(true)}
@@ -77,7 +77,7 @@ export default function ShelfCard({
             role="dialog"
             aria-modal="true"
             aria-label={`Shelf view, ${outlet.name}`}
-            className="relative w-full max-w-[820px] rounded-lg border border-line bg-white p-4 shadow-[var(--shadow-pop)]"
+            className="relative w-full max-w-[820px] rounded-lg border border-line bg-white p-6 shadow-[var(--vm-shadow-overlay)]"
           >
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
               <div className="min-w-0">

@@ -10,10 +10,11 @@
    letting a target silence a finding would mean a problem could be
    made to disappear by shifting a goalpost. */
 
+import { PageHeader } from "@/components/vemi/PageHeader";
+import { ConfidenceBadge } from "@/components/vemi/ConfidenceBadge";
 import { useState } from "react";
 import PageShell from "@/components/market/PageShell";
 import { Card, DataTable, StatCard, Toasts, useToasts, type Column } from "@/components/market/ui";
-import Badge from "@/components/market/ui/Badge";
 import Bar from "@/components/market/ui/Bar";
 import { useTargets } from "@/components/market/useTargets";
 import { brandSwatch } from "@/components/market/charts";
@@ -74,12 +75,27 @@ function Setup({ view }: { view: MarketView }) {
     {
       id: "monitored",
       header: "Monitored",
-      render: () => <Badge band="strong" label="Active" size="sm" />,
+      render: () => (
+        <span className="rounded-full bg-primary-tint px-2.5 py-1 font-mono text-xs font-medium uppercase tracking-[0.08em] text-primary-text">
+          Active
+        </span>
+      ),
     },
   ];
 
+  const changedCount = TARGET_META.filter((m) => targets[m.id] !== DEFAULT_TARGETS[m.id]).length;
+
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-8">
+      <PageHeader
+        eyebrow={`${contract.country} · ${contract.category} · Audit setup`}
+        title={
+          changedCount > 0
+            ? `${changedCount} KPI ${changedCount === 1 ? "target has" : "targets have"} been moved from the contracted values.`
+            : `${contract.contractedPos.toLocaleString()} outlets a month, measured against the contracted targets.`
+        }
+        description="What every audit cycle covers, and the targets each page of the portal is judged against."
+      />
       {/* ---------- subscription ---------- */}
       <Card
         title={`${monthLabel(contract.currentMonth)} audit`}
@@ -95,10 +111,8 @@ function Setup({ view }: { view: MarketView }) {
             { k: "Currency", v: contract.currency },
           ].map((item) => (
             <div key={item.k}>
-              <dt className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
-                {item.k}
-              </dt>
-              <dd className="mt-0.5 text-sm font-semibold text-ink-900">{item.v}</dd>
+              <dt className="vm-label">{item.k}</dt>
+              <dd className="mt-1 text-base font-semibold text-ink-900">{item.v}</dd>
             </div>
           ))}
         </dl>
@@ -117,7 +131,7 @@ function Setup({ view }: { view: MarketView }) {
                 setDirty(false);
                 push("Targets restored to the contracted values.");
               }}
-              className="rounded-md border border-line-strong bg-white px-2.5 py-1.5 text-xs font-semibold text-ink-700 transition-colors hover:border-ink-400"
+              className="vm-btn vm-btn--secondary vm-btn--sm"
             >
               Restore contracted targets
             </button>
@@ -130,11 +144,11 @@ function Setup({ view }: { view: MarketView }) {
             const value = targets[meta.id];
             const changed = value !== DEFAULT_TARGETS[meta.id];
             return (
-              <li key={meta.id} className="border-b border-line py-3 last:border-0">
+              <li key={meta.id} className="border-b border-line py-4 last:border-0">
                 <div className="flex flex-wrap items-center gap-3">
                   <div className="min-w-[210px] flex-1">
-                    <p className="text-sm font-semibold text-ink-900">{meta.label}</p>
-                    <p className="text-xs text-ink-400">{meta.hint}</p>
+                    <p className="text-base font-semibold text-ink-900">{meta.label}</p>
+                    <p className="text-sm text-ink-500">{meta.hint}</p>
                   </div>
 
                   <input
@@ -145,7 +159,7 @@ function Setup({ view }: { view: MarketView }) {
                     value={value}
                     onChange={(e) => change(meta.id, Number(e.target.value))}
                     aria-label={`${meta.label} target`}
-                    className="h-1.5 w-[180px] cursor-pointer accent-[color:var(--color-violet)]"
+                    className="h-11 w-[200px] cursor-pointer accent-[color:var(--vm-primary)]"
                   />
 
                   <label className="flex items-center gap-1.5">
@@ -156,19 +170,15 @@ function Setup({ view }: { view: MarketView }) {
                       max={100}
                       value={value}
                       onChange={(e) => change(meta.id, Number(e.target.value))}
-                      className="w-[68px] rounded-md border border-line-strong bg-white px-2 py-1 text-right text-sm font-semibold text-ink-900 outline-none transition-colors focus:border-violet"
+                      className="vm-input !w-[84px] text-right font-mono !text-base"
                     />
-                    <span className="text-xs text-ink-400">
+                    <span className="font-mono text-sm text-ink-500">
                       {meta.id === "score" ? "/100" : "%"}
                     </span>
                   </label>
 
                   {changed && (
-                    <Badge
-                      band="average"
-                      label={`was ${DEFAULT_TARGETS[meta.id]}`}
-                      size="sm"
-                    />
+                    <ConfidenceBadge level="stale" size="sm">{`Was ${DEFAULT_TARGETS[meta.id]}`}</ConfidenceBadge>
                   )}
                 </div>
               </li>
@@ -179,18 +189,18 @@ function Setup({ view }: { view: MarketView }) {
 
       {/* ---------- monitored brands ---------- */}
       <section>
-        <h2 className="mb-2.5 uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
+        <h2 className="vm-h2 mb-4 text-ink-900">
           Monitored brands
         </h2>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           {brands.map((brand) => {
             const own = skus.filter((s) => s.brandId === brand.id);
             const row = view.byBrand.find((b) => b.brandId === brand.id);
             return (
               <div
                 key={brand.id}
-                className={`flex min-w-0 flex-col rounded-lg border bg-white p-3.5 shadow-[var(--shadow-card)] ${
-                  brand.id === clientBrand.id ? "border-primary-tint" : "border-line"
+                className={`flex min-w-0 flex-col rounded-lg border bg-white p-6 ${
+                  brand.id === clientBrand.id ? "border-primary" : "border-line"
                 }`}
               >
                 <div className="flex items-center gap-2">
@@ -199,11 +209,11 @@ function Setup({ view }: { view: MarketView }) {
                     style={brandSwatch(brand.id)}
                     aria-hidden
                   />
-                  <p className="min-w-0 truncate text-sm font-semibold text-ink-900">
+                  <p className="min-w-0 truncate text-lg font-semibold text-ink-900">
                     {brand.name}
                   </p>
                 </div>
-                <p className="mt-0.5 truncate text-xs text-ink-400">{brand.owner}</p>
+                <p className="mt-0.5 truncate text-sm text-ink-500">{brand.owner}</p>
                 <p className="mono mt-2 text-xs text-ink-500">
                   {own.length} SKU{own.length === 1 ? "" : "s"} monitored
                 </p>
@@ -213,8 +223,10 @@ function Setup({ view }: { view: MarketView }) {
                   </p>
                 )}
                 {brand.id === clientBrand.id && (
-                  <span className="mt-2">
-                    <Badge band="average" label="Your brand" size="sm" />
+                  <span className="mt-3">
+                    <span className="rounded-full bg-primary-tint px-2.5 py-1 font-mono text-xs font-medium uppercase tracking-[0.08em] text-primary-text">
+                      Your brand
+                    </span>
                   </span>
                 )}
               </div>
@@ -246,10 +258,10 @@ function Setup({ view }: { view: MarketView }) {
 
       {/* ---------- coverage scope ---------- */}
       <section>
-        <h2 className="mb-2.5 uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
+        <h2 className="vm-h2 mb-4 text-ink-900">
           Coverage scope
         </h2>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard label="Governorates" value={governorates.length} footnote={governorates.map((c) => c.name).join(", ")} />
           <StatCard label="Channels" value={channels.length} footnote={channels.map((c) => c.name).join(", ")} />
           <StatCard label="Contracted outlets" value={contract.contractedPos} footnote="Per monthly cycle" />
@@ -262,7 +274,7 @@ function Setup({ view }: { view: MarketView }) {
           />
         </div>
 
-        <Card className="mt-3" title="Where the outlets sit" lead="Contracted universe by governorate, and how much of it this cycle has reached.">
+        <Card className="mt-6" title="Where the outlets sit" lead="Contracted universe by governorate, and how much of it this cycle has reached.">
           <ul className="flex flex-col">
             {governorates.map((city) => {
               const audited = view.outlets.filter((o) => o.governorateId === city.id).length;

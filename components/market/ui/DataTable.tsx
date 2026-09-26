@@ -225,7 +225,7 @@ export default function DataTable<T>({
             <button
               type="button"
               onClick={download}
-              className="inline-flex items-center gap-1.5 rounded-md border border-line-strong bg-white px-2.5 py-1.5 text-xs font-semibold text-ink-700 transition-colors hover:border-ink-400"
+              className="vm-btn vm-btn--secondary vm-btn--sm"
             >
               <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                 <path d="M8 2v8m0 0 3-3m-3 3L5 7M3 12.5h10" />
@@ -344,7 +344,7 @@ function PageButton({
       type="button"
       disabled={disabled}
       onClick={onClick}
-      className="rounded-md border border-line-strong bg-white px-2 py-1 text-xs font-semibold text-ink-700 transition-colors hover:border-ink-400 disabled:cursor-not-allowed disabled:opacity-40"
+      className="vm-btn vm-btn--secondary vm-btn--sm"
     >
       {label}
     </button>

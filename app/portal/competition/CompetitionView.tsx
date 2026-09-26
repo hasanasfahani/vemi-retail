@@ -8,6 +8,9 @@
    one-row scoreboard would look like a bug. The header still shows the
    filter; this page says out loud that it is not applying it. */
 
+import { PageHeader } from "@/components/vemi/PageHeader";
+import SectionHead from "@/components/market/SectionHead";
+import { asOf, monthShort } from "@/lib/market/asOf";
 import { SegmentedControl } from "@/components/vemi/SegmentedControl";
 import { useMemo, useState } from "react";
 import PageShell from "@/components/market/PageShell";
@@ -22,10 +25,9 @@ import { useDecisions } from "@/components/market/useDecisions";
 import type { DecisionInsight } from "@/lib/market/insightModel";
 import MarketMap, { type MapPoint } from "@/components/market/map/MarketMap";
 import { Card, EmptyState, StatCard, Tabs } from "@/components/market/ui";
-import Badge from "@/components/market/ui/Badge";
 import Bar from "@/components/market/ui/Bar";
 import {
-  BubbleScatter, ChartLegend, GapBars, StackedBars, brandColor, brandSwatch, orderedBrands, brandSeries, threeSeriesRows, SERIES3,
+  BubbleScatter, ChartLegend, GapBars, StackedBars, brandColor, brandSwatch, orderedBrands, brandSeries, threeSeriesRows, SERIES3, keyCompetitor, brandOutline,
 } from "@/components/market/charts";
 import {
   byRetailer, districtLeads, pricePosition, scoreboard,
@@ -108,33 +110,69 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
 
   const clientLeads = leads.filter((l) => l.leaderId === clientBrand.id).length;
 
+  /* ---------- the page's words, from the same rows as the charts ---------- */
+  const r1 = (n: number) => Math.round(n * 10) / 10;
+  const scopeName =
+    view.filters.governorates.length === 1 ? governorateName(view.filters.governorates[0]) : contract.country;
+  const headline = leader.isClient
+    ? `${clientBrand.name} leads the shelf in ${scopeName} at ${client.share}%, and leads ${clientLeads} of ${leads.length} districts.`
+    : `${leader.name} holds ${r1(leader.share - client.share)} pts more of the shelf than ${clientBrand.name} in ${scopeName}; ${clientBrand.name} leads ${clientLeads} of ${leads.length} districts.`;
+  const basis = { asOf: asOf(all.month), base: `${all.posCount.toLocaleString()} outlets` };
+  const battleWorst = [...battleData].sort((x, y) => (x.portfolio - x.competitor) - (y.portfolio - y.competitor))[0];
+  const battleSoWhat = battleWorst
+    ? battleWorst.portfolio < battleWorst.competitor
+      ? `The widest gap is ${battleWorst.label}: your portfolio holds ${battleWorst.portfolio}% of the fixture against ${keyCompetitor.name}'s ${battleWorst.competitor}%.`
+      : `Your portfolio out-shelves ${keyCompetitor.name} in every ${battle === "retailer" ? "retailer group" : battle}; the closest is ${battleWorst.label}.`
+    : "No facings were measured in this view.";
+  const byIndex = [...rows].sort((a, b) => a.priceIndex - b.priceIndex);
+  const cheapest = byIndex[0];
+  const dearest = byIndex[byIndex.length - 1];
+  const priceSoWhat = `${client.name} sits at a price index of ${client.priceIndex} with ${client.share}% of the shelf; ${leader.isClient ? `${rows[1]?.name ?? "the next brand"} holds ${rows[1]?.share ?? 0}%` : `${leader.name} holds ${leader.share}% at ${leader.priceIndex}`}.`;
+  const indexSoWhat = cheapest && dearest
+    ? `${dearest.name} is the most premium at ${dearest.priceIndex} and ${cheapest.name} the most value at ${cheapest.priceIndex}; ${client.name} is at ${client.priceIndex}.`
+    : "No prices were read in this view.";
+  const rivalLeads = new Map<string, number>();
+  for (const l of leads) if (l.leaderId !== clientBrand.id) rivalLeads.set(l.leaderId, (rivalLeads.get(l.leaderId) ?? 0) + 1);
+  const topRival = [...rivalLeads.entries()].sort((a, b) => b[1] - a[1])[0];
+  const leadsSoWhat = `${clientBrand.name} leads ${clientLeads} of ${leads.length} districts${
+    topRival ? `; ${brandName(topRival[0])} leads ${topRival[1]}` : ""
+  }.`;
+
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-12">
+      <div className="flex flex-col gap-6">
+      <PageHeader
+        eyebrow={`${scopeName} · ${contract.category} · ${monthShort(all.month)}`}
+        title={headline}
+        description="Where your brands win and lose the shelf against every rival, on price, presence and position."
+      />
       {narrowed && (
-        <p className="rounded-md border border-primary-tint bg-primary-tint px-3.5 py-2.5 text-sm leading-snug text-violet-ink">
+        <p className="rounded-md bg-primary-tint px-4 py-3 text-sm text-primary-text">
           The brand and SKU filters do not apply on this page — a comparison needs every brand in
           it. City, channel and retailer filters are applied as normal.
         </p>
       )}
+      </div>
 
       {/* ---------- A · scoreboard ---------- */}
       <section>
-        <div className="mb-2 flex items-baseline justify-between gap-3">
-          <h2 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
-            Competitive scoreboard
-          </h2>
-          <span className="mono text-xs text-ink-400">
-            {all.posCount.toLocaleString()} audited outlets · {all.totalFacings.toLocaleString()} facings
-          </span>
-        </div>
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <SectionHead
+          title="Competitive scoreboard"
+          lead="Every brand measured the same way: the client gets no favourable denominator."
+          actions={
+            <span className="font-mono text-xs text-ink-500">
+              {all.posCount.toLocaleString()} audited outlets · {all.totalFacings.toLocaleString()} facings
+            </span>
+          }
+        />
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {rows.slice(0, 3).map((row) => (
             <ScoreCard key={row.id} row={row} leader={leader} month={all.month} />
           ))}
         </div>
       </section>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {/* ACROSS THE WHOLE PANEL, and the label has to say so.
 
             The competitive findings below report gaps CITY BY CITY, and
@@ -145,6 +183,7 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
             contradiction unless the scopes are named. */}
         <StatCard
           label="Shelf gap to leader, nationally"
+          confidence="measured"
           value={leader.isClient ? 0 : Math.round((leader.share - client.share) * 10) / 10}
           unit="pt"
           band={leader.isClient ? "strong" : "attention"}
@@ -181,6 +220,7 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
         />
         <StatCard
           label="Districts led"
+          confidence="measured"
           value={clientLeads}
           band={clientLeads > leads.length / 2 ? "strong" : "attention"}
           explain={`Districts where ${clientBrand.name} holds more of the fixture than any other brand. Districts with fewer than three audited outlets are excluded: one shop's shelf is not a district's position.`}
@@ -208,6 +248,7 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
         />
         <StatCard
           label="Promotion presence"
+          confidence="measured"
           value={client.promo}
           unit="%"
           band={client.promo >= leader.promo ? "strong" : "attention"}
@@ -240,6 +281,7 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
         />
         <StatCard
           label="Eye-level conversion"
+          confidence="measured"
           value={client.visibility}
           unit="%"
           explain={`Of ${clientBrand.name}'s own facings, the share sitting at eye level rather than above or below it. It says how well shelf space is converted into visibility, which is a different question from how much space there is — a brand can hold a large fixture badly.`}
@@ -271,6 +313,10 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
       <Card
         title="Shelf battle"
         lead="Share of measured facings, 100% stacked."
+        soWhat={battleSoWhat}
+        {...basis}
+        confidence="measured"
+        table={{ columns: [battle === "retailer" ? "Retailer group" : battle === "channel" ? "Channel" : "Governorate", "Your portfolio", keyCompetitor.name, "Others"], numeric: [false, true, true, true], rows: battleData.map((r) => [String(r.label), `${r.portfolio}%`, `${r.competitor}%`, `${r.others}%`]) }}
         action={
           <div className="flex flex-col items-end gap-3">
             <SegmentedControl
@@ -330,10 +376,13 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
       </Card>
 
       {/* ---------- C · price position ---------- */}
-      <div className="grid gap-4 lg:grid-cols-[1.25fr_1fr]">
+      <div className="grid gap-6 lg:grid-cols-[1.25fr_1fr]">
         <Card
           title="Price against shelf"
           lead="Average observed price, share of shelf, and availability as the bubble."
+          soWhat={priceSoWhat}
+          {...basis}
+          confidence="measured"
           footnote={`Price in ${contract.currency}. A brand sitting low and left is buying nothing with its discount; high and right is a premium position that is holding.`}
         >
           <BubbleScatter
@@ -346,6 +395,9 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
         <Card
           title="Price position"
           lead="Indexed on the category average across every reading."
+          soWhat={indexSoWhat}
+          {...basis}
+          confidence="measured"
           footnote="Bars run out from the 100 index — left is a value position, right is a premium one. Drawn from par rather than from zero because the distance from the category is the whole question, and a bar starting at zero draws that part smallest."
         >
           <GapBars
@@ -375,12 +427,16 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
       {/* ---------- D · who leads where ---------- */}
       <Card
         title="Who leads where"
+        soWhat={leadsSoWhat}
+        asOf={basis.asOf}
+        base={`${leads.length} districts`}
+        confidence="measured"
         lead={`${leads.length} districts with at least three audited outlets, coloured by the brand holding the most shelf.`}
         action={
           <ChartLegend
             items={ordered
               .filter((b) => leads.some((l) => l.leaderId === b.id))
-              .map((b) => ({ id: b.id, name: b.name, color: brandColor(b.id) }))}
+              .map((b) => ({ id: b.id, name: b.name, color: brandColor(b.id), outline: brandOutline(b.id) }))}
           />
         }
         footnote="Bubble area is the facings measured in that district, so a big bubble is a big fixture rather than a big claim. Districts with fewer than three audited outlets are left off: one shop's shelf is a thin basis for saying who is winning an area."
@@ -390,14 +446,10 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
 
       {/* ---------- E · competitive findings ---------- */}
       <section>
-        <div className="mb-2 flex items-baseline justify-between gap-3">
-          <h2 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
-            Competitive findings
-          </h2>
-          <span className="mono text-xs text-ink-400">
-            Everything the audit measured against a rival rather than a target
-          </span>
-        </div>
+        <SectionHead
+          title="Competitive findings"
+          lead="Everything the audit measured against a rival rather than a target."
+        />
         {competitive.length === 0 ? (
           <Card>
             <EmptyState
@@ -406,7 +458,7 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
             />
           </Card>
         ) : (
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {competitive.map((insight) => (
               <InsightCard
                 key={insight.id}
@@ -450,8 +502,8 @@ function ScoreCard({ row, leader, month }: { row: BrandRow; leader: BrandRow; mo
 
   return (
     <article
-      className={`flex min-w-0 flex-col rounded-lg border bg-white p-4 shadow-[var(--shadow-card)] ${
-        row.isClient ? "border-primary-tint" : "border-line"
+      className={`flex min-w-0 flex-col rounded-lg border bg-white p-6 ${
+        row.isClient ? "border-primary" : "border-line"
       }`}
     >
       <div className="flex items-start justify-between gap-2">
@@ -462,20 +514,23 @@ function ScoreCard({ row, leader, month }: { row: BrandRow; leader: BrandRow; mo
               style={brandSwatch(row.id)}
               aria-hidden
             />
-            <h3 className="font-display text-[15px] font-semibold tracking-tight text-ink-900">
-              {row.name}
-            </h3>
+            <h3 className="text-lg font-semibold text-ink-900">{row.name}</h3>
           </div>
-          <p className="mt-0.5 truncate text-xs text-ink-400">{row.owner}</p>
+          <p className="mt-0.5 truncate text-sm text-ink-500">{row.owner}</p>
         </div>
+        {/* Roles, not health: neutral mono tags rather than band chips. */}
         {row.isClient ? (
-          <Badge band="average" label="Your brand" size="sm" />
+          <span className="shrink-0 rounded-full bg-primary-tint px-2.5 py-1 font-mono text-xs font-medium uppercase tracking-[0.08em] text-primary-text">
+            Your brand
+          </span>
         ) : row.id === leader.id ? (
-          <Badge band="critical" label="Category leader" size="sm" />
+          <span className="shrink-0 rounded-full border border-ink-900 px-2.5 py-1 font-mono text-xs font-medium uppercase tracking-[0.08em] text-ink-900">
+            Category leader
+          </span>
         ) : null}
       </div>
 
-      <dl className="mt-3 flex flex-col gap-2">
+      <dl className="mt-4 flex flex-col gap-3">
         {measures.map((m) => (
           <div key={m.label} className="flex items-center gap-2">
             {/* The control leads the row, so the eyes form one column
@@ -495,9 +550,9 @@ function ScoreCard({ row, leader, month }: { row: BrandRow; leader: BrandRow; mo
                 />
               )}
             </span>
-            <dt className="w-[104px] shrink-0 text-xs text-ink-500">{m.label}</dt>
+            <dt className="w-[120px] shrink-0 text-sm text-ink-700">{m.label}</dt>
             <Bar value={m.value} max={m.max} par={m.par} color={brandColor(row.id)} label={`${row.name} ${m.label}`} />
-            <dd className="mono w-[48px] shrink-0 text-right text-xs font-semibold text-ink-900">
+            <dd className="mono w-[52px] shrink-0 text-right text-sm font-semibold text-ink-900">
               {m.value}
               {m.unit}
             </dd>
@@ -505,7 +560,7 @@ function ScoreCard({ row, leader, month }: { row: BrandRow; leader: BrandRow; mo
         ))}
       </dl>
 
-      <p className="mono mt-3 border-t border-line pt-2.5 text-xs text-ink-400">
+      <p className="mt-4 border-t border-line pt-3 font-mono text-xs text-ink-500">
         {row.outlets.toLocaleString()} outlets stocking · {row.facings.toLocaleString()} facings ·
         price index {row.priceIndex}
       </p>

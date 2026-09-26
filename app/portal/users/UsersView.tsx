@@ -15,7 +15,7 @@
 import { useEffect, useMemo, useState } from "react";
 import PageShell from "@/components/market/PageShell";
 import { Card, DataTable, StatCard, Toasts, useToasts, type Column } from "@/components/market/ui";
-import Badge from "@/components/market/ui/Badge";
+import { PageHeader } from "@/components/vemi/PageHeader";
 import { useFollowUps } from "@/components/market/useFollowUps";
 import {
   DEFAULT_NOTIFICATIONS, NOTIFICATIONS, USERS, loadNotifications, saveNotifications,
@@ -89,29 +89,28 @@ function Users({ view }: { view: MarketView }) {
       id: "access",
       header: "Access",
       sortValue: (u) => u.access,
-      render: (u) => (
-        <Badge
-          band={u.access === "Full access" ? "strong" : u.access === "Read & act" ? "average" : "attention"}
-          label={u.access}
-          size="sm"
-        />
-      ),
+      /* A permission level is a role, not a health band: neutral tags,
+         filled for the widest access. */
+      render: (u) => <Tag filled={u.access === "Full access"}>{u.access}</Tag>,
     },
     {
       id: "status",
       header: "Status",
       sortValue: (u) => u.status,
-      render: (u) => (
-        <Badge band={u.status === "Active" ? "strong" : "average"} label={u.status} size="sm" />
-      ),
+      render: (u) => <Tag filled={u.status === "Active"}>{u.status}</Tag>,
     },
   ];
 
   const on = Object.values(notifications).filter(Boolean).length;
 
   return (
-    <div className="flex flex-col gap-5">
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="flex flex-col gap-8">
+      <PageHeader
+        eyebrow={`${contract.country} · ${contract.category} · Users & settings`}
+        title={`${USERS.length} people use this workspace, with ${on} of ${NOTIFICATIONS.length} alerts switched on.`}
+        description="Who can see what, and what the workspace tells them. Field auditors work for Vemi and are listed separately."
+      />
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Client users" value={USERS.length} footnote="People with access to this workspace" />
         <StatCard label="Field auditors" value={auditors.length} footnote={`Covering ${governorates.length} governorates on this contract`} />
         <StatCard
@@ -145,24 +144,24 @@ function Users({ view }: { view: MarketView }) {
       >
         <ul className="flex flex-col">
           {NOTIFICATIONS.map((item) => (
-            <li key={item.id} className="flex items-center gap-3 border-b border-line py-3 last:border-0">
+            <li key={item.id} className="flex items-center gap-4 border-b border-line py-4 last:border-0">
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-ink-900">{item.label}</p>
-                <p className="text-xs leading-snug text-ink-400">{item.hint}</p>
+                <p className="text-base font-semibold text-ink-900">{item.label}</p>
+                <p className="text-sm text-ink-500">{item.hint}</p>
               </div>
               <button
                 type="button"
                 role="switch"
                 aria-checked={notifications[item.id]}
                 onClick={() => toggle(item.id)}
-                className={`relative h-[22px] w-[40px] shrink-0 rounded-full transition-colors ${
-                  notifications[item.id] ? "bg-violet" : "bg-line-strong"
+                className={`relative h-6 w-11 shrink-0 rounded-full transition-colors after:absolute after:-inset-2.5 after:content-[''] ${
+                  notifications[item.id] ? "bg-primary" : "bg-line-strong"
                 }`}
               >
                 <span className="sr-only">{item.label}</span>
                 <span
-                  className="absolute top-[3px] h-4 w-4 rounded-full bg-white shadow-sm transition-all"
-                  style={{ left: notifications[item.id] ? 21 : 3 }}
+                  className="absolute top-[3px] h-[18px] w-[18px] rounded-full bg-white shadow-[var(--vm-shadow-raised)] transition-all"
+                  style={{ left: notifications[item.id] ? 23 : 3 }}
                   aria-hidden
                 />
               </button>
@@ -197,5 +196,17 @@ function Users({ view }: { view: MarketView }) {
 
       <Toasts toasts={toasts} onDismiss={dismiss} />
     </div>
+  );
+}
+
+function Tag({ filled, children }: { filled?: boolean; children: React.ReactNode }) {
+  return (
+    <span
+      className={`inline-flex rounded-full px-2.5 py-1 font-mono text-xs font-medium uppercase tracking-[0.08em] ${
+        filled ? "bg-primary-tint text-primary-text" : "border border-line-strong text-ink-900"
+      }`}
+    >
+      {children}
+    </span>
   );
 }

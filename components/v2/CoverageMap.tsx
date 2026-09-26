@@ -177,7 +177,7 @@ export default function CoverageMap() {
 
         {hover && !hover.label && (
           <div
-            className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full rounded-md border border-primary-tint bg-white px-2.5 py-1 text-xs font-semibold text-ink-900 shadow-[var(--shadow-pop)]"
+            className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full rounded-md border border-primary-tint bg-white px-2.5 py-1 text-xs font-semibold text-ink-900 shadow-[var(--vm-shadow-overlay)]"
             style={{ left: `${hover.x}%`, top: `calc(${(hover.y / VIEW.h) * 100}% - 6px)` }}
           >
             {hover.name}

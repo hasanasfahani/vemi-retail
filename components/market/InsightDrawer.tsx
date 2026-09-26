@@ -153,14 +153,14 @@ export default function InsightDrawer({
           <button
             type="button"
             onClick={openMail}
-            className="rounded-md border border-line-strong bg-white px-2.5 py-1.5 text-xs font-semibold text-ink-700 transition-colors hover:border-ink-400"
+            className="vm-btn vm-btn--secondary vm-btn--sm"
           >
             Email
           </button>
           <button
             type="button"
             onClick={() => window.print()}
-            className="rounded-md border border-line-strong bg-white px-2.5 py-1.5 text-xs font-semibold text-ink-700 transition-colors hover:border-ink-400"
+            className="vm-btn vm-btn--secondary vm-btn--sm"
           >
             Print
           </button>

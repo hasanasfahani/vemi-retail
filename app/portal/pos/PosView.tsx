@@ -19,14 +19,17 @@ import { useTargets } from "@/components/market/useTargets";
 import PosDrawer from "@/components/market/PosDrawer";
 import MarketMap, { type MapPoint } from "@/components/market/map/MarketMap";
 import MapLegend from "@/components/market/map/legend";
-import { Card, DataTable, StatCard, Tabs, type Column } from "@/components/market/ui";
+import { Card, DataTable, StatCard, type Column } from "@/components/market/ui";
+import { PageHeader } from "@/components/vemi/PageHeader";
+import { SegmentedControl } from "@/components/vemi/SegmentedControl";
+import { monthShort } from "@/lib/market/asOf";
 import Badge from "@/components/market/ui/Badge";
 import { scoreBand, type Band } from "@/components/market/ui/health";
 import { useFollowUps } from "@/components/market/useFollowUps";
 import { posRows, type PosRow } from "@/lib/market/pos";
 import { issuesFor, type IssueKpi } from "@/lib/market/issues";
 import { futureCycles } from "@/lib/market/followUp";
-import { channelName, governorateName } from "@/lib/market";
+import { channelName, contract, governorateName } from "@/lib/market";
 import type { MarketView } from "@/lib/market/filters";
 
 const SCORE_BANDS = [
@@ -47,7 +50,7 @@ export default function PosView() {
 
 function Explorer({ view, query }: { view: MarketView; query: string }) {
   const targets = useTargets();
-  const [mode, setMode] = useState("table");
+  const [mode, setMode] = useState<"table" | "map">("table");
   const [band, setBand] = useState("all");
   const [onlyIssues, setOnlyIssues] = useState(false);
   const [onlyFlagged, setOnlyFlagged] = useState(false);
@@ -236,8 +239,13 @@ function Explorer({ view, query }: { view: MarketView; query: string }) {
   const withIssues = rows.filter((r) => r.issues.length > 0).length;
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="flex flex-col gap-8">
+      <PageHeader
+        eyebrow={`${contract.country} · ${contract.category} · ${monthShort(view.month)}`}
+        title={`${withIssues.toLocaleString()} of ${rows.length.toLocaleString()} audited outlets have at least one open issue.`}
+        description="Every audited outlet with its score, its issues and its shelf. Open one to see what the auditor found."
+      />
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Outlets audited" value={rows.length} footnote={`${view.coveragePct}% of the outlets in scope`} />
         <StatCard
           label="With an open issue"
@@ -254,44 +262,45 @@ function Explorer({ view, query }: { view: MarketView; query: string }) {
       </div>
 
       <Card padded={false}>
-        <div className="flex flex-wrap items-center gap-3 border-b border-line px-3 py-2.5">
-          <Tabs
-            tabs={[
-              { id: "table", label: "Table", count: shown.length },
-              { id: "map", label: "Map" },
-            ]}
-            active={mode}
+        <div className="flex flex-wrap items-center gap-4 border-b border-line px-6 py-4">
+          {/* Two views of the same outlets: a SegmentedControl, not tabs. */}
+          <SegmentedControl
+            ariaLabel="View"
+            size="sm"
+            value={mode}
             onChange={setMode}
+            options={[
+              { value: "table", label: `Table · ${shown.length.toLocaleString()}` },
+              { value: "map", label: "Map" },
+            ]}
           />
-          <label className="ml-auto flex items-center gap-1.5">
-            <span className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
-              Score
-            </span>
+          <label className="ml-auto flex items-center gap-2">
+            <span className="vm-label">Score</span>
             <select
               value={band}
               onChange={(e) => setBand(e.target.value)}
-              className="rounded-md border border-line-strong bg-white px-2 py-1 text-xs text-ink-700 outline-none transition-colors hover:border-ink-400"
+              className="h-9 rounded-md border border-line-strong bg-white px-2.5 text-sm text-ink-900 outline-none transition-colors hover:bg-canvas focus:border-primary"
             >
               {SCORE_BANDS.map((b) => (
                 <option key={b.id} value={b.id}>{b.label}</option>
               ))}
             </select>
           </label>
-          <label className="flex items-center gap-1.5 text-xs text-ink-700">
+          <label className="flex min-h-9 items-center gap-2 text-sm text-ink-900">
             <input
               type="checkbox"
               checked={onlyIssues}
               onChange={(e) => setOnlyIssues(e.target.checked)}
-              className="h-3.5 w-3.5 accent-[color:var(--color-violet)]"
+              className="h-4 w-4 accent-[color:var(--vm-primary)]"
             />
             Has an issue
           </label>
-          <label className="flex items-center gap-1.5 text-xs text-ink-700">
+          <label className="flex min-h-9 items-center gap-2 text-sm text-ink-900">
             <input
               type="checkbox"
               checked={onlyFlagged}
               onChange={(e) => setOnlyFlagged(e.target.checked)}
-              className="h-3.5 w-3.5 accent-[color:var(--color-violet)]"
+              className="h-4 w-4 accent-[color:var(--vm-primary)]"
             />
             In a follow-up
           </label>
@@ -312,15 +321,15 @@ function Explorer({ view, query }: { view: MarketView; query: string }) {
             }}
           />
         ) : (
-          <div className="p-3">
-            <div className="mb-2.5">
+          <div className="p-6">
+            <div className="mb-3">
               <MapLegend counts={bandCounts} />
             </div>
             <MarketMap points={points} onSelect={setOpenPos} height={520} bandOf={scoreBand} />
-            <p className="mt-2 text-xs leading-snug text-ink-400">
+            <p className="mt-3 text-sm text-ink-500">
               Outlets are placed within their district rather than surveyed to the street. A
-              cluster shows how its outlets typically score, with a red ring where any of them is
-              critical.
+              cluster shows how its outlets typically score (darker needs you sooner), with an Ink
+              ring where any of them is critical.
             </p>
           </div>
         )}
