@@ -18,7 +18,8 @@ import Drawer from "./ui/Drawer";
 import Badge from "./ui/Badge";
 import StatusChip from "./ui/StatusChip";
 import { componentDetail } from "@/lib/market/bandDetail";
-import { scoreBand } from "./ui/health";
+import { scoreBand, BAND_LABEL } from "./ui/health";
+import { Button } from "@/components/vemi/Button";
 import Bar from "./ui/Bar";
 import ScoreRing from "./ui/ScoreRing";
 import ShelfScene from "./ShelfScene";
@@ -75,23 +76,25 @@ export default function PosDrawer({
         onClose={onClose}
         width={620}
         title={row?.pos.name ?? ""}
+        eyebrow={row ? `${row.pos.code} · ${governorateName(row.pos.governorateId)}` : undefined}
         subtitle={
           row
-            ? `${row.pos.code} · ${row.pos.district}, ${governorateName(row.pos.governorateId)} · ${channelName(row.pos.channel)}${
+            ? `${row.pos.district} · ${channelName(row.pos.channel)}${
                 row.pos.retailer === "Independent" ? "" : ` · ${row.pos.retailer}`
               }`
             : undefined
         }
+        badge={row ? <Badge band={scoreBand(row.score)} label={`Score ${Math.round(row.score)} · ${BAND_LABEL[scoreBand(row.score)]}`} size="sm" /> : undefined}
         footer={
           row && onFlag && onUnflag ? (
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="text-xs text-ink-400">
+              <span className="text-sm text-ink-500">
                 {flagged
                   ? "This outlet is on the revisit queue."
                   : "Put this outlet on a future audit route."}
               </span>
-              <button
-                type="button"
+              <Button
+                variant={flagged ? "secondary" : "primary"}
                 onClick={() =>
                   flagged
                     ? onUnflag(row.pos.id)
@@ -100,14 +103,9 @@ export default function PosDrawer({
                         row.issues[0]?.detail ?? `Review requested at ${row.pos.name}.`
                       )
                 }
-                className={`rounded-md px-3 py-1.5 text-sm font-semibold transition-colors ${
-                  flagged
-                    ? "border border-line-strong bg-white text-ink-700 hover:border-ink-400"
-                    : "bg-violet text-white hover:bg-violet-ink"
-                }`}
               >
                 {flagged ? "Remove from revisit queue" : "Flag for revisit"}
-              </button>
+              </Button>
             </div>
           ) : undefined
         }

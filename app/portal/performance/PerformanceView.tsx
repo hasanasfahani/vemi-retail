@@ -64,17 +64,17 @@ function Performance({ view }: { view: MarketView }) {
       {active === "availability" && <AvailabilityTab view={view} />}
       {active === "shelf" && <ShelfTab view={view} />}
       {active === "pricing" && (
-        <LockedOverlay title="Pricing">
+        <LockedOverlay title="Pricing" standalone={false}>
           <PricingTab view={view} />
         </LockedOverlay>
       )}
       {active === "assortment" && (
-        <LockedOverlay title="Assortment">
+        <LockedOverlay title="Assortment" standalone={false}>
           <AssortmentTab view={view} />
         </LockedOverlay>
       )}
       {active === "posm" && (
-        <LockedOverlay title="POSM">
+        <LockedOverlay title="POSM" standalone={false}>
           <PosmTab view={view} />
         </LockedOverlay>
       )}

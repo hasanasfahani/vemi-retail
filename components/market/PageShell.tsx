@@ -5,6 +5,7 @@
    not a filter object — so no page can accidentally compute its
    figures over a different slice than its own header advertises. */
 
+import { Skeleton } from "@/components/vemi/Skeleton";
 import { Suspense, useMemo, useState, type ReactNode } from "react";
 import Header from "./Header";
 import ToastHost from "./ToastHost";
@@ -44,11 +45,12 @@ function ShellSkeleton() {
   return (
     <>
       <div className="sticky top-0 z-30 border-b border-line bg-white">
-        <div className="h-[60px]" />
-        <div className="h-[57px] border-t border-line" />
+        <div className="h-16" />
+        <div className="h-[69px] border-t border-line" />
       </div>
-      <main className="min-w-0 flex-1 px-4 py-5 sm:px-6">
-        <div className="h-40 animate-pulse rounded-lg border border-line bg-white" />
+      <main className="mx-auto w-full min-w-0 max-w-[1360px] flex-1 px-4 pb-16 pt-8 sm:px-6">
+        <Skeleton width={220} height={28} />
+        <Skeleton className="mt-6" height={160} radius={16} />
       </main>
     </>
   );
@@ -96,7 +98,9 @@ function Shell({ children, search, searchPlaceholder }: ShellProps) {
         onSearch={search ? setQuery : undefined}
         searchPlaceholder={searchPlaceholder}
       />
-      <main className="min-w-0 flex-1 overflow-x-hidden px-4 py-5 sm:px-6">
+      {/* The page container (brand layout.md): at most 1360px, 24px
+          sides (16 on a phone), 32px above, room to breathe below. */}
+      <main className="mx-auto w-full min-w-0 max-w-[1360px] flex-1 overflow-x-hidden px-4 pb-16 pt-8 sm:px-6">
         {children(view, query, data)}
       </main>
       {/* One host for every confirmation on the page — see toastBus. */}

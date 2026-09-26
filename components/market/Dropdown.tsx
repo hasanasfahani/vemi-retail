@@ -8,6 +8,7 @@
    six filters rendered open would be a permanent block of furniture
    above every page. */
 
+import Icon from "@/components/vemi/Icon";
 import { useEffect, useRef, useState } from "react";
 
 export default function Dropdown({
@@ -48,38 +49,34 @@ export default function Dropdown({
 
   return (
     <div className="relative min-w-0" ref={box}>
-      <span className="mb-1 block uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
-        {label}
-      </span>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-haspopup="listbox"
-        className={`flex min-w-[152px] max-w-[240px] items-center justify-between gap-2 rounded-md border px-2.5 py-1.5 text-left text-sm transition-colors ${
+        aria-label={`${label}: ${summary}`}
+        className={`flex h-11 max-w-[260px] items-center gap-1.5 rounded-md border px-2.5 text-left text-sm transition-colors ${
           active
-            ? "border-primary-tint bg-primary-tint font-semibold text-violet-ink"
-            : "border-line-strong bg-white text-ink-700 hover:border-ink-400"
+            ? "border-primary-tint bg-primary-tint font-semibold text-primary-text"
+            : "border-line-strong bg-white text-ink-900 hover:bg-canvas"
         }`}
       >
+        {/* The default summaries name themselves ("All governorates"); the
+            label joins once a specific value is chosen ("GOVERNORATE Basra"). */}
+        {active && (
+          <span className="shrink-0 font-mono text-xs font-medium uppercase tracking-[0.08em] text-primary-text">{label}</span>
+        )}
         <span className="min-w-0 truncate">{summary}</span>
-        <svg
-          viewBox="0 0 16 16"
-          className="h-3.5 w-3.5 shrink-0 opacity-60"
-          fill="none" stroke="currentColor" strokeWidth="1.8"
-          strokeLinecap="round" strokeLinejoin="round"
-          style={{ transform: open ? "rotate(180deg)" : "none" }}
-          aria-hidden
-        >
-          <path d="M4 6.5 8 10.5 12 6.5" />
-        </svg>
+        <span className="shrink-0 text-ink-500" style={{ transform: open ? "rotate(180deg)" : "none" }}>
+          <Icon name="chevron-down" size={16} />
+        </span>
       </button>
 
       {open && (
         <div
           role="listbox"
           aria-multiselectable={!single}
-          className="absolute left-0 z-40 mt-1 max-h-[280px] w-[228px] overflow-y-auto rounded-md border border-line bg-white p-1 shadow-[var(--shadow-pop)]"
+          className="absolute left-0 z-40 mt-1 max-h-[320px] w-[248px] overflow-y-auto rounded-md border border-line bg-white p-1 shadow-[var(--vm-shadow-overlay)]"
         >
           {options.map((option) => {
             const on = selected.includes(option.value);
@@ -93,14 +90,14 @@ export default function Dropdown({
                   onToggle(option.value);
                   if (single) setOpen(false);
                 }}
-                className={`flex w-full items-center gap-2 rounded-sm px-2 py-[6px] text-left text-sm transition-colors hover:bg-canvas ${
+                className={`flex min-h-9 w-full items-center gap-2 rounded-sm px-2 text-left text-sm transition-colors hover:bg-canvas ${
                   on ? "font-semibold text-ink-900" : "text-ink-700"
                 }`}
               >
                 {!single && (
                   <span
                     className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-sm border ${
-                      on ? "border-violet bg-violet" : "border-line-strong bg-white"
+                      on ? "border-primary bg-primary" : "border-line-strong bg-white"
                     }`}
                     aria-hidden
                   >

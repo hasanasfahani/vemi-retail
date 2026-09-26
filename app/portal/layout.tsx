@@ -20,7 +20,7 @@ export default function PortalLayout({
       <div className="flex min-h-screen items-start bg-canvas">
       {/* Sidebar reads the URL to keep filters across navigation, so
           it suspends during prerender like the shell does. */}
-      <Suspense fallback={<div className="sticky top-0 hidden h-screen w-[236px] shrink-0 border-r border-line bg-white lg:block" />}>
+      <Suspense fallback={<div className="sticky top-0 hidden h-screen w-[256px] shrink-0 border-r border-line bg-white lg:block" />}>
         <Sidebar />
       </Suspense>
       {/* min-w-0 so a wide child — the assortment matrix, the POS table —

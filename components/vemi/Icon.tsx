@@ -29,6 +29,7 @@ const GLYPHS = {
 
   /* --- interface --- */
   close: <path d="M6 6l12 12M18 6 6 18" />,
+  menu: <path d="M4 7h16M4 12h16M4 17h16" />,
   "chevron-down": <path d="m6 9 6 6 6-6" />,
   "chevron-up": <path d="m6 15 6-6 6 6" />,
   "chevron-left": <path d="m15 6-6 6 6 6" />,

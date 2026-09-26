@@ -143,14 +143,8 @@ export default function InsightDrawer({
       onClose={onClose}
       width={720}
       title={insight.headline}
-      subtitle={
-        <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <Badge band={PRIORITY_BAND[insight.priorityBand]} label={OUTCOME_LABEL[insight.outcome]} size="sm" />
-          <span className="mono text-xs text-ink-400">
-            {insight.scope.label} · {monthLabel(view.month)}
-          </span>
-        </span>
-      }
+      eyebrow={`${insight.scope.label} · ${monthLabel(view.month)}`}
+      badge={<Badge band={PRIORITY_BAND[insight.priorityBand]} label={OUTCOME_LABEL[insight.outcome]} size="sm" />}
       footer={
         <div className="flex flex-wrap items-center gap-2">
           {insight.kpi && !blocked && (

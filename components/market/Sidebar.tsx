@@ -28,6 +28,9 @@ import { useReports } from "./useReports";
 import { createReport, upsertReport } from "@/lib/market/reports";
 import { contract, coverage } from "@/lib/market";
 import Icon from "@/components/vemi/Icon";
+import { IconButton } from "@/components/vemi/Button";
+import { BandChip } from "@/components/vemi/BandChip";
+import { Gauge } from "@/components/vemi/Gauge";
 import { Logo } from "@/components/vemi/Logo";
 
 const KEY = "vemi.sidebar.collapsed";
@@ -74,54 +77,48 @@ export default function Sidebar() {
     }
   };
 
+  const itemClass = (active: boolean) =>
+    `mb-0.5 flex min-h-11 items-center gap-3 rounded-md px-3 text-[15px] leading-5 transition-colors ${
+      collapsed ? "justify-center px-0" : ""
+    } ${
+      active
+        ? "bg-primary-tint font-semibold text-primary-text"
+        : "font-medium text-ink-900 hover:bg-canvas"
+    }`;
+  const iconClass = (active: boolean) => (active ? "text-primary" : "text-ink-500");
+
   return (
     <nav
       className={`sticky top-0 hidden h-screen shrink-0 flex-col border-r border-line bg-white transition-[width] duration-200 lg:flex ${
-        collapsed ? "w-[68px]" : "w-[236px]"
+        collapsed ? "w-[72px]" : "w-[256px]"
       }`}
       aria-label="Sections"
     >
       <div
-        className={`flex h-[60px] shrink-0 items-center border-b border-line ${
-          collapsed ? "justify-center px-2" : "justify-between px-4"
+        className={`flex h-16 shrink-0 items-center border-b border-line ${
+          collapsed ? "justify-center px-2" : "justify-between pl-5 pr-2"
         }`}
       >
         {!collapsed && (
-          <Link
-            href={withFilters("/portal")}
-            className="flex items-center"
-            aria-label="Vemi dashboard"
-          >
+          <Link href={withFilters("/portal")} className="flex items-center rounded-sm" aria-label="Vemi, executive dashboard">
             <Logo height={24} title="" />
           </Link>
         )}
-        <button
-          type="button"
-          onClick={toggle}
-          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          aria-expanded={!collapsed}
-          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className="rounded-sm p-1.5 text-ink-400 transition-colors hover:bg-canvas hover:text-ink-700"
-        >
-          <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-            <path d={collapsed ? "M6.5 4l4 4-4 4" : "M9.5 4 5.5 8l4 4"} />
-          </svg>
-        </button>
+        <IconButton label={collapsed ? "Expand sidebar" : "Collapse sidebar"} aria-expanded={!collapsed} onClick={toggle}>
+          <Icon name={collapsed ? "chevron-right" : "chevron-left"} />
+        </IconButton>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-2.5 py-3">
+      <div className="min-h-0 flex-1 overflow-y-auto px-3 py-4">
         {NAV.map((group, i) => (
-          <div key={group.label} className={i > 0 ? "mt-4" : undefined}>
+          <div key={group.label} className={i > 0 ? "mt-5" : undefined}>
             {!collapsed && (
-              <div className="flex items-center justify-between gap-2 px-2.5 pb-1.5">
-                <span className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
-                  {group.label}
-                </span>
+              <div className="flex min-h-8 items-center justify-between gap-2 pb-1 pl-3">
+                <span className="vm-label">{group.label}</span>
                 {group.id === "reports" && (
-                  <button
-                    type="button"
-                    title="Build a report"
-                    aria-label="Build a report"
+                  <IconButton
+                    label="Build a report"
+                    size="sm"
                     onClick={() => {
                       /* Created and opened in one gesture, with its name
                          selected. Nothing is gated behind confirming it,
@@ -130,14 +127,13 @@ export default function Sidebar() {
                       upsertReport(report);
                       router.push(`/portal/reports/custom/${report.id}?new=1`);
                     }}
-                    className="flex h-5 w-5 items-center justify-center rounded-sm text-ink-400 transition-colors hover:bg-canvas hover:text-ink-900"
                   >
-                    <Icon name="plus" className="h-3.5 w-3.5" />
-                  </button>
+                    <Icon name="plus" size={16} />
+                  </IconButton>
                 )}
               </div>
             )}
-            {collapsed && i > 0 && <div className="mx-2 mb-2 h-px bg-line" />}
+            {collapsed && i > 0 && <div className="mx-2 mb-3 h-px bg-line" />}
             {group.items.map((item) => {
               const active = pathname === item.href;
 
@@ -149,28 +145,18 @@ export default function Sidebar() {
                     key={item.href}
                     title={`${item.label} — coming soon`}
                     aria-disabled="true"
-                    className={`mb-0.5 flex cursor-default items-center gap-2.5 rounded-md px-2.5 py-2 text-sm font-medium text-ink-300 ${
-                      collapsed ? "justify-center" : ""
+                    className={`mb-0.5 flex min-h-11 cursor-default items-center gap-3 rounded-md px-3 text-[15px] font-medium text-ink-500 ${
+                      collapsed ? "justify-center px-0" : ""
                     }`}
                   >
-                    <Icon name={item.icon} className="h-[17px] w-[17px] shrink-0" />
+                    <Icon name={item.icon} className="h-5 w-5 text-line-strong" />
                     {!collapsed && (
                       <>
                         <span className="truncate">{item.label}</span>
-                        <svg
-                          viewBox="0 0 16 16"
-                          className="ml-auto h-3.5 w-3.5 shrink-0"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="1.6"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          aria-hidden
-                        >
-                          <rect x="3.5" y="7" width="9" height="6" rx="1.5" />
-                          <path d="M5.75 7V5.25a2.25 2.25 0 0 1 4.5 0V7" />
-                        </svg>
-                        <span className="sr-only">Coming soon</span>
+                        <span className="ml-auto inline-flex items-center gap-1 font-mono text-xs font-medium uppercase tracking-[0.1em] text-ink-500">
+                          <Icon name="lock" size={16} />
+                          Soon
+                        </span>
                       </>
                     )}
                   </div>
@@ -183,15 +169,9 @@ export default function Sidebar() {
                   href={withFilters(item.href)}
                   aria-current={active ? "page" : undefined}
                   title={collapsed ? item.label : undefined}
-                  className={`mb-0.5 flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors ${
-                    collapsed ? "justify-center" : ""
-                  } ${
-                    active
-                      ? "bg-primary-tint font-semibold text-violet-ink"
-                      : "font-medium text-ink-500 hover:bg-canvas hover:text-ink-900"
-                  }`}
+                  className={itemClass(active)}
                 >
-                  <Icon name={item.icon} className="h-[17px] w-[17px] shrink-0" />
+                  <Icon name={item.icon} className={`h-5 w-5 ${iconClass(active)}`} />
                   {!collapsed && <span className="truncate">{item.label}</span>}
                 </Link>
               );
@@ -200,7 +180,7 @@ export default function Sidebar() {
             {/* The reader's own reports, under the two standing pages. */}
             {group.id === "reports" && recent.length > 0 && (
               <>
-                {!collapsed && <div className="mx-2.5 my-1.5 h-px bg-line" />}
+                {!collapsed && <div className="mx-3 my-2 h-px bg-line" />}
                 {recent.slice(0, RAIL_CAP).map((report) => {
                   const href = `/portal/reports/custom/${report.id}`;
                   const active = pathname === href;
@@ -210,15 +190,9 @@ export default function Sidebar() {
                       href={withFilters(href)}
                       aria-current={active ? "page" : undefined}
                       title={collapsed ? report.name : undefined}
-                      className={`mb-0.5 flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors ${
-                        collapsed ? "justify-center" : ""
-                      } ${
-                        active
-                          ? "bg-primary-tint font-semibold text-violet-ink"
-                          : "font-medium text-ink-500 hover:bg-canvas hover:text-ink-900"
-                      }`}
+                      className={itemClass(active)}
                     >
-                      <Icon name="custom-report" className="h-[17px] w-[17px] shrink-0" />
+                      <Icon name="custom-report" className={`h-5 w-5 ${iconClass(active)}`} />
                       {!collapsed && <span className="truncate">{report.name}</span>}
                     </Link>
                   );
@@ -226,7 +200,7 @@ export default function Sidebar() {
                 {!collapsed && recent.length > RAIL_CAP && (
                   <Link
                     href={withFilters("/portal/reports/custom")}
-                    className="mb-0.5 block rounded-md px-2.5 py-1.5 text-xs font-semibold text-ink-400 transition-colors hover:bg-canvas hover:text-ink-900"
+                    className="mb-0.5 flex min-h-9 items-center rounded-md px-3 text-sm font-semibold text-primary-text transition-colors hover:bg-primary-tint"
                   >
                     All {recent.length} reports
                   </Link>
@@ -239,46 +213,31 @@ export default function Sidebar() {
 
       {/* Coverage lives in the rail because it is the one number that
           is true on every page — the contract, not a metric. */}
-      <div className="shrink-0 border-t border-line p-2.5">
+      <div className="shrink-0 border-t border-line p-3">
         {collapsed ? (
           <div
-            className="flex flex-col items-center gap-1 py-1"
+            className="flex flex-col items-center gap-1.5 py-1"
             title={`${coverage.audited.toLocaleString()} of ${coverage.contracted.toLocaleString()} audited · ${coverage.pct}%`}
           >
-            <span className="mono text-xs font-semibold text-ink-900">{coverage.pct}%</span>
-            <span className="h-1 w-8 overflow-hidden rounded-full bg-line">
-              <span
-                className="block h-full rounded-full"
-                style={{
-                  width: `${coverage.pct}%`,
-                  background: "var(--vm-primary)",
-                }}
-              />
-            </span>
+            <span className="font-mono text-xs font-medium text-ink-900">{coverage.pct}%</span>
+            <Gauge value={coverage.pct} className="w-9" label={`${coverage.pct}% of contracted outlets audited`} />
           </div>
         ) : (
-          <div className="rounded-md bg-canvas p-3">
-            <div className="flex items-baseline justify-between">
-              <span className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
-                This month
-              </span>
-              <span className="mono text-xs font-semibold" style={{ color: coverage.onTrack ? "var(--vm-primary-text)" : "var(--vm-text)" }}>
-                {coverage.onTrack ? "On track" : "Behind"}
-              </span>
+          <div className="rounded-md border border-line bg-canvas p-3">
+            <div className="flex items-center justify-between gap-2">
+              <span className="vm-label">This month</span>
+              <BandChip band={coverage.onTrack ? "strong" : "attention"} label={coverage.onTrack ? "On track" : "Behind"} size="sm" />
             </div>
-            <div className="mono mt-1 text-[15px] font-semibold text-ink-900">
+            <div className="mt-2 font-mono text-sm font-medium text-ink-900">
               {coverage.audited.toLocaleString()}
-              <span className="text-xs font-medium text-ink-400">
-                {" "}/ {coverage.contracted.toLocaleString()}
-              </span>
+              <span className="text-ink-500"> / {coverage.contracted.toLocaleString()}</span>
             </div>
-            <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-line">
-              <div
-                className="h-full rounded-full"
-                style={{ width: `${coverage.pct}%`, background: "var(--color-violet)" }}
-              />
-            </div>
-            <div className="mt-1 text-xs text-ink-400">
+            <Gauge
+              className="mt-2"
+              value={coverage.pct}
+              label={`${coverage.pct}% of contracted outlets audited`}
+            />
+            <div className="mt-2 text-xs text-ink-500">
               {coverage.pct}% · {contract.daysRemaining} days left
             </div>
           </div>
