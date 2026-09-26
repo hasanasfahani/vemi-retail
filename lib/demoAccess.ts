@@ -207,7 +207,7 @@ export function readAccessSnapshot(): AccessSession | null {
   return cachedSession;
 }
 
-export const PORTAL_ENTRY = "/dashboard/overview";
+export const PORTAL_ENTRY = "/portal";
 
 /* ---------- submit ------------------------------------------
    Posts the lead, and holds for a minimum beat regardless of how
