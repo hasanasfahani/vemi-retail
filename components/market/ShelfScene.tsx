@@ -15,9 +15,10 @@
    things that were genuinely observed rather than decorating a picture
    with plausible-looking labels.
 
-   Packs are drawn in the portal's brand palette, not in Pepsi red and
-   Coca-Cola red: a reader matching this shelf to the donut above it
-   needs the same colour to mean the same brand in both. */
+   Packs are drawn in the portal's brand series colours (plan D2), not
+   in Pepsi blue and Coca-Cola red: a reader matching this shelf to the
+   charts beside it needs the same colour to mean the same brand. Gaps
+   are an Ink dashed outline with their label, never red. */
 
 import { useMemo } from "react";
 import { brandColor } from "./charts/theme";
@@ -154,14 +155,14 @@ export default function ShelfScene({
               {/* the board */}
               <rect x={4} y={base} width={312} height={5} rx={1.5} fill="var(--vm-line-strong)" />
               <rect x={4} y={base + 5} width={312} height={2} fill="var(--vm-line)" opacity={0.7} />
-              <text x={8} y={top + 12} fontSize={7.5} fill="var(--color-ink-400)" letterSpacing={0.4}>
+              <text x={8} y={top + 12} fontSize={7.5} fill="var(--vm-text-muted)" letterSpacing={0.4} fontFamily="var(--vm-font-mono)">
                 {shelf.label.toUpperCase()}
               </text>
 
               {dropped > 0 && (
                 <text
                   x={312} y={top + 12} textAnchor="end"
-                  fontSize={7} fill="var(--color-ink-400)"
+                  fontSize={7} fill="var(--vm-text-muted)" fontFamily="var(--vm-font-mono)"
                 >
                   +{dropped} more
                 </text>
@@ -180,7 +181,7 @@ export default function ShelfScene({
                         x={left} y={packTop} width={Math.max(width, 20)} height={shape.h}
                         rx={3}
                         fill="none"
-                        stroke="var(--color-critical)"
+                        stroke="var(--vm-text)"
                         strokeWidth={1.4}
                         strokeDasharray="3 2.5"
                         opacity={0.85}
@@ -188,7 +189,7 @@ export default function ShelfScene({
                       {overlays && (
                         <text
                           x={left + 2} y={packTop - 3}
-                          fontSize={6.5} fontWeight={600} fill="var(--color-critical)"
+                          fontSize={6.5} fontWeight={600} fill="var(--vm-text)" fontFamily="var(--vm-font-mono)"
                         >
                           OUT OF STOCK · {slot.name}
                         </text>
@@ -230,12 +231,12 @@ export default function ShelfScene({
                         <rect
                           x={left - 1.5} y={packTop - 2}
                           width={width + 3} height={shape.h + 4}
-                          fill="none" stroke="var(--color-violet)" strokeWidth={1} opacity={0.9}
+                          fill="none" stroke="var(--vm-primary)" strokeWidth={1} opacity={0.9}
                           rx={2}
                         />
                         <text
                           x={left} y={packTop - 4}
-                          fontSize={6.5} fontWeight={600} fill="var(--color-violet-ink)"
+                          fontSize={6.5} fontWeight={600} fill="var(--vm-primary-text)"
                         >
                           {brandOf(slot.brandId)?.name ?? slot.brandId} · {n}
                         </text>

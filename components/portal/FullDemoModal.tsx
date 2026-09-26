@@ -127,7 +127,7 @@ export default function FullDemoModal({
         {...extra}
       />
       {errors[name] ? (
-        <p className="mt-1 text-xs" style={{ color: "var(--color-critical)" }}>
+        <p className="mt-1 text-xs" style={{ color: "var(--vm-danger)" }}>
           {errors[name]}
         </p>
       ) : null}
@@ -214,7 +214,7 @@ export default function FullDemoModal({
                 )}
 
                 {industryError ? (
-                  <p className="mt-1 text-xs" style={{ color: "var(--color-critical)" }}>
+                  <p className="mt-1 text-xs" style={{ color: "var(--vm-danger)" }}>
                     {industryError}
                   </p>
                 ) : null}

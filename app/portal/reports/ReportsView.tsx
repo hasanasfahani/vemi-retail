@@ -23,7 +23,7 @@ import { Card, ScoreRing, StatCard, Toasts, useToasts } from "@/components/marke
 import Badge from "@/components/market/ui/Badge";
 import Bar from "@/components/market/ui/Bar";
 import Delta from "@/components/market/ui/Delta";
-import { ChartLegend, StackedBars, brandColor, orderedBrands } from "@/components/market/charts";
+import { ChartLegend, StackedBars, brandColor, brandSwatch, SERIES3, threeSeriesRows } from "@/components/market/charts";
 import { scoreBand } from "@/components/market/ui/health";
 import {
   buildReport, headline, reportCsv, reportFileName,
@@ -41,7 +41,6 @@ function Reports({ view }: { view: MarketView }) {
   const { toasts, push, dismiss } = useToasts();
   const report = useMemo(() => buildReport(view), [view]);
   const s = useMemo(() => shelf(view), [view]);
-  const ordered = orderedBrands();
 
   const points = useMemo<MapPoint[]>(
     () =>
@@ -258,7 +257,7 @@ function Reports({ view }: { view: MarketView }) {
                     <span className="flex items-center gap-2 text-sm font-medium text-ink-900">
                       <span
                         className="h-2.5 w-2.5 rounded-[3px]"
-                        style={{ background: brandColor(brand.id) }}
+                        style={brandSwatch(brand.id)}
                         aria-hidden
                       />
                       {brand.name}
@@ -284,14 +283,12 @@ function Reports({ view }: { view: MarketView }) {
             title="Shelf battle by governorate"
             lead="Share of measured facings."
             action={
-              <ChartLegend
-                items={ordered.map((b) => ({ id: b.id, name: b.name, color: brandColor(b.id) }))}
-              />
+              <ChartLegend items={SERIES3.map((x) => ({ id: x.key, name: x.name, color: x.color }))} />
             }
           >
             <StackedBars
-              data={s.byGovernorate}
-              series={ordered.map((b) => ({ key: b.id, name: b.name, color: brandColor(b.id) }))}
+              data={threeSeriesRows(s.byGovernorate)}
+              series={[...SERIES3]}
               max={100}
               height={280}
             />

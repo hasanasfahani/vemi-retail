@@ -15,7 +15,7 @@ import { BAND_WORD, type BrandHealth } from "@/lib/market/brandHealth";
 import StatusChip from "./ui/StatusChip";
 import { componentDetail } from "@/lib/market/bandDetail";
 import { BAND_COLOR } from "./ui/health";
-import { brandColor } from "./charts/theme";
+import { brandSwatch } from "./charts/theme";
 import Delta from "./ui/Delta";
 
 export default function BrandHealthCard({
@@ -47,7 +47,7 @@ export default function BrandHealthCard({
         <span className="flex min-w-0 items-center gap-2">
           <span
             className="h-2.5 w-2.5 shrink-0 rounded-[3px]"
-            style={{ background: brandColor(health.brandId) }}
+            style={brandSwatch(health.brandId)}
             aria-hidden
           />
           <span className="truncate font-display text-sm font-semibold tracking-tight text-ink-900">

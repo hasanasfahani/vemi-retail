@@ -46,7 +46,7 @@ function Field({
       </label>
       {children}
       {error ? (
-        <p className="mt-1 text-xs" style={{ color: "var(--color-critical)" }}>
+        <p className="mt-1 text-xs" style={{ color: "var(--vm-danger)" }}>
           {error}
         </p>
       ) : null}

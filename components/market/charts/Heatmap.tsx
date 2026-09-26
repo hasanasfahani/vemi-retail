@@ -29,12 +29,10 @@ export default function Heatmap({
   unit?: string;
   onCellClick?: (rowId: string, colId: string) => void;
   legend?: ReactNode;
-  /* "neutral" ramps through the portal's accent, for a magnitude that
-     is neither good nor bad — penetration, coverage, price. "bad"
-     ramps through the critical red, for a magnitude that is a count of
-     failures: a grid of out-of-stocks drawn in the same violet as a
-     distribution map reads as ordinary volume, and a dark cell should
-     mean the same thing everywhere it appears. */
+  /* "neutral" ramps Violet 100 → Violet → Ink 800, for a magnitude that
+     is neither good nor bad — penetration, coverage, price. "bad" runs
+     the D1 band ramp from Paper to Ink, for a magnitude that counts
+     failures, so a dark cell means "needs you sooner" everywhere. */
   tone?: "neutral" | "bad";
 }) {
   const values: number[] = [];
@@ -56,10 +54,10 @@ export default function Heatmap({
   const RAMP = {
     neutral: [
       "var(--vm-primary-tint)",
-      "var(--vm-primary-tint)",
-      "var(--color-stock-1)",
-      "var(--color-stock-3)",
-      "var(--color-violet)",
+      "var(--vm-portfolio-3)",
+      "var(--vm-portfolio-2)",
+      "var(--vm-primary)",
+      "var(--vm-ink-800)",
     ],
     bad: ["var(--vm-bg)", "var(--vm-band-strong)", "var(--vm-band-average)", "var(--vm-band-attention)", "var(--vm-band-critical)"],
   } as const;
@@ -69,9 +67,11 @@ export default function Heatmap({
     const step = t < 0.2 ? 0 : t < 0.4 ? 1 : t < 0.6 ? 2 : t < 0.8 ? 3 : 4;
     return RAMP[tone][step];
   };
+  /* Text flips to white only on the two darkest steps, where Ink would
+     fall under 4.5:1; every lighter step keeps Ink. */
   const ink = (v: number) => {
     const t = hi === lo ? 1 : (v - lo) / (hi - lo);
-    return t >= 0.6 ? "var(--vm-surface)" : "var(--color-ink-700)";
+    return t >= 0.6 ? "var(--vm-surface)" : "var(--vm-text)";
   };
 
   return (
@@ -112,7 +112,13 @@ export default function Heatmap({
                     <td
                       key={col.id}
                       className="rounded-sm"
-                      style={{ background: fill(v), color: ink(v) }}
+                      style={{
+                        background: fill(v),
+                        color: ink(v),
+                        /* The light end of the ramp is 1.22:1 against the
+                           card; a hairline keeps the cell a cell. */
+                        boxShadow: (hi === lo ? 1 : (v - lo) / (hi - lo)) < 0.4 ? "inset 0 0 0 1px var(--vm-line)" : undefined,
+                      }}
                       title={cellLabel?.(row.id, col.id, v) ?? `${row.label} · ${col.label}: ${v}${unit}`}
                     >
                       {onCellClick ? (

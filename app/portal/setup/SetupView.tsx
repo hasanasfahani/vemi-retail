@@ -16,7 +16,7 @@ import { Card, DataTable, StatCard, Toasts, useToasts, type Column } from "@/com
 import Badge from "@/components/market/ui/Badge";
 import Bar from "@/components/market/ui/Bar";
 import { useTargets } from "@/components/market/useTargets";
-import { brandColor } from "@/components/market/charts";
+import { brandSwatch } from "@/components/market/charts";
 import {
   DEFAULT_TARGETS, TARGET_META, resetTargets, setTarget, type Targets,
 } from "@/lib/market/settings";
@@ -50,7 +50,7 @@ function Setup({ view }: { view: MarketView }) {
         <span className="flex items-center gap-2">
           <span
             className="h-2.5 w-2.5 shrink-0 rounded-[3px]"
-            style={{ background: brandColor(s.brandId) }}
+            style={brandSwatch(s.brandId)}
             aria-hidden
           />
           <span className="font-medium text-ink-900">{s.name}</span>
@@ -196,7 +196,7 @@ function Setup({ view }: { view: MarketView }) {
                 <div className="flex items-center gap-2">
                   <span
                     className="h-2.5 w-2.5 shrink-0 rounded-[3px]"
-                    style={{ background: brandColor(brand.id) }}
+                    style={brandSwatch(brand.id)}
                     aria-hidden
                   />
                   <p className="min-w-0 truncate text-sm font-semibold text-ink-900">

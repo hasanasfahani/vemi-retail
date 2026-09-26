@@ -1,14 +1,13 @@
 /* Six points of trailing context beside a KPI. Hand-drawn SVG: a chart
    library for eleven pixels of line would cost more than it carries.
-
-   The last point is emphasised — the figure the tile states is the
-   endpoint of this line, and the eye should land there. */
+   Violet 2px line on a flat Violet 100 area; the last point is marked,
+   because the figure the tile states is the endpoint of this line. */
 
 export default function Sparkline({
   points,
   width = 76,
   height = 26,
-  color = "var(--color-violet)",
+  color = "var(--vm-chart-1)",
 }: {
   points: number[];
   width?: number;
@@ -27,9 +26,9 @@ export default function Sparkline({
 
   return (
     <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} aria-hidden className="overflow-visible">
-      <path d={area} fill={color} opacity={0.09} />
+      <path d={area} fill="var(--vm-chart-base)" opacity={0.8} />
       <path d={d} fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx={x(points.length - 1)} cy={y(points[points.length - 1])} r={2.6} fill={color} stroke="white" strokeWidth={1.4} />
+      <circle cx={x(points.length - 1)} cy={y(points[points.length - 1])} r={3} fill={color} stroke="var(--vm-surface)" strokeWidth={1.5} />
     </svg>
   );
 }

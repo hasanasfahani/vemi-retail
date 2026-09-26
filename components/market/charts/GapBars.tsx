@@ -13,7 +13,7 @@
    for and cannot see in a chart that starts at zero. */
 
 import type { ReactNode } from "react";
-import { BAND_COLOR, rateBand } from "../ui/health";
+import { BAND_COLOR, BAND_EDGE, rateBand } from "../ui/health";
 
 export type GapRow = {
   id: string;
@@ -77,7 +77,7 @@ export default function GapBars({
               >
                 {/* The target itself, down the middle. */}
                 <span
-                  className="absolute bottom-0 left-1/2 top-0 w-px -translate-x-1/2 bg-ink-400"
+                  className="absolute bottom-[-2px] left-1/2 top-[-2px] w-[2px] -translate-x-1/2 rounded-[1px] bg-ink-900"
                   aria-hidden
                 />
                 <span
@@ -85,15 +85,17 @@ export default function GapBars({
                   style={{
                     left: behind ? `${50 - width}%` : "50%",
                     width: `${width}%`,
+                    boxShadow:
+                      !parLabel && behind ? `inset 0 0 0 1px ${BAND_EDGE[rateBand(row.value, par)]}` : undefined,
                     /* Banded rather than one flat red: a governorate
                        two points short and one twenty points short are
                        not the same news, and the portal already has a
                        vocabulary for saying so. */
                     background: parLabel
-                      ? "var(--color-serious)"
+                      ? "var(--vm-chart-3)"
                       : behind
                         ? BAND_COLOR[rateBand(row.value, par)]
-                        : "var(--color-good)",
+                        : "var(--vm-chart-1)",
                   }}
                   aria-hidden
                 />
@@ -101,13 +103,9 @@ export default function GapBars({
 
               <span
                 className="mono w-[4.75rem] shrink-0 text-right text-xs font-semibold"
-                style={{
-                  color: parLabel
-                    ? "var(--color-ink-900)"
-                    : behind
-                      ? BAND_COLOR[rateBand(row.value, par)]
-                      : "var(--color-good)",
-                }}
+                /* The figure stays Ink: band fills are for marks, and the
+                   lightest of them is unreadable as text. */
+                style={{ color: "var(--vm-text)" }}
               >
                 {gap > 0 ? "+" : ""}
                 {r1(gap)}

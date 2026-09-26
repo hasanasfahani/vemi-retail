@@ -88,7 +88,7 @@ export default function Header({
             </svg>
             <span
               className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full"
-              style={{ background: "var(--color-critical)" }}
+              style={{ background: "var(--vm-primary)" }}
             />
           </button>
 
@@ -199,8 +199,8 @@ function NotificationPanel({ onClose }: { onClose: () => void }) {
     { tone: "good", title: "12 flagged POS were revisited and verified", when: "3 days ago" },
   ] as const;
   const colour = {
-    critical: "var(--color-critical)", warn: "var(--color-warn)",
-    good: "var(--color-good)", neutral: "var(--color-ink-400)",
+    critical: "var(--vm-band-critical)", warn: "var(--vm-band-attention)",
+    good: "var(--vm-primary)", neutral: "var(--vm-line-strong)",
   };
   return (
     <>

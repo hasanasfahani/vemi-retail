@@ -264,7 +264,7 @@ export default function PricingTab({ view }: { view: MarketView }) {
                 id: band.id,
                 label: band.label,
                 value: band.value,
-                color: band.id === "at-list" ? "var(--color-good)" : "var(--color-serious)",
+                color: band.id === "at-list" ? "var(--vm-chart-1)" : "var(--vm-chart-3)",
               }))}
             />
           </Card>

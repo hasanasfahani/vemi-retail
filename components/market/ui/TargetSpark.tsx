@@ -44,8 +44,10 @@ export default function TargetSpark({
     .map((v, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)} ${y(v).toFixed(1)}`)
     .join(" ");
   const last = points[points.length - 1];
+  /* Whether the target is met is said in words on the card; the line
+     stays Violet either way (no green for "good"). */
   const met = goodUp ? last >= target : last <= target;
-  const color = met ? "var(--color-good)" : "var(--color-violet)";
+  const color = "var(--vm-chart-1)";
 
   /* Fill between the series and the target line, which is the gap the
      reader is being asked to close. */
@@ -60,13 +62,13 @@ export default function TargetSpark({
       viewBox={`0 0 ${width} ${height}`}
       className="overflow-visible"
       role="img"
-      aria-label={`Six cycles, latest ${last}, target ${target}`}
+      aria-label={`Six cycles, latest ${last}, target ${target}${met ? ", target met" : ""}`}
     >
-      <path d={area} fill={color} opacity={0.12} />
+      <path d={area} fill="var(--vm-chart-base)" opacity={0.9} />
       {/* the target */}
       <line
         x1={pad} y1={y(target)} x2={width - pad} y2={y(target)}
-        stroke="var(--color-ink-400)" strokeWidth={1} strokeDasharray="3 2.5"
+        stroke="var(--vm-text)" strokeWidth={1} strokeDasharray="3 2.5"
       />
       <path
         d={line}
@@ -76,17 +78,12 @@ export default function TargetSpark({
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      {points.map((v, i) =>
-        i === points.length - 1 ? null : (
-          <circle key={i} cx={x(i)} cy={y(v)} r={1.4} fill={color} opacity={0.5} />
-        )
-      )}
       <circle
         cx={x(points.length - 1)}
         cy={y(last)}
         r={3}
         fill={color}
-        stroke="white"
+        stroke="var(--vm-surface)"
         strokeWidth={1.6}
       />
     </svg>

@@ -22,10 +22,12 @@
 import type { ReactNode } from "react";
 import {
   DotPlot, GapBars, Heatmap, RankedBars, ShareDonut, SplitBars, StackedBars,
-  brandColor, MEASURE,
+  brandColor, MEASURE, SERIES3, threeSeriesRows,
 } from "@/components/market/charts";
 import { Bar } from "@/components/market/ui";
-import { rateBand, scoreBand, BAND_COLOR } from "@/components/market/ui/health";
+import { rateBand, scoreBand } from "@/components/market/ui/health";
+import { BandChip } from "@/components/vemi/BandChip";
+import { Gauge } from "@/components/vemi/Gauge";
 import { availability, assortment, pricing, posm, shelf } from "./performance";
 import { scoreboard, districtLeads } from "./competition";
 import { portfolioHealth } from "./brandHealth";
@@ -138,18 +140,19 @@ function KpiRow({ view, targets }: BlockContext) {
               {cell.value}
               {cell.unit && <span className="ml-0.5 text-sm font-semibold text-ink-500">{cell.unit}</span>}
             </span>
-            <span className="mt-2 block h-1.5 overflow-hidden rounded-full bg-canvas">
-              <span
-                className="block h-full rounded-full"
-                style={{
-                  width: `${Math.max(0, Math.min(100, (cell.value / Math.max(cell.target, cell.value)) * 100))}%`,
-                  background: BAND_COLOR[band],
-                }}
-              />
-            </span>
-            <span className="mono mt-1 block text-xs text-ink-400">
-              target {cell.target}
-              {cell.unit}
+            <Gauge
+              className="mt-3"
+              value={cell.value}
+              max={Math.max(cell.target, cell.value) * 1.1}
+              target={cell.target}
+              label={`${cell.label} ${cell.value}${cell.unit ?? ""} against a ${cell.target}${cell.unit ?? ""} target`}
+            />
+            <span className="mt-2 flex flex-wrap items-center gap-2">
+              <BandChip band={band} size="sm" />
+              <span className="mono text-xs text-ink-500">
+                target {cell.target}
+                {cell.unit}
+              </span>
             </span>
           </div>
         );
@@ -265,7 +268,7 @@ export const BLOCKS: BlockDef[] = [
           data={a.byChannel.map((row) => ({ label: row.label, client: row.client, category: row.category }))}
           series={[
             { key: "client", name: clientBrand.name, color: MEASURE },
-            { key: "category", name: "Rest of category", color: "var(--color-comp-1)" },
+            { key: "category", name: "Rest of category", color: "var(--vm-chart-3)" },
           ]}
           mode="grouped"
           max={100}
@@ -355,11 +358,13 @@ export const BLOCKS: BlockDef[] = [
         <StackedBars
           /* ShareRow already carries one key per brand — the same shape
              the Competition page feeds this chart. */
-          data={s.byGovernorate.map((row) => ({
-            label: String(row.label),
-            ...Object.fromEntries(ordered.map((b) => [b.id, Number(row[b.id] ?? 0)])),
-          }))}
-          series={ordered.map((b) => ({ key: b.id, name: b.name, color: brandColor(b.id) }))}
+          data={threeSeriesRows(
+            s.byGovernorate.map((row) => ({
+              label: String(row.label),
+              ...Object.fromEntries(ordered.map((b) => [b.id, Number(row[b.id] ?? 0)])),
+            }))
+          )}
+          series={[...SERIES3]}
           max={100}
           height={250}
         />
@@ -473,7 +478,7 @@ export const BLOCKS: BlockDef[] = [
             id: band.id,
             label: band.label,
             value: band.value,
-            color: band.id === "at-list" ? "var(--color-good)" : "var(--color-serious)",
+            color: band.id === "at-list" ? "var(--vm-chart-1)" : "var(--vm-chart-3)",
           }))}
         />
       );

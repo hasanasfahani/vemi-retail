@@ -8,7 +8,7 @@ import { ConfidenceBadge, type Confidence } from "./ConfidenceBadge";
  * should be computed from the same data the chart draws.
  */
 export function ChartCard({
-  title, soWhat, howToRead, asOf, base, confidence, actions, alert, children, className, id,
+  title, soWhat, howToRead, asOf, base, confidence, actions, alert, children, className, id, table,
 }: {
   title: string;
   soWhat: ReactNode;
@@ -21,6 +21,9 @@ export function ChartCard({
   children: ReactNode;
   className?: string;
   id?: string;
+  /** The chart's numbers as a table (brand charts.md: a data table is
+      always available). Rendered behind a "View as table" disclosure. */
+  table?: { columns: string[]; rows: (string | number)[][]; numeric?: boolean[] };
 }) {
   const foot = [asOf, base].filter(Boolean).join(" · ");
   return (
@@ -35,6 +38,31 @@ export function ChartCard({
       {alert && <div>{alert}</div>}
       <p className="vm-chartcard__sowhat">{soWhat}</p>
       <div className="vm-chartcard__body">{children}</div>
+      {table && (
+        <details className="vm-chartcard__how">
+          <summary>View as table</summary>
+          <div className="mt-2 overflow-x-auto">
+            <table className="vm-table">
+              <thead>
+                <tr>
+                  {table.columns.map((c, i) => (
+                    <th key={c} className={table.numeric?.[i] ? "num" : undefined}>{c}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {table.rows.map((r, ri) => (
+                  <tr key={ri}>
+                    {r.map((v, i) => (
+                      <td key={i} className={table.numeric?.[i] ? "num" : undefined}>{v}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </details>
+      )}
       <footer className="vm-chartcard__foot">
         <details className="vm-chartcard__how">
           <summary>How to read this</summary>

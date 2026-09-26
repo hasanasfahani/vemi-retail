@@ -427,7 +427,7 @@ function GovernorateRows({
               ) : (
                 <span
                   className="mono text-xs font-semibold"
-                  style={{ color: pos.delta >= 0 ? "var(--color-good)" : "var(--color-critical)" }}
+                  style={{ color: "var(--vm-text)" }}
                 >
                   {pos.delta > 0 ? "+" : ""}
                   {pos.delta}pt

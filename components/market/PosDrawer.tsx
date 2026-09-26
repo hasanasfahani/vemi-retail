@@ -197,8 +197,9 @@ export default function PosDrawer({
                           style={{
                             background:
                               value >= kpi.target
-                                ? "var(--color-good)"
-                                : "var(--color-serious)",
+                                ? "var(--vm-band-strong)"
+                                : "var(--vm-band-attention)",
+                            boxShadow: value >= kpi.target ? "inset 0 0 0 1.5px var(--vm-band-average)" : undefined,
                           }}
                           aria-label={value >= kpi.target ? "at target" : "below target"}
                         />

@@ -251,7 +251,7 @@ export default function Sidebar() {
                 className="block h-full rounded-full"
                 style={{
                   width: `${coverage.pct}%`,
-                  background: coverage.onTrack ? "var(--color-good)" : "var(--color-warn)",
+                  background: "var(--vm-primary)",
                 }}
               />
             </span>
@@ -262,7 +262,7 @@ export default function Sidebar() {
               <span className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
                 This month
               </span>
-              <span className="mono text-xs font-semibold" style={{ color: coverage.onTrack ? "var(--color-good)" : "var(--color-warn)" }}>
+              <span className="mono text-xs font-semibold" style={{ color: coverage.onTrack ? "var(--vm-primary-text)" : "var(--vm-text)" }}>
                 {coverage.onTrack ? "On track" : "Behind"}
               </span>
             </div>

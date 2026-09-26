@@ -378,7 +378,7 @@ export default function AccessRequestModal() {
                   }`}
                   style={{
                     borderColor: industryError
-                      ? "var(--color-critical)"
+                      ? "var(--vm-danger)"
                       : "var(--color-line-strong)",
                   }}
                 >
@@ -403,7 +403,7 @@ export default function AccessRequestModal() {
                     className="mt-2 w-full rounded-md border bg-white px-3 py-2.5 text-[15px] text-ink-900 outline-none transition-colors focus:border-violet placeholder:text-ink-500"
                     style={{
                       borderColor: industryError
-                        ? "var(--color-critical)"
+                        ? "var(--vm-danger)"
                         : "var(--color-line-strong)",
                     }}
                   />
@@ -511,7 +511,7 @@ function Field({
         className="w-full rounded-md border bg-white px-3 py-2.5 text-[15px] text-ink-900 outline-none transition-colors focus:border-violet placeholder:text-ink-400"
         style={{
           borderColor: error
-            ? "var(--color-critical)"
+            ? "var(--vm-danger)"
             : "var(--color-line-strong)",
         }}
       />
@@ -525,7 +525,7 @@ function FieldError({ message }: { message?: string }) {
   return (
     <p
       className="mt-1.5 text-sm font-medium"
-      style={{ color: "var(--color-critical)" }}
+      style={{ color: "var(--vm-danger)" }}
     >
       {message}
     </p>

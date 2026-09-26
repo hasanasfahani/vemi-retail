@@ -10,7 +10,8 @@
    "On track" is arithmetic, not a mood: outlets remaining ÷ days
    remaining against the rate achieved so far. */
 
-import { BAND_COLOR } from "./ui/health";
+import { BandChip } from "@/components/vemi/BandChip";
+import { Gauge } from "@/components/vemi/Gauge";
 
 export default function CoverageRing({
   audited,
@@ -21,7 +22,6 @@ export default function CoverageRing({
   perDaySoFar,
   perDayRequired,
   onTrack,
-  size = 168,
 }: {
   audited: number;
   contracted: number;
@@ -33,67 +33,33 @@ export default function CoverageRing({
   onTrack: boolean;
   size?: number;
 }) {
-  const stroke = 13;
-  const r = (size - stroke) / 2;
-  const c = 2 * Math.PI * r;
-  const filled = (Math.max(0, Math.min(100, pct)) / 100) * c;
-  const color = onTrack ? BAND_COLOR.strong : BAND_COLOR.attention;
 
   return (
     <div className="flex flex-wrap items-center gap-6">
-      <div className="relative shrink-0" style={{ width: size, height: size }}>
-        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden>
-          <g transform={`rotate(-90 ${size / 2} ${size / 2})`}>
-            <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--color-line)" strokeWidth={stroke} />
-            <circle
-              cx={size / 2} cy={size / 2} r={r}
-              fill="none" stroke={color} strokeWidth={stroke} strokeLinecap="round"
-              strokeDasharray={`${filled} ${c - filled}`}
-            />
-            {/* Quarter milestones, drawn on the track itself so the
-                ring says how far through the month's target it is
-                without a second scale to read. */}
-            {[25, 50, 75].map((mark) => {
-              const angle = (mark / 100) * 2 * Math.PI;
-              const inner = r - stroke / 2;
-              const outer = r + stroke / 2;
-              const cx = size / 2;
-              const cy = size / 2;
-              return (
-                <line
-                  key={mark}
-                  x1={cx + inner * Math.cos(angle)}
-                  y1={cy + inner * Math.sin(angle)}
-                  x2={cx + outer * Math.cos(angle)}
-                  y2={cy + outer * Math.sin(angle)}
-                  stroke="white"
-                  strokeWidth={2}
-                  opacity={pct >= mark ? 0.75 : 0.9}
-                />
-              );
-            })}
-          </g>
-        </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="font-display text-[28px] font-semibold leading-none tracking-tight text-ink-900">
-            {pct}%
-          </span>
-          <span className="mono mt-1 text-xs text-ink-400">
-            {audited.toLocaleString()} / {contracted.toLocaleString()}
-          </span>
+      {/* Was a ring; the brand avoids donut forms, so coverage is the
+          figure over a linear gauge with the quarter marks on it. */}
+      <div className="flex w-full max-w-[220px] shrink-0 flex-col">
+        <span className="tnum text-[56px] leading-[60px]">
+          {pct}
+          <span className="text-[28px] text-ink-500">%</span>
+        </span>
+        <div className="relative mt-3">
+          <Gauge value={pct} max={100} label={`${pct}% of contracted outlets audited`} />
+          {[25, 50, 75].map((mark) => (
+            <span key={mark} aria-hidden className="absolute top-0 h-1.5 w-[2px] bg-white" style={{ left: `${mark}%` }} />
+          ))}
         </div>
+        <span className="mono mt-2 text-xs text-ink-500">
+          {audited.toLocaleString()} / {contracted.toLocaleString()}
+        </span>
       </div>
 
       <div className="min-w-[220px] flex-1">
         <p className="font-display text-lg font-semibold tracking-tight text-ink-900">
           {audited.toLocaleString()} of {contracted.toLocaleString()} outlets audited
         </p>
-        <p
-          className="mt-1 inline-flex items-center gap-1.5 rounded-full px-2 py-[2px] text-xs font-semibold"
-          style={{ background: `${color}1a`, color }}
-        >
-          <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden />
-          {pct}% market coverage achieved · {onTrack ? "on track" : "behind plan"}
+        <p className="mt-2">
+          <BandChip band={onTrack ? "strong" : "attention"} label={`${pct}% coverage · ${onTrack ? "on track" : "behind plan"}`} />
         </p>
 
         <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-4">

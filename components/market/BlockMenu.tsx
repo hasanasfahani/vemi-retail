@@ -144,7 +144,7 @@ export default function BlockMenu({
               <div className="my-1 h-px bg-line" />
               <button
                 type="button"
-                className={`${item} text-[color:var(--color-critical)]`}
+                className={`${item} text-ink-900`}
                 onClick={() => { onRemove(); setOpen(false); }}
               >
                 Remove

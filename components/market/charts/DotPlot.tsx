@@ -104,7 +104,7 @@ export default function DotPlot({
                   />
                   {par !== undefined && (
                     <span
-                      className="absolute bottom-[-4px] top-[-4px] w-px bg-ink-400"
+                      className="absolute bottom-[-4px] top-[-4px] w-[2px] -translate-x-1/2 rounded-[1px] bg-ink-900"
                       style={{ left: `${at(par)}%` }}
                       aria-hidden
                     />

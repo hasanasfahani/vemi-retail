@@ -98,7 +98,7 @@ export default function KpiGapBar({
             </dt>
             <dd
               className="mono mt-1 text-lg font-semibold"
-              style={{ color: met ? "var(--color-good)" : "var(--color-serious)" }}
+              style={{ color: met ? "var(--vm-primary-text)" : "var(--vm-text)" }}
             >
               {met ? `+${Math.abs(gap)}` : `−${Math.abs(gap)}`}
               {unit}

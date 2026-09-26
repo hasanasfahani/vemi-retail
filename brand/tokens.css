@@ -69,6 +69,22 @@
   --vm-band-attention: #5E57F1;  /* Violet */
   --vm-band-critical: #15133A;   /* Ink */
 
+  /* Validated with the dataviz palette checker (light, on #FFFFFF):
+       series 1-3 (violet / ink / slate): CVD ΔE >= 18.7 all pairs,
+         normal-vision ΔE >= 19.1, contrast >= 3:1 — PASS. The checker's
+         lightness-band and chroma-floor flags on Ink and Slate are the
+         brand's deliberate emphasis form (client in hue, rivals in
+         neutrals), not a defect.
+       band ramp / portfolio ramp / heat ramp: monotone, single hue,
+         adjacent ΔL >= 0.06 — PASS; light end Violet 100 at 1.22:1 —
+         relief required and given: every Violet 100 mark carries a
+         Violet 400 edge (BAND_EDGE, brandOutline) or a hairline plus
+         its number (heat cells), and the band word always travels
+         with the color.
+       Split portfolio as categories: violet ↔ violet 400 ΔE 9.6 —
+         legal only as an ordinal ramp with direct labels, which is how
+         it ships (opt-in, legend + values in text). */
+
   /* The client's portfolio when a chart splits it (plan D2). Default
      charts show the portfolio as one chart-1 series. */
   --vm-portfolio-1: #5E57F1;     /* Violet */

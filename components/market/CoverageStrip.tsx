@@ -10,7 +10,7 @@
    "On track" stays arithmetic: outlets remaining ÷ days remaining,
    against the rate achieved so far. */
 
-import { BAND_COLOR } from "./ui/health";
+import { BandChip } from "@/components/vemi/BandChip";
 
 export default function CoverageStrip({
   audited,
@@ -31,7 +31,8 @@ export default function CoverageStrip({
   perDayRequired: number;
   onTrack: boolean;
 }) {
-  const color = onTrack ? BAND_COLOR.strong : BAND_COLOR.attention;
+  /* Progress is always Violet; the chip carries the verdict (plan D1). */
+  const color = "var(--vm-primary)";
 
   return (
     <section className="rounded-lg border border-line bg-white px-4 py-3 shadow-[var(--shadow-card)]">
@@ -48,13 +49,7 @@ export default function CoverageStrip({
           <span>{daysRemaining} days left</span>
         </p>
 
-        <span
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2 py-[2px] text-xs font-semibold"
-          style={{ background: `${color}1a`, color }}
-        >
-          <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden />
-          {onTrack ? "On track" : "Behind plan"}
-        </span>
+        <BandChip band={onTrack ? "strong" : "attention"} label={onTrack ? "On track" : "Behind plan"} size="sm" />
 
         <span className="mono ml-auto shrink-0 text-xs text-ink-400">
           {perDaySoFar}/day so far · {perDayRequired}/day needed

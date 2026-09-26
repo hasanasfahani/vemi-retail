@@ -575,7 +575,7 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
             <MetricSwitch value={mapMetric} onChange={setMapMetric} metrics={METRICS} />
           </span>
         }
-        footnote="Outlets are placed within their district rather than surveyed to the street. A cluster is coloured by how its outlets typically score and ringed in red when any of them is critical — hover it for the count."
+        footnote="Outlets are placed within their district rather than surveyed to the street. A cluster is coloured by how its outlets typically score (darker needs you sooner) and ringed in Ink when any of them is critical — hover it for the count."
       >
         <div className="mb-2.5">
           <MapLegend counts={bandCounts} />

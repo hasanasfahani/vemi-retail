@@ -9,8 +9,9 @@
    partial answer presented as a final one is the failure this page is
    supposed to prevent. */
 
+import { BandChip } from "@/components/vemi/BandChip";
 import { RESULT_LABEL, type Cohort, type RevisitResult } from "@/lib/market/followUp";
-import { BAND_COLOR, type Band } from "./ui/health";
+import type { Band } from "./ui/health";
 
 const BAND: Record<RevisitResult, Band> = {
   pending: "average",
@@ -33,20 +34,14 @@ export default function FollowUpResult({
   unit?: string;
   compact?: boolean;
 }) {
-  const color = BAND_COLOR[BAND[result]];
   const revisited = cohort.matched.length;
   const requested = cohort.requested.length;
 
   return (
     <div className="min-w-0">
-      <span
-        className="inline-flex items-center gap-1.5 rounded-full px-2 py-[2px] text-xs font-semibold"
-        style={{ background: `${color}1a`, color }}
-      >
-        <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden />
-        {RESULT_LABEL[result]}
+      <BandChip band={BAND[result]} label={RESULT_LABEL[result]} size="sm">
         {preliminary && <span className="font-normal opacity-80">· preliminary</span>}
-      </span>
+      </BandChip>
 
       <p className="mono mt-1 text-xs text-ink-400">
         {revisited.toLocaleString()} / {requested.toLocaleString()} revisited
@@ -59,7 +54,7 @@ export default function FollowUpResult({
           {unit}
           <span
             className="ml-1.5 font-semibold"
-            style={{ color: (cohort.delta ?? 0) >= 0 ? "var(--color-good)" : "var(--color-critical)" }}
+            style={{ color: "var(--vm-text)" }}
           >
             {(cohort.delta ?? 0) > 0 ? "+" : ""}
             {cohort.delta}pt

@@ -350,6 +350,6 @@ function Rate({ value, target }: { value: number | null; target?: number }) {
   }
   const short = target !== undefined && value < target;
   return (
-    <span className={`mono ${short ? "text-[color:var(--color-serious)]" : ""}`}>{value}%</span>
+    <span className={`mono ${short ? "font-semibold text-ink-900" : "text-ink-500"}`}>{value}%</span>
   );
 }

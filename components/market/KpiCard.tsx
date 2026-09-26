@@ -19,7 +19,7 @@ import Delta from "./ui/Delta";
 import InfoTip from "./ui/InfoTip";
 import StatusChip from "./ui/StatusChip";
 import TargetSpark from "./ui/TargetSpark";
-import { BAND_COLOR, rateBand, type Band } from "./ui/health";
+import { rateBand, type Band } from "./ui/health";
 import { distributionDetail, rateBandDetail, scoreBandDetail } from "@/lib/market/bandDetail";
 import WatchEye from "./WatchEye";
 import type { Watch as WatchRecord, WatchScope } from "@/lib/market/watchlist";
@@ -63,7 +63,6 @@ export default function KpiCard({
   watch?: { kpi: WatchRecord["kpi"]; month: string; scope?: WatchScope };
 }) {
   const resolved = band ?? rateBand(value, target);
-  const color = BAND_COLOR[resolved];
   const gap = Math.round((target - value) * 10) / 10;
   const met = gap <= 0;
 
@@ -129,7 +128,7 @@ export default function KpiCard({
         role="img"
         aria-label={`${value}${unit} against a target of ${target}${unit}`}
       >
-        <div className="h-full rounded-full" style={{ width: `${fill}%`, background: color }} />
+        <div className="h-full rounded-full" style={{ width: `${fill}%`, background: "var(--vm-primary)" }} />
         <span
           className="absolute top-[-3px] h-[12px] w-[2px] rounded-full bg-ink-900"
           style={{ left: `${mark}%` }}
@@ -138,7 +137,7 @@ export default function KpiCard({
       </div>
 
       <div className="mt-2 flex flex-wrap items-baseline justify-between gap-x-2 gap-y-1">
-        <span className="mono text-xs font-semibold" style={{ color: met ? "var(--color-good)" : "var(--color-ink-700)" }}>
+        <span className="mono text-xs font-semibold" style={{ color: met ? "var(--vm-primary-text)" : "var(--vm-text)" }}>
           {met ? `${Math.abs(gap)}${unit} above target` : `${gap}${unit} to target`}
         </span>
         <span className="mono text-xs text-ink-400">

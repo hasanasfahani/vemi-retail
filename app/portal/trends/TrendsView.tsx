@@ -24,7 +24,7 @@ import PosDrawer from "@/components/market/PosDrawer";
 import { Card, DataTable, EmptyState, StatCard, Tabs, type Column } from "@/components/market/ui";
 import Badge from "@/components/market/ui/Badge";
 import Delta from "@/components/market/ui/Delta";
-import { ChartLegend, TrendChart, brandColor, MEASURE } from "@/components/market/charts";
+import { ChartLegend, TrendChart, MEASURE, SERIES3, threeSeriesRows } from "@/components/market/charts";
 import { scoreBand } from "@/components/market/ui/health";
 import { repeated, type RepeatedRow } from "@/lib/market/trendsView";
 import { posRows } from "@/lib/market/pos";
@@ -242,15 +242,13 @@ function Trends({ view }: { view: MarketView }) {
         title="Brand share across the half"
         lead={`${clientBrand.name} against the rest of the category, all audited outlets.`}
         action={
-          <ChartLegend
-            items={brands.map((b) => ({ id: b.id, name: b.name, color: brandColor(b.id) }))}
-          />
+          <ChartLegend items={SERIES3.map((x) => ({ id: x.key, name: x.name, color: x.color }))} />
         }
         footnote="Market-level shares only. Comparing an individual store month to month is the section below, and nothing else on this page does it."
       >
         <TrendChart
-          data={brandSeries}
-          series={brands.map((b) => ({ key: b.id, name: b.name, color: brandColor(b.id) }))}
+          data={threeSeriesRows(brandSeries)}
+          series={SERIES3.map((x) => ({ key: x.key, name: x.name, color: x.color }))}
           unit="%"
           height={300}
         />

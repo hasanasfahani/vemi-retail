@@ -620,3 +620,24 @@
     content: "";
   }
 }
+
+/* Map tiles, calmed toward Paper: desaturated and slightly warm, so the
+   pins carry the only color on the map. Filtering the tile pane alone
+   leaves markers, clusters and tooltips untouched. (A licensed muted
+   tile provider is deferred to phase 2 of the plan.) */
+.leaflet-tile-pane {
+  filter: grayscale(1) sepia(0.12) brightness(1.04) contrast(0.88);
+}
+.leaflet-bar a,
+.leaflet-bar a:hover {
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
+  background: var(--vm-surface);
+}
+.leaflet-bar {
+  border: 1px solid var(--vm-line) !important;
+  border-radius: var(--vm-radius-md) !important;
+  box-shadow: var(--vm-shadow-raised) !important;
+  overflow: hidden;
+}

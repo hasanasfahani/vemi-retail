@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
+import { SegmentedControl } from "@/components/vemi/SegmentedControl";
+import { useMemo, useState } from "react";
 
 /* SHELF & VISIBILITY — how much of the fixture the brand holds, and
    at what height.
@@ -16,7 +17,7 @@ import DownloadGaps from "@/components/market/DownloadGaps";
 import RequestFollowUp from "@/components/market/RequestFollowUp";
 import ShelfCard from "@/components/market/ShelfCard";
 import {
-  ChartLegend, RankedBars, ShareDonut, StackedBars, brandColor, orderedBrands,
+  ChartLegend, RankedBars, ShareDonut, StackedBars, brandColor, orderedBrands, brandSeries, brandOutline, threeSeriesRows, SERIES3, keyCompetitor,
 } from "@/components/market/charts";
 import { shelf } from "@/lib/market/performance";
 import { clientBrand } from "@/lib/market";
@@ -41,7 +42,36 @@ export default function ShelfTab({ view }: { view: MarketView }) {
   const targets = useTargets();
   const par = targets.shelfShare;
   const ordered = orderedBrands();
-  const stack = ordered.map((b) => ({ key: b.id, name: b.name, color: brandColor(b.id) }));
+  /* Plan D2: three series by default, the portfolio split on request. */
+  const [split, setSplit] = useState(false);
+  const stack = brandSeries(split);
+  const legend = split
+    ? ordered.map((b) => ({ id: b.id, name: b.name, color: brandColor(b.id), outline: brandOutline(b.id) }))
+    : SERIES3.map((x) => ({ id: x.key, name: x.name, color: x.color }));
+  const splitControl = (
+    <SegmentedControl
+      ariaLabel="Brand detail"
+      size="sm"
+      value={split ? "split" : "grouped"}
+      onChange={(v) => setSplit(v === "split")}
+      options={[
+        { value: "grouped", label: "Portfolio" },
+        { value: "split", label: "Split portfolio" },
+      ]}
+    />
+  );
+  const slices = split
+    ? s.byBrand.map((b) => ({ id: b.id, name: b.name, value: b.facings }))
+    : (() => {
+        const sum = (f: (id: string) => boolean) =>
+          s.byBrand.filter((b) => f(b.id)).reduce((t, b) => t + b.facings, 0);
+        const inPortfolio = new Set(ordered.filter((b) => b.owner === clientBrand.owner).map((b) => b.id));
+        return [
+          { id: "portfolio", name: SERIES3[0].name, value: sum((id) => inPortfolio.has(id)) },
+          { id: "competitor", name: keyCompetitor.name, value: sum((id) => id === keyCompetitor.id) },
+          { id: "others", name: "Others", value: sum((id) => !inPortfolio.has(id) && id !== keyCompetitor.id) },
+        ];
+      })();
 
   const eye = s.positions.find((p) => p.id === "eye");
 
@@ -126,14 +156,20 @@ export default function ShelfTab({ view }: { view: MarketView }) {
         <Card
           title="Shelf battle by governorate"
           lead="Share of measured facings, 100% stacked."
-          action={<ChartLegend items={ordered.map((b) => ({ id: b.id, name: b.name, color: brandColor(b.id) }))} />}
+          action={
+            <div className="flex flex-col items-end gap-3">
+              {splitControl}
+              <ChartLegend items={legend} />
+            </div>
+          }
         >
-          <StackedBars data={s.byGovernorate} series={stack} max={100} height={250} />
+          <StackedBars data={threeSeriesRows(s.byGovernorate)} series={stack} max={100} height={250} />
         </Card>
 
         <Card title="Shelf split this month" lead="Every audited facing, by brand.">
           <ShareDonut
-            slices={s.byBrand.map((b) => ({ id: b.id, name: b.name, value: b.facings }))}
+            slices={slices}
+            palette={split ? "brand" : "category"}
             centerValue={`${s.clientShare}%`}
             centerLabel={clientBrand.name}
           />
@@ -142,7 +178,7 @@ export default function ShelfTab({ view }: { view: MarketView }) {
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card title="Shelf battle by channel" lead="The same fixture question, by retail format.">
-          <StackedBars data={s.byChannel} series={stack} max={100} height={230} />
+          <StackedBars data={threeSeriesRows(s.byChannel)} series={stack} max={100} height={230} />
         </Card>
 
         <Card

@@ -171,7 +171,7 @@ export default function AvailabilityTab({ view }: { view: MarketView }) {
               <ChartLegend
                 items={[
                   { id: "client", name: "Pepsi", color: MEASURE },
-                  { id: "category", name: "Rest of category", color: "var(--color-comp-1)" },
+                  { id: "category", name: "Rest of category", color: "var(--vm-chart-3)" },
                 ]}
               />
               {/* Grouped bars have no row to hang a control on, so the
@@ -203,7 +203,7 @@ export default function AvailabilityTab({ view }: { view: MarketView }) {
             }))}
             series={[
               { key: "client", name: "Pepsi", color: MEASURE },
-              { key: "category", name: "Rest of category", color: "var(--color-comp-1)" },
+              { key: "category", name: "Rest of category", color: "var(--vm-chart-3)" },
             ]}
             mode="grouped"
             max={100}

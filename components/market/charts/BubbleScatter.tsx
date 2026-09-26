@@ -13,7 +13,7 @@ import {
   Tooltip, XAxis, YAxis, ZAxis, LabelList,
 } from "recharts";
 import ChartTooltip from "./ChartTooltip";
-import { AXIS, GRID, brandColor } from "./theme";
+import { AXIS, GRID, brandColor, brandOutline } from "./theme";
 
 export type Bubble = {
   id: string;
@@ -50,7 +50,7 @@ export default function BubbleScatter({
   };
 
   return (
-    <div style={{ height }} className="min-w-0">
+    <div style={{ height }} className="min-w-0" role="img" aria-label={`${yLabel} against ${xLabel}, bubble size is availability`}>
       <ResponsiveContainer width="100%" height="100%">
         <ScatterChart margin={{ top: 16, right: 24, bottom: 22, left: -6 }}>
           <CartesianGrid {...GRID} vertical />
@@ -60,7 +60,7 @@ export default function BubbleScatter({
             tickFormatter={(v: number) => `${Math.round(v).toLocaleString()}${xUnit}`}
             label={{
               value: xLabel, position: "insideBottom", offset: -12,
-              fill: "var(--color-ink-400)", fontSize: 11,
+              fill: "var(--vm-text-muted)", fontSize: 12, fontFamily: "var(--vm-font-mono)",
             }}
           />
           <YAxis
@@ -87,8 +87,8 @@ export default function BubbleScatter({
               <Cell
                 key={point.id}
                 fill={brandColor(point.id)}
-                fillOpacity={point.isClient ? 0.92 : 0.78}
-                stroke="white"
+                fillOpacity={point.isClient ? 1 : 0.85}
+                stroke={brandOutline(point.id) ?? "var(--vm-surface)"}
                 strokeWidth={2}
               />
             ))}
@@ -99,7 +99,7 @@ export default function BubbleScatter({
               position="top"
               offset={10}
               xmlSpace="preserve"
-              style={{ fill: "var(--color-ink-500)", fontSize: 11, fontWeight: 600 }}
+              style={{ fill: "var(--vm-text)", fontSize: 12, fontWeight: 600 }}
             />
           </Scatter>
         </ScatterChart>

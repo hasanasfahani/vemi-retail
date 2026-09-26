@@ -190,9 +190,17 @@ export default function MarketMap({
           const criticals = bands.filter((b) => b === "critical").length;
           const n = bands.length;
           const size = n > 200 ? 46 : n > 50 ? 40 : n > 10 ? 34 : 28;
-          const ring = criticals
-            ? `0 0 0 3px color-mix(in srgb, var(--vm-surface) 90%, transparent), 0 0 0 5px ${BAND_COLOR.critical}`
-            : `0 0 0 3px color-mix(in srgb, var(--vm-surface) 85%, transparent)`;
+          /* D1 ramp: the cluster takes its members' band, darker = needs
+             you sooner. Ink text on the two light steps, Paper on the
+             two dark ones. A cluster hiding critical outlets under a
+             lighter band gets an Ink outer ring, so they are never
+             averaged out of sight. */
+          const dark = typical === "attention" || typical === "critical";
+          const ring =
+            criticals && typical !== "critical"
+              ? `0 0 0 2px var(--vm-surface), 0 0 0 4px var(--vm-band-critical)`
+              : `0 0 0 2px var(--vm-surface)`;
+          const edge = typical === "strong" ? `inset 0 0 0 1.5px var(--vm-band-average), ` : "";
 
           return L.divIcon({
             html: `<span title="${n} outlets${
@@ -200,9 +208,9 @@ export default function MarketMap({
             }${criticals ? ` · ${criticals} critical` : ""}" style="
               display:flex;align-items:center;justify-content:center;
               width:${size}px;height:${size}px;border-radius:999px;
-              background:${BAND_COLOR[typical]};color:var(--vm-surface);
-              font:600 ${size > 34 ? 13 : 11.5}px/1 var(--font-body,system-ui);
-              box-shadow:${ring}, 0 2px 8px color-mix(in srgb, var(--vm-text) 28%, transparent);
+              background:${BAND_COLOR[typical]};color:${dark ? "var(--vm-bg)" : "var(--vm-text)"};
+              font:500 12px/1 var(--vm-font-mono);
+              box-shadow:${edge}${ring}, var(--vm-shadow-raised);
             ">${n}</span>`,
             className: "vemi-cluster",
             iconSize: [size, size],
@@ -212,12 +220,16 @@ export default function MarketMap({
         : L.layerGroup();
 
       for (const p of points) {
+        /* D1 pins: the band fill, a surface ring, and critical drawn a
+           step larger. The lightest band gets a Violet 400 edge so it
+           holds against the desaturated tiles. */
+        const light = !p.color && p.band === "strong";
         const marker = L.circleMarker([p.lat, p.lng], {
-          radius: p.radius ?? 6,
-          weight: 2,
-          color: "var(--vm-surface)",
+          radius: p.radius ?? (p.band === "critical" ? 7 : 6),
+          weight: light ? 1.5 : 2,
+          color: light ? "var(--vm-band-average)" : "var(--vm-surface)",
           fillColor: p.color ?? BAND_COLOR[p.band],
-          fillOpacity: p.color ? 0.85 : 1,
+          fillOpacity: p.color ? 0.9 : 1,
         }) as import("leaflet").CircleMarker & {
           options: { band?: Band; metric?: number };
         };

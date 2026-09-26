@@ -8,6 +8,7 @@
    one-row scoreboard would look like a bug. The header still shows the
    filter; this page says out loud that it is not applying it. */
 
+import { SegmentedControl } from "@/components/vemi/SegmentedControl";
 import { useMemo, useState } from "react";
 import PageShell from "@/components/market/PageShell";
 import { useTargets } from "@/components/market/useTargets";
@@ -24,7 +25,7 @@ import { Card, EmptyState, StatCard, Tabs } from "@/components/market/ui";
 import Badge from "@/components/market/ui/Badge";
 import Bar from "@/components/market/ui/Bar";
 import {
-  BubbleScatter, ChartLegend, GapBars, StackedBars, brandColor, orderedBrands,
+  BubbleScatter, ChartLegend, GapBars, StackedBars, brandColor, brandSwatch, orderedBrands, brandSeries, threeSeriesRows, SERIES3,
 } from "@/components/market/charts";
 import {
   byRetailer, districtLeads, pricePosition, scoreboard,
@@ -55,6 +56,8 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
 
   const targets = useTargets();
   const [battle, setBattle] = useState("governorate");
+  /* Plan D2: three series by default, the portfolio split on request. */
+  const [split, setSplit] = useState(false);
   const [openPos, setOpenPos] = useState<string | null>(null);
   const [openInsight, setOpenInsight] = useState<DecisionInsight | null>(null);
 
@@ -79,9 +82,11 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
   const client = rows.find((r) => r.isClient)!;
   const leader = rows[0];
   const ordered = orderedBrands();
-  const series = ordered.map((b) => ({ key: b.id, name: b.name, color: brandColor(b.id) }));
+  const series = brandSeries(split);
 
-  const battleData = battle === "governorate" ? s.byGovernorate : battle === "channel" ? s.byChannel : retailers;
+  const battleData = threeSeriesRows(
+    battle === "governorate" ? s.byGovernorate : battle === "channel" ? s.byChannel : retailers
+  );
 
   const points = useMemo<MapPoint[]>(
     () =>
@@ -267,32 +272,45 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
         title="Shelf battle"
         lead="Share of measured facings, 100% stacked."
         action={
-          /* The legend IS the control row here. A stacked bar has no
-             row per brand to hang an eye on, and a cluster of six
-             identical eyes after the names made the reader count along
-             the row to work out which belonged to which. Each eye now
-             sits under the name it belongs to. */
-          <div className="flex flex-wrap items-start gap-x-3 gap-y-2">
-            {ordered.map((b) => (
-              <span key={b.id} className="flex flex-col items-center gap-0.5">
-                <span className="inline-flex items-center gap-1.5 text-xs text-ink-500">
-                  <span
-                    className="h-2 w-2 shrink-0 rounded-[2px]"
-                    style={{ background: brandColor(b.id) }}
-                    aria-hidden
+          <div className="flex flex-col items-end gap-3">
+            <SegmentedControl
+              ariaLabel="Brand detail"
+              size="sm"
+              value={split ? "split" : "grouped"}
+              onChange={(v) => setSplit(v === "split")}
+              options={[
+                { value: "grouped", label: "Portfolio" },
+                { value: "split", label: "Split portfolio" },
+              ]}
+            />
+            {split ? (
+              /* Split: every brand, each eye under the name it belongs
+                 to, so the reader never counts along a row of eyes. */
+              <div className="flex flex-wrap items-start gap-x-3 gap-y-2">
+              {ordered.map((b) => (
+                <span key={b.id} className="flex flex-col items-center gap-0.5">
+                  <span className="inline-flex items-center gap-1.5 text-xs text-ink-500">
+                    <span
+                      className="h-2 w-2 shrink-0 rounded-[2px]"
+                      style={brandSwatch(b.id)}
+                      aria-hidden
+                    />
+                    {b.name}
+                  </span>
+                  <WatchEye
+                    kpi="shelfShare"
+                    scope={{ brandId: b.id }}
+                    value={rows.find((r) => r.id === b.id)?.share ?? 0}
+                    target={targets.shelfShare}
+                    month={all.month}
+                    size="sm"
                   />
-                  {b.name}
                 </span>
-                <WatchEye
-                  kpi="shelfShare"
-                  scope={{ brandId: b.id }}
-                  value={rows.find((r) => r.id === b.id)?.share ?? 0}
-                  target={targets.shelfShare}
-                  month={all.month}
-                  size="sm"
-                />
-              </span>
-            ))}
+              ))}
+            </div>
+            ) : (
+              <ChartLegend items={SERIES3.map((x) => ({ id: x.key, name: x.name, color: x.color }))} />
+            )}
           </div>
         }
         footnote="Retailer groups exclude independents — the absence of a group is not a group, and including it would make it the biggest one on the chart."
@@ -441,7 +459,7 @@ function ScoreCard({ row, leader, month }: { row: BrandRow; leader: BrandRow; mo
           <div className="flex items-center gap-2">
             <span
               className="h-2.5 w-2.5 shrink-0 rounded-[3px]"
-              style={{ background: brandColor(row.id) }}
+              style={brandSwatch(row.id)}
               aria-hidden
             />
             <h3 className="font-display text-[15px] font-semibold tracking-tight text-ink-900">
