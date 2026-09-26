@@ -7,7 +7,8 @@
    Critical. Colour NEVER travels alone — every consumer of this pairs
    the swatch with the label. */
 
-export type Band = "strong" | "average" | "attention" | "critical";
+export type { Band } from "@/components/vemi/BandChip";
+import type { Band } from "@/components/vemi/BandChip";
 
 export const BAND_LABEL: Record<Band, string> = {
   strong: "Strong",
@@ -16,19 +17,31 @@ export const BAND_LABEL: Record<Band, string> = {
   critical: "Critical",
 };
 
-/* Token names, resolved to CSS variables at the point of use. */
+/* Band fills (plan D1): a four-step ramp where darker means "needs you
+   sooner" — Violet 100, Violet 400, Violet, Ink. Used for pins, heat
+   cells and swatches; always beside the band word. */
 export const BAND_COLOR: Record<Band, string> = {
-  strong: "var(--color-good)",
-  average: "var(--color-warn)",
-  attention: "var(--color-serious)",
-  critical: "var(--color-critical)",
+  strong: "var(--vm-band-strong)",
+  average: "var(--vm-band-average)",
+  attention: "var(--vm-band-attention)",
+  critical: "var(--vm-band-critical)",
 };
 
+/* The swatch needs an edge where its fill is lighter than the surface
+   it sits on (Violet 100 on white), or the lightest band disappears. */
+export const BAND_EDGE: Record<Band, string> = {
+  strong: "var(--vm-band-average)",
+  average: "transparent",
+  attention: "transparent",
+  critical: "transparent",
+};
+
+/* The chip classes (components/vemi BandChip). */
 export const BAND_CLASS: Record<Band, string> = {
-  strong: "bg-[color:var(--color-good)]/10 text-[color:var(--color-good)]",
-  average: "bg-[color:var(--color-warn)]/14 text-[color:var(--vm-text)]",
-  attention: "bg-[color:var(--color-serious)]/14 text-[color:var(--vm-text)]",
-  critical: "bg-[color:var(--color-critical)]/10 text-[color:var(--color-critical)]",
+  strong: "vm-band vm-band--strong",
+  average: "vm-band vm-band--average",
+  attention: "vm-band vm-band--attention",
+  critical: "vm-band vm-band--critical",
 };
 
 /* Score bands, from the execution score's own scale. */

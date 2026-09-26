@@ -1,8 +1,11 @@
-/* The execution score as a ring. One arc, banded by the score's own
-   thresholds, with the number in the middle and the band written
-   underneath — the ring is the glance, the word is the fact. */
+/* The execution score. It used to be a ring; the brand avoids pie and
+   donut forms, so it is now the figure, a linear gauge on the 0–100
+   scale and the band word underneath — the gauge is the glance, the word
+   is the fact. The name and props are unchanged for its callers. */
 
-import { BAND_COLOR, BAND_LABEL, scoreBand } from "./health";
+import { BandChip } from "@/components/vemi/BandChip";
+import { Gauge } from "@/components/vemi/Gauge";
+import { scoreBand } from "./health";
 
 export default function ScoreRing({
   score,
@@ -14,36 +17,18 @@ export default function ScoreRing({
   caption?: string;
 }) {
   const band = scoreBand(score);
-  const stroke = 9;
-  const r = (size - stroke) / 2;
-  const c = 2 * Math.PI * r;
-  const filled = (Math.max(0, Math.min(100, score)) / 100) * c;
-
+  const figure = size >= 120 ? 56 : size >= 90 ? 44 : 36;
   return (
-    <div className="flex flex-col items-center">
-      <div className="relative" style={{ width: size, height: size }}>
-        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden>
-          <circle
-            cx={size / 2} cy={size / 2} r={r}
-            fill="none" stroke="var(--color-line)" strokeWidth={stroke}
-          />
-          <circle
-            cx={size / 2} cy={size / 2} r={r}
-            fill="none" stroke={BAND_COLOR[band]} strokeWidth={stroke}
-            strokeLinecap="round"
-            strokeDasharray={`${filled} ${c - filled}`}
-            transform={`rotate(-90 ${size / 2} ${size / 2})`}
-          />
-        </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="font-display font-semibold leading-none tracking-tight text-ink-900" style={{ fontSize: size * 0.28 }}>
-            {Math.round(score)}
-          </span>
-          <span className="mono mt-0.5 text-xs text-ink-400">/ 100</span>
-        </div>
-      </div>
-      <span className="mt-2 text-xs font-semibold text-ink-700">{BAND_LABEL[band]}</span>
-      {caption && <span className="mt-0.5 text-xs text-ink-400">{caption}</span>}
+    <div className="flex w-full min-w-[120px] flex-col items-start" style={{ maxWidth: Math.max(160, size * 1.6) }}>
+      <span className="tnum leading-none" style={{ fontSize: figure }}>
+        {Math.round(score)}
+        <span className="ml-1 font-mono text-xs font-medium tracking-normal text-ink-500">/ 100</span>
+      </span>
+      <Gauge value={score} max={100} className="mt-3 w-full" label={`Score ${Math.round(score)} of 100`} />
+      <span className="mt-2">
+        <BandChip band={band} size="sm" />
+      </span>
+      {caption && <span className="mt-1 text-xs text-ink-500">{caption}</span>}
     </div>
   );
 }

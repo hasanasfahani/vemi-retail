@@ -70,7 +70,7 @@ select.vm-input { appearance: none; padding-inline-end: 40px; background-image: 
 .vm-card__title { margin: 0; font-size: 22px; line-height: 28px; font-weight: 600; color: var(--vm-text); }
 .vm-card__lead { margin: 4px 0 0; max-inline-size: 72ch; font-size: 14px; line-height: 20px; color: var(--vm-text-muted); }
 .vm-card__actions { display: flex; align-items: center; gap: var(--vm-space-2); flex: none; }
-.vm-card__foot { margin: var(--vm-space-4) calc(-1 * var(--vm-space-6)) calc(-1 * var(--vm-space-6)); padding: var(--vm-space-3) var(--vm-space-6); border-block-start: 1px solid var(--vm-line); font: 400 12px/18px var(--vm-font-mono); color: var(--vm-text-muted); }
+.vm-card__foot { margin: var(--vm-space-4) calc(-1 * var(--vm-space-6)) calc(-1 * var(--vm-space-6)); padding: var(--vm-space-3) var(--vm-space-6); border-block-start: 1px solid var(--vm-line); font: 400 12px/18px var(--vm-font-sans); color: var(--vm-text-muted); }
 .vm-card--flush > .vm-card__foot { margin: 0; }
 
 /* ---- Gauge: value against a target ---------------------------------- */
@@ -89,6 +89,7 @@ select.vm-input { appearance: none; padding-inline-end: 40px; background-image: 
 .vm-kpi__delta--up > span:first-child { color: var(--vm-primary-text); }
 .vm-kpi__delta--flat { color: var(--vm-text-muted); }
 .vm-kpi__foot { margin-block-start: auto; padding-block-start: var(--vm-space-3); border-block-start: 1px solid var(--vm-line); font: 400 12px/16px var(--vm-font-mono); color: var(--vm-text-muted); }
+.vm-kpi > .vm-band, .vm-kpi > .vm-badge { align-self: flex-start; }
 
 /* ---- ChartCard ------------------------------------------------------- */
 .vm-chartcard { display: flex; flex-direction: column; gap: var(--vm-space-3); }
@@ -96,7 +97,7 @@ select.vm-input { appearance: none; padding-inline-end: 40px; background-image: 
 .vm-chartcard__titles { display: flex; align-items: center; gap: var(--vm-space-3); flex-wrap: wrap; }
 .vm-chartcard__title { margin: 0; font-size: 22px; line-height: 28px; font-weight: 600; }
 .vm-chartcard__sowhat { margin: 0; font-size: 18px; line-height: 28px; font-weight: 500; color: var(--vm-text); max-inline-size: 72ch; }
-.vm-chartcard__body { min-block-size: 160px; min-inline-size: 0; }
+.vm-chartcard__body { min-inline-size: 0; }
 .vm-chartcard__foot { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--vm-space-4); flex-wrap: wrap; padding-block-start: var(--vm-space-3); border-block-start: 1px solid var(--vm-line); }
 .vm-chartcard__how { font-size: 14px; line-height: 20px; color: var(--vm-text-muted); max-inline-size: 72ch; }
 .vm-chartcard__how summary { cursor: pointer; color: var(--vm-primary-text); font-weight: 600; min-block-size: 24px; list-style-position: inside; }

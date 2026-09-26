@@ -1,16 +1,13 @@
-/* An inline proportion — shelf share against par, a brand's slice of a
-   ranked list, a compliance rate. The bar is the comparison; the
-   number beside it is the fact, and both are always shown.
-
-   `par` draws a reference tick, so a share bar can say "40% is the
-   target" without a legend. */
+/* An inline proportion — shelf share against par, a compliance rate.
+   The bar is the comparison; the number beside it is the fact, and both
+   are always shown. `par` draws the brand's 2px Ink target tick. */
 
 export default function Bar({
   value,
   max = 100,
   par,
-  color = "var(--color-violet)",
-  height = 7,
+  color = "var(--vm-primary)",
+  height = 6,
   label,
 }: {
   value: number;
@@ -26,19 +23,16 @@ export default function Bar({
   return (
     <div className="flex min-w-0 flex-1 items-center gap-2">
       <div
-        className="relative min-w-0 flex-1 overflow-hidden rounded-full bg-canvas"
+        className="relative min-w-0 flex-1 rounded-full bg-line"
         style={{ height }}
         role="img"
         aria-label={label ?? `${value} of ${max}`}
       >
-        <div
-          className="h-full rounded-full"
-          style={{ width: `${pct}%`, background: color }}
-        />
+        <div className="h-full rounded-full" style={{ width: `${pct}%`, background: color }} />
         {parPct !== null && (
           <span
-            className="absolute top-0 h-full w-[2px] bg-ink-400"
-            style={{ left: `${parPct}%` }}
+            className="absolute -top-[3px] w-[2px] -translate-x-1/2 rounded-[1px] bg-ink-900"
+            style={{ left: `${parPct}%`, height: height + 6 }}
             aria-hidden
           />
         )}

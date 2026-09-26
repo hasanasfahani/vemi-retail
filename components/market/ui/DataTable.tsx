@@ -157,7 +157,7 @@ export default function DataTable<T>({
     URL.revokeObjectURL(url);
   };
 
-  const pad = dense ? "px-3 py-1.5" : "px-3 py-2.5";
+  const pad = dense ? "px-3 py-1.5" : "px-3 py-0";
 
   return (
     <div className="min-w-0">
@@ -173,7 +173,7 @@ export default function DataTable<T>({
                   setPage(0);
                 }}
                 placeholder={searchPlaceholder}
-                className="w-full rounded-md border border-line-strong bg-white py-1.5 pl-7 pr-2.5 text-sm text-ink-900 outline-none transition-colors placeholder:text-ink-400 focus:border-violet"
+                className="h-9 w-full rounded-md border border-line-strong bg-white pl-8 pr-3 text-sm text-ink-900 outline-none transition-colors placeholder:text-ink-400 focus:border-violet"
               />
               <svg viewBox="0 0 16 16" className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-ink-400" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden>
                 <circle cx="7" cy="7" r="4.5" />
@@ -256,7 +256,7 @@ export default function DataTable<T>({
                       key={col.id}
                       scope="col"
                       style={col.width ? { width: col.width } : undefined}
-                      className={`${pad} text-xs font-semibold uppercase tracking-wide text-ink-400 ${
+                      className={`px-3 ${dense ? "py-1.5" : "py-2.5"} whitespace-nowrap font-mono text-xs font-medium uppercase tracking-[0.1em] text-ink-400 ${
                         col.align === "right" ? "text-right" : "text-left"
                       }`}
                       aria-sort={on ? (sort!.dir === "asc" ? "ascending" : "descending") : undefined}
@@ -296,14 +296,14 @@ export default function DataTable<T>({
                       : undefined
                   }
                   className={`border-b border-line last:border-0 ${
-                    onRowClick ? "cursor-pointer transition-colors hover:bg-canvas" : ""
+                    onRowClick ? "cursor-pointer transition-colors hover:bg-canvas focus-visible:bg-primary-tint" : ""
                   }`}
                 >
                   {cols.map((col) => (
                     <td
                       key={col.id}
-                      className={`${pad} align-middle text-ink-700 ${
-                        col.align === "right" ? "text-right" : "text-left"
+                      className={`${pad} align-middle text-ink-700 ${dense ? "" : "h-11"} ${
+                        col.align === "right" ? "text-right tabular-nums" : "text-left"
                       }`}
                     >
                       {col.render(row)}

@@ -15,7 +15,8 @@
    as a button would promise an action it does not perform. */
 
 import { useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { BAND_CLASS, BAND_COLOR, BAND_LABEL, type Band } from "./health";
+import { BAND_COLOR, BAND_EDGE, BAND_LABEL, type Band } from "./health";
+import { BandChip } from "@/components/vemi/BandChip";
 import type { BandDetail } from "@/lib/market/bandDetail";
 
 const WIDTH = 300;
@@ -55,15 +56,9 @@ export default function StatusChip({
   }, [open]);
 
   const chip = (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded-full font-semibold ${BAND_CLASS[band]} ${
-        size === "sm" ? "px-1.5 py-[1px] text-xs" : "px-2 py-[2px] text-xs"
-      } ${detail ? "cursor-help" : ""}`}
-    >
-      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-current" aria-hidden />
-      {label ?? BAND_LABEL[band]}
+    <BandChip band={band} label={label} size={size} className={detail ? "cursor-help" : undefined}>
       {children}
-    </span>
+    </BandChip>
   );
 
   if (!detail) return chip;
@@ -88,45 +83,35 @@ export default function StatusChip({
         <span
           id={id}
           role="tooltip"
-          className={`absolute top-[calc(100%+6px)] z-50 block w-[300px] rounded-md border border-line bg-white p-3 text-left font-normal shadow-[var(--shadow-pop)] ${
-            side === "left" ? "left-0" : "right-0"
-          }`}
+          className={`vm-pop w-[300px] ${side === "left" ? "vm-pop--start" : "vm-pop--end"}`}
         >
-          <span className="block uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
-            {title ?? `Why ${BAND_LABEL[band].toLowerCase()}`}
-          </span>
-          <span className="mt-1 block text-xs leading-snug text-ink-700">
-            {detail.lead}
-          </span>
+          <span className="vm-pop__label">{title ?? `Why ${BAND_LABEL[band].toLowerCase()}`}</span>
+          <span className="block text-sm text-ink-900">{detail.lead}</span>
 
           <span className="mt-2 block">
             {detail.rows.map((row) => (
               <span
                 key={row.label}
-                className={`flex items-center gap-2 border-b border-line py-1 text-xs last:border-0 ${
+                className={`flex items-center gap-2 border-b border-line py-1.5 text-xs last:border-0 ${
                   row.here ? "font-semibold text-ink-900" : "text-ink-500"
                 }`}
               >
                 {row.band && (
                   <span
-                    className="h-1.5 w-1.5 shrink-0 rounded-full"
-                    style={{ background: BAND_COLOR[row.band] }}
+                    className="h-2 w-2 shrink-0 rounded-full"
+                    style={{ background: BAND_COLOR[row.band], boxShadow: `inset 0 0 0 1px ${BAND_EDGE[row.band]}` }}
                     aria-hidden
                   />
                 )}
                 <span className="min-w-0 flex-1 truncate">{row.label}</span>
                 <span className="mono shrink-0">{row.value}</span>
-                {row.here && (
-                  <span className="mono shrink-0 text-xs text-violet-ink">here</span>
-                )}
+                {row.here && <span className="shrink-0 font-mono text-xs text-violet-ink">here</span>}
               </span>
             ))}
           </span>
 
           {detail.footnote && (
-            <span className="mt-2 block text-xs leading-snug text-ink-400">
-              {detail.footnote}
-            </span>
+            <span className="mt-2 block text-xs text-ink-500">{detail.footnote}</span>
           )}
         </span>
       )}
