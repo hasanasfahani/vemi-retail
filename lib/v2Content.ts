@@ -10,6 +10,8 @@
    they can be verified and updated without changing section markup.
    ============================================================ */
 
+import type { IconName } from "@/components/vemi/Icon";
+
 /* Anchor ids — the nav and every section agree through these. */
 export const ids = {
   top: "top",
@@ -98,7 +100,7 @@ export const gap = {
 };
 
 /* ---------- §3 Retail Intelligence -------------------------- */
-export type Capability = { title: string; short: string; icon: string };
+export type Capability = { title: string; short: string; icon: IconName };
 
 export const retailAudit = {
   eyebrow: "Retail intelligence — what we measure",
@@ -230,7 +232,7 @@ export const trust = {
     { title: "AI-assisted analysis", body: "Process large volumes of retail data efficiently.", icon: "spark" },
     { title: "Human verification", body: "Review critical and low-confidence findings.", icon: "check" },
     { title: "Traceable results", body: "Move from a dashboard metric back to the underlying evidence.", icon: "link" },
-  ],
+  ] satisfies { title: string; body: string; icon: IconName }[],
   evidence: {
     outlet: "Dur Nassrawey Center",
     location: "Erbil · Downtown / Qaysari",
@@ -255,7 +257,7 @@ export type Pillar = {
   key: string;
   title: string;
   tagline: string;
-  icon: string;
+  icon: IconName;
   body: string;
   items: string[];
   image: Photo;

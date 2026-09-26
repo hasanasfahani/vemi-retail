@@ -27,7 +27,7 @@ import { NAV } from "@/lib/market/nav";
 import { useReports } from "./useReports";
 import { createReport, upsertReport } from "@/lib/market/reports";
 import { contract, coverage } from "@/lib/market";
-import Icon from "./Icon";
+import Icon from "@/components/vemi/Icon";
 import { Logo } from "@/components/vemi/Logo";
 
 const KEY = "vemi.sidebar.collapsed";

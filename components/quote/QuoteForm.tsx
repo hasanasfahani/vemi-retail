@@ -10,7 +10,7 @@ import {
   type AccessRequest,
   type FieldName,
 } from "@/lib/demoAccess";
-import Icon from "@/components/v2/Icon";
+import Icon from "@/components/vemi/Icon";
 
 type QuoteScope = {
   posPerMonth: number;

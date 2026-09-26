@@ -14,6 +14,7 @@
    ============================================================ */
 @import "../brand/tokens.css";
 @import "../brand/tailwind-v4.css";
+@import "../components/vemi/vemi-components.css" layer(components);
 
 /* ---- portal chart palette ------------------------------------
    The client carries the accent, everyone else sits in neutrals, and

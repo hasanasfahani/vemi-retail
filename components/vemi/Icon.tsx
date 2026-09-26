@@ -1,8 +1,67 @@
-/* Inline stroke icons for /v2 — self-contained so v2 can be promoted or
-   deleted without touching the v1 icon set. 24x24, currentColor. */
+/* The one icon set. Stroke-based, 24-unit grid, currentColor, round
+   caps; drawn at 16 / 20 / 24px with a 1.75 stroke (brand kit:
+   "line icons, 1.5-2px stroke").
 
-const paths: Record<string, React.ReactNode> = {
-  /* --- retail audit capabilities --- */
+   Merged from the portal rail's glyphs and the marketing site's, plus
+   the interface glyphs the components need, so there is one API and
+   one stroke weight everywhere. Hand-drawn rather than a package: a
+   few dozen glyphs is not worth a dependency (lucide is the named
+   fallback in the kit, deferred to phase 2 of the plan). */
+
+import type { ReactNode } from "react";
+
+const GLYPHS = {
+  /* --- portal navigation --- */
+  dashboard: <path d="M3 3h7v7H3zM14 3h7v4h-7zM14 11h7v10h-7zM3 14h7v7H3z" />,
+  performance: <path d="M3 20h18M6 16v-5M11 16V7M16 16v-8M21 16v-3" />,
+  competition: <path d="M4 20V9M10 20V4M16 20v-7M22 20v-4" />,
+  insights: <path d="M12 3a6 6 0 0 0-3 11.2V17h6v-2.8A6 6 0 0 0 12 3zM10 20h4" />,
+  actions: <path d="M4 6h16M4 12h9M4 18h9M16 16l2 2 4-4" />,
+  pos: <path d="M4 9h16v11H4zM4 9l2-5h12l2 5M10 20v-6h4v6" />,
+  report: <path d="M6 3h9l4 4v14H6zM15 3v4h4M9 12h7M9 16h7" />,
+  trends: <path d="M3 17l5-6 4 3 5-7 4 4M3 21h18" />,
+  setup: <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 7.5 19l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0-1.1-2.7H3a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 4.7 7.5l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 2.7-1.1V3a2 2 0 1 1 4 0v.1A1.6 1.6 0 0 0 16.5 5l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0 1.1 2.7H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z" />,
+  "custom-report": <path d="M4 4h16v16H4zM4 9h16M9 9v11" />,
+  plus: <path d="M12 5v14M5 12h14" />,
+  customers: <path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM3 21v-1a6 6 0 0 1 6-6h0a6 6 0 0 1 6 6v1M17 8h5M19.5 5.5v5" />,
+  watchlist: <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />,
+  users: <path d="M16 20v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 10a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 20v-2a4 4 0 0 0-3-3.9M17 2.1a4 4 0 0 1 0 7.8" />,
+
+  /* --- interface --- */
+  close: <path d="M6 6l12 12M18 6 6 18" />,
+  "chevron-down": <path d="m6 9 6 6 6-6" />,
+  "chevron-up": <path d="m6 15 6-6 6 6" />,
+  "chevron-left": <path d="m15 6-6 6 6 6" />,
+  "chevron-right": <path d="m9 6 6 6-6 6" />,
+  "arrow-right": <path d="M5 12h14M13 6l6 6-6 6" />,
+  search: (
+    <>
+      <circle cx="11" cy="11" r="7" />
+      <path d="m20 20-3.5-3.5" />
+    </>
+  ),
+  info: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 11v5M12 7.5v.01" />
+    </>
+  ),
+  "alert-triangle": (
+    <>
+      <path d="M12 3.5 21 19.5H3z" />
+      <path d="M12 10v4M12 17.2v.01" />
+    </>
+  ),
+  lock: (
+    <>
+      <rect x="4.5" y="10.5" width="15" height="10" rx="2" />
+      <path d="M8 10.5V7a4 4 0 0 1 8 0v3.5" />
+    </>
+  ),
+  bell: <path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0" />,
+  download: <path d="M12 4v11M7 10l5 5 5-5M4 20h16" />,
+
+  /* --- capabilities and evidence (marketing site) --- */
   alert: (
     <>
       <path d="M12 3 2 20h20L12 3Z" />
@@ -147,27 +206,40 @@ const paths: Record<string, React.ReactNode> = {
       <path d="M15.5 5.5H21V11" />
     </>
   ),
-};
+} satisfies Record<string, ReactNode>;
+
+export type IconName = keyof typeof GLYPHS;
+
+export const ICON_NAMES = Object.keys(GLYPHS) as IconName[];
+
+const SIZE = { 16: "h-4 w-4", 20: "h-5 w-5", 24: "h-6 w-6" } as const;
 
 export default function Icon({
   name,
-  className = "",
+  size = 20,
+  className,
+  label,
 }: {
-  name: string;
+  name: IconName;
+  size?: keyof typeof SIZE;
+  /* Overrides the size classes when a caller needs a custom box. */
   className?: string;
+  /* An accessible name for an icon that stands alone. Omit for
+     decorative icons beside a text label (the default). */
+  label?: string;
 }) {
   return (
     <svg
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={1.6}
+      strokeWidth={1.75}
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={className}
-      aria-hidden
+      className={`shrink-0 ${className ?? SIZE[size]}`}
+      {...(label ? { role: "img", "aria-label": label } : { "aria-hidden": true })}
     >
-      {paths[name] ?? paths.bars}
+      {GLYPHS[name]}
     </svg>
   );
 }

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { retailAudit } from "@/lib/v2Content";
-import Icon from "@/components/v2/Icon";
+import Icon from "@/components/vemi/Icon";
 import Sparkline from "@/components/ui/Sparkline";
 import PlanogramScene, { type SlotState } from "@/components/v2/PlanogramScene";
 

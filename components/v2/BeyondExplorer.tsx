@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import { beyond } from "@/lib/v2Content";
-import Icon from "@/components/v2/Icon";
+import Icon from "@/components/vemi/Icon";
 
 const pillars = beyond.pillars;
 const desktopColumns = [

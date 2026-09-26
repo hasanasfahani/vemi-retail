@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { trust } from "@/lib/v2Content";
-import Icon from "@/components/v2/Icon";
+import Icon from "@/components/vemi/Icon";
 
 const e = trust.evidence;
 

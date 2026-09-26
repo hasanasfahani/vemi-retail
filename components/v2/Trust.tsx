@@ -1,6 +1,6 @@
 import { trust, ids } from "@/lib/v2Content";
 import Reveal from "@/components/ui/Reveal";
-import Icon from "@/components/v2/Icon";
+import Icon from "@/components/vemi/Icon";
 import EvidenceCard from "@/components/v2/EvidenceCard";
 
 export default function Trust() {
