@@ -13,6 +13,7 @@
 
 import ShelfScene from "./ShelfScene";
 import Badge from "./ui/Badge";
+import { ConfidenceBadge } from "@/components/vemi/ConfidenceBadge";
 import Delta from "./ui/Delta";
 import { auditorName, monthLabel } from "@/lib/market";
 import { KPI_LABEL } from "@/lib/market/issues";
@@ -50,24 +51,34 @@ export default function FollowUpEvidence({
   const afterBy = cyclePair ? auditorName(cyclePair.view.auditedBy.get(c.posId) ?? "") : "";
 
   return (
-    <div className="flex flex-col gap-5 rounded-md border border-primary-tint bg-primary-tint/40 p-3.5">
-      <div>
-        <h3 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-violet-ink">
-          Follow-up audit · {KPI_LABEL[c.kpi]}
-        </h3>
-        <p className="mt-0.5 text-xs text-ink-500">
-          Raised from {monthLabel(originMonth)}, checked in {monthLabel(cycle)}.
-        </p>
+    <div className="flex flex-col gap-6 rounded-lg border border-line bg-canvas p-6">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h3 className="vm-label">Follow-up audit · {KPI_LABEL[c.kpi]}</h3>
+          <p className="mt-1 text-sm text-ink-500">
+            Raised from {monthLabel(originMonth)}, checked in {monthLabel(cycle)}.
+          </p>
+        </div>
+        {/* Verification is granted only by re-running the rule on a
+            real revisit, so the badge says exactly that and when. */}
+        {c.revisited && afterVisit ? (
+          <span className="flex flex-wrap items-center gap-2 text-sm text-ink-700">
+            <ConfidenceBadge level="measured" size="sm" />
+            Verified by re-audit on {afterVisit}
+          </span>
+        ) : (
+          <ConfidenceBadge level="stale" size="sm">Awaiting revisit</ConfidenceBadge>
+        )}
       </div>
 
       {/* the comparison */}
       <div className="flex flex-wrap items-end gap-x-6 gap-y-2">
         <p className="flex items-baseline gap-2">
-          <span className="mono text-lg font-semibold text-ink-400">
+          <span className="tnum text-lg !text-ink-500">
             {c.before === null ? "—" : `${c.before}%`}
           </span>
           <span aria-hidden className="text-ink-400">→</span>
-          <span className="mono text-[22px] font-semibold text-ink-900">
+          <span className="tnum text-[28px] leading-8">
             {c.after === null ? "—" : `${c.after}%`}
           </span>
         </p>
@@ -81,9 +92,7 @@ export default function FollowUpEvidence({
 
       {/* what was wrong, and what happened to it */}
       <section>
-        <h4 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
-          Original issues
-        </h4>
+        <h4 className="vm-label">Original issues</h4>
         {c.issues.length === 0 ? (
           <p className="mt-1.5 text-xs text-ink-500">
             Nothing was raised against this outlet for this KPI.
@@ -93,7 +102,7 @@ export default function FollowUpEvidence({
             {c.issues.map((row) => (
               <li
                 key={row.issue.id}
-                className="flex items-center gap-2 border-b border-line py-1.5 text-xs last:border-0"
+                className="flex min-h-11 items-center gap-3 border-b border-line py-2 text-sm last:border-0"
               >
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-ink-900">
@@ -113,7 +122,7 @@ export default function FollowUpEvidence({
       </section>
 
       {/* both shelves */}
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-6 sm:grid-cols-2">
         <figure className="min-w-0">
           <figcaption className="mb-1.5 flex items-baseline justify-between gap-2">
             <span className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
@@ -145,7 +154,7 @@ export default function FollowUpEvidence({
         </figure>
       </div>
 
-      <p className="text-xs leading-snug text-ink-400">
+      <p className="text-sm text-ink-500">
         Two audits of the same outlet, side by side. They show what changed between visits — not
         that the follow-up request caused it. One outlet, no control group: a delivery that finally
         arrived would look identical here.

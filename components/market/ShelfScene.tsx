@@ -155,19 +155,6 @@ export default function ShelfScene({
               {/* the board */}
               <rect x={4} y={base} width={312} height={5} rx={1.5} fill="var(--vm-line-strong)" />
               <rect x={4} y={base + 5} width={312} height={2} fill="var(--vm-line)" opacity={0.7} />
-              <text x={8} y={top + 12} fontSize={7.5} fill="var(--vm-text-muted)" letterSpacing={0.4} fontFamily="var(--vm-font-mono)">
-                {shelf.label.toUpperCase()}
-              </text>
-
-              {dropped > 0 && (
-                <text
-                  x={312} y={top + 12} textAnchor="end"
-                  fontSize={7} fill="var(--vm-text-muted)" fontFamily="var(--vm-font-mono)"
-                >
-                  +{dropped} more
-                </text>
-              )}
-
               {drawn.map(({ slot, x: left, n }) => {
                 const shape = PACK_SHAPE[slot.pack] ?? DEFAULT_SHAPE;
                 const color = brandColor(slot.brandId);
@@ -189,7 +176,7 @@ export default function ShelfScene({
                       {overlays && (
                         <text
                           x={left + 2} y={packTop - 3}
-                          fontSize={6.5} fontWeight={600} fill="var(--vm-text)" fontFamily="var(--vm-font-mono)"
+                          fontSize={8.5} fontWeight={600} fill="var(--vm-text)" fontFamily="var(--vm-font-mono)"
                         >
                           OUT OF STOCK · {slot.name}
                         </text>
@@ -236,7 +223,7 @@ export default function ShelfScene({
                         />
                         <text
                           x={left} y={packTop - 4}
-                          fontSize={6.5} fontWeight={600} fill="var(--vm-primary-text)"
+                          fontSize={8.5} fontWeight={600} fill="var(--vm-primary-text)"
                         >
                           {brandOf(slot.brandId)?.name ?? slot.brandId} · {n}
                         </text>
@@ -245,6 +232,23 @@ export default function ShelfScene({
                   </g>
                 );
               })}
+
+              {/* Labels last, over the packs, with a Paper halo so they
+                  stay readable wherever a tall pack reaches up to them. */}
+              <text
+                x={8} y={top + 13} fontSize={9.5} fill="var(--vm-text-muted)" letterSpacing={0.4}
+                fontFamily="var(--vm-font-mono)" stroke="var(--vm-bg)" strokeWidth={3} paintOrder="stroke"
+              >
+                {shelf.label.toUpperCase()}
+              </text>
+              {dropped > 0 && (
+                <text
+                  x={312} y={top + 13} textAnchor="end" fontSize={9} fill="var(--vm-text-muted)"
+                  fontFamily="var(--vm-font-mono)" stroke="var(--vm-bg)" strokeWidth={3} paintOrder="stroke"
+                >
+                  +{dropped} more
+                </text>
+              )}
             </g>
           );
         })}

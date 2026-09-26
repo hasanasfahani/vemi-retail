@@ -82,10 +82,21 @@ export default function BrandHealthCard({
         )}
       </div>
 
-      <p className="mt-4 border-t border-line pt-3 text-sm text-ink-500">
-        <span className="font-semibold text-ink-900">{health.weakest.label}</span>{" "}
-        {health.weakest.display} · main gap
-      </p>
+      <div className="mt-4 border-t border-line pt-3">
+        {/* The brand's slice of the whole fixture, drawn in its series
+            colour: the share composition the score sits on. */}
+        <p className="flex items-baseline justify-between gap-2 text-sm">
+          <span className="text-ink-500">Shelf share</span>
+          <span className="font-mono font-medium text-ink-900">{health.share}%</span>
+        </p>
+        <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-line">
+          <div className="h-full rounded-full" style={{ ...brandSwatch(health.brandId), width: `${Math.min(100, health.share)}%` }} />
+        </div>
+        <p className="mt-3 text-sm text-ink-500">
+          <span className="font-semibold text-ink-900">{health.weakest.label}</span>{" "}
+          {health.weakest.display} · main gap
+        </p>
+      </div>
     </>
   );
 

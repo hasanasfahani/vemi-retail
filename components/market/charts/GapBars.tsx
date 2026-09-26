@@ -107,6 +107,10 @@ export default function GapBars({
                    lightest of them is unreadable as text. */
                 style={{ color: "var(--vm-text)" }}
               >
+                {/* Direction in a glyph and a sign, never in colour. */}
+                <span aria-hidden className={gap > 0 ? "mr-1 text-primary-text" : "mr-1"}>
+                  {gap > 0 ? "▲" : gap < 0 ? "▼" : "–"}
+                </span>
                 {gap > 0 ? "+" : ""}
                 {r1(gap)}
                 {unit}

@@ -238,7 +238,7 @@ export default function FullDemoModal({
               disabled={status === "sending"}
               className="btn-primary mt-6 w-full disabled:opacity-70"
             >
-              {status === "sending" ? "Sending…" : "Request Full Demo"}
+              {status === "sending" ? "Sending…" : "Request full demo"}
             </button>
             <p className="mt-3 text-center text-xs text-ink-600">
               We&apos;ll only use your details to arrange this demo.

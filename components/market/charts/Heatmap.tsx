@@ -98,12 +98,12 @@ export default function Heatmap({
                   const v = value(row.id, col.id);
                   if (v === null)
                     return (
-                      <td key={col.id} className="rounded-sm bg-canvas py-2 text-center text-ink-400" title="Not audited">
+                      <td key={col.id} className="rounded-sm bg-canvas py-3 text-center text-ink-500" title="Not audited">
                         —
                       </td>
                     );
                   const cell = (
-                    <span className="mono block py-2 text-center font-semibold tabular-nums">
+                    <span className="mono block py-3 text-center text-sm font-semibold tabular-nums">
                       {v.toFixed(v < 10 ? 1 : 0)}
                       {unit}
                     </span>

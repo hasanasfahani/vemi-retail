@@ -59,7 +59,20 @@ export default function TrendChart({
         <ComposedChart data={data} margin={{ top: 10, right: 12, bottom: 0, left: -4 }}>
           <CartesianGrid {...GRID} />
           <XAxis dataKey={xKey} {...AXIS} axisLine={{ stroke: "var(--vm-chart-grid)" }} />
-          <YAxis {...AXIS} width={48} domain={domain ?? ["auto", "auto"]} tickFormatter={(v: number) => `${v}${unit}`} />
+          <YAxis
+            {...AXIS}
+            width={48}
+            /* A target always sits inside the plot: an axis fitted to the
+               data alone can crop an 85 target off a line running at 81,
+               and a chart that hides its goal reads healthier than it is. */
+            domain={
+              domain ??
+              (target !== undefined
+                ? [(lo: number) => Math.floor(Math.min(lo, target) - 1), (hi: number) => Math.ceil(Math.max(hi, target) + 1)]
+                : ["auto", "auto"])
+            }
+            tickFormatter={(v: number) => `${Math.round(v * 10) / 10}${unit}`}
+          />
           <Tooltip
             cursor={{ stroke: "var(--vm-line-strong)", strokeWidth: 1 }}
             content={<ChartTooltip format={format ?? ((v) => `${v}${unit}`)} />}

@@ -510,3 +510,47 @@ with 96px section padding on desktop and 64px on mobile. Container 1200px.
   (except the dead-route tests in Phase 0, with your approval).
 - **Hero screenshot drifting from the real product.** It's re-shot in
   Phase 7 *after* the portal is done, from the real route.
+
+---
+
+## 8. Build status and deviations (updated 27 Sep 2026)
+
+Phases 0–6 are built and committed locally (unpushed). Phases 7–8
+(website, lock-in) remain.
+
+Deliberate deviations from the text above, each for a reason found
+while building:
+
+- **Logo clear space** is left to the caller's margin rather than
+  padded into the component, so logos align to the grid like any
+  element. The descriptor in `LogoDescriptor` is live IBM Plex Mono:
+  the outlined one would be ~5px tall at header size.
+- **Favicons**: the website uses the kit's violet tile and the portal
+  the Ink tile (the plan had it the other way round; the kit already
+  makes violet the site default). The .ico carries 16/32/48, so the
+  separate PNG sizes were not added.
+- **Component sheet** lives at `/kit` (Next private folders such as
+  `_kit` do not route). Keep or remove: your call.
+- **Rail** is 256 / 72px (not 236 / 68): 15px labels truncated at 236.
+- **Drawers** keep 620 / 720px for POS and insight detail; their tables
+  need the width.
+- **Filter buttons** show the mono label only once a value is chosen
+  ("GOVERNORATE Basra"); the default summaries name themselves, which is
+  what lets six filters fit one row at 1440.
+- **Map clusters** take the D1 ramp (not plain Ink) so a national view
+  still shows where problems sit; clusters hiding a critical outlet get
+  an Ink ring.
+- **Map metric** stays a select: five measures exceed a segmented
+  control's four.
+- **Locked modules** no longer render the module behind the lock; the
+  region lists what the module holds instead of blurring it.
+- **Shelf scene**: no Signal "worst gap" mark, because every empty slot
+  counts the same and there is no measurable worst.
+- **Competition scoreboard** keeps its share ranking (the category
+  leader first) rather than series order.
+
+Added beyond the plan: mobile navigation (below 1024px there was none),
+`lib/market/asOf` for "As of 21 Sep 2026" / "vs Aug 2026" wording, a
+Consumers page, and fixes found on the way (chips built from invalid
+CSS, stacked-bar axes printing "99.99999%", a trend axis that cropped
+its own target).

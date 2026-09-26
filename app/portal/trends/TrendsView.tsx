@@ -91,6 +91,19 @@ function Trends({ view }: { view: MarketView }) {
     [measure]
   );
 
+  /* The one month worth flagging (brand: a single Signal dot, never a
+     Signal series): the largest month-on-month move on the CORE panel,
+     where the same doors make a move real, and only if it clears the
+     core panel's detection floor. */
+  const anomaly = useMemo(() => {
+    let best: { x: string; move: number } | null = null;
+    for (let i = 1; i < series.length; i++) {
+      const move = Math.round((series[i].core - series[i - 1].core) * 10) / 10;
+      if (Math.abs(move) >= 2.66 && (!best || Math.abs(move) > Math.abs(best.move))) best = { x: series[i].label, move };
+    }
+    return best;
+  }, [series]);
+
   /* Brand share over the half — the comparison the brief names. */
   const brandSeries = useMemo(
     () =>
@@ -232,7 +245,11 @@ function Trends({ view }: { view: MarketView }) {
       <Card
         title={active.label}
         lead="Six cycles, both populations."
-        soWhat={headline}
+        soWhat={
+          anomaly
+            ? `${headline} The one move that clears the core panel's floor is ${anomaly.x}, ${anomaly.move > 0 ? "up" : "down"} ${Math.abs(anomaly.move)}.`
+            : headline
+        }
         asOf={asOf(view.month)}
         base={`${last?.outlets ?? 0} outlets · ${contract.corePanel} core`}
         confidence="measured"
@@ -244,7 +261,7 @@ function Trends({ view }: { view: MarketView }) {
             ]}
           />
         }
-        footnote="The solid line states the level. The dashed line is the only one where a movement means the market moved rather than the sample."
+        footnote="The solid line states the level. The dashed line is the only one where a movement means the market moved rather than the sample. The Ink dashed line is the target; an amber dot marks the single month whose core-panel move clears the detection floor."
       >
         <div className="mb-3">
           <Tabs
@@ -262,6 +279,7 @@ function Trends({ view }: { view: MarketView }) {
           unit={active.unit}
           height={280}
           target={active.target}
+          anomaly={anomaly ? { x: anomaly.x, key: "core" } : undefined}
           label={`${active.label} over six cycles, all audited and core panel, against a ${active.target}${active.unit} target`}
         />
       </Card>

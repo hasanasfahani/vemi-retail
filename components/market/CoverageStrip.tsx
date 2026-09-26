@@ -35,7 +35,7 @@ export default function CoverageStrip({
   const color = "var(--vm-primary)";
 
   return (
-    <section className="rounded-lg border border-line bg-white px-6 py-5">
+    <section className="rounded-lg border border-line bg-white py-5 pl-6 pr-14">
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
         <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1 font-mono text-sm text-ink-500">
           <span className="vm-label mr-1">Audit coverage</span>
