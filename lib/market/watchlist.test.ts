@@ -97,6 +97,16 @@ describe("state", () => {
     expect(watchState(make(), 72, true)).toBe("slipping");
   });
 
+  it("reads a falling count of failures as progress, not slippage", () => {
+    const gaps = make({ kpi: "gapsFound", target: 0, baseline: 300 });
+    expect(watchState(gaps, 280, true)).toBe("improving");
+    expect(watchState(gaps, 320, true)).toBe("slipping");
+    expect(watchState(gaps, 0, true)).toBe("reached");
+    /* The bug this guards: with target 0, "current >= target" called
+       every gaps watch reached on the day it was pinned. */
+    expect(watchState(gaps, 300, true)).not.toBe("reached");
+  });
+
   it("says nothing when the filter has narrowed the slice away", () => {
     expect(watchState(make(), 88, false)).toBe("out-of-scope");
     expect(watchState(make(), null, true)).toBe("out-of-scope");

@@ -98,7 +98,7 @@ export default function StatCard({
               <Badge band={resolved} size="sm" />
             ))}
           {delta !== undefined && (
-            <Delta value={delta} unit={deltaUnit} floor={deltaFloor} goodUp={goodUp} label={deltaLabel} />
+            <Delta value={delta} unit={deltaUnit} floor={deltaFloor} better={goodUp ? "up" : "down"} label={deltaLabel} />
           )}
           {target !== undefined && (
             <span className="font-mono text-xs text-text-muted">target {target}{unit}</span>

@@ -102,13 +102,16 @@ export default function GapBars({
               </span>
 
               <span
-                className="mono w-[4.75rem] shrink-0 text-right text-xs font-semibold"
-                /* The figure stays Ink: band fills are for marks, and the
-                   lightest of them is unreadable as text. */
-                style={{ color: "var(--vm-text)" }}
+                /* Against a target the gap is judged: ahead reads as good
+                   news, behind as bad (green / red in the client portal,
+                   from the delta tokens, never the band fills). Against a
+                   reference such as list price it is only stated. */
+                className={`mono w-[4.75rem] shrink-0 text-right text-xs font-semibold ${
+                  parLabel || gap === 0 ? "text-text" : gap > 0 ? "text-delta-better" : "text-delta-worse"
+                }`}
               >
-                {/* Direction in a glyph and a sign, never in colour. */}
-                <span aria-hidden className={gap > 0 ? "mr-1 text-primary-text" : "mr-1"}>
+                {/* Direction in a glyph and a sign; colour is the third cue. */}
+                <span aria-hidden className="mr-1">
                   {gap > 0 ? "▲" : gap < 0 ? "▼" : "–"}
                 </span>
                 {gap > 0 ? "+" : ""}

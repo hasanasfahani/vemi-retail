@@ -1,7 +1,7 @@
 # Client portal: neutral frame, universal status colours (plan)
 
 Status: **approved 27 Sep 2026** (N1–N6 as recommended, see §8).
-Phases 1–2 done; phases 3–6 to go (build notes in §10). Written after the
+Phases 1–3 done; phases 4–6 to go (build notes in §10). Written after the
 brand refresh (docs/BRAND-REFRESH-PLAN.md) shipped the portal fully in
 Vemi colours.
 
@@ -341,4 +341,47 @@ and every signature detail says who built it.
   - tsc and eslint: clean;
   - 270 tests pass;
   - brand:check: 0 errors, 0 warnings.
+
+### Phase 3: deltas by outcome (done)
+
+- **One rule for "is this good news".** `lib/market/outcome.ts`:
+  - `BETTER` gives the polarity for every measure: rates and the score
+    are "up", gaps found is "down".
+  - `deltaOutcome()` returns better, worse, flat (inside the detection
+    floor) or neutral (no polarity stated, so never guessed).
+  - Unit tested, including "more gaps can never read better".
+- **Delta.**
+  - The colour comes from the outcome (`--vm-delta-better` /
+    `--vm-delta-worse`): green / red in the portal, Violet 700 / Ink on
+    the Vemi surface.
+  - The arrow and sign still carry direction, and screen readers hear
+    ", better" or ", worse".
+  - `goodUp` is replaced by `better`.
+  - All KPI tiles, the brand and governorate health cards, the trend
+    tables, follow-up evidence and the watchlist pass their polarity.
+  - The Reports opportunity count is a count, not a change, so it stays
+    neutral.
+  - "N above target" on a KPI tile reads green.
+  - The gap figure beside each gap bar is judged against a target
+    (ahead green, behind red) and only stated against a reference such
+    as list price.
+- **Shared `KpiCard`** takes an optional `delta.outcome`; `/kit` shows
+  it.
+- **Bug fixed: the watchlist ignored polarity.**
+  - Before: a watch on gaps found, readings above or below list (target
+    0) or worst price variance (target 5) read "Target reached" the day
+    it was pinned, and a rise in failures read "Moving toward target".
+  - Now: `WATCH_BETTER` states each watch's direction, `watchState`
+    honours it, and a test guards it.
+- **Fixed on the way:** the lead brand's health card truncated "Pepsi"
+  to "Pe…" at 1280.
+  - The brand's role ("Lead brand" / "Portfolio brand") now sits under
+    the name on every card, so the scores still line up.
+- **Checks:**
+  - contrast scan clean on the executive, trends, competition and
+    pricing pages and `/kit`;
+  - tsc and eslint: clean;
+  - 276 tests pass;
+  - brand:check: 0 errors, 0 warnings;
+  - `next build`: OK.
 

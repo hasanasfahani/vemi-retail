@@ -23,6 +23,7 @@
 import type { IssueKpi } from "./issues";
 import { KPI_LABEL } from "./issues";
 import { KPI_NAME } from "./kpiLabels";
+import type { Better } from "./outcome";
 import { scoreboard } from "./competition";
 import { governorateHealth } from "./governorateHealth";
 import type { MarketView } from "./filters";
@@ -106,6 +107,29 @@ export const WATCH_KPI_LABEL: Record<WatchKpi, string> = {
   priceBelow: "Readings below list",
   priceWorst: "Worst price variance",
   priceIndex: "Price index",
+};
+
+/* Which way is good news. Most watches are rates climbing toward a
+   target; the counts of failures and the price variances fall toward
+   theirs. Without this a watch on "Gaps found" (target 0) read "Target
+   reached" the day it was pinned and could never read "Moving away".
+   The price index keeps "at or above 100" as its goal, as pinned. */
+export const WATCH_BETTER: Record<WatchKpi, Better> = {
+  availability: "up",
+  shelfShare: "up",
+  assortment: "up",
+  price: "up",
+  posm: "up",
+  score: "up",
+  promo: "up",
+  visibility: "up",
+  districtsLed: "up",
+  gapsFound: "down",
+  coverage: "up",
+  priceAbove: "down",
+  priceBelow: "down",
+  priceWorst: "down",
+  priceIndex: "up",
 };
 
 /* Most of these are rates. Districts led is a count, and appending a
@@ -527,8 +551,9 @@ export function watchState(
   inScope: boolean
 ): WatchState {
   if (!inScope || current === null) return "out-of-scope";
-  if (current >= watch.target) return "reached";
+  const up = WATCH_BETTER[watch.kpi] === "up";
+  if (up ? current >= watch.target : current <= watch.target) return "reached";
   const moved = current - watch.baseline;
   if (Math.abs(moved) < WATCH_FLOOR_PT) return "flat";
-  return moved > 0 ? "improving" : "slipping";
+  return moved > 0 === up ? "improving" : "slipping";
 }

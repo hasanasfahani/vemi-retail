@@ -105,6 +105,8 @@ select.vm-input { appearance: none; padding-inline-end: 40px; background-image: 
 .vm-kpi__delta { display: inline-flex; gap: 6px; align-items: baseline; font-size: 14px; line-height: 20px; font-weight: 500; }
 .vm-kpi__delta--up > span:first-child { color: var(--vm-primary-text); }
 .vm-kpi__delta--flat { color: var(--vm-text-muted); }
+.vm-kpi__delta--better, .vm-kpi__delta--better > span:first-child { color: var(--vm-delta-better); }
+.vm-kpi__delta--worse, .vm-kpi__delta--worse > span:first-child { color: var(--vm-delta-worse); }
 .vm-kpi__foot { margin-block-start: auto; padding-block-start: var(--vm-space-3); border-block-start: 1px solid var(--vm-line); font: 400 12px/16px var(--vm-font-mono); color: var(--vm-text-muted); }
 .vm-kpi > .vm-band, .vm-kpi > .vm-badge { align-self: flex-start; }
 

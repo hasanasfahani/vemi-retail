@@ -27,7 +27,7 @@ import { useWatchlist } from "@/components/market/useWatchlist";
 import { Card, StatCard, EmptyState, Badge, Delta, DataTable, type Column } from "@/components/market/ui";
 import type { Tone } from "@/components/vemi/BandChip";
 import {
-  WATCH_FLOOR_PT, WATCH_KPI_LABEL, WATCH_KPI_UNIT, WATCH_STATE_LABEL,
+  WATCH_BETTER, WATCH_FLOOR_PT, WATCH_KPI_LABEL, WATCH_KPI_UNIT, WATCH_STATE_LABEL,
   scopeLabel, scopeMatches, watchState, watchValue,
   type Watch, type WatchState,
 } from "@/lib/market/watchlist";
@@ -139,7 +139,7 @@ function Watchlist({ view }: { view: MarketView }) {
         ) : (
           /* The market's own bootstrapped floor is 1.81pt. Movement
              inside it is reported as flat rather than dressed up. */
-          <Delta value={r.moved} unit={r.unit ? "pt" : ""} floor={WATCH_FLOOR_PT} />
+          <Delta value={r.moved} unit={r.unit ? "pt" : ""} floor={WATCH_FLOOR_PT} better={WATCH_BETTER[r.watch.kpi]} />
         ),
       sortValue: (r) => r.moved ?? 0,
       csv: (r) => r.moved ?? "",

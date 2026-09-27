@@ -74,7 +74,7 @@ export default function GovernorateHealthCard({
         {health.delta === null ? (
           <span className="font-mono text-xs text-text-muted">loading last cycle…</span>
         ) : (
-          <Delta value={health.delta} unit="" floor={1} label={vsPrior()} />
+          <Delta value={health.delta} unit="" floor={1} better="up" label={vsPrior()} />
         )}
       </div>
 

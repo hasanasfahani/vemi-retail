@@ -144,6 +144,10 @@
   --vm-gauge-attention: var(--vm-primary);
   --vm-gauge-critical: var(--vm-primary);
   --vm-gauge-average-edge: transparent;
+  /* A change judged against its measure's direction (plan phase 3).
+     Vemi surface: no red/green, better in Violet 700, worse in Ink. */
+  --vm-delta-better: var(--vm-primary-text);
+  --vm-delta-worse: var(--vm-text);
   /* Heat cells for a count of failures, five relative steps. */
   --vm-heat-bad-0: var(--vm-bg);
   --vm-heat-bad-1: var(--vm-band-strong);
@@ -164,7 +168,7 @@
    Set as data-surface="portal" on the portal layout root. The portal is
    the client's room: urgency in universal colours, the frame neutral,
    Vemi violet kept for Vemi's actions, focus and "where you are".
-   Grows phase by phase: 1 status chips, 2 status marks.
+   Grows phase by phase: 1 status chips, 2 status marks, 3 deltas.
    ========================================================================== */
 [data-surface="portal"] {
   /* Marks (plan phase 2). Declared again in full here, not inherited:
@@ -190,6 +194,9 @@
   --vm-gauge-attention: var(--vm-status-attention-fill);
   --vm-gauge-critical: var(--vm-status-critical-fill);
   --vm-gauge-average-edge: var(--vm-status-average-edge);
+  /* Deltas by outcome: better green, worse red (≥6.5:1 on white). */
+  --vm-delta-better: var(--vm-status-strong-text);
+  --vm-delta-worse: var(--vm-status-critical-text);
   /* Failure heat: the four status tints, then solid red for the worst
      fifth; each cell's number in its band's text colour (≥5.5:1). */
   --vm-heat-bad-0: var(--vm-status-strong-tint);

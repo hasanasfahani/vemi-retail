@@ -39,24 +39,23 @@ export default function BrandHealthCard({
   const body = (
     <>
       <div className="flex items-start justify-between gap-2">
-        <span className="flex min-w-0 items-center gap-2">
-          <span
-            className="h-2.5 w-2.5 shrink-0 rounded-[3px]"
-            style={brandSwatch(health.brandId)}
-            aria-hidden
-          />
-          <span className="truncate text-lg font-semibold text-text">
-            {health.name}
-          </span>
-        </span>
-        <span className="flex shrink-0 items-center gap-1">
-          {health.isClient && (
-            <span className="mono uppercase font-mono text-xs font-medium tracking-[0.1em] text-text-muted">
-              Lead brand
+        {/* The brand's role sits under its name rather than beside it:
+            sharing the row, it truncated "Pepsi" to "Pe…" at 1280. Every
+            card carries one, so the scores line up across the row. */}
+        <span className="min-w-0">
+          <span className="flex min-w-0 items-center gap-2">
+            <span
+              className="h-2.5 w-2.5 shrink-0 rounded-[3px]"
+              style={brandSwatch(health.brandId)}
+              aria-hidden
+            />
+            <span className="truncate text-lg font-semibold text-text">
+              {health.name}
             </span>
-          )}
-          {watch}
+          </span>
+          <span className="vm-label mt-0.5 block">{health.isClient ? "Lead brand" : "Portfolio brand"}</span>
         </span>
+        <span className="flex shrink-0 items-center gap-1">{watch}</span>
       </div>
 
       {/* Was a ring; the brand avoids donut forms. The figure, then a
@@ -78,7 +77,7 @@ export default function BrandHealthCard({
         {health.delta === null ? (
           <span className="font-mono text-xs text-text-muted">loading last cycle…</span>
         ) : (
-          <Delta value={health.delta} unit="" floor={1} label={vsPrior()} />
+          <Delta value={health.delta} unit="" floor={1} better="up" label={vsPrior()} />
         )}
       </div>
 

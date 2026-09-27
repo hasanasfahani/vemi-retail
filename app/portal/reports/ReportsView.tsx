@@ -373,7 +373,6 @@ function Reports({ view }: { view: MarketView }) {
                   <Delta
                     value={item.scope.outlets}
                     unit=" outlets"
-                    goodUp={false}
                     floor={0}
                   />
                   <p className="mono mt-0.5 text-xs text-text-muted">{item.impact.label}</p>

@@ -82,7 +82,7 @@ export default function FollowUpEvidence({
             {c.after === null ? "—" : `${c.after}%`}
           </span>
         </p>
-        {c.delta !== null && <Delta value={c.delta} unit="pt" floor={0} />}
+        {c.delta !== null && <Delta value={c.delta} unit="pt" floor={0} better="up" />}
         <p className="mono text-xs text-text-muted">
           {c.revisited
             ? `${c.resolved} resolved · ${c.unresolved} still there`

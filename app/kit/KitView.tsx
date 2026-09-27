@@ -113,7 +113,7 @@ export default function KitView() {
       <Section title="KPI cards">
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           <KpiCard label="Availability" value="87.6" unit="%" confidence="measured"
-            delta={{ change: "1.2 pts", window: "vs Aug 2026", direction: "up" }}
+            delta={{ change: "1.2 pts", window: "vs Aug 2026", direction: "up", outcome: "better" }}
             asOf="As of 26 Sep" base="742 outlets"
             top={<InfoPopover label="How availability is measured">Listings on shelf divided by listings expected, across every audited outlet.</InfoPopover>}>
             <Gauge value={87.6} target={95} />
@@ -123,7 +123,7 @@ export default function KitView() {
             <Gauge value={34} target={40} />
           </KpiCard>
           <KpiCard size="compact" label="Lost sales" value="IQD 41.2M" confidence="estimated"
-            delta={{ change: "3.1M", window: "vs Aug 2026", direction: "down" }} asOf="As of 26 Sep" base="91 outlets" />
+            delta={{ change: "3.1M", window: "vs Aug 2026", direction: "down", outcome: "better" }} asOf="As of 26 Sep" base="91 outlets" />
           <KpiCard size="compact" label="Outlets audited" value="742" unit="/ 1,000" asOf="As of 26 Sep" />
         </div>
       </Section>

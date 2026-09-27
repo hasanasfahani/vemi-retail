@@ -45,6 +45,8 @@
   --color-band-attention: var(--vm-band-attention);
   --color-band-critical: var(--vm-band-critical);
   /* Universal status colours: client portal only (docs/PORTAL-NEUTRAL-PLAN.md). */
+  --color-delta-better: var(--vm-delta-better);
+  --color-delta-worse: var(--vm-delta-worse);
   --color-status-strong-fill: var(--vm-status-strong-fill);
   --color-status-strong-tint: var(--vm-status-strong-tint);
   --color-status-strong-text: var(--vm-status-strong-text);

@@ -137,7 +137,7 @@ export default function KpiCard({
       </div>
 
       <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-1 text-sm">
-        <span className={`font-medium ${met ? "text-primary-text" : "text-text"}`}>
+        <span className={`font-medium ${met ? "text-delta-better" : "text-text"}`}>
           {met ? `${Math.abs(gap)}${unit} above target` : `${gap}${unit} to target`}
         </span>
         <span className="font-mono text-xs text-text-muted">
@@ -164,7 +164,7 @@ export default function KpiCard({
           />
         </span>
         <span className="pointer-events-none">
-          <Delta value={delta} floor={deltaFloor} label={deltaLabel ?? "vs the prior cycle"} />
+          <Delta value={delta} floor={deltaFloor} better="up" label={deltaLabel ?? "vs the prior cycle"} />
         </span>
       </div>
 

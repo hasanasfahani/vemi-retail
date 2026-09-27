@@ -26,6 +26,7 @@ import PosDrawer from "@/components/market/PosDrawer";
 import { Card, DataTable, EmptyState, StatCard, Tabs, type Column } from "@/components/market/ui";
 import Badge from "@/components/market/ui/Badge";
 import Delta from "@/components/market/ui/Delta";
+import { BETTER } from "@/lib/market/outcome";
 import { ChartLegend, TrendChart, MEASURE, SERIES3, threeSeriesRows } from "@/components/market/charts";
 import { scoreBand } from "@/components/market/ui/health";
 import { repeated, type RepeatedRow } from "@/lib/market/trendsView";
@@ -163,7 +164,7 @@ function Trends({ view }: { view: MarketView }) {
       align: "right",
       sortValue: (r) => r.delta,
       csv: (r) => r.delta,
-      render: (r) => <Delta value={r.delta} unit="" floor={0} />,
+      render: (r) => <Delta value={r.delta} unit="" floor={0} better={BETTER.score} />,
     },
     {
       id: "availability",

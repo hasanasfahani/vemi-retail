@@ -11,6 +11,9 @@ export interface KpiDelta {
   /** The comparison, named: "vs Aug 2026" (plan D5). */
   window: string;
   direction: Direction;
+  /** Whether the change is good news for this measure. Colours the delta
+      (green / red in the client portal); omit to state it unjudged. */
+  outcome?: "better" | "worse";
 }
 
 /**
@@ -54,10 +57,11 @@ export function KpiCard({
       </div>
       {children}
       {delta && (
-        <div className={cx("vm-kpi__delta", `vm-kpi__delta--${delta.direction}`)}>
+        <div className={cx("vm-kpi__delta", `vm-kpi__delta--${delta.direction}`, delta.outcome && `vm-kpi__delta--${delta.outcome}`)}>
           <span aria-hidden="true">{ARROW[delta.direction]}</span>
           <span>
             {delta.direction === "flat" ? "flat" : delta.change} {delta.window}
+            {delta.outcome && delta.direction !== "flat" && <span className="sr-only">, {delta.outcome}</span>}
           </span>
         </div>
       )}
