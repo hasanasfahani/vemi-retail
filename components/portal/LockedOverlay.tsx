@@ -95,7 +95,7 @@ export default function LockedOverlay({
             {about && (
               <ul className="mt-1 flex flex-col gap-2">
                 {about.holds.map((item) => (
-                  <li key={item} className="flex items-center gap-2 text-sm text-ink-900">
+                  <li key={item} className="flex items-center gap-2 text-sm text-text">
                     <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary" aria-hidden />
                     {item}
                   </li>
@@ -116,13 +116,13 @@ export default function LockedOverlay({
 
   return (
     <>
-      <header className="sticky top-0 z-30 border-b border-line bg-white">
+      <header className="sticky top-0 z-30 border-b border-line bg-surface">
         <div className="flex h-16 items-center gap-3 px-4 sm:px-6">
           <Suspense fallback={null}>
             <MobileNav />
           </Suspense>
-          <h1 className="truncate text-lg font-semibold leading-7 text-ink-900">{title}</h1>
-          <span className="hidden truncate font-mono text-xs font-medium uppercase tracking-[0.1em] text-ink-500 md:inline">
+          <h1 className="truncate text-lg font-semibold leading-7 text-text">{title}</h1>
+          <span className="hidden truncate font-mono text-xs font-medium uppercase tracking-[0.1em] text-text-muted md:inline">
             {contract.clientShort} · {contract.brand} · {contract.country}
           </span>
         </div>

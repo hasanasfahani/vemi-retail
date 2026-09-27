@@ -36,8 +36,10 @@ yarn-error.log*
 # vercel
 .vercel
 
-# local tooling
-.claude
+# local tooling: Claude Code state stays out; the brand skill and command are shared.
+.claude/*
+!.claude/skills/
+!.claude/commands/
 
 # typescript
 *.tsbuildinfo

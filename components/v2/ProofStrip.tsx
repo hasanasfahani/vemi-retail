@@ -14,13 +14,13 @@ export default function ProofStrip() {
   const facts = proof.strip.filter((f) => !/\d/.test(f.value));
 
   return (
-    <section id={ids.proof} className="section-tight section-v2-tight border-t border-line bg-canvas">
+    <section id={ids.proof} className="section-tight section-v2-tight border-t border-line bg-bg">
       <div className="container-vemi">
         <div className="grid items-center gap-10 lg:grid-cols-[1fr_0.56fr] lg:gap-14">
           <Reveal>
             <div>
               <span className="vm-label text-primary-text">{proof.eyebrow}</span>
-              <h2 className="mt-3 text-[28px] font-semibold leading-[36px] tracking-[-0.01em] text-ink-900 sm:text-[36px] sm:leading-[44px]">
+              <h2 className="mt-3 text-[28px] font-semibold leading-[36px] tracking-[-0.01em] text-text sm:text-[36px] sm:leading-[44px]">
                 {proof.headline}
               </h2>
 
@@ -37,9 +37,9 @@ export default function ProofStrip() {
 
               <ul className="mt-4 grid gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-3">
                 {facts.map((f) => (
-                  <li key={f.label} className="bg-white p-5">
+                  <li key={f.label} className="bg-surface p-5">
                     <div className="vm-label">{f.label}</div>
-                    <div className="mt-2 text-lg font-semibold leading-6 text-ink-900">{f.value}</div>
+                    <div className="mt-2 text-lg font-semibold leading-6 text-text">{f.value}</div>
                   </li>
                 ))}
               </ul>

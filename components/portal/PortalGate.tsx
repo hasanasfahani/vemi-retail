@@ -57,8 +57,8 @@ export default function PortalGate({ children }: { children: React.ReactNode }) 
 
   if (!allowed) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-canvas">
-        <span className="text-sm text-ink-400">Loading workspace…</span>
+      <div className="flex min-h-screen items-center justify-center bg-bg">
+        <span className="text-sm text-text-muted">Loading workspace…</span>
       </div>
     );
   }

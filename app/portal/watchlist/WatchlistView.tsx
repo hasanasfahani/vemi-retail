@@ -88,8 +88,8 @@ function Watchlist({ view }: { view: MarketView }) {
       header: "Watching",
       render: (r) => (
         <span className="block min-w-0">
-          <span className="block truncate font-semibold text-ink-900">{r.measure}</span>
-          <span className="block truncate text-xs text-ink-400">{r.scope}</span>
+          <span className="block truncate font-semibold text-text">{r.measure}</span>
+          <span className="block truncate text-xs text-text-muted">{r.scope}</span>
         </span>
       ),
       sortValue: (r) => `${r.measure} ${r.scope}`,
@@ -101,9 +101,9 @@ function Watchlist({ view }: { view: MarketView }) {
       align: "right",
       render: (r) =>
         r.current === null ? (
-          <span className="text-ink-400">—</span>
+          <span className="text-text-muted">—</span>
         ) : (
-          <span className="mono font-semibold text-ink-900">
+          <span className="mono font-semibold text-text">
             {r.current}
             {r.unit}
           </span>
@@ -117,11 +117,11 @@ function Watchlist({ view }: { view: MarketView }) {
       align: "right",
       render: (r) => (
         <span className="block">
-          <span className="mono block text-ink-700">
+          <span className="mono block text-text">
             {r.watch.baseline}
             {r.unit}
           </span>
-          <span className="block text-xs text-ink-400">
+          <span className="block text-xs text-text-muted">
             {monthLabel(r.watch.baselineMonth)}
           </span>
         </span>
@@ -135,7 +135,7 @@ function Watchlist({ view }: { view: MarketView }) {
       align: "right",
       render: (r) =>
         r.moved === null ? (
-          <span className="text-ink-400">—</span>
+          <span className="text-text-muted">—</span>
         ) : (
           /* The market's own bootstrapped floor is 1.81pt. Movement
              inside it is reported as flat rather than dressed up. */
@@ -149,7 +149,7 @@ function Watchlist({ view }: { view: MarketView }) {
       header: "Target",
       align: "right",
       render: (r) => (
-        <span className="mono text-ink-700">
+        <span className="mono text-text">
           {r.watch.target}
           {r.unit}
         </span>
@@ -163,9 +163,9 @@ function Watchlist({ view }: { view: MarketView }) {
       align: "right",
       render: (r) =>
         r.gap === null || r.gap <= 0 ? (
-          <span className="text-ink-400">—</span>
+          <span className="text-text-muted">—</span>
         ) : (
-          <span className="mono text-ink-700">
+          <span className="mono text-text">
             {r.gap}
             {r.unit || " to go"}
           </span>

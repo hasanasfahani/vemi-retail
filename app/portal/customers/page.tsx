@@ -13,13 +13,13 @@ export const metadata = { title: "Consumers" };
 export default function Page() {
   return (
     <>
-    <header className="sticky top-0 z-30 border-b border-line bg-white">
+    <header className="sticky top-0 z-30 border-b border-line bg-surface">
       <div className="flex h-16 items-center gap-3 px-4 sm:px-6">
         <Suspense fallback={null}>
           <MobileNav />
         </Suspense>
-        <p className="truncate text-lg font-semibold leading-7 text-ink-900">Consumers</p>
-        <span className="hidden truncate font-mono text-xs font-medium uppercase tracking-[0.1em] text-ink-500 md:inline">
+        <p className="truncate text-lg font-semibold leading-7 text-text">Consumers</p>
+        <span className="hidden truncate font-mono text-xs font-medium uppercase tracking-[0.1em] text-text-muted md:inline">
           {contract.clientShort} · {contract.brand} · {contract.country}
         </span>
       </div>

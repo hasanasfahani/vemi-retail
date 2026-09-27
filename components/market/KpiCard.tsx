@@ -137,10 +137,10 @@ export default function KpiCard({
       </div>
 
       <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-1 text-sm">
-        <span className={`font-medium ${met ? "text-primary-text" : "text-ink-900"}`}>
+        <span className={`font-medium ${met ? "text-primary-text" : "text-text"}`}>
           {met ? `${Math.abs(gap)}${unit} above target` : `${gap}${unit} to target`}
         </span>
-        <span className="font-mono text-xs text-ink-500">
+        <span className="font-mono text-xs text-text-muted">
           target {target}
           {unit}
         </span>

@@ -8,37 +8,12 @@
 
 /* ============================================================
    VEMI — brand v1.0, "The Insight V"
-   Values live in brand/tokens.css; the Tailwind theme (and the
-   temporary bridge from the pre-brand class names) in
+   Values live in brand/tokens.css; the Tailwind theme in
    brand/tailwind-v4.css. Nothing below writes a raw color.
    ============================================================ */
 @import "../brand/tokens.css";
 @import "../brand/tailwind-v4.css";
 @import "../components/vemi/vemi-components.css" layer(components);
-
-/* ---- portal chart palette ------------------------------------
-   The client carries the accent, everyone else sits in neutrals, and
-   identity comes from direct labels, never from hue alone. Declared on
-   :root because charts read them through var() in inline styles, which
-   Tailwind cannot see. These re-point the pre-brand chart names; the
-   chart system rebuild (plan phase 4) replaces them with the brand's
-   chart-1/2/3 series and the D2 portfolio ramp directly. */
-:root {
-  --color-chart-context: var(--vm-chart-3);
-  --color-stock-1: var(--vm-portfolio-4);
-  --color-stock-2: var(--vm-portfolio-3);
-  --color-stock-3: var(--vm-portfolio-2);
-  --color-stock-4: var(--vm-portfolio-1);
-  /* Dumbbell "earlier point": drawn hollow, always direct-labelled. */
-  --color-chart-prior: var(--vm-portfolio-2);
-  --color-context-prior: var(--vm-line-strong);
-
-  /* Border-first: cards carry no shadow. Only menus, popovers,
-     drawers and dialogs float. */
-  --shadow-card: none;
-  --shadow-surface: none;
-  --shadow-pop: var(--vm-shadow-overlay);
-}
 
 /* ============================================================
    BASE
@@ -83,14 +58,12 @@
 }
 
 /* ============================================================
-   TYPE — the brand scale (tokens.md). The t-* names are the
-   pre-brand classes, now drawn on the brand scale; they are renamed
-   to the vm-* classes as each page is rebuilt.
+   TYPE — the brand scale (tokens.md), as the kit's vm-* classes.
+   Headings step down one size below 640px so a 44px title does not
+   wrap word by word on a phone.
    ============================================================ */
 @layer components {
-  .vm-display,
-  .t-display {
-    font-family: var(--vm-font-sans);
+  .vm-display {
     font-size: clamp(44px, 6vw, 72px);
     line-height: 1.06;
     letter-spacing: -0.02em;
@@ -103,16 +76,6 @@
     line-height: 52px;
     letter-spacing: -0.02em;
     font-weight: 600;
-  }
-
-  /* Marketing section titles run at the h1 size; inside the portal a
-     section title is .vm-h2. */
-  .t-h2 {
-    font-family: var(--vm-font-sans);
-    font-size: clamp(32px, 4vw, 44px);
-    line-height: 1.18;
-    letter-spacing: -0.02em;
-    font-weight: 600;
     color: var(--vm-text);
   }
 
@@ -123,17 +86,25 @@
     font-weight: 600;
   }
 
-  .vm-h3,
-  .t-h3 {
-    font-family: var(--vm-font-sans);
+  .vm-h3 {
     font-size: 22px;
     line-height: 28px;
     font-weight: 600;
     color: var(--vm-text);
   }
 
-  .vm-body-lg,
-  .t-lead {
+  @media (max-width: 639px) {
+    .vm-h1 {
+      font-size: 32px;
+      line-height: 40px;
+    }
+    .vm-h2 {
+      font-size: 28px;
+      line-height: 36px;
+    }
+  }
+
+  .vm-body-lg {
     font-size: 18px;
     line-height: 28px;
     color: var(--vm-text-muted);
@@ -145,8 +116,7 @@
   }
 
   /* Eyebrows, KPI labels, table headers: mono, uppercase, tracked. */
-  .vm-label,
-  .t-eyebrow {
+  .vm-label {
     font-family: var(--vm-font-mono);
     font-size: 12px;
     line-height: 16px;
@@ -171,13 +141,10 @@
     color: var(--vm-text);
   }
 
+  /* Tabular figures only (the face stays whatever it was). */
   .vm-num,
   .mono {
     font-variant-numeric: tabular-nums;
-  }
-
-  .vm-muted {
-    color: var(--vm-text-muted);
   }
 }
 
@@ -221,174 +188,11 @@
       padding-bottom: 48px;
     }
   }
-
-  .hairline {
-    border-top: 1px solid var(--vm-line);
-  }
 }
 
 /* ============================================================
-   BUTTONS — 44px, radius 10, 15/600. One primary per view.
-   Calm: color changes on hover, nothing moves.
+   MOTION — quiet. 160–260ms, color and opacity; nothing bounces.
    ============================================================ */
-@layer components {
-  .btn-primary,
-  .btn-secondary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    min-height: var(--vm-control-height);
-    padding: 0 20px;
-    border: 1px solid transparent;
-    border-radius: var(--vm-radius-md);
-    font-size: 15px;
-    line-height: 20px;
-    font-weight: 600;
-    white-space: nowrap;
-    transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
-  }
-
-  .btn-primary {
-    background: var(--vm-primary);
-    color: var(--vm-on-primary);
-  }
-  .btn-primary:hover {
-    background: var(--vm-primary-hover);
-  }
-
-  .btn-secondary {
-    background: var(--vm-surface);
-    color: var(--vm-text);
-    border-color: var(--vm-line-strong);
-  }
-  .btn-secondary:hover {
-    background: var(--vm-bg);
-  }
-
-  .btn-ghost {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    color: var(--vm-primary-text);
-    font-weight: 600;
-    font-size: 15px;
-    line-height: 20px;
-  }
-  .btn-ghost:hover {
-    text-decoration: underline;
-    text-underline-offset: 3px;
-  }
-}
-
-/* ============================================================
-   SURFACES — white, 1px Line, radius 16, no shadow.
-   ============================================================ */
-@layer components {
-  .card {
-    background: var(--vm-surface);
-    border: 1px solid var(--vm-line);
-    border-radius: var(--vm-radius-lg);
-    padding: 24px;
-    transition: border-color 160ms ease;
-  }
-  .card-hover:hover {
-    border-color: var(--vm-line-strong);
-  }
-
-  .surface {
-    background: var(--vm-surface);
-    border: 1px solid var(--vm-line);
-    border-radius: var(--vm-radius-lg);
-  }
-
-  .chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    border: 1px solid var(--vm-line);
-    border-radius: var(--vm-radius-pill);
-    padding: 4px 12px;
-    font-size: 14px;
-    line-height: 20px;
-    font-weight: 500;
-    color: var(--vm-text-muted);
-    background: var(--vm-surface);
-  }
-
-  /* Band chips (plan D1): fill style carries the band, the word always
-     travels with it. */
-  .pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    border: 1px solid transparent;
-    border-radius: var(--vm-radius-sm);
-    padding: 2px 8px;
-    font-size: 12px;
-    font-weight: 500;
-    line-height: 18px;
-  }
-  .pill-good {
-    background: var(--vm-primary-tint);
-    color: var(--vm-primary-text);
-  }
-  .pill-warn {
-    background: var(--vm-surface);
-    border-color: var(--vm-line-strong);
-    color: var(--vm-text);
-  }
-  .pill-critical {
-    background: var(--vm-text);
-    color: var(--vm-bg);
-  }
-
-  .dot {
-    display: inline-block;
-    width: 7px;
-    height: 7px;
-    border-radius: 999px;
-  }
-
-  .grid-line {
-    stroke: var(--vm-chart-grid);
-    stroke-width: 1;
-  }
-}
-
-/* ============================================================
-   MOTION — quiet. 160–220ms, color and opacity; nothing bounces.
-   ============================================================ */
-@keyframes ping-soft {
-  0% {
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--vm-primary) 45%, transparent);
-  }
-  70%,
-  100% {
-    box-shadow: 0 0 0 6px transparent;
-  }
-}
-.dot-live {
-  animation: ping-soft 2s ease-out infinite;
-}
-
-@keyframes mapPing {
-  0% {
-    opacity: 0.55;
-    transform: scale(0.5);
-  }
-  70%,
-  100% {
-    opacity: 0;
-    transform: scale(2.1);
-  }
-}
-.map-ping {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: mapPing 2s ease-out infinite;
-}
-
 @keyframes panelIn {
   from {
     opacity: 0;
@@ -403,112 +207,9 @@
   animation: panelIn 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* ============================================================
-   PORTAL — route transition and loading skeleton.
-   Skeleton blocks are flat Violet 100 at the size of the content
-   they stand in for (brand: no spinners, no shimmer gradient).
-   ============================================================ */
-.portal-page {
-  position: relative;
-}
-
-.portal-content {
-  animation: contentIn 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.portal-skeleton {
-  position: absolute;
-  inset: 0;
-  z-index: 5;
-  pointer-events: none;
-  animation: skeletonOut 420ms ease-out forwards;
-}
-
-@keyframes contentIn {
-  0%,
-  55% {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  100% {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-@keyframes skeletonOut {
-  0%,
-  45% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    visibility: hidden;
-  }
-}
-
-.sk-line,
-.sk-block,
-.sk-panel {
-  background: var(--vm-primary-tint);
-  border-radius: var(--vm-radius-sm);
-  animation: skeletonPulse 1.2s ease-in-out infinite;
-}
-
-.sk-title {
-  height: 28px;
-  width: 190px;
-}
-.sk-lead {
-  height: 16px;
-  width: 300px;
-  margin-top: 12px;
-}
-.sk-kpis {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 24px;
-  margin-top: 24px;
-}
-@media (min-width: 1024px) {
-  .sk-kpis {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-.sk-block {
-  height: 92px;
-  border-radius: var(--vm-radius-lg);
-}
-.sk-panel {
-  height: 320px;
-  margin-top: 24px;
-  border-radius: var(--vm-radius-lg);
-}
-
-@keyframes skeletonPulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.55;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .dot-live,
-  .panel-in,
-  .map-ping,
-  .sk-line,
-  .sk-block,
-  .sk-panel {
+  .panel-in {
     animation: none;
-  }
-  .portal-content {
-    animation: none;
-  }
-  .portal-skeleton {
-    display: none;
   }
   html {
     scroll-behavior: auto;
@@ -554,16 +255,6 @@
 .vemi-cluster {
   background: none;
   border: 0;
-}
-
-/* A strip that can still be dragged or swiped, without the permanent
-   grey bar macOS paints when "show scroll bars" is set to always. */
-.no-scrollbar {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
 }
 
 /* ------------------------------------------------------------------

@@ -295,7 +295,7 @@ export default function AccessRequestModal() {
                 <h2 id="access-title" className="vm-dialog__title mt-2">
                   Explore the dashboard
                 </h2>
-                <p className="mt-2 text-[15px] leading-[22px] text-ink-500">
+                <p className="mt-2 text-[15px] leading-[22px] text-text-muted">
                   Add your details to open the Vemi dashboard and see how
                   availability, shelf share and competitor activity are
                   tracked.
@@ -402,7 +402,7 @@ export default function AccessRequestModal() {
               <button type="submit" className="vm-btn vm-btn--primary vm-btn--block">
                 Open the dashboard
               </button>
-              <p className="mt-3 text-sm leading-5 text-ink-500">
+              <p className="mt-3 text-sm leading-5 text-text-muted">
                 We&apos;ll only use your details to follow up about Vemi.
               </p>
             </div>
@@ -421,7 +421,7 @@ export default function AccessRequestModal() {
                     return (
                       <li
                         key={label}
-                        className={`flex items-center gap-3 ${state === "next" ? "text-ink-500" : "text-ink-900"}`}
+                        className={`flex items-center gap-3 ${state === "next" ? "text-text-muted" : "text-text"}`}
                       >
                         <span className="flex h-5 w-5 shrink-0 items-center justify-center" aria-hidden>
                           {state === "done" ? (
@@ -443,7 +443,7 @@ export default function AccessRequestModal() {
                 <p className="vm-dialog__title mt-5">
                   {firstName ? `You're in, ${firstName}` : "You're in"}
                 </p>
-                <p className="mt-2 font-mono text-sm text-ink-500">Opening the dashboard…</p>
+                <p className="mt-2 font-mono text-sm text-text-muted">Opening the dashboard…</p>
               </>
             )}
           </div>

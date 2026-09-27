@@ -27,10 +27,10 @@ export default function Delta({
   const shown = Math.abs(value).toFixed(Math.abs(value) < 10 ? 1 : 0);
 
   return (
-    <span className="mono inline-flex items-baseline gap-1 text-xs font-medium text-ink-900">
+    <span className="mono inline-flex items-baseline gap-1 text-xs font-medium text-text">
       {material ? (
         <>
-          <span aria-hidden className={value > 0 ? "text-violet-ink" : ""}>
+          <span aria-hidden className={value > 0 ? "text-primary-text" : ""}>
             {value > 0 ? "▲" : value < 0 ? "▼" : "–"}
           </span>
           {sign}
@@ -38,9 +38,9 @@ export default function Delta({
           {unit}
         </>
       ) : (
-        <span className="text-ink-500">flat</span>
+        <span className="text-text-muted">flat</span>
       )}
-      {label && <span className="font-normal text-ink-500">{label}</span>}
+      {label && <span className="font-normal text-text-muted">{label}</span>}
     </span>
   );
 }

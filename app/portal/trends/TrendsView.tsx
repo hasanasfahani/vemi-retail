@@ -138,8 +138,8 @@ function Trends({ view }: { view: MarketView }) {
       sortValue: (r) => r.name,
       render: (r) => (
         <div className="min-w-0">
-          <p className="truncate font-medium text-ink-900">{r.name}</p>
-          <p className="mono truncate text-xs text-ink-400">{r.location}</p>
+          <p className="truncate font-medium text-text">{r.name}</p>
+          <p className="mono truncate text-xs text-text-muted">{r.location}</p>
         </div>
       ),
     },
@@ -148,7 +148,7 @@ function Trends({ view }: { view: MarketView }) {
       header: monthLabel(PRIOR),
       align: "right",
       sortValue: (r) => r.before,
-      render: (r) => <span className="mono text-ink-500">{r.before}</span>,
+      render: (r) => <span className="mono text-text-muted">{r.before}</span>,
     },
     {
       id: "after",
@@ -172,7 +172,7 @@ function Trends({ view }: { view: MarketView }) {
       sortValue: (r) => r.availabilityDelta,
       csv: (r) => r.availabilityDelta,
       render: (r) => (
-        <span className="mono text-ink-700">
+        <span className="mono text-text">
           {r.availabilityBefore}% → {r.availabilityAfter}%
         </span>
       ),
@@ -204,7 +204,7 @@ function Trends({ view }: { view: MarketView }) {
         title={headline}
         description="Six cycles of the same measures, with the core panel beside the whole market so a moving sample is never mistaken for a moving market."
       />
-      <p className="rounded-md bg-canvas px-4 py-3 text-sm text-ink-700">
+      <p className="rounded-md bg-bg px-4 py-3 text-sm text-text">
         Vemi audits a rotating panel, so a month-to-month movement can be the market changing or
         the sample changing. Every chart below draws both: the whole audited market for the level,
         and the {contract.corePanel}-outlet core panel — the same doors every month — for movement.
@@ -307,10 +307,10 @@ function Trends({ view }: { view: MarketView }) {
       {/* ---------- repeated outlets ---------- */}
       <section>
         <div className="mb-2.5 flex flex-wrap items-baseline justify-between gap-3">
-          <h2 className="vm-h2 mb-4 text-ink-900">
+          <h2 className="vm-h2 mb-4 text-text">
             Repeated outlets
           </h2>
-          <span className="mono text-xs text-ink-400">
+          <span className="mono text-xs text-text-muted">
             {improved} improved · {worsened} declined · {repeatedRows.length - improved - worsened} unchanged
           </span>
         </div>

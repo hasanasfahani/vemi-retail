@@ -47,7 +47,7 @@ export default function Nav() {
   return (
     <header
       className={`sticky top-0 z-50 transition-colors duration-200 ${
-        solid ? "border-b border-line bg-white" : "border-b border-transparent bg-canvas"
+        solid ? "border-b border-line bg-surface" : "border-b border-transparent bg-bg"
       }`}
     >
       <nav className="mx-auto flex h-[72px] max-w-[1200px] items-center justify-between gap-6 px-4 sm:px-6" aria-label="Main">
@@ -72,7 +72,7 @@ export default function Nav() {
                 className={`flex min-h-10 items-center rounded-md px-3 text-[15px] transition-colors ${
                   on
                     ? "bg-primary-tint font-semibold text-primary-text"
-                    : "font-medium text-ink-900 hover:bg-white"
+                    : "font-medium text-text hover:bg-surface"
                 }`}
               >
                 {l.label}
@@ -93,7 +93,7 @@ export default function Nav() {
             aria-expanded={open}
             aria-controls="site-menu"
             aria-label={open ? "Close menu" : "Open menu"}
-            className="vm-iconbtn -mr-2 text-ink-900 lg:hidden"
+            className="vm-iconbtn -mr-2 text-text lg:hidden"
           >
             <Icon name={open ? "close" : "menu"} />
           </button>
@@ -102,14 +102,14 @@ export default function Nav() {
 
       {/* mobile sheet: full width under the bar, 48px rows, the action last */}
       {open ? (
-        <div id="site-menu" className="border-t border-line bg-white lg:hidden">
+        <div id="site-menu" className="border-t border-line bg-surface lg:hidden">
           <div className="mx-auto flex max-w-[1200px] flex-col px-4 py-3 sm:px-6">
             {nav.links.map((l) => (
               <a
                 key={l.href}
                 href={l.href}
                 onClick={() => setOpen(false)}
-                className="flex min-h-12 items-center border-b border-line text-base font-medium text-ink-900 last:border-0"
+                className="flex min-h-12 items-center border-b border-line text-base font-medium text-text last:border-0"
               >
                 {l.label}
               </a>

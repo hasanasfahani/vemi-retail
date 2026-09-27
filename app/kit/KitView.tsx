@@ -197,9 +197,9 @@ export default function KitView() {
       <Section title="Icons">
         <div className="grid grid-cols-4 gap-3 sm:grid-cols-8 lg:grid-cols-12">
           {ICON_NAMES.map((n) => (
-            <span key={n} className="flex flex-col items-center gap-1 rounded-md border border-line bg-white p-3 text-ink-700" title={n}>
+            <span key={n} className="flex flex-col items-center gap-1 rounded-md border border-line bg-surface p-3 text-text" title={n}>
               <Icon name={n} />
-              <span className="w-full truncate text-center font-mono text-xs text-ink-500">{n}</span>
+              <span className="w-full truncate text-center font-mono text-xs text-text-muted">{n}</span>
             </span>
           ))}
         </div>
@@ -210,7 +210,7 @@ export default function KitView() {
         <TextField label="Outlets" defaultValue="12 outlets in Basra" />
       </Dialog>
       <Drawer open={drawer} onClose={() => setDrawer(false)} eyebrow="POS-0148 · Basra" title="Al Noor Market" badge={<BandChip band="critical" size="sm" />}>
-        <p className="text-sm text-ink-700">Drawer body: outlet detail, shelf evidence and history.</p>
+        <p className="text-sm text-text">Drawer body: outlet detail, shelf evidence and history.</p>
       </Drawer>
       <Toasts toasts={toasts} onDismiss={dismiss} />
     </main>

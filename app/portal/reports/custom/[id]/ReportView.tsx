@@ -74,7 +74,7 @@ function DragHandle({
       onDragEnd={onRelease}
       title={`Drag to move ${label}`}
       aria-hidden
-      className="flex h-6 w-5 cursor-grab items-center justify-center rounded-sm text-ink-300 transition-colors hover:bg-canvas hover:text-ink-700 active:cursor-grabbing"
+      className="flex h-6 w-5 cursor-grab items-center justify-center rounded-sm text-line-strong transition-colors hover:bg-bg hover:text-text active:cursor-grabbing"
     >
       <svg viewBox="0 0 16 16" className="h-4 w-4" fill="currentColor">
         <circle cx="6" cy="4" r="1.2" /><circle cx="10" cy="4" r="1.2" />
@@ -225,13 +225,13 @@ function Report({ view, data }: { view: MarketView; data: MonthData }) {
             <button
               type="button"
               onClick={() => setPicking(true)}
-              className="flex h-28 w-full max-w-[420px] flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-line-strong text-ink-700 transition-colors hover:border-primary hover:bg-primary-tint hover:text-primary-text"
+              className="flex h-28 w-full max-w-[420px] flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-line-strong text-text transition-colors hover:border-primary hover:bg-primary-tint hover:text-primary-text"
             >
               <Icon name="plus" size={24} />
               <span className="text-sm font-semibold">Add your first block</span>
             </button>
             <div className="flex flex-col items-center gap-2">
-              <span className="text-sm text-ink-500">or start with one of these</span>
+              <span className="text-sm text-text-muted">or start with one of these</span>
               <div className="flex flex-wrap justify-center gap-1.5">
                 {STARTERS.map((blockId) => {
                   const block = BLOCKS.find((b) => b.id === blockId);
@@ -282,7 +282,7 @@ function Report({ view, data }: { view: MarketView; data: MonthData }) {
                 }}
                 className={`${def?.width === "half" ? "min-w-0" : "min-w-0 lg:col-span-2"} rounded-lg transition-all ${
                   isCarrying ? "opacity-40" : ""
-                } ${isTarget ? "ring-2 ring-violet ring-offset-2" : ""}`}
+                } ${isTarget ? "ring-2 ring-primary ring-offset-2" : ""}`}
               >
                 <ReportBlockCard
                   block={block}
@@ -333,7 +333,7 @@ function Report({ view, data }: { view: MarketView; data: MonthData }) {
                       <button
                         type="button"
                         onClick={() => edit(removeBlock(report, block.id))}
-                        className="rounded-sm px-1.5 py-[2px] text-xs font-semibold text-ink-400 transition-colors hover:bg-canvas hover:text-ink-900"
+                        className="rounded-sm px-1.5 py-[2px] text-xs font-semibold text-text-muted transition-colors hover:bg-bg hover:text-text"
                       >
                         Remove
                       </button>

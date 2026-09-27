@@ -69,7 +69,7 @@ export default function PricingTab({ view }: { view: MarketView }) {
       id: "outlet",
       header: "Outlet",
       render: (r) => (
-        <span className="font-medium text-ink-900">{r.outlet?.name ?? r.posId}</span>
+        <span className="font-medium text-text">{r.outlet?.name ?? r.posId}</span>
       ),
       sortValue: (r) => r.outlet?.name ?? r.posId,
       csv: (r) => r.outlet?.name ?? r.posId,

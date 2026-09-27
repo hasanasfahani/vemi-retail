@@ -18,6 +18,8 @@ const rules = [
   { id: 'raw-hex', level: 'error', re: /(?<!&)#[0-9a-fA-F]{3,8}\b(?![-\w])/g, msg: 'Raw hex color. Use a var(--vm-*) token or a Tailwind brand class.' },
   { id: 'raw-rgb', level: 'error', re: /\b(rgba?|hsla?)\(\s*\d/g, msg: 'Raw rgb/hsl color. Use a var(--vm-*) token.' },
   { id: 'tw-default-palette', level: 'error', re: new RegExp(`\\b(bg|text|border|ring|fill|stroke|from|via|to|outline|divide|placeholder|decoration|accent|caret|shadow)-${TW_PALETTE}-\\d{2,3}\\b`, 'g'), msg: 'Tailwind default palette class. Use brand classes (bg-primary, text-text-muted, border-line…).' },
+  // Plan phase 8 retired the pre-brand bridge; with --color-*: initial these no longer compile.
+  { id: 'retired-token', level: 'error', re: /(?<![\w-])(?:[a-z0-9-]+:)*!?(?:bg|text|border(?:-[trblxyse])?|ring|fill|stroke|from|via|to|outline|divide|placeholder|decoration|accent|caret|shadow)-(?:ink-(?:900|700|600|500|400|300)|canvas|paper|violet(?:-ink)?|good|warn|serious|critical|comp-[123])(?![\w-])|var\(--color-|\bfont-(?:display|body)\b|\bt-(?:display|h2|h3|lead|eyebrow)\b|\bbtn-(?:primary|secondary|ghost)\b/g, msg: 'Retired pre-brand name. Use the semantic classes (text-text, text-text-muted, bg-bg, bg-primary, vm-h1, vm-label, vm-btn…) or var(--vm-*).' },
   { id: 'off-brand-font', level: 'error', re: /\b(Inter|Roboto|Arial|Helvetica|Montserrat|Poppins|Open Sans)\b/g, msg: 'Off-brand font. Use var(--vm-font-sans|mono|arabic).' },
   { id: 'gradient', level: 'warn', re: /(linear|radial|conic)-gradient\(/g, msg: 'Gradient. The Vemi brand uses flat color; remove unless it is a chart fill approved in review.' },
   { id: 'emoji', level: 'warn', re: /[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}]/gu, msg: 'Emoji in UI. Vemi uses line icons, never emoji.' },

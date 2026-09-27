@@ -90,10 +90,10 @@ function Index() {
             <li key={report.id}>
               <Link
                 href={`/portal/reports/custom/${report.id}`}
-                className="flex h-full flex-col rounded-lg border border-line bg-white p-6 transition-colors hover:border-primary"
+                className="flex h-full flex-col rounded-lg border border-line bg-surface p-6 transition-colors hover:border-primary"
               >
-                <span className="truncate text-lg font-semibold text-ink-900">{report.name}</span>
-                <span className="mt-1 font-mono text-xs text-ink-500">
+                <span className="truncate text-lg font-semibold text-text">{report.name}</span>
+                <span className="mt-1 font-mono text-xs text-text-muted">
                   {report.blocks.length === 1 ? "1 block" : `${report.blocks.length} blocks`}
                   {" · "}
                   edited {monthLabel(report.updatedAt.slice(0, 7))}
@@ -104,7 +104,7 @@ function Index() {
         </ul>
       )}
 
-      <p className="max-w-[72ch] text-sm text-ink-500">
+      <p className="max-w-[72ch] text-sm text-text-muted">
         Reports live in this browser until there is a server to keep them, so a colleague on another
         machine will not see this list. Share one with its link instead — it carries the whole
         definition and builds them their own copy.

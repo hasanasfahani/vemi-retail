@@ -474,7 +474,7 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
               <InfoTip label="How this is scored">
                 Each brand takes the portal&apos;s own composite — availability 30, shelf 25,
                 assortment 20, price 15, POSM 10.{" "}
-                <strong className="font-semibold text-ink-900">Shelf is scored as conversion</strong>{" "}
+                <strong className="font-semibold text-text">Shelf is scored as conversion</strong>{" "}
                 here: the share of facings a brand holds against the share of shelf slots it is
                 listed in. Judging Mountain Dew&apos;s 4% against {clientBrand.name}&apos;s 40% par
                 would rate a small brand as failing for being small, which is size rather than
@@ -484,7 +484,7 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
               <p className="flex items-baseline gap-2">
                 <span className="vm-label">Portfolio</span>
                 <span className="tnum text-[28px] leading-8">{companyScore}</span>
-                <span className="font-mono text-xs text-ink-500">/ 100</span>
+                <span className="font-mono text-xs text-text-muted">/ 100</span>
               </p>
             </>
           }
@@ -526,7 +526,7 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
               as a compact list, because a portfolio manager narrowing
               to Mirinda has not stopped owning the other three. */}
           {focusBrand && (
-            <div className="flex min-w-0 flex-col rounded-lg border border-line bg-white p-6 sm:col-span-1 lg:col-span-2">
+            <div className="flex min-w-0 flex-col rounded-lg border border-line bg-surface p-6 sm:col-span-1 lg:col-span-2">
               <h3 className="vm-label">The rest of the portfolio</h3>
               <ul className="mt-2 flex flex-col">
                 {health
@@ -536,16 +536,16 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
                       key={row.brandId}
                       className="flex items-center gap-2.5 border-b border-line py-2 last:border-0"
                     >
-                      <span className="min-w-0 flex-1 truncate text-sm text-ink-700">
+                      <span className="min-w-0 flex-1 truncate text-sm text-text">
                         {row.name}
                       </span>
-                      <span className="mono text-xs text-ink-400">
+                      <span className="mono text-xs text-text-muted">
                         {row.weakest.label} {row.weakest.display}
                       </span>
-                      <span className="mono w-[30px] shrink-0 text-right text-sm font-semibold text-ink-900">
+                      <span className="mono w-[30px] shrink-0 text-right text-sm font-semibold text-text">
                         {row.score}
                       </span>
-                      <span className="w-[92px] shrink-0 text-right text-xs text-ink-500">
+                      <span className="w-[92px] shrink-0 text-right text-xs text-text-muted">
                         {BAND_WORD[row.band]}
                       </span>
                     </li>

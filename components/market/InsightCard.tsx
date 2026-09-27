@@ -56,32 +56,32 @@ export default function InsightCard({
   const basis = BASIS_LABEL[insight.comparisonBasis];
 
   return (
-    <article className="flex min-w-0 flex-col rounded-lg border border-line bg-white p-6">
+    <article className="flex min-w-0 flex-col rounded-lg border border-line bg-surface p-6">
       {/* The outcome is a neutral mono tag (brand: colour is not a
           category); priority is said in words, and only the high one is
           set in Ink so the loudest cards still find the eye. */}
       <div className="flex items-start justify-between gap-3">
-        <span className={`font-mono text-xs font-medium uppercase tracking-[0.1em] ${insight.priorityBand === "high" ? "text-ink-900" : "text-ink-500"}`}>
+        <span className={`font-mono text-xs font-medium uppercase tracking-[0.1em] ${insight.priorityBand === "high" ? "text-text" : "text-text-muted"}`}>
           {PRIORITY_WORD[insight.priorityBand]} · {OUTCOME_LABEL[insight.outcome]}
         </span>
         {/* The count, not the rule's own scope wording, so every card
             prints the same field in the same corner. */}
-        <span className="shrink-0 font-mono text-xs text-ink-500">
+        <span className="shrink-0 font-mono text-xs text-text-muted">
           {insight.scope.outlets.toLocaleString()} {insight.scope.outlets === 1 ? "outlet" : "outlets"}
         </span>
       </div>
 
       {/* Two lines held open whatever the headline needs, so the
           figures line up across a row instead of stepping. */}
-      <h3 className="mt-3 min-h-[56px] text-lg font-semibold leading-7 text-ink-900">{insight.headline}</h3>
+      <h3 className="mt-3 min-h-[56px] text-lg font-semibold leading-7 text-text">{insight.headline}</h3>
 
       {/* The measured quantity, given the weight on the card that it
           has in the finding. */}
       <p className="tnum mt-3 text-[28px] leading-9">{insight.impact.label}</p>
 
-      <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-2 text-sm text-ink-500">
+      <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-2 text-sm text-text-muted">
         <ConfidenceBadge level={insight.confidence === "measured" ? "measured" : "estimated"} size="sm" />
-        {basis && <span className="font-medium text-ink-700">{basis}</span>}
+        {basis && <span className="font-medium text-text">{basis}</span>}
         {insight.quality === "limited" && <ConfidenceBadge level="stale" size="sm">Limited sample</ConfidenceBadge>}
         {childCount > 0 && (
           <span>

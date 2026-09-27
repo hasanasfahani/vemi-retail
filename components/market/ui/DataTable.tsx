@@ -173,9 +173,9 @@ export default function DataTable<T>({
                   setPage(0);
                 }}
                 placeholder={searchPlaceholder}
-                className="h-9 w-full rounded-md border border-line-strong bg-white pl-8 pr-3 text-sm text-ink-900 outline-none transition-colors placeholder:text-ink-400 focus:border-violet"
+                className="h-9 w-full rounded-md border border-line-strong bg-surface pl-8 pr-3 text-sm text-text outline-none transition-colors placeholder:text-text-muted focus:border-primary"
               />
-              <svg viewBox="0 0 16 16" className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-ink-400" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden>
+              <svg viewBox="0 0 16 16" className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-muted" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden>
                 <circle cx="7" cy="7" r="4.5" />
                 <path d="m10.5 10.5 3 3" />
               </svg>
@@ -184,7 +184,7 @@ export default function DataTable<T>({
 
           {(facets ?? []).map((facet) => (
             <label key={facet.id} className="flex items-center gap-1.5">
-              <span className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
+              <span className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-text-muted">
                 {facet.label}
               </span>
               <select
@@ -193,10 +193,10 @@ export default function DataTable<T>({
                   setPicked((held) => ({ ...held, [facet.id]: e.target.value }));
                   setPage(0);
                 }}
-                className={`rounded-md border bg-white px-2 py-1 text-xs outline-none transition-colors ${
+                className={`rounded-md border bg-surface px-2 py-1 text-xs outline-none transition-colors ${
                   picked[facet.id]
-                    ? "border-primary-tint bg-primary-tint font-semibold text-violet-ink"
-                    : "border-line-strong text-ink-700 hover:border-ink-400"
+                    ? "border-primary-tint bg-primary-tint font-semibold text-primary-text"
+                    : "border-line-strong text-text hover:border-text-muted"
                 }`}
               >
                 <option value="">All</option>
@@ -214,7 +214,7 @@ export default function DataTable<T>({
                 setPicked({});
                 setPage(0);
               }}
-              className="text-xs font-semibold text-violet-ink hover:underline"
+              className="text-xs font-semibold text-primary-text hover:underline"
             >
               Clear
             </button>
@@ -256,7 +256,7 @@ export default function DataTable<T>({
                       key={col.id}
                       scope="col"
                       style={col.width ? { width: col.width } : undefined}
-                      className={`px-3 ${dense ? "py-1.5" : "py-2.5"} whitespace-nowrap font-mono text-xs font-medium uppercase tracking-[0.1em] text-ink-400 ${
+                      className={`px-3 ${dense ? "py-1.5" : "py-2.5"} whitespace-nowrap font-mono text-xs font-medium uppercase tracking-[0.1em] text-text-muted ${
                         col.align === "right" ? "text-right" : "text-left"
                       }`}
                       aria-sort={on ? (sort!.dir === "asc" ? "ascending" : "descending") : undefined}
@@ -265,8 +265,8 @@ export default function DataTable<T>({
                         <button
                           type="button"
                           onClick={() => toggleSort(col)}
-                          className={`inline-flex items-center gap-1 transition-colors hover:text-ink-700 ${
-                            on ? "text-ink-700" : ""
+                          className={`inline-flex items-center gap-1 transition-colors hover:text-text ${
+                            on ? "text-text" : ""
                           }`}
                         >
                           {col.header}
@@ -296,13 +296,13 @@ export default function DataTable<T>({
                       : undefined
                   }
                   className={`border-b border-line last:border-0 ${
-                    onRowClick ? "cursor-pointer transition-colors hover:bg-canvas focus-visible:bg-primary-tint" : ""
+                    onRowClick ? "cursor-pointer transition-colors hover:bg-bg focus-visible:bg-primary-tint" : ""
                   }`}
                 >
                   {cols.map((col) => (
                     <td
                       key={col.id}
-                      className={`${pad} align-middle text-ink-700 ${dense ? "" : "h-11"} ${
+                      className={`${pad} align-middle text-text ${dense ? "" : "h-11"} ${
                         col.align === "right" ? "text-right tabular-nums" : "text-left"
                       }`}
                     >
@@ -318,14 +318,14 @@ export default function DataTable<T>({
 
       {sorted.length > pageSize && (
         <div className="flex items-center justify-between gap-3 border-t border-line px-3 py-2.5">
-          <span className="mono text-xs text-ink-400">
+          <span className="mono text-xs text-text-muted">
             {(current * pageSize + 1).toLocaleString()}–
             {Math.min(sorted.length, (current + 1) * pageSize).toLocaleString()} of{" "}
             {sorted.length.toLocaleString()}
           </span>
           <div className="flex items-center gap-1">
             <PageButton label="Previous" disabled={current === 0} onClick={() => setPage(current - 1)} />
-            <span className="mono px-1 text-xs text-ink-500">
+            <span className="mono px-1 text-xs text-text-muted">
               {current + 1} / {pages}
             </span>
             <PageButton label="Next" disabled={current >= pages - 1} onClick={() => setPage(current + 1)} />

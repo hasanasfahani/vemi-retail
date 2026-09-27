@@ -7,12 +7,12 @@ import GapWidget from "@/components/v2/GapWidget";
    that makes the argument. */
 export default function VisibilityGap() {
   return (
-    <section id={ids.gap} className="section section-v2 border-t border-line bg-canvas">
+    <section id={ids.gap} className="section section-v2 border-t border-line bg-bg">
       <div className="container-vemi">
         <Reveal>
           <span className="vm-label">{gap.eyebrow}</span>
-          <h2 className="t-h2 mt-4 max-w-3xl">{gap.headline}</h2>
-          <p className="t-lead mt-5 max-w-2xl">{gap.subhead}</p>
+          <h2 className="vm-h1 mt-4 max-w-3xl">{gap.headline}</h2>
+          <p className="vm-body-lg mt-5 max-w-2xl">{gap.subhead}</p>
         </Reveal>
 
         <div className="mt-14 grid gap-x-16 gap-y-12 lg:grid-cols-[1fr_1fr] lg:items-start">
@@ -24,8 +24,8 @@ export default function VisibilityGap() {
                     {String(i + 1).padStart(2, "0")}
                   </span>
                   <div>
-                    <h3 className="text-lg font-semibold text-ink-900">{g.title}</h3>
-                    <p className="mt-1 text-base text-ink-500">{g.body}</p>
+                    <h3 className="text-lg font-semibold text-text">{g.title}</h3>
+                    <p className="mt-1 text-base text-text-muted">{g.body}</p>
                   </div>
                 </li>
               </Reveal>

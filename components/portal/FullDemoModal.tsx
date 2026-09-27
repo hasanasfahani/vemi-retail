@@ -22,8 +22,8 @@ const noopSubscribe = () => () => {};
 type Errors = Partial<Record<FieldName, string>>;
 
 const inputCls = (err?: string) =>
-  `w-full rounded-md border bg-white px-3.5 py-2.5 text-sm text-ink-900 outline-none transition placeholder:text-ink-500 focus:ring-2 focus:ring-violet/20 ${
-    err ? "border-critical" : "border-line focus:border-violet"
+  `w-full rounded-md border bg-surface px-3.5 py-2.5 text-sm text-text outline-none transition placeholder:text-text-muted focus:ring-2 focus:ring-primary/20 ${
+    err ? "border-text" : "border-line focus:border-primary"
   }`;
 
 export default function FullDemoModal({
@@ -112,7 +112,7 @@ export default function FullDemoModal({
     extra: React.InputHTMLAttributes<HTMLInputElement> = {}
   ) => (
     <div>
-      <label htmlFor={`fd-${name}`} className="mb-1.5 block text-xs font-medium text-ink-700">
+      <label htmlFor={`fd-${name}`} className="mb-1.5 block text-xs font-medium text-text">
         {label}
       </label>
       <input
@@ -139,10 +139,10 @@ export default function FullDemoModal({
       <div className="p-7 sm:p-8">
         {status === "done" ? (
           <div className="py-8 text-center">
-            <h2 id="full-demo-title" className="t-h3 !text-[22px]">
+            <h2 id="full-demo-title" className="vm-h3">
               Request received.
             </h2>
-            <p className="mx-auto mt-2 max-w-sm text-sm text-ink-500">
+            <p className="mx-auto mt-2 max-w-sm text-sm text-text-muted">
               Thank you — our team will be in touch within one business day to walk
               you through the full platform.
             </p>
@@ -152,11 +152,11 @@ export default function FullDemoModal({
           </div>
         ) : (
           <form onSubmit={onSubmit} noValidate>
-            <span className="t-eyebrow !text-violet-ink">Full platform</span>
-            <h2 id="full-demo-title" className="t-h3 mt-2 !text-[28px]">
+            <span className="vm-label text-primary-text">Full platform</span>
+            <h2 id="full-demo-title" className="mt-2 text-[28px] font-semibold leading-9 text-text">
               Request a full demo
             </h2>
-            <p className="mt-2 text-sm text-ink-500">
+            <p className="mt-2 text-sm text-text-muted">
               We&apos;ll walk you through this module and the rest of the platform
               on a live call, using your categories and markets.
             </p>
@@ -177,7 +177,7 @@ export default function FullDemoModal({
               </div>
 
               <div className="sm:col-span-2">
-                <label htmlFor="fd-industry" className="mb-1.5 block text-xs font-medium text-ink-700">
+                <label htmlFor="fd-industry" className="mb-1.5 block text-xs font-medium text-text">
                   Industry
                 </label>
                 <select
@@ -189,7 +189,7 @@ export default function FullDemoModal({
                     if (value !== "Other") setCustomIndustry("");
                     setIndustryError(undefined);
                   }}
-                  className={`${inputCls(industryError)} ${industry ? "text-ink-900" : "text-ink-500"}`}
+                  className={`${inputCls(industryError)} ${industry ? "text-text" : "text-text-muted"}`}
                 >
                   <option value="">Select your industry</option>
                   {leadForm.industries.map((option) => (
@@ -240,7 +240,7 @@ export default function FullDemoModal({
             >
               {status === "sending" ? "Sending…" : "Request full demo"}
             </button>
-            <p className="mt-3 text-center text-xs text-ink-600">
+            <p className="mt-3 text-center text-xs text-text-muted">
               We&apos;ll only use your details to arrange this demo.
             </p>
           </form>

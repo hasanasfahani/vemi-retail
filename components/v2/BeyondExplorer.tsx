@@ -51,20 +51,20 @@ export default function BeyondExplorer() {
 
                 <span
                   aria-hidden
-                  className={`absolute inset-0 bg-black/20 transition-opacity duration-300 motion-reduce:transition-none ${on ? "opacity-0" : "opacity-100 group-hover:opacity-0"}`}
+                  className={`absolute inset-0 bg-scrim/40 transition-opacity duration-300 motion-reduce:transition-none ${on ? "opacity-0" : "opacity-100 group-hover:opacity-0"}`}
                 />
 
                 <span
                   className={`absolute bottom-4 left-4 right-4 rounded-md bg-surface p-4 ${on ? "lg:right-[50%]" : ""}`}
                 >
                   <span className="flex items-center justify-between gap-3">
-                    <span className="text-lg font-semibold leading-6 text-ink-900">
+                    <span className="text-lg font-semibold leading-6 text-text">
                       {pillar.title}
                     </span>
                     <span
                       aria-hidden
                       className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-transform duration-300 motion-reduce:transition-none ${
-                        on ? "rotate-45 bg-primary text-primary-fg" : "bg-ink-800 text-ink-900"
+                        on ? "rotate-45 bg-primary text-primary-fg" : "bg-ink-800 text-text"
                       }`}
                     >
                       <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
@@ -72,7 +72,7 @@ export default function BeyondExplorer() {
                       </svg>
                     </span>
                   </span>
-                  <span className="mt-1.5 block text-sm text-ink-500">{pillar.tagline}</span>
+                  <span className="mt-1.5 block text-sm text-text-muted">{pillar.tagline}</span>
                 </span>
               </button>
 
@@ -93,12 +93,12 @@ export default function BeyondExplorer() {
                       <Icon name={pillar.icon} size={24} />
                     </span>
                     <span className="vm-label mt-6 block">What we track</span>
-                    <h3 className="mt-2 text-[28px] font-semibold leading-9 text-ink-900">{pillar.title}</h3>
-                    <p className="mt-3 text-base text-ink-500">{pillar.body}</p>
+                    <h3 className="mt-2 text-[28px] font-semibold leading-9 text-text">{pillar.title}</h3>
+                    <p className="mt-3 text-base text-text-muted">{pillar.body}</p>
 
                     <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
                       {pillar.items.map((item) => (
-                        <li key={item} className="flex items-start gap-2.5 text-sm text-ink-900">
+                        <li key={item} className="flex items-start gap-2.5 text-sm text-text">
                           <span aria-hidden className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
                           {item}
                         </li>
@@ -117,8 +117,8 @@ export default function BeyondExplorer() {
         <div className="grid items-center gap-8 lg:grid-cols-[0.68fr_1.32fr]">
           <div>
             <span className="vm-label">Connected intelligence</span>
-            <h3 className="mt-2 text-[28px] font-semibold leading-9 text-ink-900">{beyond.convergence.title}</h3>
-            <p className="mt-2 max-w-md text-base text-ink-500">{beyond.convergence.body}</p>
+            <h3 className="mt-2 text-[28px] font-semibold leading-9 text-text">{beyond.convergence.title}</h3>
+            <p className="mt-2 max-w-md text-base text-text-muted">{beyond.convergence.body}</p>
           </div>
 
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-end">
@@ -126,7 +126,7 @@ export default function BeyondExplorer() {
               <span aria-hidden className="absolute left-4 right-4 top-1/2 hidden h-px bg-line sm:block" />
               <div className="relative grid grid-cols-2 gap-2 sm:flex sm:flex-nowrap sm:justify-between">
                 {beyond.convergence.inputs.map((input) => (
-                  <span key={input} className="whitespace-nowrap rounded-full border border-line-strong bg-surface px-3 py-1.5 text-center text-sm font-medium text-ink-900">
+                  <span key={input} className="whitespace-nowrap rounded-full border border-line-strong bg-surface px-3 py-1.5 text-center text-sm font-medium text-text">
                     {input}
                   </span>
                 ))}

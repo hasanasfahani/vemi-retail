@@ -133,12 +133,12 @@ function KpiRow({ view, targets }: BlockContext) {
         const band = cell.label === KPI_NAME.score ? scoreBand(cell.value) : rateBand(cell.value, cell.target);
         return (
           <div key={cell.label} className="min-w-0">
-            <span className="block truncate uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
+            <span className="block truncate uppercase font-mono text-xs font-medium tracking-[0.1em] text-text-muted">
               {cell.label}
             </span>
-            <span className="mt-1 block font-display text-[22px] font-semibold leading-none tracking-tight text-ink-900">
+            <span className="mt-1 block font-sans text-[22px] font-semibold leading-none tracking-tight text-text">
               {cell.value}
-              {cell.unit && <span className="ml-0.5 text-sm font-semibold text-ink-500">{cell.unit}</span>}
+              {cell.unit && <span className="ml-0.5 text-sm font-semibold text-text-muted">{cell.unit}</span>}
             </span>
             <Gauge
               className="mt-3"
@@ -149,7 +149,7 @@ function KpiRow({ view, targets }: BlockContext) {
             />
             <span className="mt-2 flex flex-wrap items-center gap-2">
               <BandChip band={band} size="sm" />
-              <span className="mono text-xs text-ink-500">
+              <span className="mono text-xs text-text-muted">
                 target {cell.target}
                 {cell.unit}
               </span>
@@ -677,9 +677,9 @@ export const BLOCKS: BlockDef[] = [
           <table className="w-full min-w-[520px] border-collapse text-xs">
             <thead>
               <tr className="border-b border-line">
-                <th scope="col" className="py-1.5 pr-3 text-left font-semibold text-ink-400">Brand</th>
+                <th scope="col" className="py-1.5 pr-3 text-left font-semibold text-text-muted">Brand</th>
                 {measures.map((m) => (
-                  <th key={m.label} scope="col" className="py-1.5 pr-3 text-left font-semibold text-ink-400">
+                  <th key={m.label} scope="col" className="py-1.5 pr-3 text-left font-semibold text-text-muted">
                     {m.label}
                   </th>
                 ))}
@@ -688,12 +688,12 @@ export const BLOCKS: BlockDef[] = [
             <tbody>
               {rows.map((row) => (
                 <tr key={row.id} className="border-b border-line last:border-0">
-                  <td className="py-1.5 pr-3 font-semibold text-ink-900">{row.name}</td>
+                  <td className="py-1.5 pr-3 font-semibold text-text">{row.name}</td>
                   {measures.map((m) => (
                     <td key={m.label} className="py-1.5 pr-3">
                       <span className="flex items-center gap-2">
                         <Bar value={m.get(row)} max={m.max} par={m.par} color={brandColor(row.id)} label={`${row.name} ${m.label}`} />
-                        <span className="mono w-[44px] shrink-0 text-right text-ink-700">{m.get(row)}%</span>
+                        <span className="mono w-[44px] shrink-0 text-right text-text">{m.get(row)}%</span>
                       </span>
                     </td>
                   ))}

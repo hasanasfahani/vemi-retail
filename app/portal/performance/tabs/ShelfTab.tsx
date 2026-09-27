@@ -231,7 +231,7 @@ export default function ShelfTab({ view }: { view: MarketView }) {
               meta: `${p.total.toLocaleString()} facings measured at this height`,
               trailing:
                 eye && p.id !== "eye" ? (
-                  <span className="shrink-0 font-mono text-xs text-ink-500">
+                  <span className="shrink-0 font-mono text-xs text-text-muted">
                     {p.clientShare > eye.clientShare ? "+" : ""}
                     {Math.round((p.clientShare - eye.clientShare) * 10) / 10}pt vs eye
                   </span>

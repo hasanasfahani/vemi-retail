@@ -100,7 +100,7 @@ function FollowUpCenter({ view }: { view: MarketView }) {
   const cycles = [...new Set(rows.map((r) => r.request.cycle))].sort();
 
   if (queue.loading || !ready) {
-    return <div className="h-64 animate-pulse rounded-lg border border-line bg-white" />;
+    return <div className="h-64 animate-pulse rounded-lg border border-line bg-surface" />;
   }
 
   const toggle = (set: Set<string>, id: string, apply: (next: Set<string>) => void) => {
@@ -121,7 +121,7 @@ function FollowUpCenter({ view }: { view: MarketView }) {
         }
         description="Gaps you asked Vemi to check again, and whether the fix held. Verification comes only from re-running the rule that raised the request."
       />
-      <p className="rounded-md bg-canvas px-4 py-3 text-sm text-ink-700">
+      <p className="rounded-md bg-bg px-4 py-3 text-sm text-text">
         Requests raised here and from the Performance tabs live in this browser only.{" "}
         <button type="button" onClick={queue.reset} className="font-semibold text-primary-text underline-offset-2 hover:underline">
           Reset the queue
@@ -150,7 +150,7 @@ function FollowUpCenter({ view }: { view: MarketView }) {
           <Select label="Result" value={resultFilter} onChange={(v) => setResultFilter(v as RevisitResult | "")}
             options={RESULTS.map((r) => ({ value: r, label: RESULT_LABEL[r] }))} />
           <span className="ml-auto flex items-center gap-2">
-            <span className="font-mono text-xs text-ink-500">
+            <span className="font-mono text-xs text-text-muted">
               {shown.length} of {rows.length} requests
             </span>
             <InfoTip label="How these figures are measured">
@@ -179,7 +179,7 @@ function FollowUpCenter({ view }: { view: MarketView }) {
               <thead>
                 <tr className="border-b border-line">
                   {["", "KPI / case", "Scope", "Baseline", "Target", "Follow-up", "Status", "Revisit result", ""].map((h, i) => (
-                    <th key={i} scope="col" className="whitespace-nowrap px-3 py-2.5 text-left font-mono text-xs font-medium uppercase tracking-[0.1em] text-ink-500">
+                    <th key={i} scope="col" className="whitespace-nowrap px-3 py-2.5 text-left font-mono text-xs font-medium uppercase tracking-[0.1em] text-text-muted">
                       {h}
                     </th>
                   ))}
@@ -262,14 +262,14 @@ function RequestRows({
 
   return (
     <>
-      <tr className="border-b border-line bg-white">
+      <tr className="border-b border-line bg-surface">
         <td className="px-3 py-2.5 align-top">
           <button
             type="button"
             onClick={onToggle}
             aria-expanded={expanded}
             aria-label={expanded ? "Collapse" : "Expand"}
-            className="rounded-sm p-1 text-ink-400 transition-colors hover:bg-canvas hover:text-ink-700"
+            className="rounded-sm p-1 text-text-muted transition-colors hover:bg-bg hover:text-text"
           >
             <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden
               style={{ transform: expanded ? "rotate(90deg)" : "none" }}>
@@ -278,28 +278,28 @@ function RequestRows({
           </button>
         </td>
         <td className="px-3 py-2.5 align-top">
-          <p className="font-medium text-ink-900">
+          <p className="font-medium text-text">
             {KPI_LABEL[row.kpi]} — {clientBrand.name} gaps
           </p>
-          <p className="mono text-xs text-ink-400">
+          <p className="mono text-xs text-text-muted">
             raised {monthLabel(row.request.originMonth)}
             {row.request.cancelled ? ` · cancelled: ${row.request.cancelled.reason.toLowerCase()}` : ""}
           </p>
         </td>
         <td className="px-3 py-2.5 align-top">
-          <p className="mono text-ink-900">{row.scope.affectedPos.toLocaleString()} POS</p>
-          <p className="mono text-xs text-ink-400">{row.scope.issues.toLocaleString()} issues</p>
+          <p className="mono text-text">{row.scope.affectedPos.toLocaleString()} POS</p>
+          <p className="mono text-xs text-text-muted">{row.scope.issues.toLocaleString()} issues</p>
         </td>
         <td className="px-3 py-2.5 align-top">
-          <span className="mono text-ink-700">
+          <span className="mono text-text">
             {row.cohort.baseline === null ? "—" : `${row.cohort.baseline}%`}
           </span>
         </td>
         <td className="px-3 py-2.5 align-top">
-          <span className="mono text-ink-400">{target}%</span>
+          <span className="mono text-text-muted">{target}%</span>
         </td>
         <td className="px-3 py-2.5 align-top">
-          <span className="text-ink-700">{cycleLabel(row.request.cycle)}</span>
+          <span className="text-text">{cycleLabel(row.request.cycle)}</span>
         </td>
         <td className="px-3 py-2.5 align-top">
           {/* A request's status is a stage, not a health band: neutral
@@ -309,8 +309,8 @@ function RequestRows({
               row.status === "completed"
                 ? "bg-primary-tint text-primary-text"
                 : row.status === "cancelled"
-                  ? "bg-canvas text-ink-500"
-                  : "border border-line-strong text-ink-900"
+                  ? "bg-bg text-text-muted"
+                  : "border border-line-strong text-text"
             }`}
           >
             {status.label}
@@ -335,7 +335,7 @@ function RequestRows({
               {CANCEL_REASONS.map((reason) => (
                 <button key={reason} type="button"
                   onClick={() => { onCancel(reason); setAsking(false); }}
-                  className="min-h-8 rounded-sm border border-line px-2 py-1 text-left text-sm text-ink-900 transition-colors hover:bg-canvas">
+                  className="min-h-8 rounded-sm border border-line px-2 py-1 text-left text-sm text-text transition-colors hover:bg-bg">
                   {reason}
                 </button>
               ))}
@@ -374,30 +374,30 @@ function GovernorateRows({
 }) {
   return (
     <>
-      <tr className="border-b border-line bg-canvas/60">
+      <tr className="border-b border-line bg-bg/60">
         <td className="px-3 py-2 align-top" />
         <td className="px-3 py-2 align-top" colSpan={2}>
           <button type="button" onClick={onToggle} aria-expanded={open}
             className="flex items-center gap-1.5 text-left">
-            <svg viewBox="0 0 16 16" className="h-3 w-3 text-ink-400" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden
+            <svg viewBox="0 0 16 16" className="h-3 w-3 text-text-muted" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden
               style={{ transform: open ? "rotate(90deg)" : "none" }}>
               <path d="M6 3.5 10.5 8 6 12.5" />
             </svg>
-            <span className="font-medium text-ink-900">{gov.name}</span>
+            <span className="font-medium text-text">{gov.name}</span>
             {gov.capital !== gov.name && (
-              <span className="text-xs text-ink-400">{gov.capital}</span>
+              <span className="text-xs text-text-muted">{gov.capital}</span>
             )}
-            <span className="mono text-xs text-ink-400">
+            <span className="mono text-xs text-text-muted">
               {gov.scope.affectedPos} POS · {gov.scope.issues} issues
             </span>
           </button>
         </td>
         <td className="px-3 py-2 align-top">
-          <span className="mono text-ink-700">
+          <span className="mono text-text">
             {gov.cohort.baseline === null ? "—" : `${gov.cohort.baseline}%`}
           </span>
         </td>
-        <td className="px-3 py-2 align-top"><span className="mono text-ink-400">{target}%</span></td>
+        <td className="px-3 py-2 align-top"><span className="mono text-text-muted">{target}%</span></td>
         <td className="px-3 py-2 align-top" />
         <td className="px-3 py-2 align-top" />
         <td className="px-3 py-2 align-top" colSpan={2}>
@@ -412,28 +412,28 @@ function GovernorateRows({
             <td className="px-3 py-1.5" colSpan={2}>
               <button type="button" onClick={() => onOpenPos(pos.posId)}
                 className="min-w-0 text-left hover:underline">
-                <span className="block truncate text-ink-900">{pos.name}</span>
-                <span className="mono block truncate text-xs text-ink-400">
+                <span className="block truncate text-text">{pos.name}</span>
+                <span className="mono block truncate text-xs text-text-muted">
                   {pos.district} · {pos.retailer} · {pos.issues} {pos.issues === 1 ? "issue" : "issues"}
                 </span>
               </button>
             </td>
             <td className="px-3 py-1.5">
-              <span className="mono text-ink-700">{pos.before === null ? "—" : `${pos.before}%`}</span>
+              <span className="mono text-text">{pos.before === null ? "—" : `${pos.before}%`}</span>
             </td>
-            <td className="px-3 py-1.5"><span className="mono text-ink-400">{target}%</span></td>
+            <td className="px-3 py-1.5"><span className="mono text-text-muted">{target}%</span></td>
             <td className="px-3 py-1.5" colSpan={2}>
               {pos.revisited ? (
-                <span className="mono text-xs text-ink-700">
+                <span className="mono text-xs text-text">
                   {pos.after}%
                 </span>
               ) : (
-                <span className="text-xs text-ink-400">not yet revisited</span>
+                <span className="text-xs text-text-muted">not yet revisited</span>
               )}
             </td>
             <td className="px-3 py-1.5" colSpan={2}>
               {pos.delta === null ? (
-                <span className="text-xs text-ink-400">—</span>
+                <span className="text-xs text-text-muted">—</span>
               ) : (
                 <span
                   className="mono text-xs font-semibold"
@@ -464,8 +464,8 @@ function Select({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`h-9 rounded-md border bg-white px-2.5 text-sm outline-none transition-colors focus:border-primary ${
-          value ? "border-primary-tint bg-primary-tint font-semibold text-primary-text" : "border-line-strong text-ink-900 hover:bg-canvas"
+        className={`h-9 rounded-md border bg-surface px-2.5 text-sm outline-none transition-colors focus:border-primary ${
+          value ? "border-primary-tint bg-primary-tint font-semibold text-primary-text" : "border-line-strong text-text hover:bg-bg"
         }`}
       >
         <option value="">All</option>

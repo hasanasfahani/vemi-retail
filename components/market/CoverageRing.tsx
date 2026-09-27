@@ -41,21 +41,21 @@ export default function CoverageRing({
       <div className="flex w-full max-w-[220px] shrink-0 flex-col">
         <span className="tnum text-[56px] leading-[60px]">
           {pct}
-          <span className="text-[28px] text-ink-500">%</span>
+          <span className="text-[28px] text-text-muted">%</span>
         </span>
         <div className="relative mt-3">
           <Gauge value={pct} max={100} label={`${pct}% of contracted outlets audited`} />
           {[25, 50, 75].map((mark) => (
-            <span key={mark} aria-hidden className="absolute top-0 h-1.5 w-[2px] bg-white" style={{ left: `${mark}%` }} />
+            <span key={mark} aria-hidden className="absolute top-0 h-1.5 w-[2px] bg-surface" style={{ left: `${mark}%` }} />
           ))}
         </div>
-        <span className="mono mt-2 text-xs text-ink-500">
+        <span className="mono mt-2 text-xs text-text-muted">
           {audited.toLocaleString()} / {contracted.toLocaleString()}
         </span>
       </div>
 
       <div className="min-w-[220px] flex-1">
-        <p className="font-display text-lg font-semibold tracking-tight text-ink-900">
+        <p className="font-sans text-lg font-semibold tracking-tight text-text">
           {audited.toLocaleString()} of {contracted.toLocaleString()} outlets audited
         </p>
         <p className="mt-2">
@@ -70,11 +70,11 @@ export default function CoverageRing({
             { k: "Rate needed", v: perDayRequired, s: "outlets / day" },
           ].map((row) => (
             <div key={row.k}>
-              <dt className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
+              <dt className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-text-muted">
                 {row.k}
               </dt>
-              <dd className="mono mt-0.5 text-[15px] font-semibold text-ink-900">{row.v}</dd>
-              <dd className="text-xs text-ink-400">{row.s}</dd>
+              <dd className="mono mt-0.5 text-[15px] font-semibold text-text">{row.v}</dd>
+              <dd className="text-xs text-text-muted">{row.s}</dd>
             </div>
           ))}
         </dl>

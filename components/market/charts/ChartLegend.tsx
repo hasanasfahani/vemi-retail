@@ -11,7 +11,7 @@ export default function ChartLegend({
   return (
     <ul className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
       {items.map((item) => (
-        <li key={item.id} className="flex items-center gap-1.5 text-sm text-ink-700">
+        <li key={item.id} className="flex items-center gap-1.5 text-sm text-text">
           {item.dashed ? (
             <svg width="16" height="4" aria-hidden className="shrink-0">
               <line x1="0" y1="2" x2="16" y2="2" stroke={item.color} strokeWidth="2" strokeDasharray="4 3" />

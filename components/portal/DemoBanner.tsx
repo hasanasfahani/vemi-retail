@@ -25,8 +25,8 @@ export default function DemoBanner() {
 
   return (
     <>
-      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-line bg-canvas px-4 py-2.5 sm:px-6 print:hidden">
-        <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink-900">
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-line bg-bg px-4 py-2.5 sm:px-6 print:hidden">
+        <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-text">
           <ConfidenceBadge level="estimated" size="sm">Sample data</ConfidenceBadge>
           <span>The figures are illustrative and are not measurements of your brand.</span>
         </p>

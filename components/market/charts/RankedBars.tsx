@@ -47,10 +47,10 @@ export default function RankedBars({
         const body = (
           <>
             <div className="flex min-w-0 items-baseline justify-between gap-2">
-              <span className="truncate text-sm font-medium text-ink-700">
+              <span className="truncate text-sm font-medium text-text">
                 {row.label}
               </span>
-              <span className="mono shrink-0 text-sm font-semibold text-ink-900">
+              <span className="mono shrink-0 text-sm font-semibold text-text">
                 {row.value.toLocaleString()}
                 {unit}
               </span>
@@ -66,7 +66,7 @@ export default function RankedBars({
               {row.trailing}
             </div>
             {row.meta && (
-              <p className="mt-1 text-xs text-ink-400">{row.meta}</p>
+              <p className="mt-1 text-xs text-text-muted">{row.meta}</p>
             )}
           </>
         );
@@ -83,7 +83,7 @@ export default function RankedBars({
                 <button
                   type="button"
                   onClick={() => onRowClick(row)}
-                  className="-mx-1.5 w-[calc(100%+0.75rem)] rounded-md px-1.5 py-0.5 text-left transition-colors hover:bg-canvas"
+                  className="-mx-1.5 w-[calc(100%+0.75rem)] rounded-md px-1.5 py-0.5 text-left transition-colors hover:bg-bg"
                 >
                   {body}
                 </button>

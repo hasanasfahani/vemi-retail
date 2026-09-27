@@ -128,7 +128,7 @@ export default function RequestFollowUp({
         subtitle={`${KPI_LABEL[kpi]} · ${clientBrand.name} · raised from the ${monthLabel(view.month)} audit`}
         footer={
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <span className="text-xs text-ink-500">
+            <span className="text-xs text-text-muted">
               {selected.length.toLocaleString()} POS ·{" "}
               {selectedIssues.length.toLocaleString()} issues ·{" "}
               {cycle ? cycleLabel(cycle) : "no cycle"}
@@ -146,7 +146,7 @@ export default function RequestFollowUp({
       >
         <div className="flex flex-col gap-5">
           {/* what the page found */}
-          <dl className="grid grid-cols-2 gap-x-4 gap-y-2 rounded-md border border-line bg-canvas px-3 py-2.5">
+          <dl className="grid grid-cols-2 gap-x-4 gap-y-2 rounded-md border border-line bg-bg px-3 py-2.5">
             {[
               { k: "KPI", v: KPI_LABEL[kpi] },
               { k: "Brand", v: clientBrand.name },
@@ -157,16 +157,16 @@ export default function RequestFollowUp({
               },
             ].map((row) => (
               <div key={row.k}>
-                <dt className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
+                <dt className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-text-muted">
                   {row.k}
                 </dt>
-                <dd className="mt-0.5 text-sm text-ink-900">{row.v}</dd>
+                <dd className="mt-0.5 text-sm text-text">{row.v}</dd>
               </div>
             ))}
           </dl>
 
           {existing && (
-            <p className="rounded-md border border-primary-tint bg-primary-tint px-3 py-2.5 text-xs leading-snug text-violet-ink">
+            <p className="rounded-md border border-primary-tint bg-primary-tint px-3 py-2.5 text-xs leading-snug text-primary-text">
               {/* Reworded to sidestep the article: "A availability
                   request" is what a template gets you when the noun
                   varies. */}
@@ -179,7 +179,7 @@ export default function RequestFollowUp({
 
           {/* which outlets */}
           <section>
-            <h3 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
+            <h3 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-text-muted">
               Which outlets
             </h3>
             <div className="mt-2 flex flex-col gap-1.5">
@@ -204,8 +204,8 @@ export default function RequestFollowUp({
                   key={option.id}
                   className={`flex cursor-pointer gap-2.5 rounded-md border px-3 py-2.5 transition-colors ${
                     mode === option.id
-                      ? "border-violet bg-primary-tint"
-                      : "border-line hover:border-ink-400"
+                      ? "border-primary bg-primary-tint"
+                      : "border-line hover:border-text-muted"
                   }`}
                 >
                   <input
@@ -213,13 +213,13 @@ export default function RequestFollowUp({
                     name="mode"
                     checked={mode === option.id}
                     onChange={() => setMode(option.id)}
-                    className="mt-0.5 h-3.5 w-3.5 shrink-0 accent-[color:var(--color-violet)]"
+                    className="mt-0.5 h-3.5 w-3.5 shrink-0 accent-[color:var(--vm-primary)]"
                   />
                   <span className="min-w-0">
-                    <span className="block text-sm font-semibold text-ink-900">
+                    <span className="block text-sm font-semibold text-text">
                       {option.label}
                     </span>
-                    <span className="mt-0.5 block text-xs leading-snug text-ink-500">
+                    <span className="mt-0.5 block text-xs leading-snug text-text-muted">
                       {option.hint}
                     </span>
                   </span>
@@ -234,7 +234,7 @@ export default function RequestFollowUp({
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search the affected outlets…"
-                className="w-full rounded-md border border-line-strong bg-white px-2.5 py-1.5 text-sm text-ink-900 outline-none transition-colors placeholder:text-ink-400 focus:border-violet"
+                className="w-full rounded-md border border-line-strong bg-surface px-2.5 py-1.5 text-sm text-text outline-none transition-colors placeholder:text-text-muted focus:border-primary"
               />
               <ul className="mt-2 max-h-[280px] overflow-y-auto rounded-md border border-line">
                 {listed.map((row) => (
@@ -251,13 +251,13 @@ export default function RequestFollowUp({
                             return next;
                           });
                         }}
-                        className="h-3.5 w-3.5 shrink-0 accent-[color:var(--color-violet)]"
+                        className="h-3.5 w-3.5 shrink-0 accent-[color:var(--vm-primary)]"
                       />
                       <span className="min-w-0 flex-1">
-                        <span className="block truncate text-sm text-ink-900">
+                        <span className="block truncate text-sm text-text">
                           {row.outlet!.name}
                         </span>
-                        <span className="mono block truncate text-xs text-ink-400">
+                        <span className="mono block truncate text-xs text-text-muted">
                           {row.outlet!.district}, {governorateName(row.outlet!.governorateId)}
                         </span>
                       </span>
@@ -271,7 +271,7 @@ export default function RequestFollowUp({
                 ))}
               </ul>
               {affected.length > listed.length && (
-                <p className="mt-1.5 text-xs text-ink-400">
+                <p className="mt-1.5 text-xs text-text-muted">
                   Showing {listed.length} of {affected.length.toLocaleString()} affected outlets —
                   search to narrow the list.
                 </p>
@@ -281,7 +281,7 @@ export default function RequestFollowUp({
 
           {/* when */}
           <section>
-            <h3 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
+            <h3 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-text-muted">
               Follow-up cycle
             </h3>
             <div className="mt-2 flex flex-wrap gap-1.5">
@@ -292,20 +292,20 @@ export default function RequestFollowUp({
                   onClick={() => setCycle(id)}
                   className={`rounded-md border px-2.5 py-1.5 text-sm font-semibold transition-colors ${
                     cycle === id
-                      ? "border-violet bg-primary-tint text-violet-ink"
-                      : "border-line-strong bg-white text-ink-700 hover:border-ink-400"
+                      ? "border-primary bg-primary-tint text-primary-text"
+                      : "border-line-strong bg-surface text-text hover:border-text-muted"
                   }`}
                 >
                   {cycleLabel(id)}
                 </button>
               ))}
               {cycles.length === 0 && (
-                <p className="text-xs text-ink-500">
+                <p className="text-xs text-text-muted">
                   No cycle after {monthLabel(view.month)} is open for requests.
                 </p>
               )}
             </div>
-            <p className="mt-2 text-xs leading-snug text-ink-400">
+            <p className="mt-2 text-xs leading-snug text-text-muted">
               The outlets join that cycle&apos;s route. Results appear as the field team works
               through them, compared against these same outlets rather than against the market.
             </p>

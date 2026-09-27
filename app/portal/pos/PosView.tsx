@@ -153,8 +153,8 @@ function Explorer({ view, query }: { view: MarketView; query: string }) {
       sortValue: (r) => r.pos.name,
       render: (r) => (
         <div className="min-w-0">
-          <p className="truncate font-medium text-ink-900">{r.pos.name}</p>
-          <p className="mono truncate text-xs text-ink-400">
+          <p className="truncate font-medium text-text">{r.pos.name}</p>
+          <p className="mono truncate text-xs text-text-muted">
             {r.pos.code} · {r.pos.district}
           </p>
         </div>
@@ -205,7 +205,7 @@ function Explorer({ view, query }: { view: MarketView; query: string }) {
       csv: (r) => r.issues.map((i) => i.label).join("; "),
       render: (r) =>
         r.issues.length === 0 ? (
-          <span className="text-xs text-ink-400">None</span>
+          <span className="text-xs text-text-muted">None</span>
         ) : (
           <div className="flex flex-wrap gap-1">
             {r.issues.slice(0, 2).map((issue) => (
@@ -217,7 +217,7 @@ function Explorer({ view, query }: { view: MarketView; query: string }) {
               />
             ))}
             {r.issues.length > 2 && (
-              <span className="mono text-xs text-ink-400">+{r.issues.length - 2}</span>
+              <span className="mono text-xs text-text-muted">+{r.issues.length - 2}</span>
             )}
           </div>
         ),
@@ -231,7 +231,7 @@ function Explorer({ view, query }: { view: MarketView; query: string }) {
         flagged.has(r.pos.id) ? (
           <Badge band="average" label="Queued" size="sm" />
         ) : (
-          <span className="text-xs text-ink-400">—</span>
+          <span className="text-xs text-text-muted">—</span>
         ),
     },
   ];
@@ -279,14 +279,14 @@ function Explorer({ view, query }: { view: MarketView; query: string }) {
             <select
               value={band}
               onChange={(e) => setBand(e.target.value)}
-              className="h-9 rounded-md border border-line-strong bg-white px-2.5 text-sm text-ink-900 outline-none transition-colors hover:bg-canvas focus:border-primary"
+              className="h-9 rounded-md border border-line-strong bg-surface px-2.5 text-sm text-text outline-none transition-colors hover:bg-bg focus:border-primary"
             >
               {SCORE_BANDS.map((b) => (
                 <option key={b.id} value={b.id}>{b.label}</option>
               ))}
             </select>
           </label>
-          <label className="flex min-h-9 items-center gap-2 text-sm text-ink-900">
+          <label className="flex min-h-9 items-center gap-2 text-sm text-text">
             <input
               type="checkbox"
               checked={onlyIssues}
@@ -295,7 +295,7 @@ function Explorer({ view, query }: { view: MarketView; query: string }) {
             />
             Has an issue
           </label>
-          <label className="flex min-h-9 items-center gap-2 text-sm text-ink-900">
+          <label className="flex min-h-9 items-center gap-2 text-sm text-text">
             <input
               type="checkbox"
               checked={onlyFlagged}
@@ -326,7 +326,7 @@ function Explorer({ view, query }: { view: MarketView; query: string }) {
               <MapLegend counts={bandCounts} />
             </div>
             <MarketMap points={points} onSelect={setOpenPos} height={520} bandOf={scoreBand} />
-            <p className="mt-3 text-sm text-ink-500">
+            <p className="mt-3 text-sm text-text-muted">
               Outlets are placed within their district rather than surveyed to the street. A
               cluster shows how its outlets typically score (darker needs you sooner), with an Ink
               ring where any of them is critical.
@@ -352,13 +352,13 @@ function Explorer({ view, query }: { view: MarketView; query: string }) {
 function Rate({ value, target }: { value: number | null; target?: number }) {
   if (value === null) {
     return (
-      <span className="mono text-ink-400" title="Nothing to measure at this outlet">
+      <span className="mono text-text-muted" title="Nothing to measure at this outlet">
         —
       </span>
     );
   }
   const short = target !== undefined && value < target;
   return (
-    <span className={`mono ${short ? "font-semibold text-ink-900" : "text-ink-500"}`}>{value}%</span>
+    <span className={`mono ${short ? "font-semibold text-text" : "text-text-muted"}`}>{value}%</span>
   );
 }

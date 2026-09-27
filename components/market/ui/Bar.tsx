@@ -31,7 +31,7 @@ export default function Bar({
         <div className="h-full rounded-full" style={{ width: `${pct}%`, background: color }} />
         {parPct !== null && (
           <span
-            className="absolute -top-[3px] w-[2px] -translate-x-1/2 rounded-[1px] bg-ink-900"
+            className="absolute -top-[3px] w-[2px] -translate-x-1/2 rounded-[1px] bg-text"
             style={{ left: `${parPct}%`, height: height + 6 }}
             aria-hidden
           />

@@ -254,7 +254,7 @@ export default function PosmTab({ view }: { view: MarketView }) {
       </div>
 
       <section>
-        <h2 className="vm-h2 mb-4 text-ink-900">
+        <h2 className="vm-h2 mb-4 text-text">
           Best supported outlets
         </h2>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -263,7 +263,7 @@ export default function PosmTab({ view }: { view: MarketView }) {
       </section>
 
       <section>
-        <h2 className="vm-h2 mb-4 text-ink-900">
+        <h2 className="vm-h2 mb-4 text-text">
           Least supported outlets
         </h2>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

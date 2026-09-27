@@ -37,7 +37,7 @@ export default function Footer() {
               <a
                 href={footer.primaryCta.href}
                 data-demo-cta
-                className={`vm-btn bg-white !text-primary-text hover:bg-primary-tint ${onViolet}`}
+                className={`vm-btn bg-surface !text-primary-text hover:bg-primary-tint ${onViolet}`}
               >
                 {footer.primaryCta.label}
                 <Icon name="arrow-right" size={16} />
@@ -53,15 +53,15 @@ export default function Footer() {
         </div>
       </section>
 
-      <div data-theme="dark" className="bg-surface text-ink-900">
+      <div data-theme="dark" className="bg-surface text-text">
         <div className="container-vemi">
           <div className="grid gap-10 py-14 md:grid-cols-[1.3fr_1fr] md:gap-16">
             <div className="max-w-sm">
               <a href={`#${ids.top}`} className="inline-flex rounded-sm" aria-label="Vemi, back to top">
                 <LogoBilingual height={40} tone="onInk" title="" />
               </a>
-              <p className="mt-5 text-sm leading-6 text-ink-500">{footer.tagline}</p>
-              <p className="mt-5 font-mono text-xs text-ink-500">{footer.credibility}</p>
+              <p className="mt-5 text-sm leading-6 text-text-muted">{footer.tagline}</p>
+              <p className="mt-5 font-mono text-xs text-text-muted">{footer.credibility}</p>
             </div>
 
             <div className="grid grid-cols-2 gap-8 sm:gap-12">
@@ -73,7 +73,7 @@ export default function Footer() {
                       <a
                         key={link.label}
                         href={link.href}
-                        className="flex min-h-10 items-center text-sm font-medium text-ink-900 underline-offset-4 hover:underline"
+                        className="flex min-h-10 items-center text-sm font-medium text-text underline-offset-4 hover:underline"
                       >
                         {link.label}
                       </a>
@@ -84,11 +84,11 @@ export default function Footer() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-3 border-t border-line py-5 font-mono text-xs text-ink-500 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-3 border-t border-line py-5 font-mono text-xs text-text-muted sm:flex-row sm:items-center sm:justify-between">
             <span>
               © {new Date().getFullYear()} {footer.brand}. All rights reserved.
             </span>
-            <a href={`#${ids.top}`} className="inline-flex min-h-10 items-center hover:text-ink-900">
+            <a href={`#${ids.top}`} className="inline-flex min-h-10 items-center hover:text-text">
               Back to top ↑
             </a>
           </div>

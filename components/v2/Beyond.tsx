@@ -12,7 +12,7 @@ export default function Beyond() {
     <section
       id={ids.market}
       data-theme="dark"
-      className="section section-v2 relative isolate overflow-hidden bg-surface text-ink-900"
+      className="section section-v2 relative isolate overflow-hidden bg-surface text-text"
     >
       <SignalField
         colorway="ink"
@@ -25,8 +25,8 @@ export default function Beyond() {
         <Reveal>
           <div className="max-w-2xl">
             <span className="vm-label">{beyond.eyebrow}</span>
-            <h2 className="t-h2 mt-4">{beyond.headline}</h2>
-            <p className="t-lead mt-5">{beyond.subhead}</p>
+            <h2 className="vm-h1 mt-4">{beyond.headline}</h2>
+            <p className="vm-body-lg mt-5">{beyond.subhead}</p>
           </div>
         </Reveal>
 

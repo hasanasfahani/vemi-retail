@@ -109,8 +109,8 @@ export default function InsightDrawer({
       header: "Outlet",
       render: (r) => (
         <span className="block min-w-0">
-          <span className="block truncate font-semibold text-ink-900">{r.name}</span>
-          <span className="mono block text-xs text-ink-400">{r.code}</span>
+          <span className="block truncate font-semibold text-text">{r.name}</span>
+          <span className="mono block text-xs text-text-muted">{r.code}</span>
         </span>
       ),
       sortValue: (r) => r.name,
@@ -165,7 +165,7 @@ export default function InsightDrawer({
             Print
           </button>
           {blocked && (
-            <p className="basis-full text-xs leading-snug text-ink-400">{blocked}</p>
+            <p className="basis-full text-xs leading-snug text-text-muted">{blocked}</p>
           )}
         </div>
       }
@@ -173,14 +173,14 @@ export default function InsightDrawer({
       <div className="flex flex-col gap-5">
         {/* ---------- what was found ---------- */}
         <section>
-          <p className="mono text-[22px] font-semibold leading-none tracking-tight text-ink-900">
+          <p className="mono text-[22px] font-semibold leading-none tracking-tight text-text">
             {insight.impact.label}
           </p>
-          <p className="mt-2.5 max-w-[68ch] text-sm leading-relaxed text-ink-700">
+          <p className="mt-2.5 max-w-[68ch] text-sm leading-relaxed text-text">
             {insight.detail}
           </p>
           {basis && (
-            <p className="mt-2 rounded-md border border-line bg-canvas px-3 py-2 text-xs leading-snug text-ink-500">
+            <p className="mt-2 rounded-md border border-line bg-bg px-3 py-2 text-xs leading-snug text-text-muted">
               {basis}
             </p>
           )}
@@ -188,18 +188,18 @@ export default function InsightDrawer({
 
         {/* ---------- the arithmetic ---------- */}
         <section>
-          <h3 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
+          <h3 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-text-muted">
             How this was calculated
           </h3>
-          <p className="mono mt-1.5 max-w-[76ch] text-xs leading-relaxed text-ink-500">
+          <p className="mono mt-1.5 max-w-[76ch] text-xs leading-relaxed text-text-muted">
             {insight.evidence.formula}
           </p>
           <div className="mt-2.5 overflow-x-auto rounded-md border border-line">
             <table className="w-full border-collapse text-xs">
               <thead>
-                <tr className="border-b border-line bg-canvas">
+                <tr className="border-b border-line bg-bg">
                   {insight.evidence.table.columns.map((col) => (
-                    <th key={col} scope="col" className="px-3 py-1.5 text-left font-semibold text-ink-400">
+                    <th key={col} scope="col" className="px-3 py-1.5 text-left font-semibold text-text-muted">
                       {col}
                     </th>
                   ))}
@@ -209,7 +209,7 @@ export default function InsightDrawer({
                 {insight.evidence.table.rows.map((row, i) => (
                   <tr key={i} className="border-b border-line last:border-0">
                     {row.map((cell, j) => (
-                      <td key={j} className="px-3 py-1.5 text-ink-700">
+                      <td key={j} className="px-3 py-1.5 text-text">
                         {typeof cell === "number" ? cell.toLocaleString() : cell}
                       </td>
                     ))}
@@ -218,7 +218,7 @@ export default function InsightDrawer({
               </tbody>
             </table>
           </div>
-          <p className="mt-2 text-xs text-ink-400">
+          <p className="mt-2 text-xs text-text-muted">
             {insight.confidence === "measured"
               ? "Counted from field rows."
               : "Projected from a measured gap."}{" "}
@@ -234,18 +234,18 @@ export default function InsightDrawer({
             need an empty heading explaining that it stands alone. */}
         {childrenFindings.length > 0 && (
           <section>
-            <h3 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
+            <h3 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-text-muted">
               The {childrenFindings.length} findings behind it
             </h3>
-            <p className="mt-1 max-w-[68ch] text-xs leading-snug text-ink-500">
+            <p className="mt-1 max-w-[68ch] text-xs leading-snug text-text-muted">
               Each of these was found separately and says the same thing about one outlet. They
               are here rather than on the page so a single market fact is stated once.
             </p>
             <ul className="mt-2 max-h-[220px] divide-y divide-line overflow-y-auto rounded-md border border-line">
               {childrenFindings.map((child) => (
                 <li key={child.id} className="flex items-baseline justify-between gap-3 px-3 py-1.5">
-                  <span className="min-w-0 truncate text-xs text-ink-700">{child.headline}</span>
-                  <span className="mono shrink-0 text-xs text-ink-400">{child.impact.label}</span>
+                  <span className="min-w-0 truncate text-xs text-text">{child.headline}</span>
+                  <span className="mono shrink-0 text-xs text-text-muted">{child.impact.label}</span>
                 </li>
               ))}
             </ul>
@@ -255,7 +255,7 @@ export default function InsightDrawer({
         {/* ---------- the doors ---------- */}
         {outlets.length > 0 && (
           <section>
-            <h3 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
+            <h3 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-text-muted">
               Outlets this touches
             </h3>
             <div className="mt-2">

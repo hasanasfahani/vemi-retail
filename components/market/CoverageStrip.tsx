@@ -35,15 +35,15 @@ export default function CoverageStrip({
   const color = "var(--vm-primary)";
 
   return (
-    <section className="rounded-lg border border-line bg-white py-5 pl-6 pr-14">
+    <section className="rounded-lg border border-line bg-surface py-5 pl-6 pr-14">
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-        <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1 font-mono text-sm text-ink-500">
+        <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1 font-mono text-sm text-text-muted">
           <span className="vm-label mr-1">Audit coverage</span>
-          <span className="font-medium text-ink-900">
+          <span className="font-medium text-text">
             {audited.toLocaleString()} / {contracted.toLocaleString()} audited
           </span>
           <span aria-hidden>·</span>
-          <span className="font-medium text-ink-900">{pct}%</span>
+          <span className="font-medium text-text">{pct}%</span>
           <span aria-hidden>·</span>
           <span>{remaining.toLocaleString()} remaining</span>
           <span aria-hidden>·</span>
@@ -52,7 +52,7 @@ export default function CoverageStrip({
 
         <BandChip band={onTrack ? "strong" : "attention"} label={onTrack ? "On track" : "Behind plan"} size="sm" />
 
-        <span className="ml-auto shrink-0 font-mono text-xs text-ink-500">
+        <span className="ml-auto shrink-0 font-mono text-xs text-text-muted">
           {perDaySoFar}/day so far · {perDayRequired}/day needed
         </span>
       </div>
@@ -71,7 +71,7 @@ export default function CoverageStrip({
         {[25, 50, 75].map((mark) => (
           <span
             key={mark}
-            className="absolute top-0 h-full w-[2px] bg-white"
+            className="absolute top-0 h-full w-[2px] bg-surface"
             style={{ left: `${mark}%` }}
             aria-hidden
           />

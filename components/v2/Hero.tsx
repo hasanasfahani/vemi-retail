@@ -8,19 +8,19 @@ import InsightV from "./InsightV";
    (border-first: no shadow), shot from the rebranded portal. */
 export default function Hero() {
   return (
-    <section id={ids.top} className="relative bg-canvas pb-16 pt-12 sm:pb-24 sm:pt-16 lg:pt-20">
+    <section id={ids.top} className="relative bg-bg pb-16 pt-12 sm:pb-24 sm:pt-16 lg:pt-20">
       <div className="mx-auto max-w-[1200px] px-4 sm:px-6">
         <div className="grid items-center gap-12 lg:grid-cols-[1.4fr_1fr]">
           <div className="min-w-0">
             <p className="vm-label">{hero.eyebrow}</p>
-            <h1 className="mt-5 text-[clamp(44px,6.4vw,72px)] font-semibold leading-[1.06] tracking-[-0.02em] text-ink-900">
+            <h1 className="mt-5 text-[clamp(44px,6.4vw,72px)] font-semibold leading-[1.06] tracking-[-0.02em] text-text">
               {hero.headlineLines.map((line) => (
                 <span key={line} className="block">
                   {line}
                 </span>
               ))}
             </h1>
-            <p className="mt-6 max-w-[34rem] text-lg text-ink-500">{hero.subhead}</p>
+            <p className="mt-6 max-w-[34rem] text-lg text-text-muted">{hero.subhead}</p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
               <a href={hero.primaryCta.href} data-demo-cta className="vm-btn vm-btn--primary">
                 {hero.primaryCta.label}
@@ -32,7 +32,7 @@ export default function Hero() {
                 {hero.secondaryCta.label}
               </a>
             </div>
-            <p className="mt-8 font-mono text-xs font-medium uppercase tracking-[0.1em] text-ink-500">
+            <p className="mt-8 font-mono text-xs font-medium uppercase tracking-[0.1em] text-text-muted">
               {hero.proofLine}
             </p>
           </div>
@@ -42,7 +42,7 @@ export default function Hero() {
           </div>
         </div>
 
-        <div className="mt-16 overflow-hidden rounded-xl border border-line bg-white sm:mt-20">
+        <div className="mt-16 overflow-hidden rounded-xl border border-line bg-surface sm:mt-20">
           <Image
             src={hero.image.src}
             alt={hero.image.alt}

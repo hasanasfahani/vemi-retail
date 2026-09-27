@@ -160,7 +160,7 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
           title="Competitive scoreboard"
           lead="Every brand measured the same way: the client gets no favourable denominator."
           actions={
-            <span className="font-mono text-xs text-ink-500">
+            <span className="font-mono text-xs text-text-muted">
               {all.posCount.toLocaleString()} audited outlets · {all.totalFacings.toLocaleString()} facings
             </span>
           }
@@ -335,7 +335,7 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
               <div className="flex flex-wrap items-start gap-x-3 gap-y-2">
               {ordered.map((b) => (
                 <span key={b.id} className="flex flex-col items-center gap-0.5">
-                  <span className="inline-flex items-center gap-1.5 text-xs text-ink-500">
+                  <span className="inline-flex items-center gap-1.5 text-xs text-text-muted">
                     <span
                       className="h-2 w-2 shrink-0 rounded-[2px]"
                       style={brandSwatch(b.id)}
@@ -502,7 +502,7 @@ function ScoreCard({ row, leader, month }: { row: BrandRow; leader: BrandRow; mo
 
   return (
     <article
-      className={`flex min-w-0 flex-col rounded-lg border bg-white p-6 ${
+      className={`flex min-w-0 flex-col rounded-lg border bg-surface p-6 ${
         row.isClient ? "border-primary" : "border-line"
       }`}
     >
@@ -514,9 +514,9 @@ function ScoreCard({ row, leader, month }: { row: BrandRow; leader: BrandRow; mo
               style={brandSwatch(row.id)}
               aria-hidden
             />
-            <h3 className="text-lg font-semibold text-ink-900">{row.name}</h3>
+            <h3 className="text-lg font-semibold text-text">{row.name}</h3>
           </div>
-          <p className="mt-0.5 truncate text-sm text-ink-500">{row.owner}</p>
+          <p className="mt-0.5 truncate text-sm text-text-muted">{row.owner}</p>
         </div>
         {/* Roles, not health: neutral mono tags rather than band chips. */}
         {row.isClient ? (
@@ -524,7 +524,7 @@ function ScoreCard({ row, leader, month }: { row: BrandRow; leader: BrandRow; mo
             Your brand
           </span>
         ) : row.id === leader.id ? (
-          <span className="shrink-0 rounded-full border border-ink-900 px-2.5 py-1 font-mono text-xs font-medium uppercase tracking-[0.08em] text-ink-900">
+          <span className="shrink-0 rounded-full border border-text px-2.5 py-1 font-mono text-xs font-medium uppercase tracking-[0.08em] text-text">
             Category leader
           </span>
         ) : null}
@@ -550,9 +550,9 @@ function ScoreCard({ row, leader, month }: { row: BrandRow; leader: BrandRow; mo
                 />
               )}
             </span>
-            <dt className="w-[120px] shrink-0 text-sm text-ink-700">{m.label}</dt>
+            <dt className="w-[120px] shrink-0 text-sm text-text">{m.label}</dt>
             <Bar value={m.value} max={m.max} par={m.par} color={brandColor(row.id)} label={`${row.name} ${m.label}`} />
-            <dd className="mono w-[52px] shrink-0 text-right text-sm font-semibold text-ink-900">
+            <dd className="mono w-[52px] shrink-0 text-right text-sm font-semibold text-text">
               {m.value}
               {m.unit}
             </dd>
@@ -560,7 +560,7 @@ function ScoreCard({ row, leader, month }: { row: BrandRow; leader: BrandRow; mo
         ))}
       </dl>
 
-      <p className="mt-4 border-t border-line pt-3 font-mono text-xs text-ink-500">
+      <p className="mt-4 border-t border-line pt-3 font-mono text-xs text-text-muted">
         {row.outlets.toLocaleString()} outlets stocking · {row.facings.toLocaleString()} facings ·
         price index {row.priceIndex}
       </p>

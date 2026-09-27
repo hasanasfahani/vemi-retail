@@ -43,12 +43,12 @@ export default function FollowUpResult({
         {preliminary && <span className="font-normal opacity-80">· preliminary</span>}
       </BandChip>
 
-      <p className="mono mt-1 text-xs text-ink-400">
+      <p className="mono mt-1 text-xs text-text-muted">
         {revisited.toLocaleString()} / {requested.toLocaleString()} revisited
       </p>
 
       {cohort.baseline !== null && cohort.followUp !== null && !compact && (
-        <p className="mono mt-0.5 text-xs text-ink-700">
+        <p className="mono mt-0.5 text-xs text-text">
           {cohort.baseline}
           {unit} → {cohort.followUp}
           {unit}
@@ -63,7 +63,7 @@ export default function FollowUpResult({
       )}
 
       {cohort.baseline !== null && cohort.matched.length > 0 && !compact && (
-        <p className="mono mt-0.5 text-xs text-ink-400">
+        <p className="mono mt-0.5 text-xs text-text-muted">
           on the same {revisited} outlets · floor {cohort.floor}pt
         </p>
       )}

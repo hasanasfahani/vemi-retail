@@ -8,9 +8,9 @@ import QuoteForm from "@/components/quote/QuoteForm";
 
 export default function RequestSection() {
   return (
-    <section id={ids.request} className="section section-v2 border-t border-line bg-canvas">
+    <section id={ids.request} className="section section-v2 border-t border-line bg-bg">
       <div className="container-vemi">
-        <div className="overflow-hidden rounded-xl border border-line bg-white">
+        <div className="overflow-hidden rounded-xl border border-line bg-surface">
           <QuoteForm idPrefix="v2" />
         </div>
       </div>

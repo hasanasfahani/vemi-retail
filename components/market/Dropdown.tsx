@@ -58,7 +58,7 @@ export default function Dropdown({
         className={`flex h-11 max-w-[260px] items-center gap-1.5 rounded-md border px-2.5 text-left text-sm transition-colors ${
           active
             ? "border-primary-tint bg-primary-tint font-semibold text-primary-text"
-            : "border-line-strong bg-white text-ink-900 hover:bg-canvas"
+            : "border-line-strong bg-surface text-text hover:bg-bg"
         }`}
       >
         {/* The default summaries name themselves ("All governorates"); the
@@ -67,7 +67,7 @@ export default function Dropdown({
           <span className="shrink-0 font-mono text-xs font-medium uppercase tracking-[0.08em] text-primary-text">{label}</span>
         )}
         <span className="min-w-0 truncate">{summary}</span>
-        <span className="shrink-0 text-ink-500" style={{ transform: open ? "rotate(180deg)" : "none" }}>
+        <span className="shrink-0 text-text-muted" style={{ transform: open ? "rotate(180deg)" : "none" }}>
           <Icon name="chevron-down" size={16} />
         </span>
       </button>
@@ -76,7 +76,7 @@ export default function Dropdown({
         <div
           role="listbox"
           aria-multiselectable={!single}
-          className="absolute left-0 z-40 mt-1 max-h-[320px] w-[248px] overflow-y-auto rounded-md border border-line bg-white p-1 shadow-[var(--vm-shadow-overlay)]"
+          className="absolute left-0 z-40 mt-1 max-h-[320px] w-[248px] overflow-y-auto rounded-md border border-line bg-surface p-1 shadow-[var(--vm-shadow-overlay)]"
         >
           {options.map((option) => {
             const on = selected.includes(option.value);
@@ -90,14 +90,14 @@ export default function Dropdown({
                   onToggle(option.value);
                   if (single) setOpen(false);
                 }}
-                className={`flex min-h-9 w-full items-center gap-2 rounded-sm px-2 text-left text-sm transition-colors hover:bg-canvas ${
-                  on ? "font-semibold text-ink-900" : "text-ink-700"
+                className={`flex min-h-9 w-full items-center gap-2 rounded-sm px-2 text-left text-sm transition-colors hover:bg-bg ${
+                  on ? "font-semibold text-text" : "text-text"
                 }`}
               >
                 {!single && (
                   <span
                     className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-sm border ${
-                      on ? "border-primary bg-primary" : "border-line-strong bg-white"
+                      on ? "border-primary bg-primary" : "border-line-strong bg-surface"
                     }`}
                     aria-hidden
                   >
@@ -110,7 +110,7 @@ export default function Dropdown({
                 )}
                 <span className="min-w-0 truncate">{option.label}</span>
                 {single && on && (
-                  <svg viewBox="0 0 12 12" className="ml-auto h-3 w-3 shrink-0 text-violet-ink" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <svg viewBox="0 0 12 12" className="ml-auto h-3 w-3 shrink-0 text-primary-text" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                     <path d="M2.5 6.2 5 8.5l4.5-5" />
                   </svg>
                 )}

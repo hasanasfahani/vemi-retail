@@ -223,12 +223,15 @@ export default function Icon({
 }: {
   name: IconName;
   size?: keyof typeof SIZE;
-  /* Overrides the size classes when a caller needs a custom box. */
+  /* Extra classes (color, margin). If it sets its own h-/w-/size-
+     box, that replaces the size classes; otherwise `size` still applies. */
   className?: string;
   /* An accessible name for an icon that stands alone. Omit for
      decorative icons beside a text label (the default). */
   label?: string;
 }) {
+  const ownBox = className ? /(^|\s)(!?)(h|w|size)-/.test(className) : false;
+  const box = ownBox ? className : `${SIZE[size]} ${className ?? ""}`;
   return (
     <svg
       viewBox="0 0 24 24"
@@ -237,7 +240,7 @@ export default function Icon({
       strokeWidth={1.75}
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={`shrink-0 ${className ?? SIZE[size]}`}
+      className={`shrink-0 ${box}`}
       {...(label ? { role: "img", "aria-label": label } : { "aria-hidden": true })}
     >
       {GLYPHS[name]}

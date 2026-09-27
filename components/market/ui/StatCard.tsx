@@ -101,7 +101,7 @@ export default function StatCard({
             <Delta value={delta} unit={deltaUnit} floor={deltaFloor} goodUp={goodUp} label={deltaLabel} />
           )}
           {target !== undefined && (
-            <span className="font-mono text-xs text-ink-500">target {target}{unit}</span>
+            <span className="font-mono text-xs text-text-muted">target {target}{unit}</span>
           )}
           {action}
         </div>

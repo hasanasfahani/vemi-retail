@@ -109,7 +109,7 @@ function ScoreRing({ value }: { value: number; size?: number }) {
     <div className="flex w-full max-w-[180px] flex-col">
       <span className="tnum text-[44px] leading-[48px]">
         <CountUp to={value} />
-        <span className="ml-1 font-mono text-xs font-medium tracking-normal text-ink-500">/ 100</span>
+        <span className="ml-1 font-mono text-xs font-medium tracking-normal text-text-muted">/ 100</span>
       </span>
       <Gauge className="mt-3" value={value} label={`Visibility score ${value} of 100`} />
     </div>
@@ -135,7 +135,7 @@ function Bar({
 }) {
   return (
     <Row>
-      <span className={`w-28 shrink-0 truncate text-sm ${strong ? "font-semibold text-ink-900" : "text-ink-500"}`}>
+      <span className={`w-28 shrink-0 truncate text-sm ${strong ? "font-semibold text-text" : "text-text-muted"}`}>
         {label}
       </span>
       <div className="h-3 flex-1 overflow-hidden rounded-sm bg-line">
@@ -146,7 +146,7 @@ function Bar({
           delay={delay}
         />
       </div>
-      <span className="w-12 shrink-0 text-right font-mono text-sm font-medium text-ink-900">
+      <span className="w-12 shrink-0 text-right font-mono text-sm font-medium text-text">
         {value}
         {suffix}
       </span>
@@ -179,7 +179,7 @@ function Preview({ title }: { title: string }) {
             <AnimatedFill className="h-full shrink-0" width="15%" tone="var(--vm-chart-2)" delay={0.16} />
             <AnimatedFill className="h-full shrink-0" width="12%" tone="var(--vm-chart-3)" delay={0.28} />
           </div>
-          <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm text-ink-700">
+          <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm text-text">
             <span className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-[3px]" style={{ background: "var(--vm-chart-1)" }} />On shelf 73%</span>
             <span className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-[3px]" style={{ background: "var(--vm-chart-2)" }} />Out of stock 15%</span>
             <span className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-[3px]" style={{ background: "var(--vm-chart-3)" }} />Misplaced 12%</span>
@@ -198,7 +198,7 @@ function Preview({ title }: { title: string }) {
           ].map((b, index) => (
             <Bar key={b.l} label={b.l} value={b.v} scale={34} tone={b.t} strong={b.s} delay={index * 0.08} />
           ))}
-          <p className="mt-2 font-mono text-xs text-ink-500">Linear share of the category shelf · 46 facings counted</p>
+          <p className="mt-2 font-mono text-xs text-text-muted">Linear share of the category shelf · 46 facings counted</p>
         </div>
       );
 
@@ -206,7 +206,7 @@ function Preview({ title }: { title: string }) {
       return (
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-line font-mono text-xs font-medium uppercase tracking-[0.1em] text-ink-500">
+            <tr className="border-b border-line font-mono text-xs font-medium uppercase tracking-[0.1em] text-text-muted">
               <th className="pb-2 font-medium">SKU</th>
               <th className="pb-2 text-right font-medium">Shelf</th>
               <th className="pb-2 text-right font-medium">RRP</th>
@@ -220,9 +220,9 @@ function Preview({ title }: { title: string }) {
               { s: "Water 500ml", p: "500", r: "500", ok: true },
             ].map((r) => (
               <tr key={r.s} className="border-b border-line last:border-0">
-                <td className="py-2 font-medium text-ink-900">{r.s}</td>
-                <td className="mono py-2 text-right text-ink-700">{r.p}</td>
-                <td className="mono py-2 text-right text-ink-500">{r.r}</td>
+                <td className="py-2 font-medium text-text">{r.s}</td>
+                <td className="mono py-2 text-right text-text">{r.p}</td>
+                <td className="mono py-2 text-right text-text-muted">{r.r}</td>
                 <td className="py-2 text-right">
                   {r.ok ? <StatusPill tone="good">At RRP</StatusPill> : <StatusPill tone="warn">+11%</StatusPill>}
                 </td>
@@ -248,7 +248,7 @@ function Preview({ title }: { title: string }) {
               { p: "Bottom", v: 16, prime: false },
             ].map((x, index) => (
               <Row key={x.p}>
-                <span className={`w-20 shrink-0 text-sm ${x.prime ? "font-semibold text-ink-900" : "text-ink-500"}`}>
+                <span className={`w-20 shrink-0 text-sm ${x.prime ? "font-semibold text-text" : "text-text-muted"}`}>
                   {x.p}
                 </span>
                 <div className="h-2.5 flex-1 overflow-hidden rounded-sm bg-line">
@@ -259,11 +259,11 @@ function Preview({ title }: { title: string }) {
                     delay={index * 0.08}
                   />
                 </div>
-                <span className="w-10 shrink-0 text-right font-mono text-sm text-ink-900">{x.v}%</span>
+                <span className="w-10 shrink-0 text-right font-mono text-sm text-text">{x.v}%</span>
               </Row>
             ))}
-            <p className="mt-2 text-sm text-ink-500">
-              <span className="font-semibold text-ink-900">54%</span> of your facings sit in prime
+            <p className="mt-2 text-sm text-text-muted">
+              <span className="font-semibold text-text">54%</span> of your facings sit in prime
               positions · 46 facings counted
             </p>
           </div>
@@ -291,8 +291,8 @@ function Preview({ title }: { title: string }) {
             <div>
               <span className="vm-label">Compliance</span>
               <div className="mt-1 flex items-baseline gap-2">
-                <span className="tnum !text-lg !text-ink-500 line-through">83%</span>
-                <span aria-hidden className="text-ink-500">&rarr;</span>
+                <span className="tnum !text-lg !text-text-muted line-through">83%</span>
+                <span aria-hidden className="text-text-muted">&rarr;</span>
                 <span className="tnum text-[44px] leading-[48px]">
                   <CountUp to={100} />%
                 </span>
@@ -316,10 +316,10 @@ function Preview({ title }: { title: string }) {
             </figure>
           </div>
 
-          <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm text-ink-700">
+          <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm text-text">
             <span className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-[3px]" style={{ background: "var(--vm-chart-1)" }} />As planned</span>
             <span className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-[3px]" style={{ background: "var(--vm-chart-3)" }} />Wrong SKU</span>
-            <span className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-[3px] border border-dashed border-ink-900" />Empty slot</span>
+            <span className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-[3px] border border-dashed border-text" />Empty slot</span>
           </div>
         </div>
       );
@@ -338,10 +338,10 @@ function Preview({ title }: { title: string }) {
                 <Icon name="photo" className="h-4 w-4 text-primary-text" />
               </span>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-ink-900">{p.w}</p>
-                <p className="truncate text-xs text-ink-500">{p.who}</p>
+                <p className="truncate text-sm font-medium text-text">{p.w}</p>
+                <p className="truncate text-xs text-text-muted">{p.who}</p>
               </div>
-              <span className="shrink-0 text-xs text-ink-600">{p.t}</span>
+              <span className="shrink-0 text-xs text-text-muted">{p.t}</span>
             </div>
           ))}
         </div>
@@ -351,7 +351,7 @@ function Preview({ title }: { title: string }) {
       return (
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-line font-mono text-xs font-medium uppercase tracking-[0.1em] text-ink-500">
+            <tr className="border-b border-line font-mono text-xs font-medium uppercase tracking-[0.1em] text-text-muted">
               <th className="pb-2 font-medium">SKU</th>
               <th className="pb-2 text-center font-medium">Listed</th>
               <th className="pb-2 text-center font-medium">In store</th>
@@ -366,7 +366,7 @@ function Preview({ title }: { title: string }) {
               { s: "Energy 250ml", a: false, b: false, c: false },
             ].map((r) => (
               <tr key={r.s} className="border-b border-line last:border-0">
-                <td className="py-2 font-medium text-ink-900">{r.s}</td>
+                <td className="py-2 font-medium text-text">{r.s}</td>
                 {[r.a, r.b, r.c].map((v, i) => (
                   <td key={i} className="py-2 text-center">
                     {/* filled = yes, hollow ring = no: shape, not green/grey */}
@@ -386,7 +386,7 @@ function Preview({ title }: { title: string }) {
       return (
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-line font-mono text-xs font-medium uppercase tracking-[0.1em] text-ink-500">
+            <tr className="border-b border-line font-mono text-xs font-medium uppercase tracking-[0.1em] text-text-muted">
               <th className="pb-2 font-medium">Brand</th>
               <th className="pb-2 text-right font-medium">Avail.</th>
               <th className="pb-2 text-right font-medium">Share</th>
@@ -401,10 +401,10 @@ function Preview({ title }: { title: string }) {
               { b: "Competitor C", a: 59, s: 12, p: 0 },
             ].map((r) => (
               <tr key={r.b} className={`border-b border-line last:border-0 ${r.me ? "bg-primary-tint" : ""}`}>
-                <td className={`py-2 ${r.me ? "font-semibold text-primary-text" : "font-medium text-ink-900"}`}>{r.b}</td>
-                <td className="mono py-2 text-right text-ink-700">{r.a}%</td>
-                <td className="mono py-2 text-right text-ink-700">{r.s}%</td>
-                <td className="mono py-2 text-right text-ink-500">{r.p}</td>
+                <td className={`py-2 ${r.me ? "font-semibold text-primary-text" : "font-medium text-text"}`}>{r.b}</td>
+                <td className="mono py-2 text-right text-text">{r.a}%</td>
+                <td className="mono py-2 text-right text-text">{r.s}%</td>
+                <td className="mono py-2 text-right text-text-muted">{r.p}</td>
               </tr>
             ))}
           </tbody>
@@ -456,21 +456,21 @@ export default function CapabilityExplorer() {
               onClick={() => setActive(i)}
               onKeyDown={(e) => onKey(e, i)}
               className={`flex items-start gap-4 rounded-md px-4 py-3 text-left transition-colors ${
-                on ? "bg-primary-tint" : "hover:bg-canvas"
+                on ? "bg-primary-tint" : "hover:bg-bg"
               }`}
             >
               <span
                 className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-md ${
-                  on ? "bg-primary text-white" : "border border-line text-ink-700"
+                  on ? "bg-primary text-white" : "border border-line text-text"
                 }`}
               >
                 <Icon name={c.icon} size={20} />
               </span>
               <span className="min-w-0">
-                <span className={`block text-[15px] font-semibold ${on ? "text-primary-text" : "text-ink-900"}`}>
+                <span className={`block text-[15px] font-semibold ${on ? "text-primary-text" : "text-text"}`}>
                   {c.title}
                 </span>
-                <span className="mt-0.5 block text-sm text-ink-500">{c.short}</span>
+                <span className="mt-0.5 block text-sm text-text-muted">{c.short}</span>
               </span>
             </button>
           );
@@ -485,7 +485,7 @@ export default function CapabilityExplorer() {
         className="vm-card flex flex-col !p-0 lg:sticky lg:top-24 lg:self-start"
       >
         <div className="flex items-center justify-between gap-3 border-b border-line px-6 py-4">
-          <span className="text-lg font-semibold text-ink-900">{current.title}</span>
+          <span className="text-lg font-semibold text-text">{current.title}</span>
           <ConfidenceBadge level="estimated" size="sm">Sample figure</ConfidenceBadge>
         </div>
         <div key={active} className="panel-in flex flex-1 flex-col justify-center p-6" style={{ minHeight: 280 }}>

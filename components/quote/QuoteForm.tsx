@@ -46,9 +46,9 @@ function ScopeRange({
   onChange: (value: number) => void;
 }) {
   return (
-    <div className="rounded-lg border border-line bg-white p-5">
+    <div className="rounded-lg border border-line bg-surface p-5">
       <div className="flex items-center justify-between gap-4">
-        <label htmlFor={id} className="text-sm font-semibold text-ink-900">
+        <label htmlFor={id} className="text-sm font-semibold text-text">
           {label}
         </label>
         <output
@@ -68,7 +68,7 @@ function ScopeRange({
         onChange={(event) => onChange(Number(event.target.value))}
         className="mt-4 h-11 w-full cursor-pointer [accent-color:var(--vm-primary)]"
       />
-      <div className="flex justify-between font-mono text-xs text-ink-500">
+      <div className="flex justify-between font-mono text-xs text-text-muted">
         <span>{minLabel}</span>
         <span>{maxLabel}</span>
       </div>
@@ -165,12 +165,12 @@ export default function QuoteForm({
 
   return (
     <div className="grid lg:grid-cols-[0.95fr_1.05fr]">
-      <div className="border-b border-line bg-canvas p-6 sm:p-10 lg:border-b-0 lg:border-r">
+      <div className="border-b border-line bg-bg p-6 sm:p-10 lg:border-b-0 lg:border-r">
         <span className="vm-label text-primary-text">01 · {finalCta.eyebrow}</span>
-        <h2 className="mt-3 text-[28px] font-semibold leading-[36px] tracking-[-0.01em] text-ink-900 sm:text-[36px] sm:leading-[44px]">
+        <h2 className="mt-3 text-[28px] font-semibold leading-[36px] tracking-[-0.01em] text-text sm:text-[36px] sm:leading-[44px]">
           {finalCta.headline}
         </h2>
-        <p className="mt-4 text-base leading-6 text-ink-700">{finalCta.subhead}</p>
+        <p className="mt-4 text-base leading-6 text-text">{finalCta.subhead}</p>
 
         <div className="mt-8 space-y-3">
           <ScopeRange
@@ -211,7 +211,7 @@ export default function QuoteForm({
           />
         </div>
 
-        <p className="mt-6 flex items-start gap-2 text-sm leading-5 text-ink-500">
+        <p className="mt-6 flex items-start gap-2 text-sm leading-5 text-text-muted">
           <Icon name="check" size={16} className="mt-0.5 shrink-0 text-primary-text" />
           {leadForm.subhead}
         </p>
@@ -223,9 +223,9 @@ export default function QuoteForm({
             <span className="flex h-12 w-12 items-center justify-center rounded-md bg-primary-tint text-primary-text">
               <Icon name="check" size={24} />
             </span>
-            <h3 className="mt-5 text-[22px] font-semibold leading-7 text-ink-900">{leadForm.success.title}</h3>
-            <p className="mt-2 max-w-sm text-base leading-6 text-ink-700">{leadForm.success.body}</p>
-            <p className="mt-6 font-mono text-xs text-ink-500">
+            <h3 className="mt-5 text-[22px] font-semibold leading-7 text-text">{leadForm.success.title}</h3>
+            <p className="mt-2 max-w-sm text-base leading-6 text-text">{leadForm.success.body}</p>
+            <p className="mt-6 font-mono text-xs text-text-muted">
               {scope.posPerMonth.toLocaleString("en-US")} POS / month · {scope.categories}{" "}
               {scope.categories === 1 ? "category" : "categories"} · {scope.cities}{" "}
               {scope.cities === 1 ? "city" : "cities"}
@@ -234,10 +234,10 @@ export default function QuoteForm({
         ) : (
           <form onSubmit={onSubmit} noValidate>
             <span className="vm-label text-primary-text">02 · {leadForm.eyebrow}</span>
-            <h3 className="mt-3 text-[22px] font-semibold leading-7 text-ink-900 sm:text-[28px] sm:leading-9">
+            <h3 className="mt-3 text-[22px] font-semibold leading-7 text-text sm:text-[28px] sm:leading-9">
               {leadForm.headline}
             </h3>
-            <p className="mt-2 text-base leading-6 text-ink-700">{leadForm.intro}</p>
+            <p className="mt-2 text-base leading-6 text-text">{leadForm.intro}</p>
 
             <div className="mt-7 grid gap-5 sm:grid-cols-2">
               <TextField
@@ -343,9 +343,9 @@ export default function QuoteForm({
               />
             </div>
 
-            <div className="mt-7 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-4 font-mono text-xs text-ink-500">
+            <div className="mt-7 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-4 font-mono text-xs text-text-muted">
               <span>Quote scope</span>
-              <span className="text-ink-900">
+              <span className="text-text">
                 {scope.posPerMonth.toLocaleString("en-US")} POS / month · {scope.categories}{" "}
                 {scope.categories === 1 ? "category" : "categories"} · {scope.cities}{" "}
                 {scope.cities === 1 ? "city" : "cities"}
@@ -360,7 +360,7 @@ export default function QuoteForm({
               {status === "sending" ? "Sending…" : leadForm.submitLabel}
             </button>
 
-            <p className="mt-3 text-sm leading-5 text-ink-500">
+            <p className="mt-3 text-sm leading-5 text-text-muted">
               We use your details only to prepare and respond to this quotation request.
             </p>
           </form>

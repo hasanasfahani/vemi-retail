@@ -22,13 +22,13 @@ export default function ScoreRing({
     <div className="flex w-full min-w-[120px] flex-col items-start" style={{ maxWidth: Math.max(160, size * 1.6) }}>
       <span className="tnum leading-none" style={{ fontSize: figure }}>
         {Math.round(score)}
-        <span className="ml-1 font-mono text-xs font-medium tracking-normal text-ink-500">/ 100</span>
+        <span className="ml-1 font-mono text-xs font-medium tracking-normal text-text-muted">/ 100</span>
       </span>
       <Gauge value={score} max={100} className="mt-3 w-full" label={`Score ${Math.round(score)} of 100`} />
       <span className="mt-2">
         <BandChip band={band} size="sm" />
       </span>
-      {caption && <span className="mt-1 text-xs text-ink-500">{caption}</span>}
+      {caption && <span className="mt-1 text-xs text-text-muted">{caption}</span>}
     </div>
   );
 }

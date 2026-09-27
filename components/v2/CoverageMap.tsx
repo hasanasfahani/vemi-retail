@@ -53,16 +53,16 @@ export default function CoverageMap() {
   const [hover, setHover] = useState<Pin | null>(null);
 
   return (
-    <div className="rounded-xl border border-line bg-white p-5 sm:p-6">
+    <div className="rounded-xl border border-line bg-surface p-5 sm:p-6">
       <div className="flex items-start justify-between gap-4">
         <div>
           <span className="vm-label inline-flex items-center gap-2 text-primary-text">
             <span aria-hidden className="h-2 w-2 rounded-full bg-primary" />
             Active field network
           </span>
-          <p className="mt-1 text-lg font-semibold leading-6 text-ink-900">Iraq coverage</p>
+          <p className="mt-1 text-lg font-semibold leading-6 text-text">Iraq coverage</p>
         </div>
-        <span className="rounded-sm border border-line px-2 py-1 font-mono text-xs text-ink-500">
+        <span className="rounded-sm border border-line px-2 py-1 font-mono text-xs text-text-muted">
           {PINS.length} hubs
         </span>
       </div>
@@ -140,7 +140,7 @@ export default function CoverageMap() {
             key={p.name}
             aria-hidden
             className={`pointer-events-none absolute -translate-y-1/2 whitespace-nowrap rounded-sm bg-white/90 px-1 font-mono text-xs leading-4 ${
-              p.capital ? "font-medium text-ink-900" : "text-ink-700"
+              p.capital ? "font-medium text-text" : "text-text"
             } ${p.label === "left" ? "-translate-x-full" : ""}`}
             style={{
               left: `calc(${p.x}% ${p.label === "left" ? "- 8px" : "+ 8px"})`,
@@ -153,7 +153,7 @@ export default function CoverageMap() {
 
         {hover && !hover.label && (
           <div
-            className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full rounded-sm border border-line bg-white px-2 py-1 font-mono text-xs text-ink-900 shadow-[var(--vm-shadow-overlay)]"
+            className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full rounded-sm border border-line bg-surface px-2 py-1 font-mono text-xs text-text shadow-[var(--vm-shadow-overlay)]"
             style={{ left: `${hover.x}%`, top: `calc(${(hover.y / VIEW.h) * 100}% - 10px)` }}
           >
             {hover.name}
@@ -161,7 +161,7 @@ export default function CoverageMap() {
         )}
       </div>
 
-      <div className="mt-4 flex items-center justify-between gap-3 border-t border-line pt-3 font-mono text-xs text-ink-500">
+      <div className="mt-4 flex items-center justify-between gap-3 border-t border-line pt-3 font-mono text-xs text-text-muted">
         <span className="inline-flex items-center gap-2">
           <span aria-hidden className="h-2 w-2 rounded-full bg-primary" />
           Field coverage hub

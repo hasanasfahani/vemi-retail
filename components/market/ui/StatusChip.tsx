@@ -86,14 +86,14 @@ export default function StatusChip({
           className={`vm-pop w-[300px] ${side === "left" ? "vm-pop--start" : "vm-pop--end"}`}
         >
           <span className="vm-pop__label">{title ?? `Why ${BAND_LABEL[band].toLowerCase()}`}</span>
-          <span className="block text-sm text-ink-900">{detail.lead}</span>
+          <span className="block text-sm text-text">{detail.lead}</span>
 
           <span className="mt-2 block">
             {detail.rows.map((row) => (
               <span
                 key={row.label}
                 className={`flex items-center gap-2 border-b border-line py-1.5 text-xs last:border-0 ${
-                  row.here ? "font-semibold text-ink-900" : "text-ink-500"
+                  row.here ? "font-semibold text-text" : "text-text-muted"
                 }`}
               >
                 {row.band && (
@@ -105,13 +105,13 @@ export default function StatusChip({
                 )}
                 <span className="min-w-0 flex-1 truncate">{row.label}</span>
                 <span className="mono shrink-0">{row.value}</span>
-                {row.here && <span className="shrink-0 font-mono text-xs text-violet-ink">here</span>}
+                {row.here && <span className="shrink-0 font-mono text-xs text-primary-text">here</span>}
               </span>
             ))}
           </span>
 
           {detail.footnote && (
-            <span className="mt-2 block text-xs text-ink-500">{detail.footnote}</span>
+            <span className="mt-2 block text-xs text-text-muted">{detail.footnote}</span>
           )}
         </span>
       )}

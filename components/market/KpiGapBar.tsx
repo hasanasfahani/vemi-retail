@@ -60,7 +60,7 @@ export default function KpiGapBar({
     /* The tab's hero figure (brand KPI hero: mono label, 56px value),
        drawn against its target, then the two counts that scope the
        problem, then the tab's actions. */
-    <section className="rounded-lg border border-line bg-white p-6">
+    <section className="rounded-lg border border-line bg-surface p-6">
       <div className="flex flex-wrap items-start justify-between gap-x-10 gap-y-6">
         {/* the figure */}
         <div className="min-w-[240px] flex-1">
@@ -100,7 +100,7 @@ export default function KpiGapBar({
             <dt className="vm-label">Target</dt>
             <dd className="tnum mt-2 text-[28px] leading-8">
               {target}
-              <span className="text-lg text-ink-500">{unit}</span>
+              <span className="text-lg text-text-muted">{unit}</span>
             </dd>
           </div>
           <div>
@@ -109,7 +109,7 @@ export default function KpiGapBar({
               {met ? `+${Math.abs(gap)}` : `−${Math.abs(gap)}`}
               <span className="text-lg">{unit}</span>
             </dd>
-            <dd className="mt-1 text-sm text-ink-500">{met ? "above target" : "below target"}</dd>
+            <dd className="mt-1 text-sm text-text-muted">{met ? "above target" : "below target"}</dd>
           </div>
         </dl>
 
@@ -118,11 +118,11 @@ export default function KpiGapBar({
           <p className="vm-label">Issue scope</p>
           <p className="mt-2 text-base">
             <span className="tnum text-[28px] leading-8">{affectedPos.toLocaleString()}</span>
-            <span className="ml-2 text-sm text-ink-500">affected POS</span>
+            <span className="ml-2 text-sm text-text-muted">affected POS</span>
           </p>
-          <p className="mt-1 font-mono text-sm text-ink-900">
+          <p className="mt-1 font-mono text-sm text-text">
             {issues.toLocaleString()}
-            <span className="ml-1.5 font-sans text-ink-500">{issueNoun}</span>
+            <span className="ml-1.5 font-sans text-text-muted">{issueNoun}</span>
           </p>
         </div>
       </div>

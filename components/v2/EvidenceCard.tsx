@@ -11,8 +11,8 @@ const e = trust.evidence;
    panel (brand rule). The analysis overlay is marked illustrative. */
 export default function EvidenceCard() {
   return (
-    <article className="flex h-full flex-col overflow-hidden rounded-lg border border-line bg-white">
-      <div className="relative aspect-[16/10] bg-canvas">
+    <article className="flex h-full flex-col overflow-hidden rounded-lg border border-line bg-surface">
+      <div className="relative aspect-[16/10] bg-bg">
         <Image
           src={e.image.src}
           alt={e.image.alt}
@@ -22,7 +22,7 @@ export default function EvidenceCard() {
           style={{ objectPosition: e.image.position }}
         />
 
-        <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-sm bg-white px-2.5 py-1.5 font-mono text-xs font-medium uppercase tracking-[0.08em] text-ink-900 sm:left-4 sm:top-4">
+        <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-sm bg-surface px-2.5 py-1.5 font-mono text-xs font-medium uppercase tracking-[0.08em] text-text sm:left-4 sm:top-4">
           <Icon name="photo" size={16} className="h-3.5 w-3.5 text-primary" />
           Source photograph
         </span>
@@ -35,21 +35,21 @@ export default function EvidenceCard() {
       </div>
 
       {/* the capture record, as data */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-y border-line bg-canvas px-5 py-3 sm:px-6">
-        <p className="font-mono text-xs font-medium uppercase tracking-[0.08em] text-ink-900">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-y border-line bg-bg px-5 py-3 sm:px-6">
+        <p className="font-mono text-xs font-medium uppercase tracking-[0.08em] text-text">
           ERB-204 · {e.captured} · Geo-tagged
         </p>
         <ConfidenceBadge level="measured" size="sm">{e.status}</ConfidenceBadge>
       </div>
 
       <div className="flex flex-1 flex-col p-5 sm:p-6">
-        <h3 className="text-lg font-semibold text-ink-900">{e.outlet}</h3>
-        <p className="text-sm text-ink-500">
+        <h3 className="text-lg font-semibold text-text">{e.outlet}</h3>
+        <p className="text-sm text-text-muted">
           {e.location} · {e.channel}
         </p>
 
         <p className="vm-label mt-5">AI-assisted image analysis</p>
-        <p className="mt-1 text-base font-semibold text-ink-900">{e.finding}</p>
+        <p className="mt-1 text-base font-semibold text-text">{e.finding}</p>
 
         <ul className="mt-4 grid gap-2 sm:grid-cols-3">
           {e.analysisPoints.map((point) => (
@@ -60,7 +60,7 @@ export default function EvidenceCard() {
           ))}
         </ul>
 
-        <div className="mt-auto flex flex-wrap gap-x-5 gap-y-2 border-t border-line pt-4 pt-4 font-mono text-xs text-ink-500">
+        <div className="mt-auto flex flex-wrap gap-x-5 gap-y-2 border-t border-line pt-4 pt-4 font-mono text-xs text-text-muted">
           <span className="inline-flex items-center gap-1.5">
             <Icon name="link" size={16} className="h-3.5 w-3.5" />
             Audit {e.auditRef}
@@ -70,7 +70,7 @@ export default function EvidenceCard() {
             Linked to the dashboard
           </span>
         </div>
-        <p className="mt-3 text-sm text-ink-500">
+        <p className="mt-3 text-sm text-text-muted">
           The analysis overlay is illustrative; the photograph and capture metadata are field evidence.
         </p>
       </div>

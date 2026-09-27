@@ -54,7 +54,7 @@ function Setup({ view }: { view: MarketView }) {
             style={brandSwatch(s.brandId)}
             aria-hidden
           />
-          <span className="font-medium text-ink-900">{s.name}</span>
+          <span className="font-medium text-text">{s.name}</span>
         </span>
       ),
     },
@@ -112,7 +112,7 @@ function Setup({ view }: { view: MarketView }) {
           ].map((item) => (
             <div key={item.k}>
               <dt className="vm-label">{item.k}</dt>
-              <dd className="mt-1 text-base font-semibold text-ink-900">{item.v}</dd>
+              <dd className="mt-1 text-base font-semibold text-text">{item.v}</dd>
             </div>
           ))}
         </dl>
@@ -147,8 +147,8 @@ function Setup({ view }: { view: MarketView }) {
               <li key={meta.id} className="border-b border-line py-4 last:border-0">
                 <div className="flex flex-wrap items-center gap-3">
                   <div className="min-w-[210px] flex-1">
-                    <p className="text-base font-semibold text-ink-900">{meta.label}</p>
-                    <p className="text-sm text-ink-500">{meta.hint}</p>
+                    <p className="text-base font-semibold text-text">{meta.label}</p>
+                    <p className="text-sm text-text-muted">{meta.hint}</p>
                   </div>
 
                   <input
@@ -172,7 +172,7 @@ function Setup({ view }: { view: MarketView }) {
                       onChange={(e) => change(meta.id, Number(e.target.value))}
                       className="vm-input !w-[84px] text-right font-mono !text-base"
                     />
-                    <span className="font-mono text-sm text-ink-500">
+                    <span className="font-mono text-sm text-text-muted">
                       {meta.id === "score" ? "/100" : "%"}
                     </span>
                   </label>
@@ -189,7 +189,7 @@ function Setup({ view }: { view: MarketView }) {
 
       {/* ---------- monitored brands ---------- */}
       <section>
-        <h2 className="vm-h2 mb-4 text-ink-900">
+        <h2 className="vm-h2 mb-4 text-text">
           Monitored brands
         </h2>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
@@ -199,7 +199,7 @@ function Setup({ view }: { view: MarketView }) {
             return (
               <div
                 key={brand.id}
-                className={`flex min-w-0 flex-col rounded-lg border bg-white p-6 ${
+                className={`flex min-w-0 flex-col rounded-lg border bg-surface p-6 ${
                   brand.id === clientBrand.id ? "border-primary" : "border-line"
                 }`}
               >
@@ -209,16 +209,16 @@ function Setup({ view }: { view: MarketView }) {
                     style={brandSwatch(brand.id)}
                     aria-hidden
                   />
-                  <p className="min-w-0 truncate text-lg font-semibold text-ink-900">
+                  <p className="min-w-0 truncate text-lg font-semibold text-text">
                     {brand.name}
                   </p>
                 </div>
-                <p className="mt-0.5 truncate text-sm text-ink-500">{brand.owner}</p>
-                <p className="mono mt-2 text-xs text-ink-500">
+                <p className="mt-0.5 truncate text-sm text-text-muted">{brand.owner}</p>
+                <p className="mono mt-2 text-xs text-text-muted">
                   {own.length} SKU{own.length === 1 ? "" : "s"} monitored
                 </p>
                 {row && (
-                  <p className="mono mt-0.5 text-xs text-ink-400">
+                  <p className="mono mt-0.5 text-xs text-text-muted">
                     {row.share}% of shelf this cycle
                   </p>
                 )}
@@ -258,7 +258,7 @@ function Setup({ view }: { view: MarketView }) {
 
       {/* ---------- coverage scope ---------- */}
       <section>
-        <h2 className="vm-h2 mb-4 text-ink-900">
+        <h2 className="vm-h2 mb-4 text-text">
           Coverage scope
         </h2>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -282,15 +282,15 @@ function Setup({ view }: { view: MarketView }) {
               return (
                 <li key={city.id} className="border-b border-line py-2.5 last:border-0">
                   <div className="flex items-baseline justify-between gap-2">
-                    <span className="text-sm font-medium text-ink-700">
+                    <span className="text-sm font-medium text-text">
                       {city.name}
                       {city.capital !== city.name && (
-                        <span className="ml-1.5 text-xs text-ink-400">{city.capital}</span>
+                        <span className="ml-1.5 text-xs text-text-muted">{city.capital}</span>
                       )}
                     </span>
-                    <span className="mono text-xs text-ink-900">
+                    <span className="mono text-xs text-text">
                       {audited.toLocaleString()} / {city.pos.toLocaleString()}
-                      <span className="ml-1.5 text-ink-400">{pct}%</span>
+                      <span className="ml-1.5 text-text-muted">{pct}%</span>
                     </span>
                   </div>
                   <div className="mt-1.5">
@@ -311,10 +311,10 @@ function Setup({ view }: { view: MarketView }) {
         <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
           {channels.map((channel) => (
             <li key={channel.id} className="rounded-md border border-line px-3 py-2.5">
-              <p className="text-xs font-semibold text-ink-900">{channel.name}</p>
-              <p className="mono mt-0.5 text-base font-semibold text-ink-900">
+              <p className="text-xs font-semibold text-text">{channel.name}</p>
+              <p className="mono mt-0.5 text-base font-semibold text-text">
                 {requiredSkus[channel.id] ?? "—"}
-                <span className="ml-1 text-xs font-normal text-ink-400">SKUs expected</span>
+                <span className="ml-1 text-xs font-normal text-text-muted">SKUs expected</span>
               </p>
             </li>
           ))}
@@ -329,8 +329,8 @@ function Setup({ view }: { view: MarketView }) {
         <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {auditors.map((auditor) => (
             <li key={auditor.id} className="rounded-md border border-line px-3 py-2.5">
-              <p className="text-sm font-semibold text-ink-900">{auditor.name}</p>
-              <p className="mt-0.5 text-xs text-ink-500">
+              <p className="text-sm font-semibold text-text">{auditor.name}</p>
+              <p className="mt-0.5 text-xs text-text-muted">
                 {auditor.governorates.map((c) => governorates.find((x) => x.id === c)?.name ?? c).join(" · ")}
               </p>
             </li>

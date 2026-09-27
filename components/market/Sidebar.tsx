@@ -83,13 +83,13 @@ export default function Sidebar() {
     } ${
       active
         ? "bg-primary-tint font-semibold text-primary-text"
-        : "font-medium text-ink-900 hover:bg-canvas"
+        : "font-medium text-text hover:bg-bg"
     }`;
-  const iconClass = (active: boolean) => (active ? "text-primary" : "text-ink-500");
+  const iconClass = (active: boolean) => (active ? "text-primary" : "text-text-muted");
 
   return (
     <nav
-      className={`sticky top-0 hidden h-screen shrink-0 flex-col border-r border-line bg-white transition-[width] duration-200 lg:flex ${
+      className={`sticky top-0 hidden h-screen shrink-0 flex-col border-r border-line bg-surface transition-[width] duration-200 lg:flex ${
         collapsed ? "w-[72px]" : "w-[256px]"
       }`}
       aria-label="Sections"
@@ -145,7 +145,7 @@ export default function Sidebar() {
                     key={item.href}
                     title={`${item.label} — coming soon`}
                     aria-disabled="true"
-                    className={`mb-0.5 flex min-h-11 cursor-default items-center gap-3 rounded-md px-3 text-[15px] font-medium text-ink-500 ${
+                    className={`mb-0.5 flex min-h-11 cursor-default items-center gap-3 rounded-md px-3 text-[15px] font-medium text-text-muted ${
                       collapsed ? "justify-center px-0" : ""
                     }`}
                   >
@@ -153,7 +153,7 @@ export default function Sidebar() {
                     {!collapsed && (
                       <>
                         <span className="truncate">{item.label}</span>
-                        <span className="ml-auto inline-flex items-center gap-1 font-mono text-xs font-medium uppercase tracking-[0.1em] text-ink-500">
+                        <span className="ml-auto inline-flex items-center gap-1 font-mono text-xs font-medium uppercase tracking-[0.1em] text-text-muted">
                           <Icon name="lock" size={16} />
                           Soon
                         </span>
@@ -219,25 +219,25 @@ export default function Sidebar() {
             className="flex flex-col items-center gap-1.5 py-1"
             title={`${coverage.audited.toLocaleString()} of ${coverage.contracted.toLocaleString()} audited · ${coverage.pct}%`}
           >
-            <span className="font-mono text-xs font-medium text-ink-900">{coverage.pct}%</span>
+            <span className="font-mono text-xs font-medium text-text">{coverage.pct}%</span>
             <Gauge value={coverage.pct} className="w-9" label={`${coverage.pct}% of contracted outlets audited`} />
           </div>
         ) : (
-          <div className="rounded-md border border-line bg-canvas p-3">
+          <div className="rounded-md border border-line bg-bg p-3">
             <div className="flex items-center justify-between gap-2">
               <span className="vm-label">This month</span>
               <BandChip band={coverage.onTrack ? "strong" : "attention"} label={coverage.onTrack ? "On track" : "Behind"} size="sm" />
             </div>
-            <div className="mt-2 font-mono text-sm font-medium text-ink-900">
+            <div className="mt-2 font-mono text-sm font-medium text-text">
               {coverage.audited.toLocaleString()}
-              <span className="text-ink-500"> / {coverage.contracted.toLocaleString()}</span>
+              <span className="text-text-muted"> / {coverage.contracted.toLocaleString()}</span>
             </div>
             <Gauge
               className="mt-2"
               value={coverage.pct}
               label={`${coverage.pct}% of contracted outlets audited`}
             />
-            <div className="mt-2 text-xs text-ink-500">
+            <div className="mt-2 text-xs text-text-muted">
               {coverage.pct}% · {contract.daysRemaining} days left
             </div>
           </div>

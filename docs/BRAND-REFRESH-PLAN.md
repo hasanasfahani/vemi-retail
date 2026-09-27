@@ -581,3 +581,41 @@ its own target).
   and form validation. Lighthouse was not run (no local install); the a11y
   checks were done by hand.
 
+### Phase 8 (lock-in): status
+
+- **Bridge retired.** 587 class usages renamed to the kit's semantic names:
+  `ink-900/700` → `text`, `ink-600/500/400` → `text-muted`,
+  `ink-300` → `line-strong`, `canvas` → `bg`, `violet` → `primary`,
+  `violet-ink` → `primary-text`, the status names → the band tokens,
+  `bg-white` → `bg-surface`, and `font-display/body` → `font-sans`.
+  The bridge block is gone, and `--color-*: initial` removes Tailwind's
+  default palette. JS, inline styles and SVG read `var(--vm-*)`, never
+  `var(--color-*)`.
+- **globals.css cut from 661 to ~350 lines.** The retired `t-*` type
+  classes fold into the kit's `vm-*` set (`vm-h1` steps down to 32/40
+  below 640px). Dead rules for old buttons, cards, chips, pills, the
+  skeleton, pings and old chart variables are removed.
+- **brand:check** gains a `retired-token` error, so the old names cannot
+  come back. It stands at 226 files, 0 errors, 0 warnings.
+- **Contrast audit.** Every token pair passes AA except Slate on
+  Violet 100 (4.32:1). A DOM scan of all 15 rendered surfaces found that
+  pair nowhere, and the skill now forbids it. One new token,
+  `--vm-paper`, lets the onInk logo sit inside a dark-token band.
+- **Found in QA and fixed:**
+  - The `Dialog` scrim was stacked above its own panel.
+  - `Icon` dropped its size whenever a caller passed a colour class,
+    which drew a check mark hundreds of pixels wide.
+  - `Reveal` ignored reduced motion.
+- **Gates:** tsc, eslint (0 errors; 3 old warnings in data scripts),
+  270 tests, `next build` with every portal route still static, and
+  84 KB of CSS.
+- **Kit installed.** `.claude/skills/vemi-brand/` (paths adapted to
+  `brand/` and `components/vemi/`, repo decisions added) and
+  `.claude/commands/brand-check.md` are now versioned. The rest of
+  `.claude/` stays ignored. `CLAUDE.md` carries the brand section.
+- **Open for you:**
+  - Keep or remove `/kit`.
+  - The portal's locked modules say "Request full demo" (from
+    `2167f56`), which conflicts with the older "never say demo inside
+    the portal" rule.
+

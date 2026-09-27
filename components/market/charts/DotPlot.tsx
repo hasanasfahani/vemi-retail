@@ -89,7 +89,7 @@ export default function DotPlot({
                 style={{ minHeight: height }}
               >
                 {row.watch && <span className="shrink-0">{row.watch}</span>}
-                <span className="w-[34%] shrink-0 truncate text-xs text-ink-700" title={row.label}>
+                <span className="w-[34%] shrink-0 truncate text-xs text-text" title={row.label}>
                   {row.label}
                 </span>
 
@@ -99,12 +99,12 @@ export default function DotPlot({
                       as a stray mark. */}
                   <span
                     className="absolute left-0 right-0 top-1/2 h-px -translate-y-1/2"
-                    style={{ background: "var(--color-line-strong)" }}
+                    style={{ background: "var(--vm-line-strong)" }}
                     aria-hidden
                   />
                   {par !== undefined && (
                     <span
-                      className="absolute bottom-[-4px] top-[-4px] w-[2px] -translate-x-1/2 rounded-[1px] bg-ink-900"
+                      className="absolute bottom-[-4px] top-[-4px] w-[2px] -translate-x-1/2 rounded-[1px] bg-text"
                       style={{ left: `${at(par)}%` }}
                       aria-hidden
                     />
@@ -123,7 +123,7 @@ export default function DotPlot({
                   )}
                   {b !== null && (
                     <span
-                      className="absolute top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 bg-white"
+                      className="absolute top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 bg-surface"
                       style={{ left: `${b}%`, borderColor: MEASURE_PRIOR }}
                       aria-hidden
                     />
@@ -135,7 +135,7 @@ export default function DotPlot({
                   />
                 </span>
 
-                <span className="mono w-[4.5rem] shrink-0 text-right text-xs font-semibold text-ink-900">
+                <span className="mono w-[4.5rem] shrink-0 text-right text-xs font-semibold text-text">
                   {show(row.value)}
                 </span>
                 {row.trailing}
@@ -145,7 +145,7 @@ export default function DotPlot({
         </ul>
       </div>
 
-      <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-400">
+      <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-muted">
         <span>
           Scale {show(lo)} to {show(hi)}
         </span>
@@ -153,7 +153,7 @@ export default function DotPlot({
         {referenceLabel && (
           <span className="inline-flex items-center gap-1">
             <span
-              className="inline-block h-2 w-2 rounded-full border-2 bg-white"
+              className="inline-block h-2 w-2 rounded-full border-2 bg-surface"
               style={{ borderColor: MEASURE_PRIOR }}
               aria-hidden
             />

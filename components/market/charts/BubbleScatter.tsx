@@ -71,7 +71,7 @@ export default function BubbleScatter({
           />
           <ZAxis type="number" dataKey="z" range={[220, 1500]} name="Availability" />
           <Tooltip
-            cursor={{ strokeDasharray: "3 3", stroke: "var(--color-line-strong)" }}
+            cursor={{ strokeDasharray: "3 3", stroke: "var(--vm-line-strong)" }}
             content={
               <ChartTooltip
                 format={(value, name) =>

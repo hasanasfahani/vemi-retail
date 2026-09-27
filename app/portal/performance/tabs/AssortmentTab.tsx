@@ -158,7 +158,7 @@ export default function AssortmentTab({ view }: { view: MarketView }) {
           {clientSkus.map((sku) => {
             const row = a.penetration.find((r) => r.id === sku.id);
             return (
-              <span key={sku.id} className="inline-flex items-center gap-0.5 text-xs text-ink-500">
+              <span key={sku.id} className="inline-flex items-center gap-0.5 text-xs text-text-muted">
                 {sku.name}
                 <WatchEye
                   kpi="assortment"

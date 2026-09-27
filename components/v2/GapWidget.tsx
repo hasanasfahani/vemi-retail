@@ -31,8 +31,8 @@ function Row({
   return (
     <div>
       <div className="mb-2 flex items-baseline justify-between gap-3">
-        <span className={`text-sm ${strong ? "font-semibold text-ink-900" : "text-ink-500"}`}>{label}</span>
-        <span className="font-mono text-sm font-medium text-ink-900">{value}%</span>
+        <span className={`text-sm ${strong ? "font-semibold text-text" : "text-text-muted"}`}>{label}</span>
+        <span className="font-mono text-sm font-medium text-text">{value}%</span>
       </div>
       <div className="relative h-4 rounded-sm bg-line/60">
         <motion.div
@@ -53,7 +53,7 @@ export default function GapWidget() {
   return (
     <section className="vm-card flex flex-col gap-6" aria-label={w.eyebrow}>
       <header className="flex flex-wrap items-center justify-between gap-3">
-        <h3 className="text-[22px] font-semibold leading-7 text-ink-900">Reported vs actual</h3>
+        <h3 className="text-[22px] font-semibold leading-7 text-text">Reported vs actual</h3>
         <ConfidenceBadge level="estimated" size="sm">Sample figure</ConfidenceBadge>
       </header>
 
@@ -68,7 +68,7 @@ export default function GapWidget() {
           {/* the unverified remainder, outlined */}
           <span
             aria-hidden
-            className="absolute inset-y-0 rounded-sm border-2 border-dashed border-ink-900"
+            className="absolute inset-y-0 rounded-sm border-2 border-dashed border-text"
             style={{ left: `${w.actualValue}%`, width: `${delta}%` }}
           />
         </Row>
@@ -76,10 +76,10 @@ export default function GapWidget() {
 
       <footer className="flex flex-wrap items-center gap-4 border-t border-line pt-4">
         <span className="tnum text-[36px] leading-10">{delta} pts</span>
-        <p className="min-w-0 flex-1 text-sm text-ink-700">
-          <span className="font-semibold text-ink-900">{w.gapLabel}.</span> {w.gapBody}
+        <p className="min-w-0 flex-1 text-sm text-text">
+          <span className="font-semibold text-text">{w.gapLabel}.</span> {w.gapBody}
         </p>
-        <span className="w-full font-mono text-xs text-ink-500">{w.tag}</span>
+        <span className="w-full font-mono text-xs text-text-muted">{w.tag}</span>
       </footer>
     </section>
   );

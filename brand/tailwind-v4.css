@@ -2,13 +2,19 @@
  * Vemi theme for Tailwind v4 (from the brand kit's src/brand/tailwind-v4.css).
  * Imported by app/globals.css after tailwindcss and brand/tokens.css.
  *
- * The kit also sets `--color-*: initial` to remove Tailwind's default
- * palette. That switch is held back until the bridge below is gone
- * (plan §4, stage C), because the bridge names would go with it.
+ * `--color-*: initial` removes Tailwind's default palette, so only the
+ * brand colors below exist as classes (bg-blue-500 no longer compiles).
+ * The pre-brand bridge names (ink-900, canvas, violet, good…) were
+ * retired in plan phase 8; scripts/brand-check.mjs keeps them out.
+ *
+ * Code outside class names (charts, inline styles, SVG attributes)
+ * reads the --vm-* tokens directly, never var(--color-…): with `inline`
+ * those theme variables are not emitted.
  */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 @theme inline {
+  --color-*: initial;
   --color-transparent: transparent;
   --color-current: currentColor;
   --color-white: #ffffff;
@@ -90,50 +96,4 @@
   --text-display--line-height: 76px;
   --text-display--font-weight: 600;
   --text-display--letter-spacing: -0.02em;
-}
-
-/* ------------------------------------------------------------------
-   BRIDGE (plan §4, stage A). Temporary.
-
-   The pre-brand class names, re-pointed at brand values so the whole
-   product recolors without touching ~1,550 class usages at once. Each
-   page renames to the semantic classes above as it is rebuilt
-   (stage B), and this block is deleted at the end (stage C).
-
-   Two names read differently than they sound: `paper` was the old
-   name for the white card surface (brand Paper is --vm-bg), and the
-   four status names no longer mean green / amber / orange / red. They
-   step down the D1 band ramp in colors that stay legible as text,
-   "darker = needs you sooner"; the full band treatment lands with the
-   chart system (plan phase 4).
-
-   `static` because charts and inline styles read many of these as
-   var(--color-…) from JS, which Tailwind cannot see; without it the
-   variables would be pruned and those marks would lose their color.
------------------------------------------------------------------- */
-@theme inline static {
-  --color-paper: var(--vm-surface);
-  --color-canvas: var(--vm-bg);
-
-  --color-ink-900: var(--vm-text);
-  --color-ink-700: var(--vm-text);
-  --color-ink-600: var(--vm-text-muted);
-  --color-ink-500: var(--vm-text-muted);
-  --color-ink-400: var(--vm-text-muted);
-  --color-ink-300: var(--vm-line-strong);
-
-  --color-violet: var(--vm-primary);
-  --color-violet-ink: var(--vm-primary-text);
-
-  --color-good: var(--vm-primary);
-  --color-warn: var(--vm-text-muted);
-  --color-serious: var(--vm-ink-800);
-  --color-critical: var(--vm-text);
-
-  --color-comp-1: var(--vm-chart-3);
-  --color-comp-2: var(--vm-line-strong);
-  --color-comp-3: var(--vm-line);
-
-  --font-display: var(--vm-font-sans);
-  --font-body: var(--vm-font-sans);
 }

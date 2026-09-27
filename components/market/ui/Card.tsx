@@ -56,7 +56,7 @@ export default function Card({
   const pad = "px-5 sm:px-6";
 
   return (
-    <section id={id} className={cx("min-w-0 rounded-lg border border-line bg-white", className)}>
+    <section id={id} className={cx("min-w-0 rounded-lg border border-line bg-surface", className)}>
       {/* The header wraps rather than competes: a wide legend in the
           action slot drops to its own row instead of squeezing the title. */}
       {head && (
@@ -64,11 +64,11 @@ export default function Card({
           <div className="min-w-[200px] flex-1">
             {title && (
               <div className="flex flex-wrap items-center gap-3">
-                <h2 className="text-[22px] font-semibold leading-7 text-ink-900">{title}</h2>
+                <h2 className="text-[22px] font-semibold leading-7 text-text">{title}</h2>
                 {confidence && <ConfidenceBadge level={confidence} size="sm" />}
               </div>
             )}
-            {lead && <p className="mt-1 max-w-[72ch] text-sm text-ink-500">{lead}</p>}
+            {lead && <p className="mt-1 max-w-[72ch] text-sm text-text-muted">{lead}</p>}
             {soWhat && <p className="vm-chartcard__sowhat mt-3">{soWhat}</p>}
           </div>
           {action && <div className="flex shrink-0 flex-wrap items-center gap-2 empty:hidden">{action}</div>}
@@ -119,7 +119,7 @@ export default function Card({
         )
       ) : (
         footnote && (
-          <p className={cx("border-t border-line py-3 text-xs leading-[18px] text-ink-500", pad)}>{footnote}</p>
+          <p className={cx("border-t border-line py-3 text-xs leading-[18px] text-text-muted", pad)}>{footnote}</p>
         )
       )}
     </section>

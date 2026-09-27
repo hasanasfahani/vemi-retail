@@ -79,7 +79,7 @@ export default function WatchEye({
       className={`relative inline-flex shrink-0 items-center justify-center rounded-sm transition-colors after:absolute after:-inset-2 after:content-[''] disabled:opacity-30 ${box} ${
         watching
           ? "text-primary hover:bg-primary-tint"
-          : "text-line-strong hover:bg-canvas hover:text-ink-900"
+          : "text-line-strong hover:bg-bg hover:text-text"
       } ${className}`}
     >
       <span className="sr-only">

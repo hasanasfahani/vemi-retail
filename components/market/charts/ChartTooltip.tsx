@@ -14,7 +14,7 @@ export default function ChartTooltip({
 }: Partial<TooltipContentProps<number, string>> & { format?: Fmt }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="min-w-[160px] rounded-md border border-line bg-white px-3 py-2.5 shadow-[var(--vm-shadow-overlay)]">
+    <div className="min-w-[160px] rounded-md border border-line bg-surface px-3 py-2.5 shadow-[var(--vm-shadow-overlay)]">
       {label !== undefined && <p className="vm-label mb-1.5">{String(label)}</p>}
       <ul className="flex flex-col gap-1">
         {payload.map((row) => (
@@ -24,8 +24,8 @@ export default function ChartTooltip({
               style={{ background: row.color, boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--vm-text) 12%, transparent)" }}
               aria-hidden
             />
-            <span className="text-ink-500">{row.name}</span>
-            <span className="mono ml-auto pl-3 font-semibold text-ink-900">
+            <span className="text-text-muted">{row.name}</span>
+            <span className="mono ml-auto pl-3 font-semibold text-text">
               {format ? format(Number(row.value), String(row.name)) : Number(row.value).toLocaleString()}
             </span>
           </li>

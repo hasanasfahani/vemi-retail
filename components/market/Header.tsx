@@ -79,14 +79,14 @@ export default function Header({
   ].join(" · ");
 
   return (
-    <header className="sticky top-0 z-30 border-b border-line bg-white">
+    <header className="sticky top-0 z-30 border-b border-line bg-surface">
       <div className="flex h-16 items-center justify-between gap-4 px-4 sm:px-6">
         <MobileNav />
         <div className="mr-auto flex min-w-0 flex-col justify-center sm:flex-row sm:items-baseline sm:gap-3">
           {/* A label, not the page heading: each page opens with its own
               PageHeader h1, written as the decision it supports. */}
-          <p className="truncate text-lg font-semibold leading-7 text-ink-900">{titleFor(pathname)}</p>
-          <span className="hidden truncate font-mono text-xs font-medium uppercase tracking-[0.1em] text-ink-500 md:inline">
+          <p className="truncate text-lg font-semibold leading-7 text-text">{titleFor(pathname)}</p>
+          <span className="hidden truncate font-mono text-xs font-medium uppercase tracking-[0.1em] text-text-muted md:inline">
             {contract.clientShort} · {contract.brand} · {contract.country}
           </span>
         </div>
@@ -95,7 +95,7 @@ export default function Header({
           {onSearch && (
             <label className="relative mr-2 hidden md:block">
               <span className="sr-only">{searchPlaceholder}</span>
-              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-500">
+              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-text-muted">
                 <Icon name="search" size={16} />
               </span>
               <input
@@ -168,7 +168,7 @@ export default function Header({
       ) : (
         <div className="flex min-h-11 items-center gap-3 border-t border-line px-4 sm:px-6">
           <span className="vm-label shrink-0">{active > 0 ? `${active} active` : "Showing"}</span>
-          <span className="min-w-0 flex-1 truncate font-mono text-xs text-ink-700">{summary}</span>
+          <span className="min-w-0 flex-1 truncate font-mono text-xs text-text">{summary}</span>
           <Button variant="text" size="sm" onClick={() => setPinnedOpen(true)}>
             Edit filters
           </Button>
@@ -179,7 +179,7 @@ export default function Header({
           forgotten is the most expensive kind of wrong on a page whose
           title says "market". */}
       {showFilters && active > 0 && (
-        <div className="flex flex-wrap items-center gap-2 border-t border-line bg-canvas px-4 py-2 sm:px-6">
+        <div className="flex flex-wrap items-center gap-2 border-t border-line bg-bg px-4 py-2 sm:px-6">
           <span className="vm-label">Showing</span>
           {filters.month !== contract.currentMonth && (
             <Chip
@@ -208,7 +208,7 @@ function Chip({ label, onRemove }: { label: string; onRemove: () => void }) {
         type="button"
         onClick={onRemove}
         aria-label={`Remove ${label}`}
-        className="flex h-6 w-6 items-center justify-center rounded-full hover:bg-white"
+        className="flex h-6 w-6 items-center justify-center rounded-full hover:bg-surface"
       >
         <Icon name="close" size={16} />
       </button>
@@ -231,18 +231,18 @@ function NotificationPanel({ onClose }: { onClose: () => void }) {
         onClick={onClose}
         className="fixed inset-0 z-20 cursor-default"
       />
-      <div className="absolute right-4 top-[60px] z-30 w-[340px] rounded-md border border-line bg-white p-2 shadow-[var(--vm-shadow-overlay)] sm:right-6">
+      <div className="absolute right-4 top-[60px] z-30 w-[340px] rounded-md border border-line bg-surface p-2 shadow-[var(--vm-shadow-overlay)] sm:right-6">
         <div className="vm-label px-2 py-2">Notifications</div>
         {items.map((n) => (
-          <div key={n.title} className="flex gap-3 rounded-md px-2 py-2.5 hover:bg-canvas">
+          <div key={n.title} className="flex gap-3 rounded-md px-2 py-2.5 hover:bg-bg">
             <span
               className="mt-[6px] h-2 w-2 shrink-0 rounded-full"
               style={{ background: BAND_COLOR[n.band], boxShadow: `inset 0 0 0 1px ${BAND_EDGE[n.band]}` }}
               aria-hidden
             />
             <span className="min-w-0">
-              <span className="block text-sm text-ink-900">{n.title}</span>
-              <span className="block font-mono text-xs text-ink-500">{n.when}</span>
+              <span className="block text-sm text-text">{n.title}</span>
+              <span className="block font-mono text-xs text-text-muted">{n.when}</span>
             </span>
           </div>
         ))}

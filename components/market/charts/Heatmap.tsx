@@ -80,9 +80,9 @@ export default function Heatmap({
         <table className="w-full min-w-[520px] border-separate border-spacing-[2px] text-xs">
           <thead>
             <tr>
-              <th className="sticky left-0 z-10 w-[140px] bg-white" />
+              <th className="sticky left-0 z-10 w-[140px] bg-surface" />
               {columns.map((col) => (
-                <th key={col.id} scope="col" className="px-1 pb-1 uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
+                <th key={col.id} scope="col" className="px-1 pb-1 uppercase font-mono text-xs font-medium tracking-[0.1em] text-text-muted">
                   {col.label}
                 </th>
               ))}
@@ -91,14 +91,14 @@ export default function Heatmap({
           <tbody>
             {rows.map((row) => (
               <tr key={row.id}>
-                <th scope="row" className="sticky left-0 z-10 bg-white pr-3 text-right text-sm font-medium text-ink-900">
+                <th scope="row" className="sticky left-0 z-10 bg-surface pr-3 text-right text-sm font-medium text-text">
                   {row.label}
                 </th>
                 {columns.map((col) => {
                   const v = value(row.id, col.id);
                   if (v === null)
                     return (
-                      <td key={col.id} className="rounded-sm bg-canvas py-3 text-center text-ink-500" title="Not audited">
+                      <td key={col.id} className="rounded-sm bg-bg py-3 text-center text-text-muted" title="Not audited">
                         —
                       </td>
                     );
@@ -136,7 +136,7 @@ export default function Heatmap({
           </tbody>
         </table>
       </div>
-      {legend && <div className="mt-2 text-xs text-ink-400">{legend}</div>}
+      {legend && <div className="mt-2 text-xs text-text-muted">{legend}</div>}
     </div>
   );
 }

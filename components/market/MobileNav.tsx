@@ -38,7 +38,7 @@ export default function MobileNav() {
                 const active = pathname === item.href;
                 if (item.locked) {
                   return (
-                    <div key={item.href} aria-disabled="true" className="flex min-h-11 items-center gap-3 px-3 text-[15px] font-medium text-ink-500">
+                    <div key={item.href} aria-disabled="true" className="flex min-h-11 items-center gap-3 px-3 text-[15px] font-medium text-text-muted">
                       <Icon name={item.icon} className="h-5 w-5 text-line-strong" />
                       {item.label}
                       <span className="ml-auto font-mono text-xs uppercase tracking-[0.1em]">Soon</span>
@@ -52,10 +52,10 @@ export default function MobileNav() {
                     aria-current={active ? "page" : undefined}
                     onClick={() => setOpen(false)}
                     className={`flex min-h-11 items-center gap-3 rounded-md px-3 text-[15px] ${
-                      active ? "bg-primary-tint font-semibold text-primary-text" : "font-medium text-ink-900 hover:bg-canvas"
+                      active ? "bg-primary-tint font-semibold text-primary-text" : "font-medium text-text hover:bg-bg"
                     }`}
                   >
-                    <Icon name={item.icon} className={`h-5 w-5 ${active ? "text-primary" : "text-ink-500"}`} />
+                    <Icon name={item.icon} className={`h-5 w-5 ${active ? "text-primary" : "text-text-muted"}`} />
                     {item.label}
                   </Link>
                 );

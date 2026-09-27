@@ -46,14 +46,14 @@ export default function SplitBars({
 
   return (
     <div className="flex flex-col">
-      <p className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-400">
+      <p className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-muted">
         <span className="inline-flex items-center gap-1.5">
-          <span className="inline-block h-2 w-3 rounded-[2px] bg-[color:var(--color-violet)]" aria-hidden />
+          <span className="inline-block h-2 w-3 rounded-[2px] bg-[color:var(--vm-primary)]" aria-hidden />
           {presentLabel}
         </span>
         <span className="inline-flex items-center gap-1.5">
           <span
-            className="inline-block h-2 w-3 rounded-[2px] border border-line-strong bg-canvas"
+            className="inline-block h-2 w-3 rounded-[2px] border border-line-strong bg-bg"
             aria-hidden
           />
           {missingLabel}
@@ -72,28 +72,28 @@ export default function SplitBars({
               <div className="flex items-center justify-between gap-2">
                 <span className="flex min-w-0 items-center gap-1.5">
                   {row.watch}
-                  <span className="truncate text-sm font-medium text-ink-700">{row.label}</span>
+                  <span className="truncate text-sm font-medium text-text">{row.label}</span>
                 </span>
                 <span className="flex shrink-0 items-baseline gap-2">
-                  <span className="mono text-sm font-semibold text-ink-900">
+                  <span className="mono text-sm font-semibold text-text">
                     {missing.toLocaleString()}
                     {unit} {missingLabel.toLowerCase()}
                   </span>
-                  <span className="mono text-xs text-ink-400">{share}% there</span>
+                  <span className="mono text-xs text-text-muted">{share}% there</span>
                 </span>
               </div>
               <div
-                className="mt-1.5 h-2.5 overflow-hidden rounded-[3px] border border-line-strong bg-canvas"
+                className="mt-1.5 h-2.5 overflow-hidden rounded-[3px] border border-line-strong bg-bg"
                 style={{ width: `${Math.max(4, width)}%` }}
                 role="img"
                 aria-label={`${row.label}: ${row.present.toLocaleString()} of ${row.total.toLocaleString()} present, ${missing.toLocaleString()} missing`}
               >
                 <div
-                  className="h-full bg-[color:var(--color-violet)]"
+                  className="h-full bg-[color:var(--vm-primary)]"
                   style={{ width: `${fill}%` }}
                 />
               </div>
-              {row.meta && <p className="mt-1 text-xs text-ink-400">{row.meta}</p>}
+              {row.meta && <p className="mt-1 text-xs text-text-muted">{row.meta}</p>}
             </li>
           );
         })}

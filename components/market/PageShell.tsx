@@ -44,7 +44,7 @@ export default function PageShell(props: ShellProps) {
 function ShellSkeleton() {
   return (
     <>
-      <div className="sticky top-0 z-30 border-b border-line bg-white">
+      <div className="sticky top-0 z-30 border-b border-line bg-surface">
         <div className="h-16" />
         <div className="h-[69px] border-t border-line" />
       </div>

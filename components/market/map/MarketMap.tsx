@@ -256,9 +256,9 @@ export default function MarketMap({
 
   return (
     <div className="relative overflow-hidden rounded-md border border-line">
-      <div ref={host} style={{ height }} className="z-0 w-full bg-canvas" />
+      <div ref={host} style={{ height }} className="z-0 w-full bg-bg" />
       {!ready && (
-        <div className="absolute inset-0 flex items-center justify-center text-sm text-ink-400">
+        <div className="absolute inset-0 flex items-center justify-center text-sm text-text-muted">
           Loading map…
         </div>
       )}

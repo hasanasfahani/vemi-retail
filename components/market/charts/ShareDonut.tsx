@@ -85,8 +85,8 @@ export default function ShareDonut({
               }}
               aria-hidden
             />
-            <span className="min-w-0 flex-1 text-ink-700">{slice.name}</span>
-            <span className="mono ml-auto font-semibold text-ink-900">{pct(slice.value).toFixed(1)}%</span>
+            <span className="min-w-0 flex-1 text-text">{slice.name}</span>
+            <span className="mono ml-auto font-semibold text-text">{pct(slice.value).toFixed(1)}%</span>
           </li>
         ))}
       </ul>

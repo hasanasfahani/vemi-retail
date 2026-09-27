@@ -88,7 +88,7 @@ export default function PosDrawer({
         footer={
           row && onFlag && onUnflag ? (
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="text-sm text-ink-500">
+              <span className="text-sm text-text-muted">
                 {flagged
                   ? "This outlet is on the revisit queue."
                   : "Put this outlet on a future audit route."}
@@ -113,7 +113,7 @@ export default function PosDrawer({
         {row && (
           <div className="flex flex-col gap-5">
             {/* ---------- who and when ---------- */}
-            <dl className="grid grid-cols-2 gap-x-4 gap-y-2 rounded-md border border-line bg-canvas px-3 py-2.5">
+            <dl className="grid grid-cols-2 gap-x-4 gap-y-2 rounded-md border border-line bg-bg px-3 py-2.5">
               {[
                 { k: "Audited on", v: row.auditedAt || "—" },
                 { k: "Collector", v: row.collector },
@@ -121,10 +121,10 @@ export default function PosDrawer({
                 { k: "Category", v: contract.category },
               ].map((item) => (
                 <div key={item.k}>
-                  <dt className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
+                  <dt className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-text-muted">
                     {item.k}
                   </dt>
-                  <dd className="mt-0.5 text-sm text-ink-900">{item.v}</dd>
+                  <dd className="mt-0.5 text-sm text-text">{item.v}</dd>
                 </div>
               ))}
             </dl>
@@ -173,10 +173,10 @@ export default function PosDrawer({
                   if (value === null) {
                     return (
                       <div key={kpi.key} className="flex items-center gap-2 py-[3px]">
-                        <dt className="w-[86px] shrink-0 text-xs text-ink-500">
+                        <dt className="w-[86px] shrink-0 text-xs text-text-muted">
                           {kpi.label}
                         </dt>
-                        <dd className="mono flex-1 text-xs text-ink-400">
+                        <dd className="mono flex-1 text-xs text-text-muted">
                           nothing to measure here
                         </dd>
                       </div>
@@ -184,9 +184,9 @@ export default function PosDrawer({
                   }
                   return (
                     <div key={kpi.key} className="flex items-center gap-2 py-[3px]">
-                      <dt className="w-[86px] shrink-0 text-xs text-ink-500">{kpi.label}</dt>
+                      <dt className="w-[86px] shrink-0 text-xs text-text-muted">{kpi.label}</dt>
                       <Bar value={value} max={100} par={kpi.target} />
-                      <dd className="mono w-[42px] shrink-0 text-right text-xs font-semibold text-ink-900">
+                      <dd className="mono w-[42px] shrink-0 text-right text-xs font-semibold text-text">
                         {value}%
                       </dd>
                       <dd className="w-[16px] shrink-0">
@@ -210,11 +210,11 @@ export default function PosDrawer({
 
             {/* ---------- issues ---------- */}
             <section>
-              <h3 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
+              <h3 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-text-muted">
                 Detected issues
               </h3>
               {row.issues.length === 0 ? (
-                <p className="mt-2 text-sm text-ink-500">
+                <p className="mt-2 text-sm text-text-muted">
                   Nothing flagged — this outlet met every threshold the audit checks.
                 </p>
               ) : (
@@ -226,7 +226,7 @@ export default function PosDrawer({
                         label={issue.label}
                         size="sm"
                       />
-                      <span className="min-w-0 flex-1 text-xs leading-snug text-ink-500">
+                      <span className="min-w-0 flex-1 text-xs leading-snug text-text-muted">
                         {issue.detail}
                       </span>
                     </li>
@@ -238,19 +238,19 @@ export default function PosDrawer({
             {/* ---------- the shelf ---------- */}
             <section>
               <div className="mb-2 flex items-center justify-between gap-2">
-                <h3 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
+                <h3 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-text-muted">
                   Shelf as audited
                 </h3>
                 <button
                   type="button"
                   onClick={() => setZoom(true)}
-                  className="text-xs font-semibold text-violet-ink hover:underline"
+                  className="text-xs font-semibold text-primary-text hover:underline"
                 >
                   Enlarge
                 </button>
               </div>
               <ShelfScene cells={row.cells} height={190} />
-              <p className="mt-1.5 text-xs leading-snug text-ink-400">
+              <p className="mt-1.5 text-xs leading-snug text-text-muted">
                 Drawn from this visit&apos;s rows: {row.cells.length} lines checked,{" "}
                 {row.gaps} out of stock, {row.facings.toLocaleString()} client facings counted.
               </p>
@@ -258,20 +258,20 @@ export default function PosDrawer({
 
             {/* ---------- what to do ---------- */}
             <section>
-              <h3 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
+              <h3 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-text-muted">
                 Recommended actions
               </h3>
               <ul className="mt-2 flex flex-col gap-1.5">
                 {recommendationsFor(row).map((line) => (
-                  <li key={line} className="flex gap-2 text-sm leading-snug text-ink-700">
-                    <span className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-violet" aria-hidden />
+                  <li key={line} className="flex gap-2 text-sm leading-snug text-text">
+                    <span className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-primary" aria-hidden />
                     {line}
                   </li>
                 ))}
               </ul>
               <Link
                 href="/portal/actions"
-                className="mt-2.5 inline-block text-xs font-semibold text-violet-ink hover:underline"
+                className="mt-2.5 inline-block text-xs font-semibold text-primary-text hover:underline"
               >
                 Track these in the Follow-up Audit Center
               </Link>
@@ -279,7 +279,7 @@ export default function PosDrawer({
 
             {/* ---------- lines ---------- */}
             <section>
-              <h3 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-400">
+              <h3 className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-text-muted">
                 Every line checked
               </h3>
               <ul className="mt-2 flex flex-col">
@@ -288,15 +288,15 @@ export default function PosDrawer({
                     key={cell.skuId}
                     className="flex items-center gap-2 border-b border-line py-1.5 text-sm last:border-0"
                   >
-                    <span className="min-w-0 flex-1 truncate text-ink-700">
+                    <span className="min-w-0 flex-1 truncate text-text">
                       {skuOf(cell.skuId)?.name ?? cell.skuId}
                     </span>
                     {cell.state === "in-stock" ? (
                       <>
-                        <span className="mono text-xs text-ink-400">
+                        <span className="mono text-xs text-text-muted">
                           {cell.position ?? "shelf"}
                         </span>
-                        <span className="mono w-[62px] text-right font-semibold text-ink-900">
+                        <span className="mono w-[62px] text-right font-semibold text-text">
                           {cell.facings} {cell.facings === 1 ? "facing" : "facings"}
                         </span>
                       </>
@@ -308,7 +308,7 @@ export default function PosDrawer({
               </ul>
             </section>
 
-            <p className="text-xs leading-snug text-ink-400">
+            <p className="text-xs leading-snug text-text-muted">
               Map position is placed within {row.pos.district} rather than surveyed to the street.
             </p>
           </div>
@@ -323,20 +323,20 @@ export default function PosDrawer({
             type="button"
             aria-label="Close"
             onClick={() => setZoom(false)}
-            className="absolute inset-0 bg-ink-900/65"
+            className="absolute inset-0 bg-text/65"
           />
           <div
             role="dialog"
             aria-modal="true"
             aria-label={`Shelf view, ${row.pos.name}`}
-            className="relative w-full max-w-[880px] rounded-lg border border-line bg-white p-6 shadow-[var(--vm-shadow-overlay)]"
+            className="relative w-full max-w-[880px] rounded-lg border border-line bg-surface p-6 shadow-[var(--vm-shadow-overlay)]"
           >
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
               <div className="min-w-0">
-                <h2 className="font-display text-[15px] font-semibold tracking-tight text-ink-900">
+                <h2 className="font-sans text-[15px] font-semibold tracking-tight text-text">
                   {row.pos.name}
                 </h2>
-                <p className="text-xs text-ink-500">
+                <p className="text-xs text-text-muted">
                   {row.pos.district}, {governorateName(row.pos.governorateId)} · audited {row.auditedAt} by{" "}
                   {row.collector}
                 </p>
@@ -348,8 +348,8 @@ export default function PosDrawer({
                   aria-pressed={overlays}
                   className={`rounded-md border px-2.5 py-1.5 text-xs font-semibold transition-colors ${
                     overlays
-                      ? "border-primary-tint bg-primary-tint text-violet-ink"
-                      : "border-line-strong bg-white text-ink-700 hover:border-ink-400"
+                      ? "border-primary-tint bg-primary-tint text-primary-text"
+                      : "border-line-strong bg-surface text-text hover:border-text-muted"
                   }`}
                 >
                   Detections
@@ -358,7 +358,7 @@ export default function PosDrawer({
                   type="button"
                   onClick={() => setZoom(false)}
                   aria-label="Close"
-                  className="rounded-sm p-1 text-ink-400 transition-colors hover:bg-canvas hover:text-ink-700"
+                  className="rounded-sm p-1 text-text-muted transition-colors hover:bg-bg hover:text-text"
                 >
                   <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden>
                     <path d="m4 4 8 8M12 4l-8 8" />
@@ -367,7 +367,7 @@ export default function PosDrawer({
               </div>
             </div>
             <ShelfScene cells={row.cells} height={380} overlays={overlays} maxFacings={40} />
-            <p className="mt-2 text-xs leading-snug text-ink-400">
+            <p className="mt-2 text-xs leading-snug text-text-muted">
               Every pack, facing count and empty slot is an observation from this visit — the
               overlay labels what was recorded, not what a photograph might contain.
             </p>
