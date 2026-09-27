@@ -182,7 +182,7 @@ function Reports({ view }: { view: MarketView }) {
                 {report.governorates.slice(0, 3).map((city) => (
                   <li key={city.id} className="flex items-center gap-2 text-sm">
                     <span className="w-[74px] shrink-0 text-text-muted">{city.label}</span>
-                    <Bar value={city.score} max={100} par={report.score.target} />
+                    <Bar value={city.score} max={100} par={report.score.target} band={scoreBand(city.score)} />
                     <span className="mono w-[34px] shrink-0 text-right font-semibold text-text">
                       {city.score}
                     </span>
@@ -333,7 +333,7 @@ function Reports({ view }: { view: MarketView }) {
           asOf={asOf(view.month)}
           base={`${view.posCount.toLocaleString()} outlets`}
           confidence="measured"
-          footnote="Outlets are placed within their district rather than surveyed to the street. Darker needs you sooner."
+          footnote="Outlets are placed within their district rather than surveyed to the street. Green is strong, yellow average, orange needs attention, red critical."
         >
           <div className="mb-2.5">
             <MapLegend />
@@ -343,7 +343,7 @@ function Reports({ view }: { view: MarketView }) {
             {report.governorates.map((city) => (
               <li key={city.id} className="flex items-center gap-2">
                 <span className="w-[74px] shrink-0 text-xs text-text-muted">{city.label}</span>
-                <Bar value={city.score} max={100} par={report.score.target} />
+                <Bar value={city.score} max={100} par={report.score.target} band={scoreBand(city.score)} />
                 <span className="mono w-[30px] shrink-0 text-right text-xs font-semibold text-text">
                   {city.score}
                 </span>

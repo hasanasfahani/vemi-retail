@@ -17,39 +17,59 @@ export const BAND_LABEL: Record<Band, string> = {
   critical: "Critical",
 };
 
-/* Band fills (plan D1): a four-step ramp where darker means "needs you
-   sooner" — Violet 100, Violet 400, Violet, Ink. Used for pins, heat
-   cells and swatches; always beside the band word. */
+/* Band marks: pins, clusters, heat cells, gap bars, the swatches that
+   explain a chip. Each is a role token (brand/tokens.css), so the Vemi
+   surface draws the D1 violet ramp and the client portal
+   (data-surface="portal") the universal status colours, from the same
+   call. Always beside the band word. */
 export const BAND_COLOR: Record<Band, string> = {
-  strong: "var(--vm-band-strong)",
-  average: "var(--vm-band-average)",
-  attention: "var(--vm-band-attention)",
-  critical: "var(--vm-band-critical)",
+  strong: "var(--vm-mark-strong)",
+  average: "var(--vm-mark-average)",
+  attention: "var(--vm-mark-attention)",
+  critical: "var(--vm-mark-critical)",
 };
 
-/* The swatch needs an edge where its fill is lighter than the surface
-   it sits on (Violet 100 on white), or the lightest band disappears. */
+/* The inset edge a fill needs where it is too light for its ground:
+   Violet 100 on the Vemi surface, yellow in the portal. */
 export const BAND_EDGE: Record<Band, string> = {
-  strong: "var(--vm-band-average)",
-  average: "transparent",
+  strong: "var(--vm-mark-strong-edge)",
+  average: "var(--vm-mark-average-edge)",
   attention: "transparent",
   critical: "transparent",
 };
 
-/* Swatches: the small colour keys that explain a chip — the status
-   chip's cut-off panel, the notification list. They follow the chips,
-   so inside the client portal they are the universal status colours
-   (docs/PORTAL-NEUTRAL-PLAN.md) while pins and heat cells still read
-   BAND_COLOR until the marks move over (that plan's phase 2). */
-export const BAND_SWATCH: Record<Band, string> = {
-  strong: "var(--vm-swatch-strong)",
-  average: "var(--vm-swatch-average)",
-  attention: "var(--vm-swatch-attention)",
-  critical: "var(--vm-swatch-critical)",
+/* A pin's outline against the map tiles: the surface, except where the
+   fill is the light step and needs its edge instead. */
+export const BAND_RING: Record<Band, string> = {
+  strong: "var(--vm-mark-strong-ring)",
+  average: "var(--vm-mark-average-ring)",
+  attention: "var(--vm-surface)",
+  critical: "var(--vm-surface)",
 };
-export const BAND_SWATCH_EDGE: Record<Band, string> = {
-  strong: "var(--vm-swatch-strong-edge)",
-  average: "var(--vm-swatch-average-edge)",
+
+/* Text set on a mark (a cluster's count), ≥4.5:1 on each fill. */
+export const BAND_ON: Record<Band, string> = {
+  strong: "var(--vm-mark-strong-on)",
+  average: "var(--vm-mark-average-on)",
+  attention: "var(--vm-mark-attention-on)",
+  critical: "var(--vm-mark-critical-on)",
+};
+
+/* The outer ring on a cluster whose members include critical outlets
+   under a lighter band, so they are never averaged out of sight. */
+export const MARK_ALARM = "var(--vm-mark-alarm)";
+
+/* A value-against-target bar: Violet on the Vemi surface, the band's
+   colour in the portal (yellow keeps its edge). */
+export const BAND_GAUGE: Record<Band, string> = {
+  strong: "var(--vm-gauge-strong)",
+  average: "var(--vm-gauge-average)",
+  attention: "var(--vm-gauge-attention)",
+  critical: "var(--vm-gauge-critical)",
+};
+export const GAUGE_EDGE: Record<Band, string> = {
+  strong: "transparent",
+  average: "var(--vm-gauge-average-edge)",
   attention: "transparent",
   critical: "transparent",
 };

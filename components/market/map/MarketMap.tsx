@@ -17,7 +17,7 @@
    "needs attention" means, made in health.ts and read here. */
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { BAND_COLOR, BAND_LABEL, type Band } from "../ui/health";
+import { BAND_COLOR, BAND_EDGE, BAND_LABEL, BAND_ON, BAND_RING, MARK_ALARM, type Band } from "../ui/health";
 
 export type MapPoint = {
   id: string;
@@ -190,17 +190,16 @@ export default function MarketMap({
           const criticals = bands.filter((b) => b === "critical").length;
           const n = bands.length;
           const size = n > 200 ? 46 : n > 50 ? 40 : n > 10 ? 34 : 28;
-          /* D1 ramp: the cluster takes its members' band, darker = needs
-             you sooner. Ink text on the two light steps, Paper on the
-             two dark ones. A cluster hiding critical outlets under a
-             lighter band gets an Ink outer ring, so they are never
-             averaged out of sight. */
-          const dark = typical === "attention" || typical === "critical";
+          /* The cluster takes its members' band (the D1 ramp on the Vemi
+             surface, the status colours in the portal), with its count
+             in the text colour made for that fill. A cluster hiding
+             critical outlets under a lighter band gets the alarm ring,
+             so they are never averaged out of sight. */
           const ring =
             criticals && typical !== "critical"
-              ? `0 0 0 2px var(--vm-surface), 0 0 0 4px var(--vm-band-critical)`
+              ? `0 0 0 2px var(--vm-surface), 0 0 0 4px ${MARK_ALARM}`
               : `0 0 0 2px var(--vm-surface)`;
-          const edge = typical === "strong" ? `inset 0 0 0 1.5px var(--vm-band-average), ` : "";
+          const edge = `inset 0 0 0 1.5px ${BAND_EDGE[typical]}, `;
 
           return L.divIcon({
             html: `<span title="${n} outlets${
@@ -208,7 +207,7 @@ export default function MarketMap({
             }${criticals ? ` · ${criticals} critical` : ""}" style="
               display:flex;align-items:center;justify-content:center;
               width:${size}px;height:${size}px;border-radius:999px;
-              background:${BAND_COLOR[typical]};color:${dark ? "var(--vm-bg)" : "var(--vm-text)"};
+              background:${BAND_COLOR[typical]};color:${BAND_ON[typical]};
               font:500 12px/1 var(--vm-font-mono);
               box-shadow:${edge}${ring}, var(--vm-shadow-raised);
             ">${n}</span>`,
@@ -220,14 +219,14 @@ export default function MarketMap({
         : L.layerGroup();
 
       for (const p of points) {
-        /* D1 pins: the band fill, a surface ring, and critical drawn a
-           step larger. The lightest band gets a Violet 400 edge so it
-           holds against the desaturated tiles. */
-        const light = !p.color && p.band === "strong";
+        /* Pins: the band fill, a surface ring, and critical drawn a step
+           larger. The light step (Violet 100 here, yellow in the portal)
+           takes its edge colour as the ring so it holds against the
+           desaturated tiles. */
         const marker = L.circleMarker([p.lat, p.lng], {
           radius: p.radius ?? (p.band === "critical" ? 7 : 6),
-          weight: light ? 1.5 : 2,
-          color: light ? "var(--vm-band-average)" : "var(--vm-surface)",
+          weight: 2,
+          color: p.color ? "var(--vm-surface)" : BAND_RING[p.band],
           fillColor: p.color ?? BAND_COLOR[p.band],
           fillOpacity: p.color ? 0.9 : 1,
         }) as import("leaflet").CircleMarker & {

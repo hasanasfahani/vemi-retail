@@ -24,7 +24,7 @@ export default function ScoreRing({
         {Math.round(score)}
         <span className="ml-1 font-mono text-xs font-medium tracking-normal text-text-muted">/ 100</span>
       </span>
-      <Gauge value={score} max={100} className="mt-3 w-full" label={`Score ${Math.round(score)} of 100`} />
+      <Gauge value={score} max={100} band={band} className="mt-3 w-full" label={`Score ${Math.round(score)} of 100`} />
       <span className="mt-2">
         <BandChip band={band} size="sm" />
       </span>

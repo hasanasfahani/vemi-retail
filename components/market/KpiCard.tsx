@@ -128,7 +128,7 @@ export default function KpiCard({
       {/* value against target, drawn: the track runs past the target so
           a met goal does not read as an empty bar */}
       <div
-        className="vm-gauge mt-1"
+        className={`vm-gauge vm-gauge--${resolved} mt-1`}
         role="img"
         aria-label={`${value}${unit} against a target of ${target}${unit}`}
       >

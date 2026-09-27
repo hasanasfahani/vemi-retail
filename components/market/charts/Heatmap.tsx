@@ -59,20 +59,25 @@ export default function Heatmap({
       "var(--vm-primary)",
       "var(--vm-ink-800)",
     ],
-    bad: ["var(--vm-bg)", "var(--vm-band-strong)", "var(--vm-band-average)", "var(--vm-band-attention)", "var(--vm-band-critical)"],
+    /* Role tokens (brand/tokens.css): the D1 ramp on the Vemi surface,
+       green → red status tints in the client portal. */
+    bad: ["var(--vm-heat-bad-0)", "var(--vm-heat-bad-1)", "var(--vm-heat-bad-2)", "var(--vm-heat-bad-3)", "var(--vm-heat-bad-4)"],
   } as const;
 
-  const fill = (v: number) => {
+  const fill = (v: number) => RAMP[tone][step(v)];
+  const step = (v: number) => {
     const t = hi === lo ? 1 : (v - lo) / (hi - lo);
-    const step = t < 0.2 ? 0 : t < 0.4 ? 1 : t < 0.6 ? 2 : t < 0.8 ? 3 : 4;
-    return RAMP[tone][step];
+    return t < 0.2 ? 0 : t < 0.4 ? 1 : t < 0.6 ? 2 : t < 0.8 ? 3 : 4;
   };
-  /* Text flips to white only on the two darkest steps, where Ink would
-     fall under 4.5:1; every lighter step keeps Ink. */
-  const ink = (v: number) => {
-    const t = hi === lo ? 1 : (v - lo) / (hi - lo);
-    return t >= 0.6 ? "var(--vm-surface)" : "var(--vm-text)";
-  };
+  /* The number's colour is made for its cell: on the neutral ramp it
+     flips to white on the two darkest steps, where Ink would fall under
+     4.5:1; on the failure ramp each step names its own (≥4.5:1). */
+  const ink = (v: number) =>
+    tone === "bad"
+      ? `var(--vm-heat-bad-on-${step(v)})`
+      : step(v) >= 3
+        ? "var(--vm-surface)"
+        : "var(--vm-text)";
 
   return (
     <div className="min-w-0">

@@ -18,7 +18,7 @@ import Drawer from "./ui/Drawer";
 import Badge from "./ui/Badge";
 import StatusChip from "./ui/StatusChip";
 import { componentDetail } from "@/lib/market/bandDetail";
-import { scoreBand, BAND_LABEL } from "./ui/health";
+import { scoreBand, BAND_COLOR, BAND_EDGE, BAND_LABEL } from "./ui/health";
 import { Button } from "@/components/vemi/Button";
 import Bar from "./ui/Bar";
 import ScoreRing from "./ui/ScoreRing";
@@ -193,11 +193,8 @@ export default function PosDrawer({
                         <span
                           className="block h-2 w-2 rounded-full"
                           style={{
-                            background:
-                              value >= kpi.target
-                                ? "var(--vm-band-strong)"
-                                : "var(--vm-band-attention)",
-                            boxShadow: value >= kpi.target ? "inset 0 0 0 1.5px var(--vm-band-average)" : undefined,
+                            background: value >= kpi.target ? BAND_COLOR.strong : BAND_COLOR.attention,
+                            boxShadow: `inset 0 0 0 1.5px ${value >= kpi.target ? BAND_EDGE.strong : BAND_EDGE.attention}`,
                           }}
                           aria-label={value >= kpi.target ? "at target" : "below target"}
                         />

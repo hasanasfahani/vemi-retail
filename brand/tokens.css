@@ -119,16 +119,42 @@
   --vm-status-critical-tint: #FBE8E8;
   --vm-status-critical-text: #A82828;
 
-  /* Band swatches: the small colour keys that explain a chip (the
-     status chip's cut-off panel, the notification list). On the Vemi
-     surface they are the band ramp; the portal surface re-points them
-     at the status fills below, together with the chips. */
-  --vm-swatch-strong: var(--vm-band-strong);
-  --vm-swatch-average: var(--vm-band-average);
-  --vm-swatch-attention: var(--vm-band-attention);
-  --vm-swatch-critical: var(--vm-band-critical);
-  --vm-swatch-strong-edge: var(--vm-band-average);
-  --vm-swatch-average-edge: transparent;
+  /* Band marks: every place a band is drawn rather than written — map
+     pins and clusters, heat cells, gauges, gap bars, and the swatches
+     that explain a chip. Components ask for a role (fill, edge, pin
+     ring, text on the mark), never for a violet step, so the portal
+     surface below can swap the whole set. These are the Vemi-surface
+     values (plan D1): the band ramp, the lightest step edged in
+     Violet 400, gauges always Violet. */
+  --vm-mark-strong: var(--vm-band-strong);
+  --vm-mark-average: var(--vm-band-average);
+  --vm-mark-attention: var(--vm-band-attention);
+  --vm-mark-critical: var(--vm-band-critical);
+  --vm-mark-strong-edge: var(--vm-band-average);
+  --vm-mark-average-edge: transparent;
+  --vm-mark-strong-ring: var(--vm-band-average);
+  --vm-mark-average-ring: var(--vm-surface);
+  --vm-mark-strong-on: var(--vm-text);
+  --vm-mark-average-on: var(--vm-text);
+  --vm-mark-attention-on: var(--vm-bg);
+  --vm-mark-critical-on: var(--vm-bg);
+  --vm-mark-alarm: var(--vm-band-critical);   /* ring on a cluster hiding criticals */
+  --vm-gauge-strong: var(--vm-primary);
+  --vm-gauge-average: var(--vm-primary);
+  --vm-gauge-attention: var(--vm-primary);
+  --vm-gauge-critical: var(--vm-primary);
+  --vm-gauge-average-edge: transparent;
+  /* Heat cells for a count of failures, five relative steps. */
+  --vm-heat-bad-0: var(--vm-bg);
+  --vm-heat-bad-1: var(--vm-band-strong);
+  --vm-heat-bad-2: var(--vm-band-average);
+  --vm-heat-bad-3: var(--vm-band-attention);
+  --vm-heat-bad-4: var(--vm-band-critical);
+  --vm-heat-bad-on-0: var(--vm-text);
+  --vm-heat-bad-on-1: var(--vm-text);
+  --vm-heat-bad-on-2: var(--vm-text);
+  --vm-heat-bad-on-3: var(--vm-surface);
+  --vm-heat-bad-on-4: var(--vm-surface);
 
   color-scheme: light;
 }
@@ -138,15 +164,44 @@
    Set as data-surface="portal" on the portal layout root. The portal is
    the client's room: urgency in universal colours, the frame neutral,
    Vemi violet kept for Vemi's actions, focus and "where you are".
-   Grows phase by phase; phase 1 = status chips and their swatches.
+   Grows phase by phase: 1 status chips, 2 status marks.
    ========================================================================== */
 [data-surface="portal"] {
-  --vm-swatch-strong: var(--vm-status-strong-fill);
-  --vm-swatch-average: var(--vm-status-average-fill);
-  --vm-swatch-attention: var(--vm-status-attention-fill);
-  --vm-swatch-critical: var(--vm-status-critical-fill);
-  --vm-swatch-strong-edge: transparent;
-  --vm-swatch-average-edge: var(--vm-status-average-edge);
+  /* Marks (plan phase 2). Declared again in full here, not inherited:
+     a var() in a custom property resolves where it is declared, so a
+     value that names a neutral has to be restated inside the scope. */
+  --vm-mark-strong: var(--vm-status-strong-fill);
+  --vm-mark-average: var(--vm-status-average-fill);
+  --vm-mark-attention: var(--vm-status-attention-fill);
+  --vm-mark-critical: var(--vm-status-critical-fill);
+  --vm-mark-strong-edge: transparent;
+  --vm-mark-average-edge: var(--vm-status-average-edge);
+  --vm-mark-strong-ring: var(--vm-surface);
+  --vm-mark-average-ring: var(--vm-status-average-edge);
+  /* Text on a mark: Ink on green 5.1, yellow 9.4, orange 5.2; white on
+     red 4.7 :1. */
+  --vm-mark-strong-on: var(--vm-text);
+  --vm-mark-average-on: var(--vm-text);
+  --vm-mark-attention-on: var(--vm-text);
+  --vm-mark-critical-on: var(--vm-surface);
+  --vm-mark-alarm: var(--vm-status-critical-fill);
+  --vm-gauge-strong: var(--vm-status-strong-fill);
+  --vm-gauge-average: var(--vm-status-average-fill);
+  --vm-gauge-attention: var(--vm-status-attention-fill);
+  --vm-gauge-critical: var(--vm-status-critical-fill);
+  --vm-gauge-average-edge: var(--vm-status-average-edge);
+  /* Failure heat: the four status tints, then solid red for the worst
+     fifth; each cell's number in its band's text colour (≥5.5:1). */
+  --vm-heat-bad-0: var(--vm-status-strong-tint);
+  --vm-heat-bad-1: var(--vm-status-average-tint);
+  --vm-heat-bad-2: var(--vm-status-attention-tint);
+  --vm-heat-bad-3: var(--vm-status-critical-tint);
+  --vm-heat-bad-4: var(--vm-status-critical-fill);
+  --vm-heat-bad-on-0: var(--vm-status-strong-text);
+  --vm-heat-bad-on-1: var(--vm-status-average-text);
+  --vm-heat-bad-on-2: var(--vm-status-attention-text);
+  --vm-heat-bad-on-3: var(--vm-status-critical-text);
+  --vm-heat-bad-on-4: var(--vm-surface);
 }
 
 [data-theme="dark"] {

@@ -174,7 +174,7 @@ export default function AvailabilityTab({ view }: { view: MarketView }) {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card title="Availability by governorate" lead="Client listings on shelf, per governorate." soWhat={govSoWhat} {...basis} confidence="measured" footnote={`Each bar is the share of client listings found in stock; the Ink tick marks the ${targets.availability}% target.`}>
+        <Card title="Availability by governorate" lead="Client listings on shelf, per governorate." soWhat={govSoWhat} {...basis} confidence="measured" footnote={`Each bar is the share of client listings found in stock; the dark tick marks the ${targets.availability}% target.`}>
           <RankedBars
             rows={a.byGovernorate.map((row) => ({
               id: row.id,

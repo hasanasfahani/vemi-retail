@@ -61,7 +61,7 @@ export default function GovernorateHealthCard({
         <span className="tnum text-[44px] leading-[48px]">{health.score}</span>
         <span className="font-mono text-xs text-text-muted">/ 100</span>
       </div>
-      <Gauge className="mt-3" value={health.score} max={100} label={`${health.name} score ${health.score} of 100`} />
+      <Gauge className="mt-3" value={health.score} max={100} band={health.band} label={`${health.name} score ${health.score} of 100`} />
 
       <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
         <StatusChip

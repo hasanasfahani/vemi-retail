@@ -220,7 +220,7 @@ export default function Sidebar() {
             title={`${coverage.audited.toLocaleString()} of ${coverage.contracted.toLocaleString()} audited · ${coverage.pct}%`}
           >
             <span className="font-mono text-xs font-medium text-text">{coverage.pct}%</span>
-            <Gauge value={coverage.pct} className="w-9" label={`${coverage.pct}% of contracted outlets audited`} />
+            <Gauge value={coverage.pct} band={coverage.onTrack ? "strong" : "attention"} className="w-9" label={`${coverage.pct}% of contracted outlets audited`} />
           </div>
         ) : (
           <div className="rounded-md border border-line bg-bg p-3">
@@ -233,6 +233,7 @@ export default function Sidebar() {
               <span className="text-text-muted"> / {coverage.contracted.toLocaleString()}</span>
             </div>
             <Gauge
+              band={coverage.onTrack ? "strong" : "attention"}
               className="mt-2"
               value={coverage.pct}
               label={`${coverage.pct}% of contracted outlets audited`}

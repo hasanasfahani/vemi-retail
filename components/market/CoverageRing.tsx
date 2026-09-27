@@ -44,7 +44,7 @@ export default function CoverageRing({
           <span className="text-[28px] text-text-muted">%</span>
         </span>
         <div className="relative mt-3">
-          <Gauge value={pct} max={100} label={`${pct}% of contracted outlets audited`} />
+          <Gauge value={pct} max={100} band={onTrack ? "strong" : "attention"} label={`${pct}% of contracted outlets audited`} />
           {[25, 50, 75].map((mark) => (
             <span key={mark} aria-hidden className="absolute top-0 h-1.5 w-[2px] bg-surface" style={{ left: `${mark}%` }} />
           ))}

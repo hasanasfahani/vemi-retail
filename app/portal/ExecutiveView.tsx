@@ -629,7 +629,7 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
       <ChartCard
         title="Where it is happening"
         soWhat={mapSoWhat}
-        howToRead="Each point is one audited outlet, placed inside its district rather than surveyed to the street. Colour is the outlet's band on the chosen measure: darker needs you sooner. A cluster takes how its outlets typically score and is ringed in Ink when any of them is critical; hover it for the count. Outlets with nothing to measure on the chosen metric are left off rather than shown at zero."
+        howToRead="Each point is one audited outlet, placed inside its district rather than surveyed to the street. Colour is the outlet's band on the chosen measure: green strong, yellow average, orange needs attention, red critical. A cluster takes how its outlets typically score and is ringed in red when any of them is critical; hover it for the count. Outlets with nothing to measure on the chosen metric are left off rather than shown at zero."
         asOf={asOf(view.month)}
         base={`${points.length.toLocaleString()} outlets`}
         confidence="measured"
@@ -655,7 +655,7 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
       <ChartCard
         title="Market comparison"
         soWhat={compareSoWhat}
-        howToRead={`The mean of ${compareDef.label.toLowerCase()} across each governorate's audited outlets; the Ink tick on each bar marks the ${compareDef.target}${compareDef.unit} target. Coverage differs by governorate, so one with fewer audited doors carries a wider margin of error than its bar suggests.`}
+        howToRead={`The mean of ${compareDef.label.toLowerCase()} across each governorate's audited outlets; the dark tick on each bar marks the ${compareDef.target}${compareDef.unit} target. Coverage differs by governorate, so one with fewer audited doors carries a wider margin of error than its bar suggests.`}
         asOf={asOf(view.month)}
         base={`${view.posCount.toLocaleString()} outlets`}
         confidence="measured"

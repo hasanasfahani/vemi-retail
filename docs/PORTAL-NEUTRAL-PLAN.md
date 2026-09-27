@@ -1,7 +1,7 @@
 # Client portal: neutral frame, universal status colours (plan)
 
 Status: **approved 27 Sep 2026** (N1–N6 as recommended, see §8).
-Phase 1 done; phases 2–6 to go (build notes in §10). Written after the
+Phases 1–2 done; phases 3–6 to go (build notes in §10). Written after the
 brand refresh (docs/BRAND-REFRESH-PLAN.md) shipped the portal fully in
 Vemi colours.
 
@@ -292,4 +292,53 @@ and every signature detail says who built it.
   - 270 tests pass;
   - brand:check: 0 errors, 0 warnings;
   - `next build`: OK.
+
+### Phase 2: status marks (done)
+
+- **Role tokens, not violet steps.** `brand/tokens.css` gains a family
+  that every drawn band reads:
+  - `--vm-mark-{band}` fill, `-edge`, pin `-ring`, and `-on` (text on the
+    mark);
+  - `--vm-mark-alarm`;
+  - `--vm-gauge-{band}`;
+  - `--vm-heat-bad-{0..4}` with `-on-{n}`.
+  - The Vemi values reproduce plan D1 exactly. The portal scope
+    redeclares them all, because a `var()` inside a custom property
+    resolves where it is declared.
+  - The phase-1 swatch aliases fold into this.
+- **health.ts is the one map.**
+  - `BAND_COLOR`, `BAND_EDGE`, `BAND_RING`, `BAND_ON`, `MARK_ALARM`,
+    `BAND_GAUGE`, `GAUGE_EDGE`.
+  - The map, the drawer, the block glyph and the heatmap stop naming
+    `--vm-band-*` directly.
+- **Map.**
+  - Pins take their band, and yellow gets its dark edge as its ring.
+  - Clusters take their typical band, with the count in the text colour
+    made for that fill: 9.4:1 on yellow.
+  - The ring for hidden criticals is red.
+  - The help text names the colours.
+- **Failure heatmap.** Green → yellow → orange → red tints, with solid
+  red for the worst fifth. Each number is in its band's text colour.
+  The neutral magnitude ramp stays violet until phase 5, since it is
+  data, not a judgement.
+- **Everything measured against a target takes its band:**
+  - KPI card gauges, the performance hero bar, `Gauge` (new `band`
+    prop);
+  - brand and governorate score bars, report score bars (score bands);
+  - the coverage strip, ring and rail month card (green on track, orange
+    behind);
+  - gap bars (ahead = green), and `Bar` with a `par` and no explicit
+    colour.
+  - Bars with a brand's own colour stay data.
+  - Help text now says "dark tick" instead of "Ink tick".
+- **Noted for later phases:**
+  - Trends' "amber dot" and the shelf footnote's series wording:
+    phase 5.
+  - The Monthly Report's violet cover band: phase 4.
+- **Checks:**
+  - contrast scan clean on the executive, performance, competition,
+    POS explorer (admin), follow-up, trends, setup and reports pages;
+  - tsc and eslint: clean;
+  - 270 tests pass;
+  - brand:check: 0 errors, 0 warnings.
 

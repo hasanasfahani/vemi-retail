@@ -89,6 +89,10 @@ select.vm-input { appearance: none; padding-inline-end: 40px; background-image: 
 /* ---- Gauge: value against a target ---------------------------------- */
 .vm-gauge { position: relative; block-size: 6px; border-radius: var(--vm-radius-pill); background: var(--vm-line); overflow: visible; }
 .vm-gauge__fill { position: absolute; inset-block: 0; inset-inline-start: 0; border-radius: var(--vm-radius-pill); background: var(--vm-primary); }
+.vm-gauge--strong .vm-gauge__fill { background: var(--vm-gauge-strong); }
+.vm-gauge--average .vm-gauge__fill { background: var(--vm-gauge-average); box-shadow: inset 0 0 0 1px var(--vm-gauge-average-edge); }
+.vm-gauge--attention .vm-gauge__fill { background: var(--vm-gauge-attention); }
+.vm-gauge--critical .vm-gauge__fill { background: var(--vm-gauge-critical); }
 .vm-gauge__target { position: absolute; inset-block: -3px; inline-size: 2px; margin-inline-start: -1px; background: var(--vm-text); border-radius: 1px; }
 
 /* ---- KpiCard --------------------------------------------------------- */

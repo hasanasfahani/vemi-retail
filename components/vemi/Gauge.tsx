@@ -1,9 +1,11 @@
 import { cx } from "./cx";
 
-/** A value against a target: violet fill, 2px Ink target tick. The number
-    and the gap are always written beside it; the gauge is the glance. */
+/** A value against a target: 2px Ink target tick, and the fill Violet on
+    the Vemi surface or, given its `band`, the band's status colour inside
+    the client portal. The number and the gap are always written beside
+    it; the gauge is the glance. */
 export function Gauge({
-  value, max = 100, target, label, className, fill,
+  value, max = 100, target, label, className, fill, band,
 }: {
   value: number;
   max?: number;
@@ -13,11 +15,13 @@ export function Gauge({
   className?: string;
   /** Overrides the violet fill (e.g. a portfolio shade). */
   fill?: string;
+  /** The verdict the gauge shows; colours the fill in the portal. */
+  band?: "strong" | "average" | "attention" | "critical";
 }) {
   const pct = (v: number) => (max <= 0 ? 0 : Math.max(0, Math.min(100, (v / max) * 100)));
   return (
     <div
-      className={cx("vm-gauge", className)}
+      className={cx("vm-gauge", band && `vm-gauge--${band}`, className)}
       role="img"
       aria-label={label ?? (target !== undefined ? `${value} against a target of ${target}` : `${value} of ${max}`)}
     >

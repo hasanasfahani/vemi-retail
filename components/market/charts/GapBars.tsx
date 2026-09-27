@@ -13,7 +13,7 @@
    for and cannot see in a chart that starts at zero. */
 
 import type { ReactNode } from "react";
-import { BAND_COLOR, BAND_EDGE, rateBand } from "../ui/health";
+import { BAND_COLOR, BAND_EDGE, BAND_GAUGE, rateBand } from "../ui/health";
 
 export type GapRow = {
   id: string;
@@ -95,7 +95,7 @@ export default function GapBars({
                       ? "var(--vm-chart-3)"
                       : behind
                         ? BAND_COLOR[rateBand(row.value, par)]
-                        : "var(--vm-chart-1)",
+                        : BAND_GAUGE.strong,
                   }}
                   aria-hidden
                 />

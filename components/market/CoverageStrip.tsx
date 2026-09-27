@@ -10,6 +10,7 @@
    "On track" stays arithmetic: outlets remaining ÷ days remaining,
    against the rate achieved so far. */
 
+import { BAND_GAUGE } from "./ui/health";
 import { BandChip } from "@/components/vemi/BandChip";
 
 export default function CoverageStrip({
@@ -31,8 +32,9 @@ export default function CoverageStrip({
   perDayRequired: number;
   onTrack: boolean;
 }) {
-  /* Progress is always Violet; the chip carries the verdict (plan D1). */
-  const color = "var(--vm-primary)";
+  /* Progress carries the verdict with the chip: Violet on the Vemi
+     surface, green on track or orange behind plan in the client portal. */
+  const color = onTrack ? BAND_GAUGE.strong : BAND_GAUGE.attention;
 
   return (
     <section className="rounded-lg border border-line bg-surface py-5 pl-6 pr-14">

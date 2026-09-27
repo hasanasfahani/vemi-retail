@@ -46,7 +46,7 @@ export default function BlockShapeGlyph({ shape }: { shape: BlockShape }) {
           <>
             <rect x="16.5" y="4" width="1" height="18" fill={GHOST} />
             {[[8, 8.5], [11, 6], [17, 7], [17, 5]].map(([x, w], i) => (
-              <rect key={i} x={x} y={5.5 + i * 4.5} width={w} height="3" rx="1.5" fill={i < 2 ? "var(--vm-band-critical)" : "var(--vm-chart-1)"} />
+              <rect key={i} x={x} y={5.5 + i * 4.5} width={w} height="3" rx="1.5" fill={i < 2 ? "var(--vm-mark-critical)" : "var(--vm-chart-1)"} />
             ))}
           </>
         )}

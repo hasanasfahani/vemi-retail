@@ -86,6 +86,7 @@ export default function KpiGapBar({
             </span>
           </p>
           <Gauge
+            band={band}
             className="mt-3 max-w-[420px]"
             value={value}
             max={ceiling}
