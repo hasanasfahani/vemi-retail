@@ -22,6 +22,7 @@ import {
 import { months, contract } from "@/lib/market";
 import Dropdown from "./Dropdown";
 import MobileNav from "./MobileNav";
+import ClientMark from "@/components/portal/ClientMark";
 import { FILTER_OPTIONS as OPTIONS, FILTER_VALUE_LABEL as LABEL } from "@/lib/market/filterOptions";
 
 
@@ -82,13 +83,22 @@ export default function Header({
     <header className="sticky top-0 z-30 border-b border-line bg-surface">
       <div className="flex h-16 items-center justify-between gap-4 px-4 sm:px-6">
         <MobileNav />
-        <div className="mr-auto flex min-w-0 flex-col justify-center sm:flex-row sm:items-baseline sm:gap-3">
-          {/* A label, not the page heading: each page opens with its own
-              PageHeader h1, written as the decision it supports. */}
-          <p className="truncate text-lg font-semibold leading-7 text-text">{titleFor(pathname)}</p>
-          <span className="hidden truncate font-mono text-xs font-medium uppercase tracking-[0.1em] text-text-muted md:inline">
-            {contract.clientShort} · {contract.brand} · {contract.country}
-          </span>
+        {/* The client leads (docs/PORTAL-NEUTRAL-PLAN.md, N5): their
+            monogram and name, then where in the portal they are. The page
+            name is a label, not the heading: each page opens with its own
+            PageHeader h1, written as the decision it supports. */}
+        <div className="mr-auto flex min-w-0 items-center gap-3">
+          <ClientMark name={contract.clientShort} className="hidden sm:inline-flex" />
+          <p className="flex min-w-0 items-baseline gap-2">
+            <span className="hidden truncate text-[15px] font-semibold leading-5 text-text md:inline">
+              {contract.clientShort}
+            </span>
+            <span className="hidden shrink-0 text-sm text-text-muted lg:inline">
+              {contract.brand} · {contract.country}
+            </span>
+            <span aria-hidden className="hidden text-text-muted md:inline">/</span>
+            <span className="truncate text-[15px] font-medium leading-5 text-text">{titleFor(pathname)}</span>
+          </p>
         </div>
 
         <div className="flex shrink-0 items-center gap-1">

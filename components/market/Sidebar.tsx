@@ -82,7 +82,7 @@ export default function Sidebar() {
       collapsed ? "justify-center px-0" : ""
     } ${
       active
-        ? "bg-primary-tint font-semibold text-primary-text"
+        ? "bg-primary-tint font-semibold text-text"
         : "font-medium text-text hover:bg-bg"
     }`;
   const iconClass = (active: boolean) => (active ? "text-primary" : "text-text-muted");
@@ -101,7 +101,7 @@ export default function Sidebar() {
       >
         {!collapsed && (
           <Link href={withFilters("/portal")} className="flex items-center rounded-sm" aria-label="Vemi, executive dashboard">
-            <Logo height={24} title="" />
+            <Logo height={20} title="" />
           </Link>
         )}
         <IconButton label={collapsed ? "Expand sidebar" : "Collapse sidebar"} aria-expanded={!collapsed} onClick={toggle}>

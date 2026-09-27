@@ -13,7 +13,7 @@
    there is nobody to share with. */
 
 import { Logo } from "@/components/vemi/Logo";
-import { SignalField } from "@/components/vemi/SignalField";
+import ClientMark from "@/components/portal/ClientMark";
 import { asOf, vsPrior } from "@/lib/market/asOf";
 import { useMemo } from "react";
 import PageShell from "@/components/market/PageShell";
@@ -95,29 +95,27 @@ function Reports({ view }: { view: MarketView }) {
   return (
     <div className="flex flex-col gap-12">
       {/* ---------- cover ----------
-          The brand's report-cover style (Brand Guide, "Report cover"):
-          a Violet panel, the reversed logo, a mono eyebrow, the title,
-          and a block field thinning in from the corner. On paper the
-          panel drops to white with the colour logo, because browsers do
-          not print backgrounds and white type would vanish. */}
-      <header className="relative isolate overflow-hidden rounded-xl bg-primary p-8 text-white sm:p-10 print:rounded-none print:bg-surface print:p-0 print:text-text">
-        <SignalField colorway="violet" fadeFrom="right" cols={16} rows={9} className="absolute inset-y-0 right-0 -z-10 h-full w-[55%] opacity-90 print:hidden" />
+          The client's report (docs/PORTAL-NEUTRAL-PLAN.md): a white page
+          with the client's mark and name at the top, one Vemi action
+          (Export PDF, violet), and Vemi's signature at the foot —
+          "Prepared by" and the logo. It prints as it reads on screen:
+          nothing here depends on a background colour. */}
+      <header className="rounded-xl border border-line bg-surface p-8 sm:p-10 print:rounded-none print:border-0 print:p-0">
         <div className="flex flex-wrap items-start justify-between gap-6">
-          <span className="print:hidden">
-            <Logo height={26} tone="reversed" title="Vemi" />
+          <span className="flex items-center gap-3">
+            <ClientMark name={contract.clientShort} size={40} />
+            <span>
+              <span className="block text-[15px] font-semibold leading-5 text-text">{contract.client}</span>
+              <span className="block text-sm text-text-muted">
+                {contract.brand} · {contract.country}
+              </span>
+            </span>
           </span>
-          <span className="hidden print:inline-flex">
-            <Logo height={26} title="Vemi" />
-          </span>
-          <div className="flex flex-wrap items-center gap-3 print:hidden">
-            <button type="button" onClick={exportPdf} className="vm-btn bg-surface text-primary-text hover:bg-primary-tint">
+          <div className="flex flex-wrap items-center gap-2 print:hidden">
+            <button type="button" onClick={exportPdf} className="vm-btn vm-btn--primary">
               Export PDF
             </button>
-            <button
-              type="button"
-              onClick={exportCsv}
-              className="vm-btn border-white/60 bg-transparent text-white hover:bg-white/10"
-            >
+            <button type="button" onClick={exportCsv} className="vm-btn vm-btn--secondary">
               Export Excel
             </button>
             <button
@@ -125,22 +123,24 @@ function Reports({ view }: { view: MarketView }) {
               onClick={() =>
                 push("Sharing is not wired up in this build — export the file and send it on.", "info")
               }
-              className="vm-btn vm-btn--text text-white hover:bg-white/10"
+              className="vm-btn vm-btn--text"
             >
               Share
             </button>
           </div>
         </div>
-        <p className="mt-16 font-mono text-xs font-medium uppercase tracking-[0.12em] text-white/80 print:mt-8 print:text-text-muted">
-          Monthly market report
-        </p>
-        <h1 className="mt-3 max-w-[18ch] text-[44px] font-semibold leading-[52px] tracking-[-0.02em]">
+        <p className="vm-label mt-12 print:mt-8">Monthly market report</p>
+        <h1 className="mt-3 max-w-[18ch] text-[44px] font-semibold leading-[52px] tracking-[-0.02em] text-text">
           {contract.country} {contract.category.toLowerCase()} market monitor
         </h1>
-        <p className="mt-3 font-mono text-sm text-white/85 print:text-text-muted">
+        <p className="mt-3 font-mono text-sm text-text-muted">
           {contract.client} · {report.monthLabel}
         </p>
-        <p className="mt-6 max-w-[64ch] text-lg text-white/90 print:text-text">{headline(report)}</p>
+        <p className="mt-6 max-w-[64ch] text-lg text-text">{headline(report)}</p>
+        <p className="mt-10 flex items-center gap-2 border-t border-line pt-4 font-mono text-xs text-text-muted">
+          Prepared by
+          <Logo height={16} title="Vemi" />
+        </p>
       </header>
 
       {/* ---------- 1 · coverage ---------- */}

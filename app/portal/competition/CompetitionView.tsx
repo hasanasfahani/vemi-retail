@@ -147,7 +147,7 @@ function Competition({ view, data }: { view: MarketView; data: MonthData }) {
         description="Where your brands win and lose the shelf against every rival, on price, presence and position."
       />
       {narrowed && (
-        <p className="rounded-md bg-primary-tint px-4 py-3 text-sm text-primary-text">
+        <p className="rounded-md bg-primary-tint px-4 py-3 text-sm text-text">
           The brand and SKU filters do not apply on this page — a comparison needs every brand in
           it. City, channel and retailer filters are applied as normal.
         </p>

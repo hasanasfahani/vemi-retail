@@ -491,7 +491,7 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
         />
 
         {rivalSelected && (
-          <p className="mb-6 rounded-md bg-primary-tint px-4 py-3 text-sm text-primary-text">
+          <p className="mb-6 rounded-md bg-primary-tint px-4 py-3 text-sm text-text">
             This section covers {contract.clientShort}&apos;s own brands, so the brand filter is not
             applied to it — a competitor&apos;s price compliance would be judged against a list
             price this company does not set. Everything below the KPI row still follows the filter.

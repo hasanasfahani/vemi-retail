@@ -52,7 +52,7 @@ export default function MobileNav() {
                     aria-current={active ? "page" : undefined}
                     onClick={() => setOpen(false)}
                     className={`flex min-h-11 items-center gap-3 rounded-md px-3 text-[15px] ${
-                      active ? "bg-primary-tint font-semibold text-primary-text" : "font-medium text-text hover:bg-bg"
+                      active ? "bg-primary-tint font-semibold text-text" : "font-medium text-text hover:bg-bg"
                     }`}
                   >
                     <Icon name={item.icon} className={`h-5 w-5 ${active ? "text-primary" : "text-text-muted"}`} />

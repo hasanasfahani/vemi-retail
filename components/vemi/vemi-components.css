@@ -43,6 +43,10 @@ select.vm-input { appearance: none; padding-inline-end: 40px; background-image: 
 .vm-badge__dot { inline-size: 7px; block-size: 7px; border-radius: 50%; box-sizing: border-box; flex: none; }
 .vm-badge--measured { background: var(--vm-primary-tint); color: var(--vm-primary-text); }
 .vm-badge--measured .vm-badge__dot { background: var(--vm-primary-text); }
+/* In the client portal data quality is not Vemi's colour: measured is a
+   neutral badge with a solid dark dot (estimated stays dashed, stale grey). */
+[data-surface="portal"] .vm-badge--measured { background: var(--vm-primary-tint); color: var(--vm-text); }
+[data-surface="portal"] .vm-badge--measured .vm-badge__dot { background: var(--vm-text); }
 .vm-badge--estimated { background: var(--vm-surface); color: var(--vm-text-muted); border: 1px dashed var(--vm-line-strong); }
 .vm-badge--estimated .vm-badge__dot { border: 1.5px solid var(--vm-text-muted); }
 .vm-badge--stale { background: var(--vm-bg); color: var(--vm-text-muted); border-color: var(--vm-line); }

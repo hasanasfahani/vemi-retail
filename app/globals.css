@@ -25,6 +25,13 @@
     background: var(--vm-bg);
   }
 
+  /* The portal's ground reaches the page edges (overscroll, short
+     pages), not only its own layout box. */
+  html:has([data-surface="portal"]),
+  html:has([data-surface="portal"]) body {
+    background: var(--vm-neutral-50);
+  }
+
   body {
     background: var(--vm-bg);
     color: var(--vm-text);

@@ -119,6 +119,18 @@
   --vm-status-critical-tint: #FBE8E8;
   --vm-status-critical-text: #A82828;
 
+  /* Cool neutrals for the client portal's frame (docs/PORTAL-NEUTRAL-
+     PLAN.md, N3). Paper is the most "Vemi" surface there is; the client's
+     room is grey. Checked: text on 50 16.4, muted on white 5.9 / on 50
+     5.5 / on 100 5.2, 500 on white 3.5 :1 (control borders). */
+  --vm-neutral-50: #F5F6F8;
+  --vm-neutral-100: #EDEFF3;
+  --vm-neutral-200: #E3E5EA;
+  --vm-neutral-500: #848A96;
+  --vm-neutral-600: #5E6470;
+  --vm-neutral-800: #3A3F4A;
+  --vm-neutral-900: #16181D;
+
   /* Band marks: every place a band is drawn rather than written — map
      pins and clusters, heat cells, gauges, gap bars, and the swatches
      that explain a chip. Components ask for a role (fill, edge, pin
@@ -168,9 +180,24 @@
    Set as data-surface="portal" on the portal layout root. The portal is
    the client's room: urgency in universal colours, the frame neutral,
    Vemi violet kept for Vemi's actions, focus and "where you are".
-   Grows phase by phase: 1 status chips, 2 status marks, 3 deltas.
+   Grows phase by phase: 1 status chips, 2 status marks, 3 deltas,
+   4 the neutral frame.
    ========================================================================== */
 [data-surface="portal"] {
+  /* The neutral frame (phase 4). Violet primary, its hover, Violet 700
+     links and the focus ring stay: Vemi's actions, "where you are" and
+     keyboard focus. The selection tint goes grey, so a selected control
+     is marked by its Violet 700 label rather than a violet field. */
+  --vm-bg: var(--vm-neutral-50);
+  --vm-surface: #FFFFFF;
+  --vm-line: var(--vm-neutral-200);
+  --vm-line-strong: var(--vm-neutral-500);
+  --vm-text: var(--vm-neutral-900);
+  --vm-text-muted: var(--vm-neutral-600);
+  --vm-primary-tint: var(--vm-neutral-100);
+  --vm-scrim: rgba(22, 24, 29, 0.4);
+  --vm-focus-ring: 0 0 0 2px var(--vm-surface), 0 0 0 4px var(--vm-focus);
+
   /* Marks (plan phase 2). Declared again in full here, not inherited:
      a var() in a custom property resolves where it is declared, so a
      value that names a neutral has to be restated inside the scope. */

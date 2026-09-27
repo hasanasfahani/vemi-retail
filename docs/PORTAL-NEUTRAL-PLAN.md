@@ -1,7 +1,7 @@
 # Client portal: neutral frame, universal status colours (plan)
 
 Status: **approved 27 Sep 2026** (N1–N6 as recommended, see §8).
-Phases 1–3 done; phases 4–6 to go (build notes in §10). Written after the
+Phases 1–4 done; phases 5–6 to go (build notes in §10). Written after the
 brand refresh (docs/BRAND-REFRESH-PLAN.md) shipped the portal fully in
 Vemi colours.
 
@@ -384,4 +384,44 @@ and every signature detail says who built it.
   - 276 tests pass;
   - brand:check: 0 errors, 0 warnings;
   - `next build`: OK.
+
+### Phase 4: the neutral frame (done)
+
+- **Tokens.**
+  - Cool neutrals `--vm-neutral-50…900` are raw values at `:root`.
+  - The portal scope maps bg, surface, line, line-strong, text, muted,
+    the selection tint, the scrim and the focus-ring ground onto them.
+  - Violet primary, its hover, Violet 700 links and the focus colour
+    stay.
+  - Checked: text on the ground 16.4, muted on white 5.9 / on the ground
+    5.5 / on the tint 5.2, control border 3.5 :1. Muted on the tint
+    failed in the Vemi palette (4.3) and now passes.
+  - The page ground reaches the viewport edges (`html:has(...)`).
+- **Selection** keeps a Violet 700 label on a grey field (filters, table
+  chips, toggles), so "selected" is still marked in Vemi's colour at a
+  fraction of the area.
+- **Rail.**
+  - The active item is a grey pill with a near-black label and a violet
+    icon.
+  - The Vemi logo stays, at 20px (was 24).
+  - The month card is neutral with its band-coloured bar.
+- **Page header: the client leads.** A neutral monogram tile
+  (`components/portal/ClientMark`), "Baghdad Soft Drinks" in 15/600,
+  "Pepsi · Iraq" muted, then "/ page name". The mono caps line is gone.
+- **Monthly Report cover** is no longer the violet report-cover band.
+  - It is a white page with the client's mark and name, and one violet
+    action (Export PDF); Excel and Share are neutral.
+  - Its foot reads "Prepared by" with the Vemi logo, and it prints as it
+    reads.
+- **Confidence badges.** Measured is neutral with a solid dark dot;
+  estimated stays dashed and stale stays grey.
+- **Notes** (executive digest, competition caveat, follow-up request
+  note) are plain text on grey, not violet prose.
+- **Unchanged, as planned:**
+  - tabs (near-black label, violet underline) and segmented control
+    (white selected option) already matched;
+  - the sample-data banner and skeletons follow the tokens;
+  - the favicon, primary buttons and focus ring.
+- **Checks:** tsc and eslint clean, 276 tests pass, brand:check 0
+  errors, 0 warnings. The contrast scan runs in phase 6.
 

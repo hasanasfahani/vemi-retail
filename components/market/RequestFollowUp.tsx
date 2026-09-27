@@ -166,7 +166,7 @@ export default function RequestFollowUp({
           </dl>
 
           {existing && (
-            <p className="rounded-md border border-primary-tint bg-primary-tint px-3 py-2.5 text-xs leading-snug text-primary-text">
+            <p className="rounded-md border border-primary-tint bg-primary-tint px-3 py-2.5 text-xs leading-snug text-text">
               {/* Reworded to sidestep the article: "A availability
                   request" is what a template gets you when the noun
                   varies. */}
