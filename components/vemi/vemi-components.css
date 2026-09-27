@@ -125,6 +125,11 @@ select.vm-input { appearance: none; padding-inline-end: 40px; background-image: 
 .vm-chartcard__how { font-size: 14px; line-height: 20px; color: var(--vm-text-muted); max-inline-size: 72ch; }
 .vm-chartcard__how summary { cursor: pointer; color: var(--vm-primary-text); font-weight: 600; min-block-size: 24px; list-style-position: inside; }
 .vm-chartcard__how p { margin: var(--vm-space-2) 0 0; }
+/* In the client portal violet is Vemi's actions, links, focus and "where
+   you are" only (docs/PORTAL-NEUTRAL-PLAN.md §5): text buttons and
+   disclosure toggles are neutral. */
+[data-surface="portal"] .vm-chartcard__how summary { color: var(--vm-text); }
+[data-surface="portal"] .vm-btn--text { color: var(--vm-text); }
 .vm-chartcard__asof { font: 400 12px/20px var(--vm-font-mono); color: var(--vm-text-muted); }
 
 /* ---- SegmentedControl ------------------------------------------------ */

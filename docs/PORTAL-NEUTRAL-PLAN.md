@@ -1,7 +1,7 @@
 # Client portal: neutral frame, universal status colours (plan)
 
 Status: **approved 27 Sep 2026** (N1–N6 as recommended, see §8).
-Phases 1–5 done; phase 6 to go (build notes in §10). Written after the
+**All six phases done** (build notes and the requirements check in §10). Written after the
 brand refresh (docs/BRAND-REFRESH-PLAN.md) shipped the portal fully in
 Vemi colours.
 
@@ -64,8 +64,8 @@ separate tokens for marks and for text:
 |---|---|---|---|---|---|---|
 | Strong | `#0CA30C` | `#1E9E4A` | `#E6F5EC` | `#146C36` | check-circle | text on tint 5.8:1 · fill on white 3.5:1 |
 | Average | `#FAB219` | `#F2B21B` + edge `#A87A00` | `#FDF3D8` | `#7A5600` | minus-circle | text on tint 6.0:1 · edge on white 3.9:1 |
-| Needs attention | `#EC835A` | `#E8702E` (to be darkened slightly, see §8) | `#FDECE2` | `#A2431A` | triangle-alert | text on tint 5.5:1 · fill on white 3.1:1 |
-| Critical | `#D03B3B` | `#D23B3B` | `#FBE8E8` | `#A82828` | octagon-alert | text on tint 5.9:1 · fill on white 4.7:1 |
+| Needs attention | `#EC835A` | `#E0672A` (shipped; darkened from the proposed `#E8702E`) | `#FDECE2` | `#A2431A` | triangle-alert | text on tint 5.5:1 · fill on white 3.4:1 |
+| Critical | `#D03B3B` | `#B42318` (shipped; darkened from the proposed `#D23B3B` for CVD, see §10) | `#FBE8E8` | `#A82828` | octagon-alert | text on tint 5.9:1 · fill on white 6.6:1 |
 
 The values are a starting point. The final values go through a contrast
 check and a colour-blindness (CVD) check before shipping; see §7, phase 6.
@@ -457,4 +457,129 @@ and every signature detail says who built it.
 - **Copy.** The shelf footnote says "Blue is your portfolio, dark grey
   is Coca-Cola, light grey is every other brand"; the trends footnote
   names the dark target line and the black dot.
+
+### Phase 6: QA and the requirements check (done)
+
+**Found and fixed in QA:**
+- **Red vs orange** were too close even with full colour vision
+  (dataviz validator, all pairs: ΔE 9.6, below the 15 floor), and red vs
+  green merged for red-green colour-blind users (ΔE 3.1).
+  - The critical fill moved to `#B42318`, the product's own danger red.
+  - Now: normal-vision ΔE 15.9; the CVD worst pair is orange/green at
+    7.3, inside the 6–8 band that is legal only with secondary
+    encoding.
+  - Every status mark has that encoding: chips have word and glyph,
+    pins a legend, tooltip and a larger critical size, and heat cells
+    their number.
+- **Colour inheritance leaked Ink into the portal.**
+  - `body` resolves `--vm-text` outside the scope, and any element that
+    set no colour of its own inherited that computed Ink. The rail was
+    the visible case.
+  - A base rule now restarts `color` at every `[data-surface]` /
+    `[data-theme]` scope.
+- **Printed pages kept the grey ground.** The portal root prints white
+  now.
+- **The header monogram showed on phones.** `ClientMark`'s own
+  `inline-flex` beat the `hidden` passed to it; it is now wrapped.
+
+**Checks run:**
+- **Contrast.**
+  - DOM scan of every portal surface, as a visitor and as admin
+    (executive; performance ×5 tabs; competition; insights with an open
+    drawer; consumers; follow-up; POS explorer; watchlist; monthly
+    report; custom reports; trends; setup; users), plus the website,
+    `/kit` and the 404: 0 text pairs under AA.
+  - `scripts/contrast-check.mjs`: 48 token pairs across both surfaces,
+    now part of `npm run brand:check`.
+- **Vemi colours left in the portal** (the same scan): only the intended
+  ones. That is the logo, primary buttons, the rail's active icon, the
+  bell's unread dot, and the "on" state of notification toggles (a
+  selected control). The website is unchanged: Paper ground, Paper text
+  in its dark band.
+- **Keyboard.** The rail and header tab in order. The focus ring is
+  violet `#5E57F1` once its colour transition settles. Escape closes an
+  insight drawer, clears the URL and returns focus to "Open analysis".
+- **Print.** The monthly report prints white, with the client's mark,
+  "Prepared by Vemi" and the status colours.
+- **Mobile, 375px.** No horizontal scroll; the header fits.
+- **Gates:**
+  - tsc clean;
+  - eslint 0 errors (3 old warnings in data scripts);
+  - 276 tests pass;
+  - brand:check 0 errors, 0 warnings;
+  - `next build` OK, every portal route still static.
+
+**Requirements check, against this plan:**
+
+§1 and §2 (roles and the three rules):
+- Neutral frame, Vemi violet at a distance, data blue for your data,
+  status colours on small marks: done.
+- Status colours never draw a series; violet never draws data: done.
+- No status-coloured card, band or header: done.
+
+§3 (status):
+- Four bands with fill, tint, text, the yellow edge and a glyph each:
+  done.
+- Health bands: done.
+- Follow-up outcomes (improved green, mixed yellow, no change and
+  pending neutral, worsened red): done.
+- Workflow stages neutral, with a stage icon: done. "Overdue turns red"
+  does not apply: the current portal has no overdue state (the old
+  dashboard that had one was deleted).
+- Insight priority (high red, medium orange, low neutral): done.
+- Insight direction (a red or green glyph beside the title, card
+  neutral): done.
+- Deltas by outcome, with polarity and a unit test: done.
+- AlertChip red with an octagon, one per view, Signal amber gone from
+  the portal: done.
+- Confidence badges neutral: done.
+- Form errors in the critical red: done.
+- Marks: target bars, gap bars, score bars, map pins, heat cells: done.
+  Two built differently:
+  1. A cluster takes its *typical* band plus a red alarm ring when it
+     holds any critical outlet, not its worst band. The worst band
+     would paint most clusters red and hide the distribution; the ring
+     still makes criticals impossible to miss.
+  2. The failure heatmap uses five relative steps (four tints, then
+     solid red), not four band bins. Its cells count failures, which
+     have no band cut-offs.
+
+§4 (data):
+- Series blue / dark grey / grey: done. "Others" is `#858B97` (3.4:1).
+- Blue portfolio ramp with an outlined lightest step: done.
+- Neutral baselines, near-black dashed target line: done.
+- The client's own brand colour: deferred, as planned.
+
+§5 (frame): every row done:
+- ground, cards, text, muted, rail, logo 20px, rail foot;
+- the client-led header;
+- primary buttons violet; text buttons and "How to read this" toggles
+  neutral;
+- tabs and segmented control, focus, KPI value;
+- confidence, banner, skeletons, favicon;
+- exports and print, with "Prepared by Vemi" on the monthly and custom
+  reports.
+
+§6 (technical):
+- Scoped token layer, status and data tokens with Tailwind classes, the
+  role map in health.ts: done.
+- Deltas: named `better` rather than `polarity`, sourced from
+  `lib/market/outcome.ts` BETTER and `WATCH_BETTER`, with the unit
+  test: done.
+- Charts via the series tokens: done.
+- brand:check `portal-only-colour` warning: done.
+- The contrast script: done.
+- Skill and brand-plan sections: done.
+
+§7 (phases): 1–6 done, each committed locally.
+
+§8 (N1–N6): all applied as recommended.
+
+§9 (risks): all addressed:
+- CVD: darker red plus secondary encoding.
+- Rainbow effect: status colour on small marks only.
+- Yellow: always edged, never text.
+- Blue vs violet: kept apart by role.
+- Orange on grey: darkened to `#E0672A`.
+- Drift: brand:check and the skill.
 

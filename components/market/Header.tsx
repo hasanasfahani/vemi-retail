@@ -88,7 +88,7 @@ export default function Header({
             name is a label, not the heading: each page opens with its own
             PageHeader h1, written as the decision it supports. */}
         <div className="mr-auto flex min-w-0 items-center gap-3">
-          <ClientMark name={contract.clientShort} className="hidden sm:inline-flex" />
+          <span className="hidden sm:inline-flex"><ClientMark name={contract.clientShort} /></span>
           <p className="flex min-w-0 items-baseline gap-2">
             <span className="hidden truncate text-[15px] font-semibold leading-5 text-text md:inline">
               {contract.clientShort}

@@ -95,7 +95,7 @@ export default function KitView() {
           <AlertChip>Critical · 29 outlets in Basra</AlertChip>
         </Row>
         <p className="vm-label">Client portal surface (data-surface=&quot;portal&quot;)</p>
-        <div data-surface="portal" className="flex flex-col gap-4">
+        <div data-surface="portal" className="flex flex-col gap-4 text-text">
           <Row>
             <BandChip band="strong" />
             <BandChip band="average" />

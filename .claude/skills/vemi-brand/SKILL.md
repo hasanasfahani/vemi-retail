@@ -46,6 +46,42 @@ Installed from the brand kit (`Vemi Branding/Vemi Dashboard Branding/vemi-claude
 4. Charts: series order is fixed (client → key competitor → others). See `reference/charts.md`.
 5. Copy: sentence case, verbs on buttons, numbers with units and time. See `reference/copy.md`.
 
+## The client portal surface
+
+The portal (`app/portal`, `data-surface="portal"` on its layout root) is
+the client's room, so it is deliberately **not** fully Vemi-branded.
+The plan and its build notes are in `docs/PORTAL-NEUTRAL-PLAN.md`. One
+scoped token layer in `brand/tokens.css` does all of it, so components
+keep reading `--vm-*` and never branch on the surface.
+
+| Colour role | Portal | Where |
+|---|---|---|
+| Neutral frame | cool greys (`--vm-neutral-*`), white cards, near-black text | ground, cards, text, lines, selection tint, skeletons, secondary and text buttons, disclosure toggles |
+| Vemi | Violet (Violet 700 text) | logo, primary buttons (Vemi's actions: audit, quote, export), links, focus ring, the rail's active icon, the tab underline, a selected control's label |
+| Your data | data blue / dark grey / grey (`--vm-chart-1/2/3`, `--vm-portfolio-*`, `--vm-heat-*`) | chart series only: your portfolio blue, key competitor dark grey, others grey |
+| Status | green / yellow / orange / red (`--vm-status-*`) | chips, pins, heat cells, bars against a target, the one alert, delta colouring |
+
+Rules:
+- Status colours never draw a series, and violet never draws data.
+- Status colour stays on small marks: never a card fill, band or header.
+- Marks ask for a **role**, never a hue: `BAND_COLOR`, `BAND_EDGE`,
+  `BAND_RING`, `BAND_ON`, `MARK_ALARM`, `BAND_GAUGE` in
+  `components/market/ui/health.ts`.
+- A `Gauge` or `Bar` measured against a target takes its `band`.
+- A change is coloured by **outcome**: pass `better` from
+  `lib/market/outcome.ts` (`BETTER`) or `WATCH_BETTER`. Counts stay
+  unjudged.
+- A state that is not a judgement uses the `neutral` tone (pending, no
+  change, out of scope, low priority, workflow stages).
+- The client leads the header (`components/portal/ClientMark`), and Vemi
+  signs exports ("Prepared by" + logo).
+- The portal restates every token that names a neutral inside its scope,
+  because a `var()` in a custom property resolves where it is declared.
+  Keep that true when adding tokens.
+- `npm run brand:check` warns on status or data colours outside portal
+  code, and `scripts/contrast-check.mjs` (part of `brand:check`) checks
+  every pair on both surfaces.
+
 ## Website
 
 One page (`app/(site)/page.tsx`, sections in `components/v2/`). Rhythm: Paper sections split by Line hairlines, **one Ink band** (the Market intelligence section, `data-theme="dark"`) and **one Violet band** (the closing band in the footer). The Insight V key visual (`components/v2/InsightV.tsx`) and `SignalField` are marketing-only; product screens never put the pattern behind data.

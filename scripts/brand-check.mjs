@@ -36,6 +36,12 @@ function walk(dir, out) {
   }
 }
 
+/* The client portal's colours (docs/PORTAL-NEUTRAL-PLAN.md): universal
+   status colours and the data blue belong to portal code only, so the
+   website stays fully Vemi. Anywhere else they are a warning. */
+const PORTAL_ONLY = /--vm-status-|--vm-data-|--vm-delta-|(?<![\w-])(?:[a-z0-9-]+:)*!?(?:bg|text|border|fill|stroke|ring|outline)-(?:status-|delta-(?:better|worse))/;
+const PORTAL_PATHS = [`app${sep}portal${sep}`, `components${sep}market${sep}`, `components${sep}portal${sep}`, `components${sep}vemi${sep}`, `app${sep}kit${sep}`, `lib${sep}market${sep}`];
+
 const files = []; roots.forEach((r) => walk(r, files));
 let errors = 0, warns = 0;
 for (const f of files) {
@@ -46,6 +52,10 @@ for (const f of files) {
   lines.forEach((line, i) => {
     if (/brand-check-ignore/.test(line)) return;
     alerts += (line.match(/<AlertChip\b/g) || []).length;
+    if (PORTAL_ONLY.test(line) && !PORTAL_PATHS.some((p) => rel.startsWith(p))) {
+      warns++;
+      console.log(`warn   ${rel}:${i + 1}  [portal-only-colour] Status and data colours belong to the client portal (docs/PORTAL-NEUTRAL-PLAN.md); the website uses the Vemi tokens.`);
+    }
     for (const r of rules) {
       r.re.lastIndex = 0;
       if (r.re.test(line)) {

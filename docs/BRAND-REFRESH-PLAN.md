@@ -619,3 +619,16 @@ its own target).
     `2167f56`), which conflicts with the older "never say demo inside
     the portal" rule.
 
+## 9. The client portal surface (27 Sep 2026)
+
+After this plan shipped, the portal was re-scoped as the **client's**
+room (docs/PORTAL-NEUTRAL-PLAN.md, approved 27 Sep 2026). For the portal
+only:
+- D1 (violet band ramp) is superseded by the universal status colours.
+- D2 (violet client series) is superseded by the data blue.
+- The frame is cool neutral.
+
+Vemi keeps its logo, type, primary actions, links, focus and "where you
+are". The website, access modal and everything before the portal still
+follow this plan unchanged.
+

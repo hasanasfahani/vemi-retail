@@ -60,3 +60,23 @@ Spacing 4-pt: 4 · 8 · 12 · 16 · 24 · 32 · 48 · 64 (`--vm-space-1…16`). 
 Radius: 6 badges/chips · 10 controls · 16 cards · 24 hero panels · pill for badges/alerts.
 Shadows: none on cards. `--vm-shadow-raised` only on the active segmented option; `--vm-shadow-overlay` on menus, popovers, dialogs.
 Controls: 44px tall (`--vm-control-height`).
+
+## Client portal surface (`data-surface="portal"`)
+
+Restated inside the scope (docs/PORTAL-NEUTRAL-PLAN.md): bg `#F5F6F8`,
+surface white, line `#E3E5EA`, line-strong `#848A96`, text `#16181D`,
+muted `#5E6470`, and primary-tint `#EDEFF3` (so muted on the tint passes,
+5.2:1). Violet primary, its hover, Violet 700 and focus are unchanged.
+
+| Token | Value | Use |
+|---|---|---|
+| `--vm-status-strong-{fill,tint,text}` | `#1E9E4A` / `#E6F5EC` / `#146C36` | Strong (green) |
+| `--vm-status-average-{fill,tint,text,edge}` | `#F2B21B` / `#FDF3D8` / `#7A5600` / `#A87A00` | Average (yellow); a yellow mark always carries its edge; yellow is never text |
+| `--vm-status-attention-{fill,tint,text}` | `#E0672A` / `#FDECE2` / `#A2431A` | Needs attention (orange) |
+| `--vm-status-critical-{fill,tint,text}` | `#B42318` / `#FBE8E8` / `#A82828` | Critical (red); also form errors in the portal |
+| `--vm-data-1/2/3` | `#2F6BD8` / `#3A3F4A` / `#858B97` | your portfolio / key competitor / others |
+| `--vm-data-portfolio-1…4` | `#2F6BD8` → `#D3E1F8` | the portfolio split (lightest step outlined) |
+| `--vm-data-heat-0…4` | `#E4EDFB` → `#1D4A9C` | magnitude heat (white text on the two dark steps) |
+| `--vm-delta-better/worse` | status strong / critical text | a change by outcome |
+| `--vm-mark-*`, `--vm-gauge-*`, `--vm-heat-bad-*` | role tokens | drawn bands; Vemi values on the website, status values in the portal |
+

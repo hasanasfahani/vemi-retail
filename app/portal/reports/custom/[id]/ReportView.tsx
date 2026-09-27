@@ -22,6 +22,7 @@ import BlockMenu from "@/components/market/BlockMenu";
 import { useReports } from "@/components/market/useReports";
 import { Card, EmptyState } from "@/components/market/ui";
 import ReportTitle from "@/components/market/ReportTitle";
+import { Logo } from "@/components/vemi/Logo";
 import { useTargets } from "@/components/market/useTargets";
 import {
   addBlock, duplicateBlock, moveBlock, removeBlock, renameReport, setBlockScope, setBlockTitle,
@@ -344,6 +345,15 @@ function Report({ view, data }: { view: MarketView; data: MonthData }) {
             );
           })}
         </div>
+      )}
+
+      {/* Vemi's signature on the client's report (docs/PORTAL-NEUTRAL-
+          PLAN.md §5, exports and print), as on the monthly report. */}
+      {report.blocks.length > 0 && (
+        <p className="flex items-center gap-2 border-t border-line pt-4 font-mono text-xs text-text-muted">
+          Prepared by
+          <Logo height={16} title="Vemi" />
+        </p>
       )}
 
       <BlockPicker

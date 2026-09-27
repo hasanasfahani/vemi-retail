@@ -102,7 +102,14 @@
      split into a mark fill, a chip tint and a text shade so every use
      passes AA:
        text on tint  strong 5.8 · average 6.0 · attention 5.5 · critical 5.9 :1
-       fill on white strong 3.5 · attention 3.4 · critical 4.7 :1
+       fill on white strong 3.5 · attention 3.4 · critical 6.6 :1
+       CVD (dataviz validator, all pairs): the red was darkened from the
+       pre-brand #D23B3B to #B42318 (the product's danger red) so red and
+       orange part in lightness — normal-vision ΔE 9.6 → 15.9 — and red
+       and green stop merging for deutans (ΔE 3.1 → 7.3+). Traffic-light
+       hues stay inside the 6–8 CVD band, legal only with secondary
+       encoding: every status mark carries its word, glyph, number or
+       legend, and critical pins are drawn a step larger.
        average fill is 1.9:1 on white, so a yellow mark always carries
        its edge (3.9:1). Yellow is never used as text. */
   --vm-status-strong-fill: #1E9E4A;
@@ -115,7 +122,7 @@
   --vm-status-attention-fill: #E0672A;
   --vm-status-attention-tint: #FDECE2;
   --vm-status-attention-text: #A2431A;
-  --vm-status-critical-fill: #D23B3B;
+  --vm-status-critical-fill: #B42318;   /* see the CVD note above */
   --vm-status-critical-tint: #FBE8E8;
   --vm-status-critical-text: #A82828;
 
@@ -227,6 +234,8 @@
   --vm-primary-tint: var(--vm-neutral-100);
   --vm-scrim: rgba(22, 24, 29, 0.4);
   --vm-focus-ring: 0 0 0 2px var(--vm-surface), 0 0 0 4px var(--vm-focus);
+  /* Form errors speak the same red as Critical (§3). */
+  --vm-danger: var(--vm-status-critical-text);
 
   /* Charts (phase 5): your portfolio in data blue, the key competitor
      dark grey, everyone else grey; baselines and grids neutral; the

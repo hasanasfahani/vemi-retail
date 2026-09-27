@@ -89,7 +89,17 @@ export default function InsightCard({
 
       {/* Two lines held open whatever the headline needs, so the
           figures line up across a row instead of stepping. */}
-      <h3 className="mt-3 min-h-[56px] text-lg font-semibold leading-7 text-text">{insight.headline}</h3>
+      {/* Direction beside the title (docs/PORTAL-NEUTRAL-PLAN.md §3): a
+          risk in red, a win in green, as a glyph with its word for screen
+          readers; the card itself stays neutral. */}
+      <h3 className="mt-3 flex min-h-[56px] gap-2 text-lg font-semibold leading-7 text-text">
+        <Icon
+          name={insight.direction === "win" ? "trend" : "trend-down"}
+          className={`mt-1.5 h-4 w-4 ${insight.direction === "win" ? "text-status-strong-text" : "text-status-critical-text"}`}
+          label={insight.direction === "win" ? "Win" : "Risk"}
+        />
+        <span>{insight.headline}</span>
+      </h3>
 
       {/* The measured quantity, given the weight on the card that it
           has in the finding. */}

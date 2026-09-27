@@ -25,6 +25,14 @@
     background: var(--vm-bg);
   }
 
+  /* A token scope (data-surface, data-theme) restates --vm-text, but an
+     element that sets no colour inherits its parent's COMPUTED colour —
+     resolved outside the scope. Restart the inheritance at the scope. */
+  [data-surface],
+  [data-theme] {
+    color: var(--vm-text);
+  }
+
   /* The portal's ground reaches the page edges (overscroll, short
      pages), not only its own layout box. */
   html:has([data-surface="portal"]),
@@ -278,7 +286,9 @@
     margin: 14mm;
   }
   html,
-  body {
+  body,
+  html:has([data-surface="portal"]),
+  html:has([data-surface="portal"]) body {
     background: var(--vm-surface);
   }
   .print\:hidden,

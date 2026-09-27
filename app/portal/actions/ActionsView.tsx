@@ -33,12 +33,23 @@ import {
   CANCEL_REASONS, REQUEST_STATUS, RESULT_LABEL, canCancel, cycleLabel,
   type RequestStatus, type RevisitResult,
 } from "@/lib/market/followUp";
+import Icon, { type IconName } from "@/components/vemi/Icon";
 import { KPI_LABEL, type IssueKpi } from "@/lib/market/issues";
 import { clientBrand, contract, monthLabel, months } from "@/lib/market";
 import type { MarketView } from "@/lib/market/filters";
 
 const KPIS: IssueKpi[] = ["availability", "shelfShare", "assortment", "price", "posm"];
 const RESULTS: RevisitResult[] = ["pending", "improved", "no-change", "worsened", "mixed"];
+
+
+/* One glyph per stage, so the column scans without colour. */
+const STAGE_ICON: Record<RequestStatus, IconName> = {
+  requested: "circle",
+  scheduled: "clock",
+  "in-progress": "workflow",
+  completed: "check",
+  cancelled: "close",
+};
 
 export default function ActionsView() {
   return <PageShell>{(view) => <FollowUpCenter view={view} />}</PageShell>;
@@ -303,16 +314,18 @@ function RequestRows({
         </td>
         <td className="px-3 py-2.5 align-top">
           {/* A request's status is a stage, not a health band: neutral
-              mono tags, filled only once the cycle is complete. */}
+              tags with a stage icon (docs/PORTAL-NEUTRAL-PLAN.md §3),
+              filled only once the cycle is complete. No status colour. */}
           <span
-            className={`inline-flex rounded-full px-2.5 py-1 font-mono text-xs font-medium uppercase tracking-[0.08em] ${
+            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-mono text-xs font-medium uppercase tracking-[0.08em] ${
               row.status === "completed"
-                ? "bg-primary-tint text-primary-text"
+                ? "bg-primary-tint text-text"
                 : row.status === "cancelled"
                   ? "bg-bg text-text-muted"
                   : "border border-line-strong text-text"
             }`}
           >
+            <Icon name={STAGE_ICON[row.status]} className="h-3.5 w-3.5" />
             {status.label}
           </span>
         </td>
