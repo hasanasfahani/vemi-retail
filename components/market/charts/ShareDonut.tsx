@@ -15,8 +15,8 @@ export type Slice = { id: string; name: string; value: number };
 /* Categorical sets that are not brands (out-of-stock reasons, channel
    mixes, POSM types): assigned by position and never cycled, so a
    category keeps its colour when another drops out of the filter. The
-   first three are the brand's series colours; beyond three, the violet
-   ramp continues. The legend carries every value in text. */
+   first three are the series colours; beyond three, the portfolio
+   ramp continues (violet on the Vemi surface, blue in the portal). The legend carries every value in text. */
 export const CATEGORY_COLORS = [
   "var(--vm-chart-1)",
   "var(--vm-chart-2)",
@@ -37,7 +37,7 @@ export default function ShareDonut({
   size?: number;
   centerLabel?: string;
   centerValue?: string;
-  /* "brand" keys colour to the brand id, so Pepsi is the same violet in
+  /* "brand" keys colour to the brand id, so Pepsi is the same colour in
      every chart; "category" assigns from the fixed sequence. */
   palette?: "brand" | "category";
 }) {

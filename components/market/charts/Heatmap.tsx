@@ -29,10 +29,9 @@ export default function Heatmap({
   unit?: string;
   onCellClick?: (rowId: string, colId: string) => void;
   legend?: ReactNode;
-  /* "neutral" ramps Violet 100 → Violet → Ink 800, for a magnitude that
-     is neither good nor bad — penetration, coverage, price. "bad" runs
-     the D1 band ramp from Paper to Ink, for a magnitude that counts
-     failures, so a dark cell means "needs you sooner" everywhere. */
+  /* "neutral" is a magnitude that is neither good nor bad — penetration,
+     coverage, price: one data hue, light to dark. "bad" counts failures
+     and runs the status ramp (the D1 band ramp on the Vemi surface). */
   tone?: "neutral" | "bad";
 }) {
   const values: number[] = [];
@@ -52,13 +51,9 @@ export default function Heatmap({
      never a rainbow — and the hue itself carries the meaning: accent
      for a plain magnitude, red where the magnitude counts failures. */
   const RAMP = {
-    neutral: [
-      "var(--vm-primary-tint)",
-      "var(--vm-portfolio-3)",
-      "var(--vm-portfolio-2)",
-      "var(--vm-primary)",
-      "var(--vm-ink-800)",
-    ],
+    /* Role tokens: violet on the Vemi surface, data blue in the client
+       portal. */
+    neutral: ["var(--vm-heat-0)", "var(--vm-heat-1)", "var(--vm-heat-2)", "var(--vm-heat-3)", "var(--vm-heat-4)"],
     /* Role tokens (brand/tokens.css): the D1 ramp on the Vemi surface,
        green → red status tints in the client portal. */
     bad: ["var(--vm-heat-bad-0)", "var(--vm-heat-bad-1)", "var(--vm-heat-bad-2)", "var(--vm-heat-bad-3)", "var(--vm-heat-bad-4)"],

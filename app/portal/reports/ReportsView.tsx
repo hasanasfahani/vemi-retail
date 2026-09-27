@@ -283,7 +283,7 @@ function Reports({ view }: { view: MarketView }) {
                       />
                       {brand.name}
                       {brand.isClient && (
-                        <span className="rounded-full bg-primary-tint px-2 py-0.5 font-mono text-xs font-medium uppercase tracking-[0.08em] text-primary-text">
+                        <span className="rounded-full bg-primary-tint px-2 py-0.5 font-mono text-xs font-medium uppercase tracking-[0.08em] text-text">
                           Your brand
                         </span>
                       )}

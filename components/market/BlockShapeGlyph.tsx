@@ -8,7 +8,7 @@
 
 import type { BlockShape } from "@/lib/market/reportBlocks";
 
-const FILL = "var(--vm-primary)";
+const FILL = "var(--vm-chart-1)";
 const GHOST = "var(--vm-line-strong)";
 
 export default function BlockShapeGlyph({ shape }: { shape: BlockShape }) {

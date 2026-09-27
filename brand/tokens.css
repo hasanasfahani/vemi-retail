@@ -131,6 +131,36 @@
   --vm-neutral-800: #3A3F4A;
   --vm-neutral-900: #16181D;
 
+  /* The client's data in its own portal (N2): one data blue for "your
+     portfolio", greys for rivals. Blue only ever appears inside a chart
+     and violet never does, which keeps the two accents apart by role.
+     dataviz validator (light): CVD ΔE 23.8, normal-vision ΔE 24.2,
+     contrast ≥ 3:1 — PASS; its lightness-band and chroma-floor flags on
+     the two greys are the emphasis form (client in hue, rivals in
+     neutrals), as with the Vemi series above. Ramps are monotone in
+     OKLab L (portfolio 0.55 / 0.65 / 0.77 / 0.91; heat 0.94 → 0.43). */
+  --vm-data-1: #2F6BD8;
+  --vm-data-2: #3A3F4A;
+  --vm-data-3: #858B97;
+  --vm-data-portfolio-1: #2F6BD8;
+  --vm-data-portfolio-2: #5E8EE3;
+  --vm-data-portfolio-3: #95B5EE;
+  --vm-data-portfolio-4: #D3E1F8;
+  --vm-data-heat-0: #E4EDFB;
+  --vm-data-heat-1: #B5CCF3;
+  --vm-data-heat-2: #7FA6EA;
+  --vm-data-heat-3: #2F6BD8;
+  --vm-data-heat-4: #1D4A9C;
+
+  /* Magnitude heat (a plain quantity, not a judgement) and the one
+     "notable point" marker on a trend. Vemi surface values. */
+  --vm-heat-0: var(--vm-primary-tint);
+  --vm-heat-1: var(--vm-portfolio-3);
+  --vm-heat-2: var(--vm-portfolio-2);
+  --vm-heat-3: var(--vm-primary);
+  --vm-heat-4: var(--vm-ink-800);
+  --vm-chart-marker: var(--vm-signal);
+
   /* Band marks: every place a band is drawn rather than written — map
      pins and clusters, heat cells, gauges, gap bars, and the swatches
      that explain a chip. Components ask for a role (fill, edge, pin
@@ -181,7 +211,7 @@
    the client's room: urgency in universal colours, the frame neutral,
    Vemi violet kept for Vemi's actions, focus and "where you are".
    Grows phase by phase: 1 status chips, 2 status marks, 3 deltas,
-   4 the neutral frame.
+   4 the neutral frame, 5 chart colours.
    ========================================================================== */
 [data-surface="portal"] {
   /* The neutral frame (phase 4). Violet primary, its hover, Violet 700
@@ -197,6 +227,26 @@
   --vm-primary-tint: var(--vm-neutral-100);
   --vm-scrim: rgba(22, 24, 29, 0.4);
   --vm-focus-ring: 0 0 0 2px var(--vm-surface), 0 0 0 4px var(--vm-focus);
+
+  /* Charts (phase 5): your portfolio in data blue, the key competitor
+     dark grey, everyone else grey; baselines and grids neutral; the
+     portfolio split and magnitude heat on blue ramps; a trend's notable
+     point in near-black (amber would read as "Average" here). */
+  --vm-chart-1: var(--vm-data-1);
+  --vm-chart-2: var(--vm-data-2);
+  --vm-chart-3: var(--vm-data-3);
+  --vm-chart-base: var(--vm-neutral-100);
+  --vm-chart-grid: var(--vm-neutral-200);
+  --vm-portfolio-1: var(--vm-data-portfolio-1);
+  --vm-portfolio-2: var(--vm-data-portfolio-2);
+  --vm-portfolio-3: var(--vm-data-portfolio-3);
+  --vm-portfolio-4: var(--vm-data-portfolio-4);
+  --vm-heat-0: var(--vm-data-heat-0);
+  --vm-heat-1: var(--vm-data-heat-1);
+  --vm-heat-2: var(--vm-data-heat-2);
+  --vm-heat-3: var(--vm-data-heat-3);
+  --vm-heat-4: var(--vm-data-heat-4);
+  --vm-chart-marker: var(--vm-neutral-900);
 
   /* Marks (plan phase 2). Declared again in full here, not inherited:
      a var() in a custom property resolves where it is declared, so a

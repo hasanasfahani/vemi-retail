@@ -187,7 +187,7 @@ export default function ShelfTab({ view }: { view: MarketView }) {
           soWhat={govSoWhat}
           {...basis}
           confidence="measured"
-          footnote={`Each bar is one governorate's measured fixture. Violet is your portfolio, Ink is ${keyCompetitor.name}, Slate is every other brand. Split portfolio breaks the violet into its brands.`}
+          footnote={`Each bar is one governorate's measured fixture. Blue is your portfolio, dark grey is ${keyCompetitor.name}, light grey is every other brand. Split portfolio breaks the blue into its brands.`}
           table={{ columns: ["Governorate", "Your portfolio", keyCompetitor.name, "Others"], numeric: [false, true, true, true], rows: govRows.map((r) => [r.label, `${r.portfolio}%`, `${r.competitor}%`, `${r.others}%`]) }}
           action={
             <div className="flex flex-col items-end gap-3">

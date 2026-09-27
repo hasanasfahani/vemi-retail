@@ -262,7 +262,7 @@ function Trends({ view }: { view: MarketView }) {
             ]}
           />
         }
-        footnote="The solid line states the level. The dashed line is the only one where a movement means the market moved rather than the sample. The Ink dashed line is the target; an amber dot marks the single month whose core-panel move clears the detection floor."
+        footnote="The solid line states the level. The dashed line is the only one where a movement means the market moved rather than the sample. The dark dashed line is the target; a black dot marks the single month whose core-panel move clears the detection floor."
       >
         <div className="mb-3">
           <Tabs

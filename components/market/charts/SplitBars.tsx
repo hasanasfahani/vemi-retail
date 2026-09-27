@@ -48,7 +48,7 @@ export default function SplitBars({
     <div className="flex flex-col">
       <p className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-muted">
         <span className="inline-flex items-center gap-1.5">
-          <span className="inline-block h-2 w-3 rounded-[2px] bg-[color:var(--vm-primary)]" aria-hidden />
+          <span className="inline-block h-2 w-3 rounded-[2px] bg-chart-1" aria-hidden />
           {presentLabel}
         </span>
         <span className="inline-flex items-center gap-1.5">
@@ -89,7 +89,7 @@ export default function SplitBars({
                 aria-label={`${row.label}: ${row.present.toLocaleString()} of ${row.total.toLocaleString()} present, ${missing.toLocaleString()} missing`}
               >
                 <div
-                  className="h-full bg-[color:var(--vm-primary)]"
+                  className="h-full bg-chart-1"
                   style={{ width: `${fill}%` }}
                 />
               </div>

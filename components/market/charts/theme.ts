@@ -3,20 +3,21 @@
    Three rules the whole portal obeys:
 
    1. SERIES ORDER IS MEANING. The brand allows three series: the
-      client (Violet, chart-1), the key competitor (Ink, chart-2) and
-      everyone else (Slate, chart-3). Share charts default to exactly
+      client (chart-1), the key competitor (chart-2) and everyone else
+      (chart-3) — Violet / Ink / Slate on the Vemi surface, data blue /
+      dark grey / grey in the client portal (docs/PORTAL-NEUTRAL-PLAN.md). Share charts default to exactly
       those three — "Your portfolio", the strongest rival, "Others" —
       built from each row's brand figures by `threeSeriesRows`.
 
    2. Colour follows the ENTITY, never its rank. Pepsi is the same
-      violet whether it sits first or fourth, so a filter that drops a
+      colour whether it sits first or fourth, so a filter that drops a
       brand cannot repaint the survivors.
 
    3. Where a chart is about the portfolio itself, it may split it
-      ("Split portfolio"): the client's brands step down one violet ramp
-      (Violet, Violet 400, Violet 300, Violet 100 with an outline) so
-      the portfolio still reads as one body of colour, while rivals keep
-      Ink and Slate. */
+      ("Split portfolio"): the client's brands step down one four-step
+      ramp (violet on the Vemi surface, data blue in the portal; the
+      lightest step with an outline) so the portfolio still reads as one
+      body of colour, while rivals keep their greys. */
 
 import { brands, portfolioBrands } from "@/lib/market";
 
@@ -123,14 +124,16 @@ export const GRID = {
 } as const;
 
 /* One measure, one hue: the default mark where the series is not a
-   brand (execution score, coverage, compliance). The earlier point of a
-   dumbbell is Violet 400, drawn hollow. */
+   brand (execution score, coverage, compliance), chart-1 — Violet on the
+   Vemi surface, data blue in the client portal. The earlier point of a
+   dumbbell is the next step of the same ramp, drawn hollow. */
 export const MEASURE = "var(--vm-chart-1)";
 export const MEASURE_PRIOR = "var(--vm-portfolio-2)";
 
-/* The anomaly flag: one Signal dot with a 2px surface ring, never a
-   series. */
-export const SIGNAL = "var(--vm-signal)";
+/* The anomaly flag: one dot with a 2px surface ring, never a series.
+   Signal amber on the Vemi surface; near-black in the client portal,
+   where amber means "Average". */
+export const SIGNAL = "var(--vm-chart-marker)";
 
 /* A brand swatch's style: its colour, plus the outline the lightest
    portfolio step needs to hold on a white card. */

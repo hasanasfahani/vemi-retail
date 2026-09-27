@@ -27,7 +27,7 @@ export default function Bar({
   label?: string;
 }) {
   const judged = color ? undefined : band ?? (par !== undefined ? rateBand(value, par) : undefined);
-  const fill = color ?? (judged ? BAND_GAUGE[judged] : "var(--vm-primary)");
+  const fill = color ?? (judged ? BAND_GAUGE[judged] : "var(--vm-chart-1)");
   const pct = max === 0 ? 0 : Math.max(0, Math.min(100, (value / max) * 100));
   const parPct = par === undefined || max === 0 ? null : Math.max(0, Math.min(100, (par / max) * 100));
 

@@ -1,7 +1,7 @@
 # Client portal: neutral frame, universal status colours (plan)
 
 Status: **approved 27 Sep 2026** (N1–N6 as recommended, see §8).
-Phases 1–4 done; phases 5–6 to go (build notes in §10). Written after the
+Phases 1–5 done; phase 6 to go (build notes in §10). Written after the
 brand refresh (docs/BRAND-REFRESH-PLAN.md) shipped the portal fully in
 Vemi colours.
 
@@ -424,4 +424,37 @@ and every signature detail says who built it.
   - the favicon, primary buttons and focus ring.
 - **Checks:** tsc and eslint clean, 276 tests pass, brand:check 0
   errors, 0 warnings. The contrast scan runs in phase 6.
+
+### Phase 5: chart colours (done)
+
+- **Tokens.** Raw `--vm-data-*` values (data blue, the two greys, a
+  four-step blue portfolio ramp, a five-step blue magnitude ramp). The
+  portal scope maps `--vm-chart-1/2/3`, `--vm-chart-base/grid`,
+  `--vm-portfolio-1…4`, the new `--vm-heat-0…4` and `--vm-chart-marker`
+  onto them, so every chart that already read the series tokens changed
+  from one place.
+- **Validated with the dataviz script** (light):
+  - CVD ΔE 23.8, normal-vision ΔE 24.2, contrast ≥ 3:1 — pass.
+  - The lightness-band and chroma-floor flags on the greys are the
+    emphasis form (client in hue, rivals in neutrals), as with the Vemi
+    series.
+  - Both ramps are monotone in OKLab L.
+  - Heat text is near-black on the light steps and white on the two
+    dark ones (≥ 4.98:1).
+- **Series.** Your portfolio is data blue, the key competitor dark grey,
+  others grey. The portfolio split steps down the blue ramp, with its
+  lightest step outlined. Baselines, grids, sparkline areas and hover
+  cursors are neutral.
+- **Direct violet removed from charts:**
+  - the magnitude heatmap (now `--vm-heat-*`), split bars, the block
+    glyph and the plain `Bar` default (now `chart-1`);
+  - the shelf scene's detection box and label (now near-black: it
+    annotates data, and violet never draws data).
+- **The trend's notable-month dot** is near-black in the portal; amber
+  would read as "Average". Signal amber is now nowhere in the portal.
+- **Your brand outside charts.** The client's scoreboard and setup cards
+  take a data-blue border; "Your brand" / "Active" tags are neutral.
+- **Copy.** The shelf footnote says "Blue is your portfolio, dark grey
+  is Coca-Cola, light grey is every other brand"; the trends footnote
+  names the dark target line and the black dot.
 

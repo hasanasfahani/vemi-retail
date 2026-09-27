@@ -76,7 +76,7 @@ function Setup({ view }: { view: MarketView }) {
       id: "monitored",
       header: "Monitored",
       render: () => (
-        <span className="rounded-full bg-primary-tint px-2.5 py-1 font-mono text-xs font-medium uppercase tracking-[0.08em] text-primary-text">
+        <span className="rounded-full bg-primary-tint px-2.5 py-1 font-mono text-xs font-medium uppercase tracking-[0.08em] text-text">
           Active
         </span>
       ),
@@ -200,7 +200,7 @@ function Setup({ view }: { view: MarketView }) {
               <div
                 key={brand.id}
                 className={`flex min-w-0 flex-col rounded-lg border bg-surface p-6 ${
-                  brand.id === clientBrand.id ? "border-primary" : "border-line"
+                  brand.id === clientBrand.id ? "border-chart-1" : "border-line"
                 }`}
               >
                 <div className="flex items-center gap-2">
@@ -224,7 +224,7 @@ function Setup({ view }: { view: MarketView }) {
                 )}
                 {brand.id === clientBrand.id && (
                   <span className="mt-3">
-                    <span className="rounded-full bg-primary-tint px-2.5 py-1 font-mono text-xs font-medium uppercase tracking-[0.08em] text-primary-text">
+                    <span className="rounded-full bg-primary-tint px-2.5 py-1 font-mono text-xs font-medium uppercase tracking-[0.08em] text-text">
                       Your brand
                     </span>
                   </span>

@@ -218,12 +218,12 @@ export default function ShelfScene({
                         <rect
                           x={left - 1.5} y={packTop - 2}
                           width={width + 3} height={shape.h + 4}
-                          fill="none" stroke="var(--vm-primary)" strokeWidth={1} opacity={0.9}
+                          fill="none" stroke="var(--vm-text)" strokeWidth={1} opacity={0.9}
                           rx={2}
                         />
                         <text
                           x={left} y={packTop - 4}
-                          fontSize={8.5} fontWeight={600} fill="var(--vm-primary-text)"
+                          fontSize={8.5} fontWeight={600} fill="var(--vm-text)"
                         >
                           {brandOf(slot.brandId)?.name ?? slot.brandId} · {n}
                         </text>

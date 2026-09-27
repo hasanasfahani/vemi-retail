@@ -503,7 +503,7 @@ function ScoreCard({ row, leader, month }: { row: BrandRow; leader: BrandRow; mo
   return (
     <article
       className={`flex min-w-0 flex-col rounded-lg border bg-surface p-6 ${
-        row.isClient ? "border-primary" : "border-line"
+        row.isClient ? "border-chart-1" : "border-line"
       }`}
     >
       <div className="flex items-start justify-between gap-2">
@@ -520,7 +520,7 @@ function ScoreCard({ row, leader, month }: { row: BrandRow; leader: BrandRow; mo
         </div>
         {/* Roles, not health: neutral mono tags rather than band chips. */}
         {row.isClient ? (
-          <span className="shrink-0 rounded-full bg-primary-tint px-2.5 py-1 font-mono text-xs font-medium uppercase tracking-[0.08em] text-primary-text">
+          <span className="shrink-0 rounded-full bg-primary-tint px-2.5 py-1 font-mono text-xs font-medium uppercase tracking-[0.08em] text-text">
             Your brand
           </span>
         ) : row.id === leader.id ? (
