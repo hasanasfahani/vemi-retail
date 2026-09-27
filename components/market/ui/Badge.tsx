@@ -2,15 +2,14 @@
    colour alone — a colourblind reader and a printed page both have to be
    able to read the state. */
 
-import { BandChip } from "@/components/vemi/BandChip";
-import type { Band } from "./health";
+import { BandChip, type Tone } from "@/components/vemi/BandChip";
 
 export default function Badge({
   band,
   label,
   size = "md",
 }: {
-  band: Band;
+  band: Tone;
   /* Overrides the band's own word where the domain has a better one
      ("Out of stock" rather than "Critical"). */
   label?: string;

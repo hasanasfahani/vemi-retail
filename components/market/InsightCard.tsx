@@ -20,14 +20,22 @@ import type { DecisionInsight } from "@/lib/market/insightModel";
 import { OUTCOME_LABEL } from "@/lib/market/insightModel";
 import { ConfidenceBadge } from "@/components/vemi/ConfidenceBadge";
 import { Button, buttonClass } from "@/components/vemi/Button";
+import Icon from "@/components/vemi/Icon";
 
 /* Priority is how loud, outcome is what kind of conversation. Both are
    said in one mono tag (the drawer's header chip carries priority as a
-   band). */
+   band). In the client portal priority is urgency, so high and medium
+   carry the status colour and glyph (red octagon, orange triangle);
+   low is not a warning and stays muted. */
 const PRIORITY_WORD: Record<DecisionInsight["priorityBand"], string> = {
   high: "High",
   medium: "Medium",
   low: "Low",
+};
+const PRIORITY_TONE: Record<DecisionInsight["priorityBand"], string> = {
+  high: "text-status-critical-text",
+  medium: "text-status-attention-text",
+  low: "text-text-muted",
 };
 
 /* Stated on any finding that claims a change, and only on those. A
@@ -57,12 +65,20 @@ export default function InsightCard({
 
   return (
     <article className="flex min-w-0 flex-col rounded-lg border border-line bg-surface p-6">
-      {/* The outcome is a neutral mono tag (brand: colour is not a
-          category); priority is said in words, and only the high one is
-          set in Ink so the loudest cards still find the eye. */}
+      {/* The outcome is a neutral mono tag (colour is not a category);
+          priority is said in words with its urgency glyph. */}
       <div className="flex items-start justify-between gap-3">
-        <span className={`font-mono text-xs font-medium uppercase tracking-[0.1em] ${insight.priorityBand === "high" ? "text-text" : "text-text-muted"}`}>
-          {PRIORITY_WORD[insight.priorityBand]} · {OUTCOME_LABEL[insight.outcome]}
+        <span className="font-mono text-xs font-medium uppercase tracking-[0.1em] text-text-muted">
+          <span className={PRIORITY_TONE[insight.priorityBand]}>
+            {insight.priorityBand !== "low" && (
+              <Icon
+                name={insight.priorityBand === "high" ? "alert-octagon" : "alert-triangle"}
+                className="-mt-0.5 mr-1 inline h-3.5 w-3.5 align-middle"
+              />
+            )}
+            {PRIORITY_WORD[insight.priorityBand]}
+          </span>{" "}
+          · {OUTCOME_LABEL[insight.outcome]}
         </span>
         {/* The count, not the rule's own scope wording, so every card
             prints the same field in the same corner. */}

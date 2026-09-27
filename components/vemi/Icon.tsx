@@ -177,6 +177,21 @@ const GLYPHS = {
       <path d="m8 12.2 2.8 2.8L16 9.6" />
     </>
   ),
+  /* status glyphs: one distinct shape per band, so the band still
+     reads where red and green merge (check · minus · triangle · octagon) */
+  "minus-circle": (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M8 12h8" />
+    </>
+  ),
+  "alert-octagon": (
+    <>
+      <path d="M8.3 3h7.4L21 8.3v7.4L15.7 21H8.3L3 15.7V8.3z" />
+      <path d="M12 8v4.5M12 16v.01" />
+    </>
+  ),
+  circle: <circle cx="12" cy="12" r="6" />,
   workflow: (
     <>
       <rect x="3" y="3.5" width="6" height="5" rx="1.2" />

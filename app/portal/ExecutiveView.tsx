@@ -417,7 +417,7 @@ function Dashboard({ view, data }: { view: MarketView; data: MonthData }) {
         />
         {criticalTotal > 0 && (
           <div>
-            <AlertChip>
+            <AlertChip band="critical">
               Critical · {criticalTotal.toLocaleString()} outlets
               {worstGov ? `, ${worstGov[1]} in ${governorateName(worstGov[0])}` : ""}
             </AlertChip>

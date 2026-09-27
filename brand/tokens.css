@@ -96,7 +96,57 @@
   --vm-portfolio-3: #A9A5FA;     /* Violet 300 */
   --vm-portfolio-4: #E8E7FD;     /* Violet 100, drawn with a violet outline */
 
+  /* Universal status colours (docs/PORTAL-NEUTRAL-PLAN.md, N1). The
+     client portal reads urgency in the colours everyone already knows;
+     the website keeps the violet band ramp above. The pre-brand hues,
+     split into a mark fill, a chip tint and a text shade so every use
+     passes AA:
+       text on tint  strong 5.8 · average 6.0 · attention 5.5 · critical 5.9 :1
+       fill on white strong 3.5 · attention 3.4 · critical 4.7 :1
+       average fill is 1.9:1 on white, so a yellow mark always carries
+       its edge (3.9:1). Yellow is never used as text. */
+  --vm-status-strong-fill: #1E9E4A;
+  --vm-status-strong-tint: #E6F5EC;
+  --vm-status-strong-text: #146C36;
+  --vm-status-average-fill: #F2B21B;
+  --vm-status-average-tint: #FDF3D8;
+  --vm-status-average-text: #7A5600;
+  --vm-status-average-edge: #A87A00;
+  --vm-status-attention-fill: #E0672A;
+  --vm-status-attention-tint: #FDECE2;
+  --vm-status-attention-text: #A2431A;
+  --vm-status-critical-fill: #D23B3B;
+  --vm-status-critical-tint: #FBE8E8;
+  --vm-status-critical-text: #A82828;
+
+  /* Band swatches: the small colour keys that explain a chip (the
+     status chip's cut-off panel, the notification list). On the Vemi
+     surface they are the band ramp; the portal surface re-points them
+     at the status fills below, together with the chips. */
+  --vm-swatch-strong: var(--vm-band-strong);
+  --vm-swatch-average: var(--vm-band-average);
+  --vm-swatch-attention: var(--vm-band-attention);
+  --vm-swatch-critical: var(--vm-band-critical);
+  --vm-swatch-strong-edge: var(--vm-band-average);
+  --vm-swatch-average-edge: transparent;
+
   color-scheme: light;
+}
+
+/* ==========================================================================
+   The client portal surface (docs/PORTAL-NEUTRAL-PLAN.md).
+   Set as data-surface="portal" on the portal layout root. The portal is
+   the client's room: urgency in universal colours, the frame neutral,
+   Vemi violet kept for Vemi's actions, focus and "where you are".
+   Grows phase by phase; phase 1 = status chips and their swatches.
+   ========================================================================== */
+[data-surface="portal"] {
+  --vm-swatch-strong: var(--vm-status-strong-fill);
+  --vm-swatch-average: var(--vm-status-average-fill);
+  --vm-swatch-attention: var(--vm-status-attention-fill);
+  --vm-swatch-critical: var(--vm-status-critical-fill);
+  --vm-swatch-strong-edge: transparent;
+  --vm-swatch-average-edge: var(--vm-status-average-edge);
 }
 
 [data-theme="dark"] {

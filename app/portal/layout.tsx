@@ -17,7 +17,9 @@ export default function PortalLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <PortalGate>
-      <div className="flex min-h-screen items-start bg-bg">
+      {/* data-surface: the client-portal token scope (docs/PORTAL-NEUTRAL-PLAN.md) —
+          universal status colours and, as the plan lands, a neutral frame. */}
+      <div data-surface="portal" className="flex min-h-screen items-start bg-bg">
       {/* Sidebar reads the URL to keep filters across navigation, so
           it suspends during prerender like the shell does. */}
       <Suspense fallback={<div className="sticky top-0 hidden h-screen w-[256px] shrink-0 border-r border-line bg-surface lg:block" />}>

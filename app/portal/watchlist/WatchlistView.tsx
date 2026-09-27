@@ -25,7 +25,7 @@ import Link from "next/link";
 import PageShell from "@/components/market/PageShell";
 import { useWatchlist } from "@/components/market/useWatchlist";
 import { Card, StatCard, EmptyState, Badge, Delta, DataTable, type Column } from "@/components/market/ui";
-import type { Band } from "@/components/market/ui/health";
+import type { Tone } from "@/components/vemi/BandChip";
 import {
   WATCH_FLOOR_PT, WATCH_KPI_LABEL, WATCH_KPI_UNIT, WATCH_STATE_LABEL,
   scopeLabel, scopeMatches, watchState, watchValue,
@@ -34,12 +34,12 @@ import {
 import { monthLabel } from "@/lib/market";
 import type { MarketView } from "@/lib/market/filters";
 
-const STATE_BAND: Record<WatchState, Band> = {
+const STATE_BAND: Record<WatchState, Tone> = {
   reached: "strong",
   improving: "average",
   flat: "attention",
   slipping: "critical",
-  "out-of-scope": "average",
+  "out-of-scope": "neutral",
 };
 
 type Row = {

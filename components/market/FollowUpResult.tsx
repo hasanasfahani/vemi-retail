@@ -9,16 +9,18 @@
    partial answer presented as a final one is the failure this page is
    supposed to prevent. */
 
-import { BandChip } from "@/components/vemi/BandChip";
+import { BandChip, type Tone } from "@/components/vemi/BandChip";
 import { RESULT_LABEL, type Cohort, type RevisitResult } from "@/lib/market/followUp";
-import type { Band } from "./ui/health";
 
-const BAND: Record<RevisitResult, Band> = {
-  pending: "average",
+/* Outcomes in universal terms: improved green, mixed yellow, worsened
+   red. "Pending" and "no material change" are not judgements, so they
+   stay neutral rather than borrowing a band. */
+const BAND: Record<RevisitResult, Tone> = {
+  pending: "neutral",
   improved: "strong",
-  "no-change": "average",
+  "no-change": "neutral",
   worsened: "critical",
-  mixed: "attention",
+  mixed: "average",
 };
 
 export default function FollowUpResult({

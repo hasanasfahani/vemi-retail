@@ -36,6 +36,24 @@ export const BAND_EDGE: Record<Band, string> = {
   critical: "transparent",
 };
 
+/* Swatches: the small colour keys that explain a chip — the status
+   chip's cut-off panel, the notification list. They follow the chips,
+   so inside the client portal they are the universal status colours
+   (docs/PORTAL-NEUTRAL-PLAN.md) while pins and heat cells still read
+   BAND_COLOR until the marks move over (that plan's phase 2). */
+export const BAND_SWATCH: Record<Band, string> = {
+  strong: "var(--vm-swatch-strong)",
+  average: "var(--vm-swatch-average)",
+  attention: "var(--vm-swatch-attention)",
+  critical: "var(--vm-swatch-critical)",
+};
+export const BAND_SWATCH_EDGE: Record<Band, string> = {
+  strong: "var(--vm-swatch-strong-edge)",
+  average: "var(--vm-swatch-average-edge)",
+  attention: "transparent",
+  critical: "transparent",
+};
+
 /* The chip classes (components/vemi BandChip). */
 export const BAND_CLASS: Record<Band, string> = {
   strong: "vm-band vm-band--strong",

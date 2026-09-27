@@ -18,7 +18,7 @@ import { useMemo } from "react";
 import Drawer from "./ui/Drawer";
 import DataTable, { type Column } from "./ui/DataTable";
 import Badge from "./ui/Badge";
-import type { Band } from "./ui/health";
+import type { Tone } from "@/components/vemi/BandChip";
 import { OUTCOME_LABEL, followUpBlock, type DecisionInsight } from "@/lib/market/insightModel";
 import { insightUrl, mailtoFor } from "@/lib/market/insightShare";
 import { issuesFor } from "@/lib/market/issues";
@@ -26,10 +26,11 @@ import RequestFollowUp from "./RequestFollowUp";
 import { governorateName, channelName, monthLabel } from "@/lib/market/index";
 import type { MarketView } from "@/lib/market/filters";
 
-const PRIORITY_BAND: Record<DecisionInsight["priorityBand"], Band> = {
+/* Priority as urgency: high red, medium orange, low is not a warning. */
+const PRIORITY_BAND: Record<DecisionInsight["priorityBand"], Tone> = {
   high: "critical",
   medium: "attention",
-  low: "average",
+  low: "neutral",
 };
 
 /* Only findings that claim a change carry a basis. Labelling a

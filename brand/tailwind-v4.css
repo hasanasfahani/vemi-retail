@@ -44,6 +44,20 @@
   --color-band-average: var(--vm-band-average);
   --color-band-attention: var(--vm-band-attention);
   --color-band-critical: var(--vm-band-critical);
+  /* Universal status colours: client portal only (docs/PORTAL-NEUTRAL-PLAN.md). */
+  --color-status-strong-fill: var(--vm-status-strong-fill);
+  --color-status-strong-tint: var(--vm-status-strong-tint);
+  --color-status-strong-text: var(--vm-status-strong-text);
+  --color-status-average-fill: var(--vm-status-average-fill);
+  --color-status-average-tint: var(--vm-status-average-tint);
+  --color-status-average-text: var(--vm-status-average-text);
+  --color-status-average-edge: var(--vm-status-average-edge);
+  --color-status-attention-fill: var(--vm-status-attention-fill);
+  --color-status-attention-tint: var(--vm-status-attention-tint);
+  --color-status-attention-text: var(--vm-status-attention-text);
+  --color-status-critical-fill: var(--vm-status-critical-fill);
+  --color-status-critical-tint: var(--vm-status-critical-tint);
+  --color-status-critical-text: var(--vm-status-critical-text);
 
   --font-sans: var(--vm-font-sans);
   --font-mono: var(--vm-font-mono);

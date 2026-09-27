@@ -82,16 +82,32 @@ export default function KitView() {
           <ConfidenceBadge level="estimated" />
           <ConfidenceBadge level="stale" />
         </Row>
+        <p className="vm-label">Vemi surface (website)</p>
         <Row>
           <BandChip band="strong" />
           <BandChip band="average" />
           <BandChip band="attention" />
           <BandChip band="critical" />
+          <BandChip band="neutral" label="Pending" />
           <BandChip band="critical" size="sm" label="Out of stock" />
         </Row>
         <Row>
           <AlertChip>Critical · 29 outlets in Basra</AlertChip>
         </Row>
+        <p className="vm-label">Client portal surface (data-surface=&quot;portal&quot;)</p>
+        <div data-surface="portal" className="flex flex-col gap-4">
+          <Row>
+            <BandChip band="strong" />
+            <BandChip band="average" />
+            <BandChip band="attention" />
+            <BandChip band="critical" />
+            <BandChip band="neutral" label="Pending" />
+            <BandChip band="critical" size="sm" label="Out of stock" />
+          </Row>
+          <Row>
+            <AlertChip band="critical">Critical · 29 outlets in Basra</AlertChip>{/* brand-check-ignore: specimen of the portal surface */}
+          </Row>
+        </div>
       </Section>
 
       <Section title="KPI cards">

@@ -13,7 +13,7 @@
 import { useEffect, useState } from "react";
 import Icon from "@/components/vemi/Icon";
 import { Button, IconButton } from "@/components/vemi/Button";
-import { BAND_COLOR, BAND_EDGE } from "./ui/health";
+import { BAND_SWATCH, BAND_SWATCH_EDGE } from "./ui/health";
 import { usePathname } from "next/navigation";
 import { titleFor } from "@/lib/market/nav";
 import {
@@ -237,7 +237,7 @@ function NotificationPanel({ onClose }: { onClose: () => void }) {
           <div key={n.title} className="flex gap-3 rounded-md px-2 py-2.5 hover:bg-bg">
             <span
               className="mt-[6px] h-2 w-2 shrink-0 rounded-full"
-              style={{ background: BAND_COLOR[n.band], boxShadow: `inset 0 0 0 1px ${BAND_EDGE[n.band]}` }}
+              style={{ background: BAND_SWATCH[n.band], boxShadow: `inset 0 0 0 1px ${BAND_SWATCH_EDGE[n.band]}` }}
               aria-hidden
             />
             <span className="min-w-0">

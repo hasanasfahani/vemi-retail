@@ -89,7 +89,7 @@ export default function KpiCard({
        link is an overlay underneath the content and the controls sit
        above it. */
     <article
-      className={`vm-kpi ${size === "compact" ? "vm-kpi--compact" : ""} group relative transition-colors hover:border-line-strong focus-within:border-primary`}
+      className={`vm-kpi ${size === "compact" ? "vm-kpi--compact" : ""} group relative transition-colors hover:z-20 hover:border-line-strong focus-within:z-20 focus-within:border-primary`}
     >
       <Link
         href={href}

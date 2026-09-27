@@ -27,8 +27,8 @@ Installed from the brand kit (`Vemi Branding/Vemi Dashboard Branding/vemi-claude
 
 1. **No raw colors.** Never write hex, rgb() or hsl() outside `brand/`. Use `var(--vm-*)` or brand Tailwind classes. JS, inline styles and SVG attributes read `var(--vm-*)`, never `var(--color-*)` (those are not emitted).
 2. **Violet is the only brand hue.** `primary` for the main action, the client's data series and selected indicators. Violet text/links use `primary-text`, never `primary`.
-3. **Signal (amber) = one alert per view.** Only through `<AlertChip>`. Never for series, headings, badges, decoration or form errors.
-4. **No red/green.** Health is the D1 band ramp (Violet 100 → Violet 400 → Violet → Ink, darker = needs you sooner) and the band word always travels with it. `danger` is for form validation only.
+3. **One alert per view**, only through `<AlertChip>`. On the website it is Signal amber; in the client portal pass `band` and it takes that band's status colour. Never for series, headings, decoration or form errors.
+4. **Two surfaces for health.** The website uses the D1 band ramp (Violet 100 → Ink, darker = needs you sooner). The client portal (`data-surface="portal"` on its layout root) uses the universal status colours: `--vm-status-{strong|average|attention|critical}-{fill|tint|text}` = green / yellow / orange / red (docs/PORTAL-NEUTRAL-PLAN.md). Status colours go on chips and small marks only, never on chart series, and never borrowed for a state that is not a judgement (use the `neutral` tone). The band word and glyph always travel with the colour.
 5. **Fonts:** Instrument Sans for UI and text, IBM Plex Mono for labels/numbers-with-units/timestamps, IBM Plex Sans Arabic for Arabic. Type scale 12 · 14 · 15 · 16 · 18 · 22 · 28 · 36 · 44 · 56 · 72; nothing below 12px.
 6. **Every chart lives in a `ChartCard`** (portal: `components/market/ui/Card` with `soWhat`) with a real `soWhat` finding and `howToRead`.
 7. **Every metric shows its basis:** `asOf` and `base` ("742 outlets"). Deltas name the window ("vs Aug 2026").

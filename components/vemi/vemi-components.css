@@ -49,17 +49,30 @@ select.vm-input { appearance: none; padding-inline-end: 40px; background-image: 
 .vm-badge--stale .vm-badge__dot { background: var(--vm-line-strong); }
 .vm-badge--sm { block-size: 22px; padding-inline: 8px; }
 
-/* ---- BandChip (plan D1): darker = needs you sooner ------------------- */
+/* ---- BandChip -------------------------------------------------------
+   Vemi surface (plan D1): fill style carries the band, darker = needs
+   you sooner. Client portal (data-surface="portal"): the universal
+   status colours on a tint. Word + glyph in both. */
 .vm-band { display: inline-flex; align-items: center; gap: 5px; block-size: 24px; box-sizing: border-box; padding-inline: 8px; border: 1px solid transparent; border-radius: var(--vm-radius-pill); font: 500 12px/1 var(--vm-font-sans); white-space: nowrap; }
-.vm-band__glyph { font-size: 9px; line-height: 1; }
-.vm-band--sm { block-size: 20px; padding-inline: 6px; }
+.vm-band__glyph { flex: none; }
+.vm-band--sm { block-size: 20px; padding-inline: 6px; gap: 4px; }
 .vm-band--strong { background: var(--vm-primary-tint); color: var(--vm-primary-text); }
 .vm-band--average { background: var(--vm-surface); border-color: var(--vm-line-strong); color: var(--vm-text); }
 .vm-band--attention { background: var(--vm-surface); border: 1.5px solid var(--vm-text); color: var(--vm-text); }
 .vm-band--critical { background: var(--vm-text); color: var(--vm-bg); }
+.vm-band--neutral { background: var(--vm-bg); border-color: var(--vm-line); color: var(--vm-text-muted); }
 
-/* ---- AlertChip: the ONE Signal element per view --------------------- */
-.vm-alert { display: inline-flex; align-items: center; gap: var(--vm-space-2); min-block-size: 32px; box-sizing: border-box; padding: 6px 14px; border-radius: var(--vm-radius-pill); background: var(--vm-signal); color: var(--vm-on-signal); font: 600 14px/20px var(--vm-font-sans); }
+[data-surface="portal"] .vm-band--strong { background: var(--vm-status-strong-tint); border-color: transparent; color: var(--vm-status-strong-text); }
+[data-surface="portal"] .vm-band--average { background: var(--vm-status-average-tint); border-color: transparent; color: var(--vm-status-average-text); }
+[data-surface="portal"] .vm-band--attention { background: var(--vm-status-attention-tint); border: 1px solid transparent; color: var(--vm-status-attention-text); }
+[data-surface="portal"] .vm-band--critical { background: var(--vm-status-critical-tint); border-color: transparent; color: var(--vm-status-critical-text); }
+
+/* ---- AlertChip: the ONE alert element per view ----------------------
+   Vemi surface: Signal amber. Client portal: amber would read as
+   "Average", so a banded alert takes its band's status colours. */
+.vm-alert { display: inline-flex; align-items: center; gap: var(--vm-space-2); min-block-size: 32px; box-sizing: border-box; padding: 6px 14px; border: 1px solid transparent; border-radius: var(--vm-radius-pill); background: var(--vm-signal); color: var(--vm-on-signal); font: 600 14px/20px var(--vm-font-sans); }
+[data-surface="portal"] .vm-alert--critical { background: var(--vm-status-critical-tint); border-color: var(--vm-status-critical-fill); color: var(--vm-status-critical-text); }
+[data-surface="portal"] .vm-alert--attention { background: var(--vm-status-attention-tint); border-color: var(--vm-status-attention-fill); color: var(--vm-status-attention-text); }
 
 /* ---- Card ------------------------------------------------------------ */
 .vm-card { box-sizing: border-box; padding: var(--vm-space-6); background: var(--vm-surface); border: 1px solid var(--vm-line); border-radius: var(--vm-radius-lg); color: var(--vm-text); min-inline-size: 0; }

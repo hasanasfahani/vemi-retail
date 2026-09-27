@@ -15,7 +15,7 @@
    as a button would promise an action it does not perform. */
 
 import { useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { BAND_COLOR, BAND_EDGE, BAND_LABEL, type Band } from "./health";
+import { BAND_SWATCH, BAND_SWATCH_EDGE, BAND_LABEL, type Band } from "./health";
 import { BandChip } from "@/components/vemi/BandChip";
 import type { BandDetail } from "@/lib/market/bandDetail";
 
@@ -99,7 +99,7 @@ export default function StatusChip({
                 {row.band && (
                   <span
                     className="h-2 w-2 shrink-0 rounded-full"
-                    style={{ background: BAND_COLOR[row.band], boxShadow: `inset 0 0 0 1px ${BAND_EDGE[row.band]}` }}
+                    style={{ background: BAND_SWATCH[row.band], boxShadow: `inset 0 0 0 1px ${BAND_SWATCH_EDGE[row.band]}` }}
                     aria-hidden
                   />
                 )}
