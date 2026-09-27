@@ -1,101 +1,94 @@
 import { footer, ids } from "@/lib/v2Content";
 import { LogoBilingual } from "@/components/vemi/Logo";
+import { SignalField } from "@/components/vemi/SignalField";
+import Icon from "@/components/vemi/Icon";
+
+/* The close (brand refresh, phase 7). A Violet band set like a report
+   cover — white signal field at 14%, mono eyebrow, white headline, a
+   white button — then the Ink footer on the dark token set, so every
+   colour below comes from the tokens rather than white-at-some-alpha. */
+
+const onViolet =
+  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white focus-visible:shadow-none";
 
 export default function Footer() {
   return (
-    <footer className="relative overflow-hidden bg-[color:var(--vm-text)] text-white">
-      <div
-        aria-hidden="true"
-        className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet to-transparent"
-      />
-
-      <div className="pb-14 pt-16 sm:pb-16 sm:pt-20">
-        <div className="container-vemi">
-          <div className="grid items-end gap-8 border-b border-white/10 pb-8 lg:grid-cols-[1fr_auto] lg:gap-16 lg:pb-9">
-          <div className="max-w-3xl">
-            <span className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-primary-tint">
-              {footer.eyebrow}
-            </span>
-            <h2 className="mt-4 max-w-2xl font-display text-[clamp(30px,4vw,52px)] font-semibold leading-[1.02] tracking-[-0.02em] text-white">
+    <footer>
+      <section className="relative isolate overflow-hidden bg-primary text-white" aria-labelledby="closing-title">
+        <SignalField
+          colorway="violet"
+          fadeFrom="right"
+          cols={16}
+          rows={9}
+          seed={5}
+          className="absolute right-0 top-0 -z-10 hidden h-full w-[38%] lg:block"
+        />
+        <div className="container-vemi py-16 sm:py-20">
+          <div className="max-w-xl">
+            <span className="vm-label !text-white">{footer.eyebrow}</span>
+            <h2
+              id="closing-title"
+              className="mt-4 text-[36px] font-semibold leading-[44px] tracking-[-0.02em] sm:text-[44px] sm:leading-[52px]"
+            >
               {footer.headline}
             </h2>
-            <p className="mt-4 max-w-xl text-sm leading-6 text-white/55 sm:text-base">
-              {footer.body}
-            </p>
-          </div>
-
-          <div className="flex flex-col gap-3 sm:flex-row lg:flex-col xl:flex-row">
-            <a
-              href={footer.primaryCta.href}
-              data-demo-cta
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-violet px-5 py-3 text-sm font-semibold text-white transition hover:bg-violet-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-            >
-              {footer.primaryCta.label}
-              <svg
-                viewBox="0 0 20 20"
-                className="h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
+            <p className="mt-4 max-w-xl text-base leading-6 sm:text-lg sm:leading-7">{footer.body}</p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <a
+                href={footer.primaryCta.href}
+                data-demo-cta
+                className={`vm-btn bg-white !text-primary-text hover:bg-primary-tint ${onViolet}`}
               >
-                <path d="M4 10h12M11 5l5 5-5 5" />
-              </svg>
-            </a>
-            <a
-              href={footer.secondaryCta.href}
-              className="inline-flex min-h-12 items-center justify-center rounded-md border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/30 hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-            >
-              {footer.secondaryCta.label}
-            </a>
+                {footer.primaryCta.label}
+                <Icon name="arrow-right" size={16} />
+              </a>
+              <a
+                href={footer.secondaryCta.href}
+                className={`vm-btn border-white/70 bg-transparent text-white hover:bg-white/10 ${onViolet}`}
+              >
+                {footer.secondaryCta.label}
+              </a>
+            </div>
           </div>
         </div>
+      </section>
 
-          <div className="grid gap-8 py-8 md:grid-cols-[1.3fr_1fr] md:gap-16">
-          <div className="max-w-sm">
-            <a
-              href={`#${ids.top}`}
-              className="inline-flex"
-              aria-label="Vemi, back to top"
-            >
-              <LogoBilingual height={40} tone="onInk" title="" />
-            </a>
-            <p className="mt-4 text-sm leading-6 text-white/50">{footer.tagline}</p>
-            <p className="mt-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-white/65">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary-on-ink" aria-hidden="true" />
-              {footer.credibility}
-            </p>
+      <div data-theme="dark" className="bg-surface text-ink-900">
+        <div className="container-vemi">
+          <div className="grid gap-10 py-14 md:grid-cols-[1.3fr_1fr] md:gap-16">
+            <div className="max-w-sm">
+              <a href={`#${ids.top}`} className="inline-flex rounded-sm" aria-label="Vemi, back to top">
+                <LogoBilingual height={40} tone="onInk" title="" />
+              </a>
+              <p className="mt-5 text-sm leading-6 text-ink-500">{footer.tagline}</p>
+              <p className="mt-5 font-mono text-xs text-ink-500">{footer.credibility}</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-8 sm:gap-12">
+              {footer.columns.map((column) => (
+                <div key={column.title}>
+                  <span className="vm-label">{column.title}</span>
+                  <nav className="mt-3 flex flex-col" aria-label={`${column.title} links`}>
+                    {column.links.map((link) => (
+                      <a
+                        key={link.label}
+                        href={link.href}
+                        className="flex min-h-10 items-center text-sm font-medium text-ink-900 underline-offset-4 hover:underline"
+                      >
+                        {link.label}
+                      </a>
+                    ))}
+                  </nav>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-8 sm:gap-12">
-            {footer.columns.map((column) => (
-              <div key={column.title}>
-                <span className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-white/35">
-                  {column.title}
-                </span>
-                <nav className="mt-4 flex flex-col gap-3" aria-label={`${column.title} links`}>
-                  {column.links.map((link) => (
-                    <a
-                      key={link.label}
-                      href={link.href}
-                      className="text-sm font-medium text-white/60 transition-colors hover:text-white"
-                    >
-                      {link.label}
-                    </a>
-                  ))}
-                </nav>
-              </div>
-            ))}
-          </div>
-        </div>
-
-          <div className="flex flex-col gap-3 border-t border-white/10 pt-5 text-xs text-white/35 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-3 border-t border-line py-5 font-mono text-xs text-ink-500 sm:flex-row sm:items-center sm:justify-between">
             <span>
               © {new Date().getFullYear()} {footer.brand}. All rights reserved.
             </span>
-            <a href={`#${ids.top}`} className="font-medium text-white/50 transition-colors hover:text-white">
+            <a href={`#${ids.top}`} className="inline-flex min-h-10 items-center hover:text-ink-900">
               Back to top ↑
             </a>
           </div>

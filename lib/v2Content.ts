@@ -50,22 +50,25 @@ export const figures = {
 export const nav = {
   brand: "Vemi",
   links: [
-    { label: "Retail Intelligence", href: `#${ids.retail}` },
-    { label: "Insight to Action", href: `#${ids.action}` },
+    { label: "Retail intelligence", href: `#${ids.retail}` },
+    { label: "Insight to action", href: `#${ids.action}` },
     { label: "Trust", href: `#${ids.trust}` },
-    { label: "Market Intelligence", href: `#${ids.market}` },
+    { label: "Market intelligence", href: `#${ids.market}` },
     { label: "Pricing", href: `#${ids.request}` },
   ],
-  cta: { label: "Explore Dashboard", href: "/portal/performance" },
+  cta: { label: "Explore the dashboard", href: "/portal/performance" },
 };
 
 /* ---------- §1 Hero ----------------------------------------- */
 export const hero = {
-  headlineLines: ["See Every Shelf.", "Understand Your Market.", "Act Faster and Smarter."],
+  /* The brand tagline (plan D4), sentence case. */
+  eyebrow: "Market intelligence platform · Iraq",
+  headlineLines: ["See every shelf.", "Know every move.", "Win every decision."],
   subhead:
     "Turn verified shelf evidence into faster decisions across availability, execution, pricing, and competition.",
-  primaryCta: { label: "Explore Dashboard", href: "/portal/performance" },
+  primaryCta: { label: "Explore the dashboard", href: "/portal/performance" },
   secondaryCta: { label: "Get a quote", href: `#${ids.request}` },
+  proofLine: "1,000+ POS · 16 governorates · weekly field cycle",
   image: {
     src: "/images/v2/vemi-performance-dashboard.png",
     alt: "Vemi performance dashboard showing shelf availability, audit coverage, and channel comparisons",
@@ -93,8 +96,8 @@ export const gap = {
     actualLabel: "Verified on shelf",
     actualValue: 73,
     gapLabel: "Shelf verification gap",
-    gapBody: "The red segment shows reported distribution that Vemi could not verify on shelf.",
-    tag: "Live audit · Baghdad",
+    gapBody: "The outlined segment is reported distribution that Vemi could not verify on shelf.",
+    tag: "Sample figure · Baghdad",
     placeholder: true,
   },
 };
@@ -109,20 +112,20 @@ export const retailAudit = {
     "Trained auditors visit every outlet on a fixed weekly cycle and capture the shelf as it really is — measured, photographed, and verified.",
   capabilities: [
     { title: "Availability & OOS", short: "What is on shelf, what is missing, and where the gaps cost you most.", icon: "alert" },
-    { title: "Shelf Share & Facings", short: "Your linear share and facing count against every competitor.", icon: "bars" },
+    { title: "Shelf share & facings", short: "Your linear share and facing count against every competitor.", icon: "bars" },
     { title: "Pricing", short: "Shelf price, promo price, and drift from your recommended price.", icon: "tag" },
     { title: "Visibility", short: "Eye-level, end-cap, or bottom shelf — your real visibility.", icon: "eye" },
-    { title: "Planogram Compliance", short: "Whether the agreed layout is the layout actually executed.", icon: "planogram" },
+    { title: "Planogram compliance", short: "Whether the agreed layout is the layout actually executed.", icon: "planogram" },
     { title: "Promotions & POSM", short: "Every promotion and display material, yours and theirs.", icon: "photo" },
     { title: "Assortment", short: "Which of your range is listed, stocked, and reaching shoppers.", icon: "assortment" },
-    { title: "Competitor Tracking", short: "Side-by-side benchmarking on availability, share, price, and promos.", icon: "swap" },
+    { title: "Competitor tracking", short: "Side-by-side benchmarking on availability, share, price, and promos.", icon: "swap" },
   ] satisfies Capability[],
 };
 
 /* ---------- §4 See What's Happening. Know Where to Act. ----- */
 export const decisions = {
   eyebrow: "What you'll see",
-  headline: "See What's Happening. Know Where to Act.",
+  headline: "See what's happening. Know where to act.",
   subhead:
     "Every view answers a question you already ask in your Monday meeting — down to the outlet and the SKU.",
   cta: { label: "Explore the dashboard", href: `#${ids.request}` },
@@ -271,7 +274,7 @@ export const beyond = {
   pillars: [
     {
       key: "competitive",
-      title: "Competitive Intelligence",
+      title: "Competitive intelligence",
       tagline: "Know what they did before it shows up in your sales.",
       icon: "swap",
       body: "Closely connected to retail audit — the same store visits that measure your shelf also measure theirs.",
@@ -285,7 +288,7 @@ export const beyond = {
     },
     {
       key: "consumer",
-      title: "Consumer & Shopper Insights",
+      title: "Consumer & shopper insights",
       tagline: "Understand why the shopper chose them instead.",
       icon: "people",
       body: "Structured research run through the same field network that already stands in the aisle.",
@@ -299,7 +302,7 @@ export const beyond = {
     },
     {
       key: "market",
-      title: "Market & Demand Intelligence",
+      title: "Market & demand intelligence",
       tagline: "See where the category is going, not just where it has been.",
       icon: "trend",
       body: "The wider signals that decide whether your category grows next quarter.",
@@ -386,7 +389,7 @@ export const leadForm = {
     "Agency / Research",
     "Other",
   ],
-  submitLabel: "Get a Quote",
+  submitLabel: "Request quote",
   success: {
     title: "Quotation request received.",
     body: "Thank you — our team will review your scope and contact you within one business day.",
@@ -396,28 +399,28 @@ export const leadForm = {
 /* ---------- Footer ------------------------------------------ */
 export const footer = {
   brand: "Vemi",
-  tagline: "Verified retail and market intelligence for brands operating in Iraq.",
+  tagline: "The market intelligence platform for FMCG brands in Iraq, built on verified shelf evidence.",
   eyebrow: "From shelf evidence to market action",
   headline: "See the market clearly. Move before it changes.",
   body: "Explore the live workspace or define your coverage to receive a tailored retail-audit quotation.",
-  primaryCta: { label: "Explore Dashboard", href: "/portal/performance" },
-  secondaryCta: { label: "View Pricing", href: `#${ids.request}` },
+  primaryCta: { label: "Explore the dashboard", href: "/portal/performance" },
+  secondaryCta: { label: "View pricing", href: `#${ids.request}` },
   columns: [
     {
       title: "Platform",
       links: [
-        { label: "Retail Intelligence", href: `#${ids.retail}` },
-        { label: "Insight to Action", href: `#${ids.action}` },
-        { label: "Market Intelligence", href: `#${ids.market}` },
+        { label: "Retail intelligence", href: `#${ids.retail}` },
+        { label: "Insight to action", href: `#${ids.action}` },
+        { label: "Market intelligence", href: `#${ids.market}` },
         { label: "Pricing", href: `#${ids.request}` },
       ],
     },
     {
       title: "Company",
       links: [
-        { label: "Intelligence You Can Trust", href: `#${ids.trust}` },
+        { label: "Intelligence you can trust", href: `#${ids.trust}` },
         { label: "Proof", href: `#${ids.proof}` },
-        { label: "Get a Quote", href: `#${ids.request}` },
+        { label: "Get a quote", href: `#${ids.request}` },
       ],
     },
   ],

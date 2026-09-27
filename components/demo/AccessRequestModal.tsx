@@ -27,6 +27,9 @@ import {
   type FieldName,
 } from "@/lib/demoAccess";
 import { leadForm } from "@/lib/v2Content";
+import { Mark } from "@/components/vemi/Logo";
+import Icon from "@/components/vemi/Icon";
+import { TextField, SelectField } from "@/components/vemi/Field";
 
 type Phase = "form" | "provisioning" | "ready";
 
@@ -259,44 +262,47 @@ export default function AccessRequestModal() {
 
   const firstName = form.fullName.trim().split(/\s+/)[0];
 
+  const fieldProps = (name: FieldName) => ({
+    id: `access-${name}`,
+    name,
+    value: form[name],
+    error: errors[name],
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => setField(name, e.target.value),
+    onBlur: () => blurField(name),
+  });
+
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-end justify-center overflow-y-auto p-0 sm:items-center sm:p-6"
-      style={{ background: "var(--vm-scrim)" }}
+      className="vm-dialog-wrap !z-[100]"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) close();
       }}
     >
+      <div className="vm-scrim" aria-hidden="true" onMouseDown={close} />
       <div
         ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="access-title"
-        className="panel-in surface my-auto w-full max-w-[440px] rounded-b-none sm:rounded-b-lg"
+        className="vm-dialog max-w-[560px]"
       >
         {phase === "form" && (
           <form onSubmit={onSubmit} noValidate>
-            <div className="flex items-start justify-between gap-4 border-b border-line px-7 pb-5 pt-6">
+            <div className="flex items-start justify-between gap-4 px-6 pt-6">
               <div>
-                <span className="t-eyebrow">Platform access</span>
-                <h2 id="access-title" className="t-h3 mt-2">
-                  Explore the Dashboard
+                <Mark size={24} title="" />
+                <span className="vm-label mt-5 block text-primary-text">Platform access</span>
+                <h2 id="access-title" className="vm-dialog__title mt-2">
+                  Explore the dashboard
                 </h2>
-                <p className="mt-1.5 text-sm text-ink-500">
+                <p className="mt-2 text-[15px] leading-[22px] text-ink-500">
                   Add your details to open the Vemi dashboard and see how
                   availability, shelf share and competitor activity are
                   tracked.
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={close}
-                aria-label="Close"
-                className="-mr-2 -mt-1 shrink-0 rounded-md p-2 text-ink-400 transition-colors hover:bg-canvas hover:text-ink-900"
-              >
-                <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden>
-                  <path d="M5 5l10 10M15 5L5 15" />
-                </svg>
+              <button type="button" onClick={close} aria-label="Close" className="vm-iconbtn -me-2 -mt-2 shrink-0">
+                <Icon name="close" />
               </button>
             </div>
 
@@ -306,111 +312,77 @@ export default function AccessRequestModal() {
                 format and a wide select beside a cramped input was hard to
                 type into. `dialCode` stays in state as a fallback — the
                 endpoint only prepends it when the number has no "+". */}
-            <div className="space-y-4 px-7 py-6">
-              <Field
+            <div className="grid gap-4 px-6 py-6 sm:grid-cols-2">
+              <TextField
                 label="Full name"
-                name="fullName"
-                value={form.fullName}
-                error={errors.fullName}
+                ref={firstFieldRef}
                 autoComplete="name"
                 placeholder="Your name"
-                inputRef={firstFieldRef}
-                onChange={setField}
-                onBlur={blurField}
+                {...fieldProps("fullName")}
               />
-
-              <Field
+              <TextField
                 label="Company"
-                name="company"
-                value={form.company}
-                error={errors.company}
                 autoComplete="organization"
                 placeholder="Company name"
-                onChange={setField}
-                onBlur={blurField}
+                {...fieldProps("company")}
               />
-
-              <Field
+              <TextField
+                className="sm:col-span-2"
                 label="Work email"
-                name="email"
                 type="email"
-                value={form.email}
-                error={errors.email}
                 autoComplete="email"
                 placeholder="you@company.com"
-                onChange={setField}
-                onBlur={blurField}
+                {...fieldProps("email")}
               />
-
-              <Field
+              <TextField
+                className="sm:col-span-2"
                 label="Phone"
-                name="phone"
                 type="tel"
-                value={form.phone}
-                error={errors.phone}
+                inputMode="tel"
                 autoComplete="tel"
                 placeholder="e.g. +964 770 123 4567"
-                onChange={setField}
-                onBlur={blurField}
+                {...fieldProps("phone")}
               />
 
               {/* Industry, matching the pricing form — it is the one
                   qualifying answer sales needs before the call. */}
-              <div>
-                <label
-                  htmlFor="access-industry"
-                  className="mb-1.5 block text-sm font-semibold text-ink-900"
-                >
-                  Industry
-                </label>
-                <select
-                  id="access-industry"
-                  name="industry"
-                  value={industry}
+              <SelectField
+                className="sm:col-span-2"
+                label="Industry"
+                id="access-industry"
+                name="industry"
+                value={industry}
+                error={industry === "Other" ? undefined : industryError}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setIndustry(value);
+                  if (value !== "Other") setCustomIndustry("");
+                  setIndustryError(undefined);
+                }}
+              >
+                <option value="">Select your industry</option>
+                {leadForm.industries.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </SelectField>
+
+              {industry === "Other" && (
+                <TextField
+                  className="sm:col-span-2"
+                  label="Specify your industry"
+                  id="access-custom-industry"
+                  value={customIndustry}
+                  maxLength={100}
+                  error={industryError}
                   onChange={(e) => {
-                    const value = e.target.value;
-                    setIndustry(value);
-                    if (value !== "Other") setCustomIndustry("");
+                    setCustomIndustry(e.target.value);
                     setIndustryError(undefined);
                   }}
-                  className={`w-full rounded-md border bg-white px-3 py-2.5 text-[15px] outline-none transition-colors focus:border-violet ${
-                    industry ? "text-ink-900" : "text-ink-500"
-                  }`}
-                  style={{
-                    borderColor: industryError
-                      ? "var(--vm-danger)"
-                      : "var(--color-line-strong)",
-                  }}
-                >
-                  <option value="">Select your industry</option>
-                  {leadForm.industries.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-
-                {industry === "Other" && (
-                  <input
-                    aria-label="Specify your industry"
-                    value={customIndustry}
-                    maxLength={100}
-                    onChange={(e) => {
-                      setCustomIndustry(e.target.value);
-                      setIndustryError(undefined);
-                    }}
-                    placeholder="Enter your industry"
-                    className="mt-2 w-full rounded-md border bg-white px-3 py-2.5 text-[15px] text-ink-900 outline-none transition-colors focus:border-violet placeholder:text-ink-500"
-                    style={{
-                      borderColor: industryError
-                        ? "var(--vm-danger)"
-                        : "var(--color-line-strong)",
-                    }}
-                  />
-                )}
-
-                <FieldError message={industryError} />
-              </div>
+                  placeholder="Enter your industry"
+                />
+              )}
 
               {/* Honeypot — off-screen and out of the tab order. Only a
                   bot fills it, and the endpoint drops anything that does. */}
@@ -426,11 +398,11 @@ export default function AccessRequestModal() {
               />
             </div>
 
-            <div className="border-t border-line px-7 py-5">
-              <button type="submit" className="btn-primary w-full">
-                Access Dashboard
+            <div className="border-t border-line px-6 py-5">
+              <button type="submit" className="vm-btn vm-btn--primary vm-btn--block">
+                Open the dashboard
               </button>
-              <p className="mt-3 text-center text-xs text-ink-400">
+              <p className="mt-3 text-sm leading-5 text-ink-500">
                 We&apos;ll only use your details to follow up about Vemi.
               </p>
             </div>
@@ -438,22 +410,40 @@ export default function AccessRequestModal() {
         )}
 
         {phase !== "form" && (
-          <div className="px-7 py-12 text-center" aria-live="polite">
+          <div className="px-6 py-10" aria-live="polite">
+            <Mark size={24} title="" />
             {phase === "provisioning" ? (
               <>
-                <Spinner />
-                <p className="t-h3 mt-6">Opening the dashboard</p>
-                <p className="mt-1.5 h-5 text-sm text-ink-500">{STEPS[step]}</p>
+                <p className="vm-dialog__title mt-5">Opening the dashboard</p>
+                <ol className="mt-6 space-y-3 font-mono text-sm">
+                  {STEPS.map((label, i) => {
+                    const state = i < step ? "done" : i === step ? "now" : "next";
+                    return (
+                      <li
+                        key={label}
+                        className={`flex items-center gap-3 ${state === "next" ? "text-ink-500" : "text-ink-900"}`}
+                      >
+                        <span className="flex h-5 w-5 shrink-0 items-center justify-center" aria-hidden>
+                          {state === "done" ? (
+                            <Icon name="check" size={16} className="text-primary-text" />
+                          ) : state === "now" ? (
+                            <Spinner />
+                          ) : (
+                            <span className="h-1.5 w-1.5 rounded-full bg-line-strong" />
+                          )}
+                        </span>
+                        {label}
+                      </li>
+                    );
+                  })}
+                </ol>
               </>
             ) : (
               <>
-                <CheckMark />
-                <p className="t-h3 mt-6">
+                <p className="vm-dialog__title mt-5">
                   {firstName ? `You're in, ${firstName}` : "You're in"}
                 </p>
-                <p className="mt-1.5 text-sm text-ink-500">
-                  Opening the dashboard…
-                </p>
+                <p className="mt-2 font-mono text-sm text-ink-500">Opening the dashboard…</p>
               </>
             )}
           </div>
@@ -465,105 +455,16 @@ export default function AccessRequestModal() {
 
 /* ------------------------------------------------------------------ */
 
-function Field({
-  label,
-  name,
-  value,
-  error,
-  type = "text",
-  placeholder,
-  autoComplete,
-  inputRef,
-  onChange,
-  onBlur,
-}: {
-  label: string;
-  name: FieldName;
-  value: string;
-  error?: string;
-  type?: string;
-  placeholder?: string;
-  autoComplete?: string;
-  inputRef?: React.Ref<HTMLInputElement>;
-  onChange: (name: FieldName, value: string) => void;
-  onBlur: (name: FieldName) => void;
-}) {
-  const id = `access-${name}`;
-  return (
-    <div>
-      <label
-        htmlFor={id}
-        className="mb-1.5 block text-sm font-semibold text-ink-900"
-      >
-        {label}
-      </label>
-      <input
-        id={id}
-        ref={inputRef}
-        name={name}
-        type={type}
-        value={value}
-        placeholder={placeholder}
-        autoComplete={autoComplete}
-        aria-invalid={Boolean(error)}
-        onChange={(e) => onChange(name, e.target.value)}
-        onBlur={() => onBlur(name)}
-        className="w-full rounded-md border bg-white px-3 py-2.5 text-[15px] text-ink-900 outline-none transition-colors focus:border-violet placeholder:text-ink-400"
-        style={{
-          borderColor: error
-            ? "var(--vm-danger)"
-            : "var(--color-line-strong)",
-        }}
-      />
-      <FieldError message={error} />
-    </div>
-  );
-}
-
-function FieldError({ message }: { message?: string }) {
-  if (!message) return null;
-  return (
-    <p
-      className="mt-1.5 text-sm font-medium"
-      style={{ color: "var(--vm-danger)" }}
-    >
-      {message}
-    </p>
-  );
-}
-
 function Spinner() {
   return (
     <svg
-      viewBox="0 0 44 44"
-      className="mx-auto h-11 w-11 animate-spin"
+      viewBox="0 0 20 20"
+      className="h-4 w-4 animate-spin motion-reduce:animate-none"
       style={{ animationDuration: "900ms" }}
       aria-hidden
     >
-      <circle cx="22" cy="22" r="18" fill="none" stroke="var(--color-line)" strokeWidth="3" />
-      <path
-        d="M22 4a18 18 0 0 1 18 18"
-        fill="none"
-        stroke="var(--color-violet)"
-        strokeWidth="3"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function CheckMark() {
-  return (
-    <svg viewBox="0 0 44 44" className="mx-auto h-11 w-11" aria-hidden>
-      <circle cx="22" cy="22" r="18" fill="none" stroke="var(--color-violet)" strokeWidth="3" />
-      <path
-        d="M14 22.5l5.5 5.5L30 17"
-        fill="none"
-        stroke="var(--color-violet)"
-        strokeWidth="3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <circle cx="10" cy="10" r="7.5" fill="none" stroke="var(--vm-line)" strokeWidth="2" />
+      <path d="M10 2.5a7.5 7.5 0 0 1 7.5 7.5" fill="none" stroke="var(--vm-primary)" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }

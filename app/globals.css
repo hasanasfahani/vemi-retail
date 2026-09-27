@@ -641,3 +641,21 @@
   box-shadow: var(--vm-shadow-raised) !important;
   overflow: hidden;
 }
+
+/* The Insight V settling in on load: each row of the mark lands in
+   turn (surface, convergence, insight point), ~600ms in all. */
+@keyframes insightVIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+.insight-v-block {
+  transform-box: fill-box;
+  animation: insightVIn 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .insight-v-block {
+    animation: none;
+  }
+}

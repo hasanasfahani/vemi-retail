@@ -1,18 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { retailAudit } from "@/lib/v2Content";
 import Icon from "@/components/vemi/Icon";
 import Sparkline from "@/components/ui/Sparkline";
 import PlanogramScene, { type SlotState } from "@/components/v2/PlanogramScene";
+import { BandChip } from "@/components/vemi/BandChip";
+import { ConfidenceBadge } from "@/components/vemi/ConfidenceBadge";
+import { Gauge } from "@/components/vemi/Gauge";
 
 /* The eight retail-audit capabilities, each with a representative live
    widget. One preview at a time — the list stays scannable, the panel
    carries the proof. */
 
 const caps = retailAudit.capabilities;
-const comp = ["var(--color-comp-1)", "var(--color-comp-2)", "var(--color-comp-3)"];
+/* Brand series order: your brand, the key competitor, everyone else. */
+const comp = ["var(--vm-chart-2)", "var(--vm-chart-3)", "var(--vm-line-strong)"];
 
 function Row({ children }: { children: React.ReactNode }) {
   return <div className="flex items-center gap-3">{children}</div>;
@@ -98,38 +102,16 @@ function CountUp({ to, durationMs = 1100 }: { to: number; durationMs?: number })
   return <>{display}</>;
 }
 
-/* Visibility score as a sweeping arc. The preview panel remounts on every
-   capability change, so the sweep replays each time Visibility is picked. */
-function ScoreRing({ value, size = 104 }: { value: number; size?: number }) {
-  const reduceMotion = useReducedMotion();
-  const stroke = 9;
-  const r = (size - stroke) / 2;
-  const c = 2 * Math.PI * r;
-
+/* Visibility score: the figure over a 0–100 gauge (the brand avoids
+   donut forms). Counts up each time Visibility is picked. */
+function ScoreRing({ value }: { value: number; size?: number }) {
   return (
-    <div className="relative" style={{ width: size, height: size }}>
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90" aria-hidden>
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--color-line)" strokeWidth={stroke} />
-        <motion.circle
-          cx={size / 2}
-          cy={size / 2}
-          r={r}
-          fill="none"
-          stroke="var(--color-violet)"
-          strokeWidth={stroke}
-          strokeLinecap="round"
-          strokeDasharray={c}
-          initial={reduceMotion ? false : { strokeDashoffset: c }}
-          animate={{ strokeDashoffset: c * (1 - value / 100) }}
-          transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
-        />
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="tnum text-[28px]" style={{ color: "var(--color-violet-ink)" }}>
-          <CountUp to={value} />
-        </span>
-        <span className="text-xs text-ink-600">/ 100</span>
-      </div>
+    <div className="flex w-full max-w-[180px] flex-col">
+      <span className="tnum text-[44px] leading-[48px]">
+        <CountUp to={value} />
+        <span className="ml-1 font-mono text-xs font-medium tracking-normal text-ink-500">/ 100</span>
+      </span>
+      <Gauge className="mt-3" value={value} label={`Visibility score ${value} of 100`} />
     </div>
   );
 }
@@ -138,7 +120,7 @@ function Bar({
   label,
   value,
   scale,
-  tone = "var(--color-violet)",
+  tone = "var(--vm-chart-1)",
   strong,
   suffix = "%",
   delay = 0,
@@ -153,7 +135,7 @@ function Bar({
 }) {
   return (
     <Row>
-      <span className={`w-28 shrink-0 truncate text-xs ${strong ? "font-semibold text-ink-900" : "text-ink-500"}`}>
+      <span className={`w-28 shrink-0 truncate text-sm ${strong ? "font-semibold text-ink-900" : "text-ink-500"}`}>
         {label}
       </span>
       <div className="h-3 flex-1 overflow-hidden rounded-sm bg-line">
@@ -164,7 +146,7 @@ function Bar({
           delay={delay}
         />
       </div>
-      <span className="tnum w-10 shrink-0 text-right text-xs">
+      <span className="w-12 shrink-0 text-right font-mono text-sm font-medium text-ink-900">
         {value}
         {suffix}
       </span>
@@ -173,12 +155,8 @@ function Bar({
 }
 
 function StatusPill({ tone, children }: { tone: "good" | "warn" | "critical"; children: React.ReactNode }) {
-  const color = `var(--color-${tone === "good" ? "good" : tone === "warn" ? "warn" : "critical"})`;
   return (
-    <span className={`pill pill-${tone}`}>
-      <span className="dot" style={{ background: color }} />
-      {children}
-    </span>
+    <BandChip band={tone === "good" ? "strong" : tone === "warn" ? "attention" : "critical"} label={String(children)} size="sm" />
   );
 }
 
@@ -189,38 +167,38 @@ function Preview({ title }: { title: string }) {
         <div>
           <div className="flex items-end justify-between">
             <div>
-              <span className="t-eyebrow">On-shelf availability</span>
-              <div className="tnum text-[28px]">73%</div>
+              <span className="vm-label">On-shelf availability</span>
+              <div className="tnum mt-1 text-[44px] leading-[48px]">73%</div>
             </div>
             <ChartReveal>
               <Sparkline data={[66, 68, 67, 70, 71, 70, 72, 73]} />
             </ChartReveal>
           </div>
-          <div className="mt-4 flex h-3 gap-0.5 overflow-hidden rounded-sm">
-            <AnimatedFill className="h-full shrink-0" width="73%" tone="var(--color-violet)" />
-            <AnimatedFill className="h-full shrink-0" width="15%" tone="var(--color-critical)" delay={0.16} />
-            <AnimatedFill className="h-full shrink-0" width="12%" tone="var(--color-warn)" delay={0.28} />
+          <div className="mt-5 flex h-5 gap-0.5 overflow-hidden rounded-sm">
+            <AnimatedFill className="h-full shrink-0" width="73%" tone="var(--vm-chart-1)" />
+            <AnimatedFill className="h-full shrink-0" width="15%" tone="var(--vm-chart-2)" delay={0.16} />
+            <AnimatedFill className="h-full shrink-0" width="12%" tone="var(--vm-chart-3)" delay={0.28} />
           </div>
-          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink-500">
-            <span className="flex items-center gap-1.5"><span className="dot" style={{ background: "var(--color-violet)" }} />On shelf 73%</span>
-            <span className="flex items-center gap-1.5"><span className="dot" style={{ background: "var(--color-critical)" }} />Out of stock 15%</span>
-            <span className="flex items-center gap-1.5"><span className="dot" style={{ background: "var(--color-warn)" }} />Misplaced 12%</span>
+          <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm text-ink-700">
+            <span className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-[3px]" style={{ background: "var(--vm-chart-1)" }} />On shelf 73%</span>
+            <span className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-[3px]" style={{ background: "var(--vm-chart-2)" }} />Out of stock 15%</span>
+            <span className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-[3px]" style={{ background: "var(--vm-chart-3)" }} />Misplaced 12%</span>
           </div>
         </div>
       );
 
-    case "Shelf Share & Facings":
+    case "Shelf share & facings":
       return (
         <div className="flex flex-col gap-2.5">
           {[
-            { l: "Your brand", v: 28, s: true, t: "var(--color-violet)" },
+            { l: "Your brand", v: 28, s: true, t: "var(--vm-chart-1)" },
             { l: "Competitor A", v: 22, t: comp[0] },
             { l: "Competitor B", v: 18, t: comp[1] },
             { l: "Competitor C", v: 12, t: comp[2] },
           ].map((b, index) => (
             <Bar key={b.l} label={b.l} value={b.v} scale={34} tone={b.t} strong={b.s} delay={index * 0.08} />
           ))}
-          <p className="mt-1 text-xs text-ink-600">Linear share of the category shelf · 46 facings counted</p>
+          <p className="mt-2 font-mono text-xs text-ink-500">Linear share of the category shelf · 46 facings counted</p>
         </div>
       );
 
@@ -228,7 +206,7 @@ function Preview({ title }: { title: string }) {
       return (
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-line uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-600">
+            <tr className="border-b border-line font-mono text-xs font-medium uppercase tracking-[0.1em] text-ink-500">
               <th className="pb-2 font-medium">SKU</th>
               <th className="pb-2 text-right font-medium">Shelf</th>
               <th className="pb-2 text-right font-medium">RRP</th>
@@ -257,9 +235,9 @@ function Preview({ title }: { title: string }) {
     case "Visibility":
       return (
         <div className="grid items-center gap-5 sm:grid-cols-[auto_1fr]">
-          <div className="mx-auto flex flex-col items-center sm:mx-0">
+          <div className="flex flex-col">
             <ScoreRing value={68} />
-            <div className="mt-2 text-center text-xs text-ink-600">Visibility score</div>
+            <div className="vm-label mt-2">Visibility score</div>
           </div>
 
           <div className="flex flex-col gap-2">
@@ -270,29 +248,29 @@ function Preview({ title }: { title: string }) {
               { p: "Bottom", v: 16, prime: false },
             ].map((x, index) => (
               <Row key={x.p}>
-                <span className={`w-20 shrink-0 text-xs ${x.prime ? "font-semibold text-ink-900" : "text-ink-500"}`}>
+                <span className={`w-20 shrink-0 text-sm ${x.prime ? "font-semibold text-ink-900" : "text-ink-500"}`}>
                   {x.p}
                 </span>
                 <div className="h-2.5 flex-1 overflow-hidden rounded-sm bg-line">
                   <AnimatedFill
                     className="h-full rounded-sm"
                     width={`${x.v}%`}
-                    tone={x.prime ? "var(--color-violet)" : "var(--color-comp-1)"}
+                    tone={x.prime ? "var(--vm-chart-1)" : "var(--vm-chart-3)"}
                     delay={index * 0.08}
                   />
                 </div>
-                <span className="tnum w-8 shrink-0 text-right text-xs">{x.v}%</span>
+                <span className="w-10 shrink-0 text-right font-mono text-sm text-ink-900">{x.v}%</span>
               </Row>
             ))}
-            <p className="mt-1 text-xs text-ink-600">
-              <span className="font-semibold text-ink-700">54%</span> of your facings sit in prime
+            <p className="mt-2 text-sm text-ink-500">
+              <span className="font-semibold text-ink-900">54%</span> of your facings sit in prime
               positions · 46 facings counted
             </p>
           </div>
         </div>
       );
 
-    case "Planogram Compliance": {
+    case "Planogram compliance": {
       /* Before / after the same bay, the way the portal shows a
          follow-up audit: the agreed layout, the deviations found, and
          the corrected shelf on the next visit. */
@@ -311,37 +289,37 @@ function Preview({ title }: { title: string }) {
         <div>
           <div className="flex items-end justify-between gap-3">
             <div>
-              <span className="t-eyebrow">Compliance</span>
-              <div className="mt-0.5 flex items-baseline gap-2">
-                <span className="tnum !text-lg text-ink-500 line-through">83%</span>
-                <span aria-hidden className="text-ink-400">&rarr;</span>
-                <span className="tnum text-[28px]">
+              <span className="vm-label">Compliance</span>
+              <div className="mt-1 flex items-baseline gap-2">
+                <span className="tnum !text-lg !text-ink-500 line-through">83%</span>
+                <span aria-hidden className="text-ink-500">&rarr;</span>
+                <span className="tnum text-[44px] leading-[48px]">
                   <CountUp to={100} />%
                 </span>
               </div>
             </div>
-            <StatusPill tone="warn">3 deviations fixed</StatusPill>
+            <ConfidenceBadge level="measured" size="sm">Verified on re-audit</ConfidenceBadge>
           </div>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <figure className="min-w-0">
-              <figcaption className="mb-1.5 uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-600">
+              <figcaption className="vm-label mb-2">
                 Before &middot; audit
               </figcaption>
               <PlanogramScene rows={before} />
             </figure>
             <figure className="min-w-0">
-              <figcaption className="mb-1.5 uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-600">
+              <figcaption className="vm-label mb-2">
                 After &middot; re-audit
               </figcaption>
               <PlanogramScene rows={after} />
             </figure>
           </div>
 
-          <div className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink-500">
-            <span className="flex items-center gap-1.5"><span className="dot" style={{ background: "var(--color-violet)" }} />As planned</span>
-            <span className="flex items-center gap-1.5"><span className="dot" style={{ background: "var(--color-warn)" }} />Wrong SKU</span>
-            <span className="flex items-center gap-1.5"><span className="dot" style={{ background: "var(--color-critical)" }} />Empty slot</span>
+          <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm text-ink-700">
+            <span className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-[3px]" style={{ background: "var(--vm-chart-1)" }} />As planned</span>
+            <span className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-[3px]" style={{ background: "var(--vm-chart-3)" }} />Wrong SKU</span>
+            <span className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-[3px] border border-dashed border-ink-900" />Empty slot</span>
           </div>
         </div>
       );
@@ -349,7 +327,7 @@ function Preview({ title }: { title: string }) {
 
     case "Promotions & POSM":
       return (
-        <div className="flex flex-col divide-y divide-[color:var(--color-line)]">
+        <div className="flex flex-col divide-y divide-line">
           {[
             { w: "20% multi-buy bundle", who: "Competitor A · Baghdad", t: "2d ago" },
             { w: "Gondola end-cap display", who: "Competitor B · Basra", t: "4d ago" },
@@ -357,7 +335,7 @@ function Preview({ title }: { title: string }) {
           ].map((p) => (
             <div key={p.w} className="flex items-center gap-3 py-2.5 first:pt-0">
               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary-tint">
-                <Icon name="photo" className="h-4 w-4 text-violet-ink" />
+                <Icon name="photo" className="h-4 w-4 text-primary-text" />
               </span>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-ink-900">{p.w}</p>
@@ -373,7 +351,7 @@ function Preview({ title }: { title: string }) {
       return (
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-line uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-600">
+            <tr className="border-b border-line font-mono text-xs font-medium uppercase tracking-[0.1em] text-ink-500">
               <th className="pb-2 font-medium">SKU</th>
               <th className="pb-2 text-center font-medium">Listed</th>
               <th className="pb-2 text-center font-medium">In store</th>
@@ -391,9 +369,9 @@ function Preview({ title }: { title: string }) {
                 <td className="py-2 font-medium text-ink-900">{r.s}</td>
                 {[r.a, r.b, r.c].map((v, i) => (
                   <td key={i} className="py-2 text-center">
+                    {/* filled = yes, hollow ring = no: shape, not green/grey */}
                     <span
-                      className="inline-block h-2.5 w-2.5 rounded-full"
-                      style={{ background: v ? "var(--color-good)" : "var(--color-line-strong)" }}
+                      className={`inline-block h-3 w-3 rounded-full ${v ? "bg-primary" : "border-2 border-line-strong"}`}
                       aria-label={v ? "yes" : "no"}
                     />
                   </td>
@@ -404,11 +382,11 @@ function Preview({ title }: { title: string }) {
         </table>
       );
 
-    case "Competitor Tracking":
+    case "Competitor tracking":
       return (
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-line uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-600">
+            <tr className="border-b border-line font-mono text-xs font-medium uppercase tracking-[0.1em] text-ink-500">
               <th className="pb-2 font-medium">Brand</th>
               <th className="pb-2 text-right font-medium">Avail.</th>
               <th className="pb-2 text-right font-medium">Share</th>
@@ -423,7 +401,7 @@ function Preview({ title }: { title: string }) {
               { b: "Competitor C", a: 59, s: 12, p: 0 },
             ].map((r) => (
               <tr key={r.b} className={`border-b border-line last:border-0 ${r.me ? "bg-primary-tint" : ""}`}>
-                <td className={`py-2 ${r.me ? "font-semibold text-violet-ink" : "font-medium text-ink-900"}`}>{r.b}</td>
+                <td className={`py-2 ${r.me ? "font-semibold text-primary-text" : "font-medium text-ink-900"}`}>{r.b}</td>
                 <td className="mono py-2 text-right text-ink-700">{r.a}%</td>
                 <td className="mono py-2 text-right text-ink-700">{r.s}%</td>
                 <td className="mono py-2 text-right text-ink-500">{r.p}</td>
@@ -441,51 +419,76 @@ function Preview({ title }: { title: string }) {
 export default function CapabilityExplorer() {
   const [active, setActive] = useState(0);
   const current = caps[active];
+  const refs = useRef<Array<HTMLButtonElement | null>>([]);
+
+  /* Vertical tabs: up / down / Home / End move between capabilities. */
+  const onKey = (e: KeyboardEvent, i: number) => {
+    const n = caps.length;
+    const next =
+      e.key === "ArrowDown" ? (i + 1) % n
+      : e.key === "ArrowUp" ? (i - 1 + n) % n
+      : e.key === "Home" ? 0
+      : e.key === "End" ? n - 1
+      : -1;
+    if (next < 0) return;
+    e.preventDefault();
+    setActive(next);
+    refs.current[next]?.focus();
+  };
 
   return (
-    <div className="grid gap-5 lg:grid-cols-[0.92fr_1.08fr] lg:items-stretch">
-      {/* capability list */}
-      <div className="flex flex-col gap-1.5">
+    <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-stretch">
+      {/* capabilities: vertical tabs; the current one is a Violet 100 pill */}
+      <div className="flex flex-col gap-1" role="tablist" aria-orientation="vertical" aria-label="Retail intelligence capabilities">
         {caps.map((c, i) => {
           const on = i === active;
           return (
             <button
               key={c.title}
+              ref={(el) => { refs.current[i] = el; }}
+              type="button"
+              role="tab"
+              id={`cap-tab-${i}`}
+              aria-selected={on}
+              aria-controls="cap-panel"
+              tabIndex={on ? 0 : -1}
               onMouseEnter={() => setActive(i)}
               onClick={() => setActive(i)}
-              aria-pressed={on}
-              className={`flex items-start gap-3 rounded-md border px-3.5 py-3 text-left transition-colors ${
-                on ? "border-violet/30 bg-primary-tint" : "border-transparent hover:bg-canvas"
+              onKeyDown={(e) => onKey(e, i)}
+              className={`flex items-start gap-4 rounded-md px-4 py-3 text-left transition-colors ${
+                on ? "bg-primary-tint" : "hover:bg-canvas"
               }`}
             >
               <span
-                className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md border ${
-                  on ? "border-transparent bg-violet text-white" : "border-line text-ink-700"
+                className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-md ${
+                  on ? "bg-primary text-white" : "border border-line text-ink-700"
                 }`}
               >
-                <Icon name={c.icon} className="h-4 w-4" />
+                <Icon name={c.icon} size={20} />
               </span>
               <span className="min-w-0">
-                <span className={`block text-[15px] font-semibold ${on ? "text-violet-ink" : "text-ink-900"}`}>
+                <span className={`block text-[15px] font-semibold ${on ? "text-primary-text" : "text-ink-900"}`}>
                   {c.title}
                 </span>
-                <span className="mt-0.5 block text-xs leading-relaxed text-ink-500">{c.short}</span>
+                <span className="mt-0.5 block text-sm text-ink-500">{c.short}</span>
               </span>
             </button>
           );
         })}
       </div>
 
-      {/* live preview */}
-      <div className="surface flex flex-col overflow-hidden lg:sticky lg:top-24 lg:self-start">
-        <div className="flex items-center justify-between border-b border-line px-4 py-2.5">
-          <span className="text-sm font-semibold text-ink-900">{current.title}</span>
-          <span className="inline-flex items-center gap-1.5 text-xs text-ink-500">
-            <span className="dot dot-live" style={{ background: "var(--color-good)" }} />
-            Live preview
-          </span>
+      {/* the preview: a product card, figures labelled as samples */}
+      <div
+        id="cap-panel"
+        role="tabpanel"
+        aria-labelledby={`cap-tab-${active}`}
+        className="vm-card flex flex-col !p-0 lg:sticky lg:top-24 lg:self-start"
+      >
+        <div className="flex items-center justify-between gap-3 border-b border-line px-6 py-4">
+          <span className="text-lg font-semibold text-ink-900">{current.title}</span>
+          <ConfidenceBadge level="estimated" size="sm">Sample figure</ConfidenceBadge>
         </div>
-        <div key={active} className="panel-in flex flex-1 flex-col justify-center p-5" style={{ minHeight: 260 }}>
+        <div key={active} className="panel-in flex flex-1 flex-col justify-center p-6" style={{ minHeight: 280 }}>
           <Preview title={current.title} />
         </div>
       </div>

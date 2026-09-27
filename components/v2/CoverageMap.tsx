@@ -45,66 +45,43 @@ const ROUTES = [
   ["Nasiriyah", "Basra"],
 ] as const;
 
+/* The field network (brand refresh, phase 7): a white card, the country
+   a flat Violet 100 fill with a Violet hairline, hubs as solid Violet
+   dots (the capital larger). No gradient, glow, blur or drop shadow.
+   Labels are HTML so they hold 12px at every width. */
 export default function CoverageMap() {
   const [hover, setHover] = useState<Pin | null>(null);
 
   return (
-    <div
-      className="relative overflow-hidden rounded-xl border border-primary-tint p-4 sm:p-5"
-      style={{ background: "radial-gradient(circle at 78% 12%, var(--vm-surface) 0%, var(--vm-surface) 44%, var(--vm-primary-tint) 100%)" }}
-    >
-      <div aria-hidden className="absolute -right-16 -top-16 h-44 w-44 rounded-full bg-primary-tint/60 blur-3xl" />
-
-      <div className="relative flex items-center justify-between gap-4">
+    <div className="rounded-xl border border-line bg-white p-5 sm:p-6">
+      <div className="flex items-start justify-between gap-4">
         <div>
-          <span className="inline-flex items-center gap-2 uppercase font-mono text-xs font-medium tracking-[0.1em] text-violet-ink">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full rounded-full bg-violet opacity-30" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-violet" />
-            </span>
+          <span className="vm-label inline-flex items-center gap-2 text-primary-text">
+            <span aria-hidden className="h-2 w-2 rounded-full bg-primary" />
             Active field network
           </span>
-          <p className="mt-1 font-display text-lg font-semibold tracking-tight text-ink-900">Iraq coverage</p>
+          <p className="mt-1 text-lg font-semibold leading-6 text-ink-900">Iraq coverage</p>
         </div>
-        <span className="rounded-full border border-primary-tint bg-white/80 px-3 py-1.5 text-xs font-semibold text-violet-ink shadow-sm backdrop-blur">
-          {PINS.length} coverage hubs
+        <span className="rounded-sm border border-line px-2 py-1 font-mono text-xs text-ink-500">
+          {PINS.length} hubs
         </span>
       </div>
 
-      <div className="relative mx-auto mt-3 w-[88%]" style={{ aspectRatio: `${VIEW.w} / ${VIEW.h}` }}>
+      <div className="relative mx-auto mt-4 w-[88%] max-w-[420px]" style={{ aspectRatio: `${VIEW.w} / ${VIEW.h}` }}>
         <svg
           viewBox={`0 0 ${VIEW.w} ${VIEW.h}`}
-          className="h-full w-full"
+          className="h-full w-full overflow-visible"
           role="img"
           aria-label={`Map of Iraq showing Vemi coverage across ${PINS.length} governorate capitals: ${PINS.map((p) => p.name).join(", ")}.`}
         >
-          <defs>
-            <linearGradient id="v2IraqFill" x1="0" y1="0" x2="0.5" y2="1">
-              <stop offset="0" stopColor="var(--vm-primary-tint)" />
-              <stop offset="0.55" stopColor="var(--vm-primary-tint)" />
-              <stop offset="1" stopColor="var(--vm-surface)" />
-            </linearGradient>
-            <pattern id="v2MapGrid" width="5" height="5" patternUnits="userSpaceOnUse">
-              <path d="M5 0H0V5" fill="none" stroke="var(--vm-primary)" strokeOpacity="0.08" strokeWidth="0.25" />
-            </pattern>
-            <clipPath id="v2IraqClip">
-              <path d={IRAQ_PATH} />
-            </clipPath>
-            <filter id="v2MapShadow" x="-25%" y="-25%" width="150%" height="160%">
-              <feDropShadow dx="0" dy="2" stdDeviation="2.2" floodColor="var(--vm-text)" floodOpacity="0.18" />
-            </filter>
-          </defs>
-
           <path
             d={IRAQ_PATH}
-            fill="url(#v2IraqFill)"
-            stroke="var(--color-violet)"
-            strokeOpacity="0.48"
-            strokeWidth="0.8"
+            fill="var(--vm-primary-tint)"
+            stroke="var(--vm-primary)"
+            strokeOpacity="0.5"
+            strokeWidth="0.6"
             strokeLinejoin="round"
-            filter="url(#v2MapShadow)"
           />
-          <rect width={VIEW.w} height={VIEW.h} fill="url(#v2MapGrid)" clipPath="url(#v2IraqClip)" />
 
           <g aria-hidden>
             {ROUTES.map(([from, to]) => {
@@ -118,9 +95,9 @@ export default function CoverageMap() {
                   y1={start.y}
                   x2={end.x}
                   y2={end.y}
-                  stroke="var(--color-violet)"
-                  strokeOpacity="0.26"
-                  strokeWidth="0.55"
+                  stroke="var(--vm-primary)"
+                  strokeOpacity="0.35"
+                  strokeWidth="0.45"
                   strokeDasharray="1.4 1.6"
                   strokeLinecap="round"
                 />
@@ -130,11 +107,10 @@ export default function CoverageMap() {
 
           {PINS.map((p) => {
             const on = hover?.name === p.name;
-            const labelX = p.label === "left" ? p.x - 3 : p.x + 3;
             return (
               <g
                 key={p.name}
-                className="cursor-pointer"
+                className="cursor-pointer outline-none"
                 onMouseEnter={() => setHover(p)}
                 onMouseLeave={() => setHover(null)}
                 onFocus={() => setHover(p)}
@@ -144,52 +120,53 @@ export default function CoverageMap() {
                 aria-label={p.name}
               >
                 <circle cx={p.x} cy={p.y} r="4.2" fill="transparent" />
-                <circle cx={p.x} cy={p.y} r={on ? 3.3 : p.capital ? 2.9 : 2.35} fill="var(--color-violet)" opacity={on ? 0.2 : 0.11} />
+                {on && <circle cx={p.x} cy={p.y} r="3.2" fill="none" stroke="var(--vm-primary)" strokeWidth="0.6" />}
                 <circle
                   cx={p.x}
                   cy={p.y}
-                  r={on ? 1.9 : p.capital ? 1.6 : 1.25}
-                  fill="var(--color-violet)"
+                  r={p.capital ? 1.8 : 1.3}
+                  fill="var(--vm-primary)"
                   stroke="var(--vm-surface)"
-                  strokeWidth="0.75"
-                  style={{ transition: "r 180ms ease" }}
+                  strokeWidth="0.6"
                 />
-                {p.label && (
-                  <text
-                    x={labelX}
-                    y={p.y + 0.9}
-                    textAnchor={p.label === "left" ? "end" : "start"}
-                    fontSize="2.75"
-                    fontWeight={p.capital ? 700 : 600}
-                    fill={on ? "var(--color-ink-900)" : "var(--color-ink-700)"}
-                    stroke="var(--vm-surface)"
-                    strokeWidth="0.9"
-                    paintOrder="stroke"
-                    style={{ fontFamily: "var(--vm-font-sans)" }}
-                  >
-                    {p.name}
-                  </text>
-                )}
               </g>
             );
           })}
         </svg>
 
+        {/* standing labels for the anchor hubs */}
+        {PINS.filter((p) => p.label).map((p) => (
+          <span
+            key={p.name}
+            aria-hidden
+            className={`pointer-events-none absolute -translate-y-1/2 whitespace-nowrap rounded-sm bg-white/90 px-1 font-mono text-xs leading-4 ${
+              p.capital ? "font-medium text-ink-900" : "text-ink-700"
+            } ${p.label === "left" ? "-translate-x-full" : ""}`}
+            style={{
+              left: `calc(${p.x}% ${p.label === "left" ? "- 8px" : "+ 8px"})`,
+              top: `${(p.y / VIEW.h) * 100}%`,
+            }}
+          >
+            {p.name}
+          </span>
+        ))}
+
         {hover && !hover.label && (
           <div
-            className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full rounded-md border border-primary-tint bg-white px-2.5 py-1 text-xs font-semibold text-ink-900 shadow-[var(--vm-shadow-overlay)]"
-            style={{ left: `${hover.x}%`, top: `calc(${(hover.y / VIEW.h) * 100}% - 6px)` }}
+            className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full rounded-sm border border-line bg-white px-2 py-1 font-mono text-xs text-ink-900 shadow-[var(--vm-shadow-overlay)]"
+            style={{ left: `${hover.x}%`, top: `calc(${(hover.y / VIEW.h) * 100}% - 10px)` }}
           >
             {hover.name}
           </div>
         )}
       </div>
 
-      <div className="relative mt-3 flex items-center gap-3 border-t border-primary-tint pt-3 text-xs text-ink-500">
-        <span className="inline-flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-violet" />
+      <div className="mt-4 flex items-center justify-between gap-3 border-t border-line pt-3 font-mono text-xs text-ink-500">
+        <span className="inline-flex items-center gap-2">
+          <span aria-hidden className="h-2 w-2 rounded-full bg-primary" />
           Field coverage hub
         </span>
+        <span>Governorate capitals</span>
       </div>
     </div>
   );

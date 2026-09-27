@@ -146,7 +146,7 @@ export default function FullDemoModal({
               Thank you — our team will be in touch within one business day to walk
               you through the full platform.
             </p>
-            <button type="button" onClick={onClose} className="btn-secondary mt-6">
+            <button type="button" onClick={onClose} className="vm-btn vm-btn--secondary mt-6">
               Back to the dashboard
             </button>
           </div>
@@ -236,7 +236,7 @@ export default function FullDemoModal({
             <button
               type="submit"
               disabled={status === "sending"}
-              className="btn-primary mt-6 w-full disabled:opacity-70"
+              className="vm-btn vm-btn--primary vm-btn--block mt-6"
             >
               {status === "sending" ? "Sending…" : "Request full demo"}
             </button>

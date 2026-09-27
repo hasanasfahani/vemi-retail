@@ -2,98 +2,85 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import { gap } from "@/lib/v2Content";
-import { Figure } from "@/components/v2/Figure";
+import { ConfidenceBadge } from "@/components/vemi/ConfidenceBadge";
 
-/* The section's whole argument in one figure: what the paperwork claims,
-   what the shelf actually shows, and the hatched distance between them. */
+/* The section's whole argument in one small chart card: what the
+   paperwork claims (Slate), what the shelf shows (Violet), and the
+   distance between them, outlined in Ink rather than painted red.
+   Figures are illustrative and say so. */
 
 const w = gap.widget;
 const delta = w.reportedValue - w.actualValue;
 
-export default function GapWidget() {
+function Row({
+  label,
+  value,
+  color,
+  strong,
+  delay,
+  children,
+}: {
+  label: string;
+  value: number;
+  color: string;
+  strong?: boolean;
+  delay: number;
+  children?: React.ReactNode;
+}) {
   const reduceMotion = useReducedMotion();
-
   return (
-    <div className="surface p-6">
-      <div className="flex items-center justify-between gap-3">
-        <span className="t-eyebrow">{w.eyebrow}</span>
-        <span className="chip !py-1 text-xs">
-          <span className="dot dot-live" style={{ background: "var(--color-good)" }} />
-          {w.tag}
-        </span>
+    <div>
+      <div className="mb-2 flex items-baseline justify-between gap-3">
+        <span className={`text-sm ${strong ? "font-semibold text-ink-900" : "text-ink-500"}`}>{label}</span>
+        <span className="font-mono text-sm font-medium text-ink-900">{value}%</span>
       </div>
-
-      <div className="mt-6 flex flex-col gap-5">
-        {/* the claim */}
-        <div>
-          <div className="mb-1.5 flex items-baseline justify-between">
-            <span className="text-sm font-medium text-ink-500">{w.reportedLabel}</span>
-            <span className="tnum !text-sm text-ink-500">
-              <Figure value={`${w.reportedValue}%`} />
-            </span>
-          </div>
-          <div className="h-3.5 overflow-hidden rounded-full bg-line">
-            <motion.div
-              className="h-full rounded-full"
-              initial={reduceMotion ? false : { width: 0 }}
-              whileInView={{ width: `${w.reportedValue}%` }}
-              viewport={{ once: true, amount: 0.7 }}
-              transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-              style={{ background: "var(--color-line-strong)" }}
-            />
-          </div>
-        </div>
-
-        {/* the truth, with the unverified remainder exposed */}
-        <div>
-          <div className="mb-1.5 flex items-baseline justify-between">
-            <span className="text-sm font-semibold text-ink-900">{w.actualLabel}</span>
-            <span className="tnum !text-sm" style={{ color: "var(--color-violet-ink)" }}>
-              <Figure value={`${w.actualValue}%`} />
-            </span>
-          </div>
-          <div className="relative h-3.5 overflow-hidden rounded-full bg-line">
-            <motion.div
-              className="absolute inset-y-0 left-0 rounded-full"
-              initial={reduceMotion ? false : { width: 0 }}
-              whileInView={{ width: `${w.actualValue}%` }}
-              viewport={{ once: true, amount: 0.7 }}
-              transition={{ duration: 0.9, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
-              style={{ background: "var(--color-violet)" }}
-            />
-            <motion.div
-              className="absolute inset-y-0"
-              initial={reduceMotion ? false : { width: 0 }}
-              whileInView={{ width: `${delta}%` }}
-              viewport={{ once: true, amount: 0.7 }}
-              transition={{ duration: 0.55, delay: 0.82, ease: [0.22, 1, 0.36, 1] }}
-              style={{
-                left: `${w.actualValue}%`,
-              }}
-            >
-              <motion.span
-                className="absolute inset-0"
-                aria-hidden="true"
-                animate={reduceMotion ? undefined : { backgroundPosition: ["0px 0px", "16px 0px"] }}
-                transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
-                style={{
-                  background:
-                    "repeating-linear-gradient(45deg, color-mix(in srgb, var(--color-critical) 34%, var(--vm-surface)) 0 4px, color-mix(in srgb, var(--color-critical) 14%, var(--vm-surface)) 4px 8px)",
-                }}
-              />
-            </motion.div>
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-6 flex items-center gap-4 rounded-md border border-line bg-canvas p-4">
-        <span className="tnum shrink-0 text-[36px]" style={{ color: "var(--color-critical)" }}>
-          {delta}%
-        </span>
-        <p className="text-sm leading-snug text-ink-700">
-          <span className="font-semibold text-ink-900">{w.gapLabel}</span> — {w.gapBody}
-        </p>
+      <div className="relative h-4 rounded-sm bg-line/60">
+        <motion.div
+          className="absolute inset-y-0 left-0 rounded-sm"
+          initial={reduceMotion ? false : { width: 0 }}
+          whileInView={{ width: `${value}%` }}
+          viewport={{ once: true, amount: 0.7 }}
+          transition={{ duration: 0.8, delay, ease: [0.22, 1, 0.36, 1] }}
+          style={{ background: color }}
+        />
+        {children}
       </div>
     </div>
+  );
+}
+
+export default function GapWidget() {
+  return (
+    <section className="vm-card flex flex-col gap-6" aria-label={w.eyebrow}>
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <h3 className="text-[22px] font-semibold leading-7 text-ink-900">Reported vs actual</h3>
+        <ConfidenceBadge level="estimated" size="sm">Sample figure</ConfidenceBadge>
+      </header>
+
+      <p className="vm-chartcard__sowhat">
+        Of {w.reportedValue}% reported distribution, Vemi could verify {w.actualValue}% on the
+        shelf. {delta} points exist only on paper.
+      </p>
+
+      <div className="flex flex-col gap-5">
+        <Row label={w.reportedLabel} value={w.reportedValue} color="var(--vm-chart-3)" delay={0} />
+        <Row label={w.actualLabel} value={w.actualValue} color="var(--vm-chart-1)" strong delay={0.12}>
+          {/* the unverified remainder, outlined */}
+          <span
+            aria-hidden
+            className="absolute inset-y-0 rounded-sm border-2 border-dashed border-ink-900"
+            style={{ left: `${w.actualValue}%`, width: `${delta}%` }}
+          />
+        </Row>
+      </div>
+
+      <footer className="flex flex-wrap items-center gap-4 border-t border-line pt-4">
+        <span className="tnum text-[36px] leading-10">{delta} pts</span>
+        <p className="min-w-0 flex-1 text-sm text-ink-700">
+          <span className="font-semibold text-ink-900">{w.gapLabel}.</span> {w.gapBody}
+        </p>
+        <span className="w-full font-mono text-xs text-ink-500">{w.tag}</span>
+      </footer>
+    </section>
   );
 }

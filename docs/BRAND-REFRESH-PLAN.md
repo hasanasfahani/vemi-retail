@@ -554,3 +554,30 @@ Added beyond the plan: mobile navigation (below 1024px there was none),
 Consumers page, and fixes found on the way (chips built from invalid
 CSS, stacked-bar axes printing "99.99999%", a trend axis that cropped
 its own target).
+
+### Phase 7 (website) deviations
+
+- **Insight V** sits on an even Violet 100 field with no Signal accents:
+  accent blocks read as stray pieces of the V. The five V rows settle
+  110ms apart (~700ms), and the visual shows from 1024px up only; at
+  tablet width it stacked into a full-width wall above the product shot.
+- **Beyond tabs** on Ink mark the current card with a Violet border
+  rather than an Ink 800 pill; the cards already sit on Ink 800.
+- **Footer links** are full Paper at 14px rather than Paper 80% at 15px,
+  which reads better and clears contrast with margin.
+- **Proof tiles**: only the two counted figures (1,000+ POS, 16
+  governorates) are 56px KPI tiles, each with a "Sample figure" badge;
+  the three word facts sit in a plain row, because words at 56px do not read.
+- **Coverage map** labels are HTML, not SVG text, so they hold 12px at
+  every width.
+- **Access modal** button reads "Open the dashboard" (sentence case, a verb).
+- New token `--vm-paper` (constant Paper) so the onInk logo also works
+  inside a `data-theme="dark"` band.
+- Found on the way: the brand `Dialog` scrim sat above its own panel (the
+  wrap is a stacking context), so every portal dialog was washed out.
+  Fixed in `vemi-components.css`. `Reveal` now honours reduced motion.
+- Verified at 375 / 768 / 1280 / 1440 (no horizontal scroll at 375), the
+  keyboard path through nav, tabs, form and modal (Escape, focus return),
+  and form validation. Lighthouse was not run (no local install); the a11y
+  checks were done by hand.
+

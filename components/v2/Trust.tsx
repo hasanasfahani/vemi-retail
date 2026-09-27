@@ -5,26 +5,26 @@ import EvidenceCard from "@/components/v2/EvidenceCard";
 
 export default function Trust() {
   return (
-    <section id={ids.trust} className="section section-v2 border-y border-line bg-primary-tint/50">
+    <section id={ids.trust} className="section section-v2 border-t border-line bg-white">
       <div className="container-vemi">
         <Reveal>
           <div className="max-w-2xl">
-            <span className="t-eyebrow !text-violet-ink">{trust.eyebrow}</span>
-            <h2 className="t-h2 mt-3">{trust.headline}</h2>
+            <span className="vm-label">{trust.eyebrow}</span>
+            <h2 className="t-h2 mt-4">{trust.headline}</h2>
             <p className="t-lead mt-5">{trust.subhead}</p>
           </div>
         </Reveal>
 
-        <div className="mt-12 grid gap-8 lg:grid-cols-2 lg:items-stretch lg:gap-10">
-          <div className="grid gap-3 sm:grid-cols-2 lg:h-full lg:grid-rows-3">
+        <div className="mt-14 grid gap-8 lg:grid-cols-2 lg:items-stretch lg:gap-10">
+          <div className="grid gap-6 sm:grid-cols-2 lg:h-full lg:grid-rows-3">
             {trust.items.map((t, i) => (
               <Reveal key={t.title} delay={i * 0.05} className="h-full">
-                <div className="h-full rounded-lg border border-line bg-white p-5 shadow-[var(--shadow-card)]">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-md border border-primary-tint bg-primary-tint text-violet-ink">
-                    <Icon name={t.icon} className="h-[18px] w-[18px]" />
+                <div className="h-full rounded-lg border border-line bg-white p-6">
+                  <span className="text-primary">
+                    <Icon name={t.icon} size={24} />
                   </span>
-                  <h3 className="t-h3 mt-3 !text-base">{t.title}</h3>
-                  <p className="mt-1.5 text-sm leading-relaxed text-ink-500">{t.body}</p>
+                  <h3 className="mt-4 text-lg font-semibold text-ink-900">{t.title}</h3>
+                  <p className="mt-1 text-sm text-ink-500">{t.body}</p>
                 </div>
               </Reveal>
             ))}
@@ -37,7 +37,7 @@ export default function Trust() {
 
         {/* the claim, stated plainly */}
         <Reveal delay={0.1}>
-          <p className="mt-12 border-t border-line pt-8 text-center font-display text-[22px] font-semibold tracking-tight text-ink-900 sm:text-[28px]">
+          <p className="mt-14 border-t border-line pt-10 text-center text-[22px] font-semibold leading-8 tracking-[-0.01em] text-ink-900 sm:text-[32px] sm:leading-10">
             {trust.supportingLine}
           </p>
         </Reveal>

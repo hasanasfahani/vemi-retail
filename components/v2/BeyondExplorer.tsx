@@ -18,7 +18,7 @@ export default function BeyondExplorer() {
   return (
     <div>
       <div
-        className={`grid grid-cols-1 gap-4 transition-[grid-template-columns] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none lg:h-[570px] ${desktopColumns[active]}`}
+        className={`grid grid-cols-1 gap-6 transition-[grid-template-columns] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none lg:h-[570px] ${desktopColumns[active]}`}
       >
         {pillars.map((pillar, index) => {
           const on = index === active;
@@ -27,8 +27,8 @@ export default function BeyondExplorer() {
           return (
             <article
               key={pillar.key}
-              className={`relative min-w-0 overflow-hidden rounded-xl border bg-white transition-colors duration-300 motion-reduce:transition-none ${
-                on ? "border-violet/30" : "border-line hover:border-line-strong"
+              className={`relative min-w-0 overflow-hidden rounded-lg border bg-ink-800 transition-colors duration-300 motion-reduce:transition-none ${
+                on ? "border-primary" : "border-transparent hover:border-line-strong"
               }`}
             >
               <button
@@ -36,7 +36,7 @@ export default function BeyondExplorer() {
                 onClick={() => setActive(index)}
                 aria-expanded={on}
                 aria-controls={panelId}
-                className="group relative block h-[270px] w-full overflow-hidden text-left outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-inset lg:h-full"
+                className="group relative block h-[270px] w-full overflow-hidden text-left lg:h-full"
               >
                 <Image
                   src={pillar.image.src}
@@ -55,16 +55,16 @@ export default function BeyondExplorer() {
                 />
 
                 <span
-                  className={`absolute bottom-4 left-4 right-4 rounded-lg border border-white/70 bg-white/90 p-4 shadow-sm backdrop-blur ${on ? "lg:right-[50%]" : ""}`}
+                  className={`absolute bottom-4 left-4 right-4 rounded-md bg-surface p-4 ${on ? "lg:right-[50%]" : ""}`}
                 >
                   <span className="flex items-center justify-between gap-3">
-                    <span className="font-display text-lg font-semibold leading-tight tracking-tight text-ink-900">
+                    <span className="text-lg font-semibold leading-6 text-ink-900">
                       {pillar.title}
                     </span>
                     <span
                       aria-hidden
                       className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-transform duration-300 motion-reduce:transition-none ${
-                        on ? "rotate-45 bg-violet text-white" : "bg-white text-ink-700"
+                        on ? "rotate-45 bg-primary text-primary-fg" : "bg-ink-800 text-ink-900"
                       }`}
                     >
                       <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
@@ -72,7 +72,7 @@ export default function BeyondExplorer() {
                       </svg>
                     </span>
                   </span>
-                  <span className="mt-1.5 block text-xs leading-relaxed text-ink-500">{pillar.tagline}</span>
+                  <span className="mt-1.5 block text-sm text-ink-500">{pillar.tagline}</span>
                 </span>
               </button>
 
@@ -87,23 +87,19 @@ export default function BeyondExplorer() {
                     : "pointer-events-none grid-rows-[0fr] opacity-0 lg:invisible lg:translate-x-2"
                 }`}
               >
-                <div className="min-h-0 overflow-hidden border-t border-line bg-white lg:overflow-y-auto lg:rounded-lg lg:border lg:shadow-[var(--vm-shadow-overlay)]">
+                <div className="min-h-0 overflow-hidden border-t border-line bg-surface lg:overflow-y-auto lg:rounded-md lg:border">
                   <div className="p-6 lg:p-7">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-md bg-violet text-white">
-                      <Icon name={pillar.icon} className="h-5 w-5" />
+                    <span className="text-primary">
+                      <Icon name={pillar.icon} size={24} />
                     </span>
-                    <span className="t-eyebrow mt-6 block">What we track</span>
-                    <h3 className="t-h3 mt-2 !text-[28px]">{pillar.title}</h3>
-                    <p className="mt-3 text-sm leading-relaxed text-ink-500">{pillar.body}</p>
+                    <span className="vm-label mt-6 block">What we track</span>
+                    <h3 className="mt-2 text-[28px] font-semibold leading-9 text-ink-900">{pillar.title}</h3>
+                    <p className="mt-3 text-base text-ink-500">{pillar.body}</p>
 
                     <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
                       {pillar.items.map((item) => (
-                        <li key={item} className="flex items-start gap-2.5 text-sm leading-snug text-ink-700">
-                          <span
-                            aria-hidden
-                            className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full"
-                            style={{ background: "var(--color-violet)" }}
-                          />
+                        <li key={item} className="flex items-start gap-2.5 text-sm text-ink-900">
+                          <span aria-hidden className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
                           {item}
                         </li>
                       ))}
@@ -116,20 +112,21 @@ export default function BeyondExplorer() {
         })}
       </div>
 
-      <div className="mt-5 overflow-hidden rounded-xl bg-ink-900 px-6 py-8 text-white sm:px-8 lg:px-10">
+      {/* the convergence: four inputs, one view */}
+      <div className="mt-6 rounded-lg border border-line px-6 py-8 sm:px-8 lg:px-10">
         <div className="grid items-center gap-8 lg:grid-cols-[0.68fr_1.32fr]">
           <div>
-            <span className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-ink-300">Connected intelligence</span>
-            <h3 className="mt-2 font-display text-[28px] font-semibold tracking-tight text-white">{beyond.convergence.title}</h3>
-            <p className="mt-2 max-w-md text-sm leading-relaxed text-ink-300">{beyond.convergence.body}</p>
+            <span className="vm-label">Connected intelligence</span>
+            <h3 className="mt-2 text-[28px] font-semibold leading-9 text-ink-900">{beyond.convergence.title}</h3>
+            <p className="mt-2 max-w-md text-base text-ink-500">{beyond.convergence.body}</p>
           </div>
 
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-end">
             <div className="relative flex-1">
-              <span aria-hidden className="absolute left-4 right-4 top-1/2 hidden h-px bg-white/20 sm:block" />
+              <span aria-hidden className="absolute left-4 right-4 top-1/2 hidden h-px bg-line sm:block" />
               <div className="relative grid grid-cols-2 gap-2 sm:flex sm:flex-nowrap sm:justify-between">
                 {beyond.convergence.inputs.map((input) => (
-                  <span key={input} className="whitespace-nowrap rounded-full border border-white/25 bg-ink-900 px-3 py-1.5 text-center text-xs font-medium text-white">
+                  <span key={input} className="whitespace-nowrap rounded-full border border-line-strong bg-surface px-3 py-1.5 text-center text-sm font-medium text-ink-900">
                     {input}
                   </span>
                 ))}
@@ -137,20 +134,11 @@ export default function BeyondExplorer() {
             </div>
 
             <div className="flex items-center justify-center gap-2 sm:justify-end">
-              <span aria-hidden className="h-px w-8 bg-gradient-to-r from-white/20 to-violet sm:w-10" />
-              <svg
-                viewBox="0 0 24 24"
-                className="h-4 w-4 shrink-0"
-                style={{ color: "var(--vm-primary-tint)" }}
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                aria-hidden
-              >
-                <path d="M5 12h14M14 7l5 5-5 5" />
-              </svg>
-              <span className="shrink-0 rounded-md bg-violet px-5 py-3 text-sm font-semibold text-white">
+              <span aria-hidden className="h-px w-8 bg-primary sm:w-10" />
+              <span className="text-primary">
+                <Icon name="arrow-right" size={16} />
+              </span>
+              <span className="shrink-0 rounded-md bg-primary px-5 py-3 text-[15px] font-semibold text-primary-fg">
                 {beyond.convergence.output}
               </span>
             </div>

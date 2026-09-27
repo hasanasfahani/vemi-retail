@@ -22,9 +22,11 @@ const SHAPES = [
   { w: 15, h: 28, can: false },
 ];
 
+/* Brand series, not status hues: the planned SKU in Violet, a wrong
+   SKU in Slate, an empty slot as an Ink dashed outline. */
 const FILL: Record<Exclude<SlotState, "empty">, string> = {
-  planned: "var(--color-violet)",
-  wrong: "var(--color-warn)",
+  planned: "var(--vm-chart-1)",
+  wrong: "var(--vm-chart-3)",
 };
 
 export default function PlanogramScene({
@@ -52,9 +54,6 @@ export default function PlanogramScene({
             {/* the board */}
             <rect x={4} y={base} width={W - 8} height={4.5} rx={1.5} fill="var(--vm-line-strong)" />
             <rect x={4} y={base + 4.5} width={W - 8} height={1.8} fill="var(--vm-line)" opacity={0.7} />
-            <text x={8} y={top + 10} fontSize={6.5} fill="var(--color-ink-600)" letterSpacing={0.4}>
-              {SHELVES[r]?.toUpperCase()}
-            </text>
 
             {row.map((state, c) => {
               const shape = SHAPES[c % SHAPES.length];
@@ -73,7 +72,7 @@ export default function PlanogramScene({
                     height={shape.h}
                     rx={3}
                     fill="none"
-                    stroke="var(--color-critical)"
+                    stroke="var(--vm-text)"
                     strokeWidth={1.4}
                     strokeDasharray="3 2.5"
                   />
@@ -119,6 +118,10 @@ export default function PlanogramScene({
                 </g>
               );
             })}
+            {/* label last, over the packs, with a Paper halo */}
+            <text x={8} y={top + 11} fontSize={9} fill="var(--vm-text-muted)" letterSpacing={0.4} fontFamily="var(--vm-font-mono)" stroke="var(--vm-bg)" strokeWidth={3} paintOrder="stroke">
+              {SHELVES[r]?.toUpperCase()}
+            </text>
           </g>
         );
       })}

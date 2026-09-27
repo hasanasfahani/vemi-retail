@@ -2,34 +2,35 @@ import { gap, ids } from "@/lib/v2Content";
 import Reveal from "@/components/ui/Reveal";
 import GapWidget from "@/components/v2/GapWidget";
 
+/* The visibility gap: four things a shipment report cannot see, as a
+   numbered list (mono numerals, not red dots), beside the one figure
+   that makes the argument. */
 export default function VisibilityGap() {
   return (
-    <section id={ids.gap} className="section section-v2 bg-white">
+    <section id={ids.gap} className="section section-v2 border-t border-line bg-canvas">
       <div className="container-vemi">
         <Reveal>
-          <span className="t-eyebrow !text-violet-ink">{gap.eyebrow}</span>
-          <h2 className="t-h2 mt-3 max-w-3xl">{gap.headline}</h2>
+          <span className="vm-label">{gap.eyebrow}</span>
+          <h2 className="t-h2 mt-4 max-w-3xl">{gap.headline}</h2>
           <p className="t-lead mt-5 max-w-2xl">{gap.subhead}</p>
         </Reveal>
 
-        <div className="mt-12 grid gap-x-12 gap-y-10 lg:grid-cols-[1fr_0.95fr] lg:items-start">
-          <div className="flex flex-col gap-6">
+        <div className="mt-14 grid gap-x-16 gap-y-12 lg:grid-cols-[1fr_1fr] lg:items-start">
+          <ol className="flex flex-col">
             {gap.items.map((g, i) => (
               <Reveal key={g.title} delay={i * 0.05}>
-                <div className="flex gap-4">
-                  <span
-                    aria-hidden
-                    className="mt-1.5 h-2 w-2 shrink-0 rounded-full"
-                    style={{ background: "var(--color-critical)" }}
-                  />
+                <li className="flex gap-6 border-t border-line py-6 first:border-t-0 first:pt-0">
+                  <span className="w-8 shrink-0 font-mono text-sm font-medium text-primary-text">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
                   <div>
-                    <h3 className="t-h3">{g.title}</h3>
-                    <p className="mt-1 text-[15px] leading-relaxed text-ink-500">{g.body}</p>
+                    <h3 className="text-lg font-semibold text-ink-900">{g.title}</h3>
+                    <p className="mt-1 text-base text-ink-500">{g.body}</p>
                   </div>
-                </div>
+                </li>
               </Reveal>
             ))}
-          </div>
+          </ol>
 
           <Reveal delay={0.1}>
             <GapWidget />

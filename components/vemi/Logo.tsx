@@ -74,7 +74,7 @@ const TONES: Record<LogoTone, CSSProperties> = {
   },
   onInk: {
     ["--logo-mark" as string]: "var(--vm-primary-on-ink)",
-    ["--logo-word" as string]: "var(--vm-bg)",
+    ["--logo-word" as string]: "var(--vm-paper)",
     ["--logo-rule" as string]: "var(--vm-ink-800)",
   },
 };
@@ -182,7 +182,7 @@ export function LogoBilingual({ height = 40, tone = "color", className, title = 
 export function LogoDescriptor({ height = 28, tone = "color", className, title = "Vemi, market intelligence platform" }: Common & { height?: number }) {
   const descriptorColor =
     tone === "color" ? "var(--vm-text-muted)"
-    : tone === "onInk" ? "color-mix(in srgb, var(--vm-bg) 72%, transparent)"
+    : tone === "onInk" ? "color-mix(in srgb, var(--vm-paper) 72%, transparent)"
     : tone === "reversed" ? "var(--vm-on-primary)"
     : "currentColor";
   return (

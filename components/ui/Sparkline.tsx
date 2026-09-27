@@ -1,7 +1,8 @@
-/* Tiny inline sparkline — 2px line, optional soft area, no axes. */
+/* Tiny inline sparkline — 2px Violet line on a flat Violet 100 area
+   (brand: no gradients), the endpoint marked, no axes. */
 export default function Sparkline({
   data,
-  color = "var(--color-violet)",
+  color = "var(--vm-chart-1)",
   width = 108,
   height = 34,
   area = true,
@@ -24,23 +25,12 @@ export default function Sparkline({
   });
   const line = pts.map((p, i) => `${i ? "L" : "M"}${p[0]},${p[1]}`).join(" ");
   const areaPath = `${line} L${pts[pts.length - 1][0]},${height} L${pts[0][0]},${height} Z`;
-  const id = `sk-${data.join("-").slice(0, 12)}`;
 
   return (
     <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} aria-hidden>
-      {area && (
-        <>
-          <defs>
-            <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stopColor={color} stopOpacity="0.16" />
-              <stop offset="1" stopColor={color} stopOpacity="0" />
-            </linearGradient>
-          </defs>
-          <path d={areaPath} fill={`url(#${id})`} />
-        </>
-      )}
+      {area && <path d={areaPath} fill="var(--vm-chart-base)" opacity={0.8} />}
       <path d={line} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx={pts[pts.length - 1][0]} cy={pts[pts.length - 1][1]} r="2.6" fill={color} />
+      <circle cx={pts[pts.length - 1][0]} cy={pts[pts.length - 1][1]} r="3" fill={color} stroke="var(--vm-surface)" strokeWidth="1.5" />
     </svg>
   );
 }

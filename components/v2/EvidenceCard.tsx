@@ -1,13 +1,18 @@
 import Image from "next/image";
 import { trust } from "@/lib/v2Content";
 import Icon from "@/components/vemi/Icon";
+import { ConfidenceBadge } from "@/components/vemi/ConfidenceBadge";
 
 const e = trust.evidence;
 
+/* One audit record, evidence first: the photograph, then its capture
+   metadata as a mono strip, then what was read from it. No gradient
+   over the photo and no glass: anything on the image sits on a solid
+   panel (brand rule). The analysis overlay is marked illustrative. */
 export default function EvidenceCard() {
   return (
-    <article className="surface flex h-full flex-col overflow-hidden">
-      <div className="relative aspect-[16/10] border-b border-line bg-canvas">
+    <article className="flex h-full flex-col overflow-hidden rounded-lg border border-line bg-white">
+      <div className="relative aspect-[16/10] bg-canvas">
         <Image
           src={e.image.src}
           alt={e.image.alt}
@@ -17,73 +22,56 @@ export default function EvidenceCard() {
           style={{ objectPosition: e.image.position }}
         />
 
-        <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-sm border border-white/70 bg-white/90 px-2.5 py-1.5 text-xs font-semibold text-ink-900 shadow-sm backdrop-blur sm:left-4 sm:top-4">
-          <Icon name="photo" className="h-3 w-3 text-violet-ink" />
+        <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-sm bg-white px-2.5 py-1.5 font-mono text-xs font-medium uppercase tracking-[0.08em] text-ink-900 sm:left-4 sm:top-4">
+          <Icon name="photo" size={16} className="h-3.5 w-3.5 text-primary" />
           Source photograph
         </span>
-        <span className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-sm border border-white/70 bg-white/90 px-2.5 py-1.5 text-xs font-semibold text-ink-900 shadow-sm backdrop-blur sm:right-4 sm:top-4">
-          <Icon name="check" className="h-3 w-3 text-good" />
-          {e.status}
-        </span>
 
-        <div
-          className="absolute left-[24%] top-[34%] h-[34%] w-[52%] rounded-md border-2 border-dashed"
-          style={{
-            borderColor: "var(--color-violet)",
-            background: "color-mix(in srgb, var(--color-violet) 9%, transparent)",
-          }}
-        >
-          <span className="absolute -top-7 left-0 rounded-sm bg-violet px-2 py-1 uppercase font-mono text-xs font-medium tracking-[0.1em] text-white">
+        <div className="absolute left-[24%] top-[34%] h-[34%] w-[52%] rounded-md border-2 border-dashed border-primary">
+          <span className="absolute -top-8 left-0 rounded-sm bg-primary px-2 py-1 font-mono text-xs font-medium uppercase tracking-[0.08em] text-white">
             Brand blocks detected
           </span>
         </div>
+      </div>
 
-        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/55 to-transparent px-4 pb-4 pt-16 text-white sm:px-5 sm:pb-5">
-          <p className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-white/70">Traceable audit record</p>
-          <h3 className="mt-1 font-display text-base font-semibold">{e.outlet}</h3>
-          <p className="mt-0.5 text-xs text-white/80">
-            {e.location} · {e.channel}
-          </p>
-        </div>
+      {/* the capture record, as data */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-y border-line bg-canvas px-5 py-3 sm:px-6">
+        <p className="font-mono text-xs font-medium uppercase tracking-[0.08em] text-ink-900">
+          ERB-204 · {e.captured} · Geo-tagged
+        </p>
+        <ConfidenceBadge level="measured" size="sm">{e.status}</ConfidenceBadge>
       </div>
 
       <div className="flex flex-1 flex-col p-5 sm:p-6">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <p className=" uppercase font-mono text-xs font-medium tracking-[0.1em] text-violet-ink">AI-assisted image analysis</p>
-            <p className="mt-1 text-sm font-semibold leading-relaxed text-ink-900">{e.finding}</p>
-          </div>
-          <span className="pill pill-good shrink-0">
-            <Icon name="check" className="h-3 w-3" />
-            Verified
-          </span>
-        </div>
+        <h3 className="text-lg font-semibold text-ink-900">{e.outlet}</h3>
+        <p className="text-sm text-ink-500">
+          {e.location} · {e.channel}
+        </p>
+
+        <p className="vm-label mt-5">AI-assisted image analysis</p>
+        <p className="mt-1 text-base font-semibold text-ink-900">{e.finding}</p>
 
         <ul className="mt-4 grid gap-2 sm:grid-cols-3">
           {e.analysisPoints.map((point) => (
-            <li key={point} className="flex items-center gap-2 rounded-md bg-primary-tint px-3 py-2 text-xs font-medium text-violet-ink">
-              <Icon name="spark" className="h-3.5 w-3.5 shrink-0" />
+            <li key={point} className="flex items-center gap-2 rounded-md bg-primary-tint px-3 py-2 text-sm font-medium text-primary-text">
+              <Icon name="spark" size={16} />
               {point}
             </li>
           ))}
         </ul>
 
-        <div className="mt-auto flex flex-wrap gap-x-5 gap-y-2 border-t border-line pt-4 text-xs text-ink-500">
+        <div className="mt-auto flex flex-wrap gap-x-5 gap-y-2 border-t border-line pt-4 pt-4 font-mono text-xs text-ink-500">
           <span className="inline-flex items-center gap-1.5">
-            <Icon name="clock" className="h-3.5 w-3.5" />
-            {e.captured}
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <Icon name="link" className="h-3.5 w-3.5" />
+            <Icon name="link" size={16} className="h-3.5 w-3.5" />
             Audit {e.auditRef}
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <Icon name="check" className="h-3.5 w-3.5" />
-            Linked to dashboard
+            <Icon name="check" size={16} className="h-3.5 w-3.5" />
+            Linked to the dashboard
           </span>
         </div>
-        <p className="mt-3 text-xs leading-relaxed text-ink-600">
-          Analysis overlay is illustrative; the photograph and capture metadata are field evidence.
+        <p className="mt-3 text-sm text-ink-500">
+          The analysis overlay is illustrative; the photograph and capture metadata are field evidence.
         </p>
       </div>
     </article>

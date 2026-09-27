@@ -1,71 +1,55 @@
 import Image from "next/image";
 import { hero, ids } from "@/lib/v2Content";
+import InsightV from "./InsightV";
 
+/* The hero (brand refresh, phase 7): Paper, the tagline at display
+   size, one primary action and one secondary, a mono proof line, and
+   the Insight V key visual. The product follows in a flat white panel
+   (border-first: no shadow), shot from the rebranded portal. */
 export default function Hero() {
   return (
-    <section
-      id={ids.top}
-      className="relative isolate overflow-hidden pb-16 pt-32 sm:pb-20 sm:pt-36 md:pb-24 md:pt-44"
-      /* Flat Violet until the hero is rebuilt on Paper with the
-         Insight V key visual (brand refresh plan, phase 7). */
-      style={{ background: "var(--vm-primary)" }}
-    >
-      <div className="relative mx-auto max-w-[1320px] px-4 sm:px-6">
-        <div className="mx-auto max-w-[1050px] text-center">
-          <h1 className="font-display text-[clamp(44px,6vw,72px)] font-semibold leading-[1.06] tracking-[-0.02em] text-white">
-            {hero.headlineLines.map((line, index) => (
-              <span
-                key={line}
-                className={`block ${
-                  index === hero.headlineLines.length - 1 ? "text-primary-tint" : ""
-                }`}
-              >
-                {line}
-              </span>
-            ))}
-          </h1>
+    <section id={ids.top} className="relative bg-canvas pb-16 pt-12 sm:pb-24 sm:pt-16 lg:pt-20">
+      <div className="mx-auto max-w-[1200px] px-4 sm:px-6">
+        <div className="grid items-center gap-12 lg:grid-cols-[1.4fr_1fr]">
+          <div className="min-w-0">
+            <p className="vm-label">{hero.eyebrow}</p>
+            <h1 className="mt-5 text-[clamp(44px,6.4vw,72px)] font-semibold leading-[1.06] tracking-[-0.02em] text-ink-900">
+              {hero.headlineLines.map((line) => (
+                <span key={line} className="block">
+                  {line}
+                </span>
+              ))}
+            </h1>
+            <p className="mt-6 max-w-[34rem] text-lg text-ink-500">{hero.subhead}</p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <a href={hero.primaryCta.href} data-demo-cta className="vm-btn vm-btn--primary">
+                {hero.primaryCta.label}
+                <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M4 10h12M11 5l5 5-5 5" />
+                </svg>
+              </a>
+              <a href={hero.secondaryCta.href} className="vm-btn vm-btn--secondary">
+                {hero.secondaryCta.label}
+              </a>
+            </div>
+            <p className="mt-8 font-mono text-xs font-medium uppercase tracking-[0.1em] text-ink-500">
+              {hero.proofLine}
+            </p>
+          </div>
 
-          <p className="mx-auto mt-7 max-w-[690px] text-lg leading-7 text-white/78 sm:text-lg">
-            {hero.subhead}
-          </p>
-
-          <div className="mt-9 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
-            <a
-              href={hero.primaryCta.href}
-              data-demo-cta
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-white px-6 py-3 text-[15px] font-semibold text-violet-ink transition duration-200 hover:bg-primary-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-            >
-              {hero.primaryCta.label}
-              <svg
-                viewBox="0 0 20 20"
-                className="h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M4 10h12M11 5l5 5-5 5" />
-              </svg>
-            </a>
-            <a
-              href={hero.secondaryCta.href}
-              className="inline-flex min-h-12 items-center justify-center rounded-md border border-white/35 bg-white/10 px-6 py-3 text-[15px] font-semibold text-white backdrop-blur-sm transition duration-200 hover:bg-white/18 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-            >
-              {hero.secondaryCta.label}
-            </a>
+          <div className="hidden min-w-0 lg:block">
+            <InsightV className="h-auto w-full" />
           </div>
         </div>
 
-        <div className="mt-12 overflow-hidden rounded-xl border border-white/35 bg-white sm:mt-16 sm:rounded-xl">
+        <div className="mt-16 overflow-hidden rounded-xl border border-line bg-white sm:mt-20">
           <Image
             src={hero.image.src}
             alt={hero.image.alt}
             width={2830}
             height={1416}
             preload
-            sizes="(max-width: 1320px) 100vw, 1320px"
+            sizes="(max-width: 1200px) 100vw, 1200px"
             className="block h-auto w-full"
           />
         </div>

@@ -57,6 +57,10 @@
      and the "needs attention" step of the band ramp below. */
   --vm-ink-800: #2A2766;
 
+  /* Paper as a constant (the dark set does not redefine it): artwork
+     that sits on Ink in either theme — the onInk logo word. */
+  --vm-paper: #F5F4EF;
+
   /* Dialog and drawer backdrop (the kit's components.md asks for it to
      be defined here). */
   --vm-scrim: rgba(21, 19, 58, 0.4);

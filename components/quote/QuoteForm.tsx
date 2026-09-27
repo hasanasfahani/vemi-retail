@@ -11,6 +11,7 @@ import {
   type FieldName,
 } from "@/lib/demoAccess";
 import Icon from "@/components/vemi/Icon";
+import { TextField, SelectField } from "@/components/vemi/Field";
 
 type QuoteScope = {
   posPerMonth: number;
@@ -20,39 +21,6 @@ type QuoteScope = {
 
 type QuoteField = FieldName | "industry" | "customIndustry";
 type AllErrors = Partial<Record<QuoteField, string>>;
-
-const inputBase =
-  "w-full rounded-md border bg-white px-3 py-2.5 text-sm text-ink-900 placeholder:text-ink-500 focus:outline-none focus:ring-2 focus:ring-violet/20";
-
-function cls(err?: string) {
-  return `${inputBase} ${err ? "border-critical" : "border-line focus:border-violet"}`;
-}
-
-function Field({
-  label,
-  htmlFor,
-  error,
-  children,
-}: {
-  label: string;
-  htmlFor: string;
-  error?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div>
-      <label htmlFor={htmlFor} className="mb-1.5 block text-xs font-medium text-ink-700">
-        {label}
-      </label>
-      {children}
-      {error ? (
-        <p className="mt-1 text-xs" style={{ color: "var(--vm-danger)" }}>
-          {error}
-        </p>
-      ) : null}
-    </div>
-  );
-}
 
 function ScopeRange({
   id,
@@ -78,14 +46,14 @@ function ScopeRange({
   onChange: (value: number) => void;
 }) {
   return (
-    <div className="rounded-lg border border-line bg-white p-5 shadow-[var(--shadow-card)]">
+    <div className="rounded-lg border border-line bg-white p-5">
       <div className="flex items-center justify-between gap-4">
         <label htmlFor={id} className="text-sm font-semibold text-ink-900">
           {label}
         </label>
         <output
           htmlFor={id}
-          className="min-w-20 rounded-md bg-primary-tint px-3 py-1.5 text-center font-display text-base font-semibold text-violet-ink"
+          className="min-w-20 rounded-sm bg-primary-tint px-3 py-1 text-center font-mono text-base font-medium tabular-nums text-primary-text"
         >
           {valueLabel}
         </output>
@@ -98,16 +66,15 @@ function ScopeRange({
         step={step}
         value={value}
         onChange={(event) => onChange(Number(event.target.value))}
-        className="mt-5 h-2 w-full cursor-pointer [accent-color:var(--color-violet)]"
+        className="mt-4 h-11 w-full cursor-pointer [accent-color:var(--vm-primary)]"
       />
-      <div className="mt-2 flex justify-between text-xs font-medium text-ink-600">
+      <div className="flex justify-between font-mono text-xs text-ink-500">
         <span>{minLabel}</span>
         <span>{maxLabel}</span>
       </div>
     </div>
   );
 }
-
 
 /* The quote request, shared by the marketing pricing section and the
    portal's "Request a Quote" modal.
@@ -190,14 +157,22 @@ export default function QuoteForm({
     onSubmitted?.();
   }
 
+  const blur = (key: FieldName) => (event: React.FocusEvent<HTMLInputElement>) =>
+    setErrors((current) => ({
+      ...current,
+      [key]: validateField(key, event.target.value, form) ?? undefined,
+    }));
+
   return (
     <div className="grid lg:grid-cols-[0.95fr_1.05fr]">
-      <div className="border-b border-line bg-canvas p-8 sm:p-10 lg:border-b-0 lg:border-r">
-        <span className="t-eyebrow !text-violet-ink">{finalCta.eyebrow}</span>
-        <h2 className="t-h2 mt-3 !text-[clamp(30px,3.6vw,44px)]">{finalCta.headline}</h2>
-        <p className="t-lead mt-4">{finalCta.subhead}</p>
+      <div className="border-b border-line bg-canvas p-6 sm:p-10 lg:border-b-0 lg:border-r">
+        <span className="vm-label text-primary-text">01 · {finalCta.eyebrow}</span>
+        <h2 className="mt-3 text-[28px] font-semibold leading-[36px] tracking-[-0.01em] text-ink-900 sm:text-[36px] sm:leading-[44px]">
+          {finalCta.headline}
+        </h2>
+        <p className="mt-4 text-base leading-6 text-ink-700">{finalCta.subhead}</p>
 
-        <div className="mt-8 space-y-4">
+        <div className="mt-8 space-y-3">
           <ScopeRange
             id={id("pos")}
             label={quoteScope.posPerMonth.label}
@@ -236,179 +211,124 @@ export default function QuoteForm({
           />
         </div>
 
-        <p className="mt-6 flex items-start gap-2 text-xs leading-5 text-ink-500">
-          <Icon name="check" className="mt-0.5 h-3.5 w-3.5 shrink-0 text-good" />
+        <p className="mt-6 flex items-start gap-2 text-sm leading-5 text-ink-500">
+          <Icon name="check" size={16} className="mt-0.5 shrink-0 text-primary-text" />
           {leadForm.subhead}
         </p>
       </div>
 
-      <div className="p-8 sm:p-10">
+      <div className="p-6 sm:p-10">
         {status === "done" ? (
-          <div className="flex h-full min-h-[420px] flex-col items-center justify-center text-center">
-            <span
-              className="flex h-12 w-12 items-center justify-center rounded-full"
-              style={{ background: "var(--vm-primary-tint)" }}
-            >
-              <Icon name="check" className="h-6 w-6" />
+          <div className="flex h-full min-h-[420px] flex-col items-start justify-center" role="status">
+            <span className="flex h-12 w-12 items-center justify-center rounded-md bg-primary-tint text-primary-text">
+              <Icon name="check" size={24} />
             </span>
-            <h3 className="t-h3 mt-4 !text-[22px]">{leadForm.success.title}</h3>
-            <p className="mt-2 max-w-sm text-sm text-ink-500">{leadForm.success.body}</p>
+            <h3 className="mt-5 text-[22px] font-semibold leading-7 text-ink-900">{leadForm.success.title}</h3>
+            <p className="mt-2 max-w-sm text-base leading-6 text-ink-700">{leadForm.success.body}</p>
+            <p className="mt-6 font-mono text-xs text-ink-500">
+              {scope.posPerMonth.toLocaleString("en-US")} POS / month · {scope.categories}{" "}
+              {scope.categories === 1 ? "category" : "categories"} · {scope.cities}{" "}
+              {scope.cities === 1 ? "city" : "cities"}
+            </p>
           </div>
         ) : (
           <form onSubmit={onSubmit} noValidate>
-            <span className="t-eyebrow !text-violet-ink">{leadForm.eyebrow}</span>
-            <h3 className="t-h3 mt-2 !text-[28px]">{leadForm.headline}</h3>
-            <p className="mt-2 text-sm text-ink-500">{leadForm.intro}</p>
+            <span className="vm-label text-primary-text">02 · {leadForm.eyebrow}</span>
+            <h3 className="mt-3 text-[22px] font-semibold leading-7 text-ink-900 sm:text-[28px] sm:leading-9">
+              {leadForm.headline}
+            </h3>
+            <p className="mt-2 text-base leading-6 text-ink-700">{leadForm.intro}</p>
 
             <div className="mt-7 grid gap-5 sm:grid-cols-2">
-              <Field label="Full name" htmlFor={id("name")} error={errors.fullName}>
-                <input
-                  id={id("name")}
-                  className={cls(errors.fullName)}
-                  value={form.fullName}
-                  onChange={(event) => setF("fullName", event.target.value)}
-                  onBlur={(event) =>
-                    setErrors((current) => ({
-                      ...current,
-                      fullName: validateField("fullName", event.target.value) ?? undefined,
-                    }))
+              <TextField
+                label="Full name"
+                id={id("name")}
+                error={errors.fullName}
+                value={form.fullName}
+                onChange={(event) => setF("fullName", event.target.value)}
+                onBlur={blur("fullName")}
+                placeholder="Your name"
+                autoComplete="name"
+              />
+              <TextField
+                label="Company"
+                id={id("company")}
+                error={errors.company}
+                value={form.company}
+                onChange={(event) => setF("company", event.target.value)}
+                onBlur={blur("company")}
+                placeholder="Company name"
+                autoComplete="organization"
+              />
+              <TextField
+                className="sm:col-span-2"
+                label="Work email"
+                id={id("email")}
+                type="email"
+                error={errors.email}
+                value={form.email}
+                onChange={(event) => setF("email", event.target.value)}
+                onBlur={blur("email")}
+                placeholder="you@company.com"
+                autoComplete="email"
+              />
+              <TextField
+                className="sm:col-span-2"
+                label="Phone"
+                id={id("phone")}
+                type="tel"
+                inputMode="tel"
+                maxLength={24}
+                error={errors.phone}
+                value={form.phone}
+                onChange={(event) => setF("phone", event.target.value)}
+                onBlur={blur("phone")}
+                placeholder="e.g. +964 770 123 4567"
+                autoComplete="tel"
+              />
+              <SelectField
+                className="sm:col-span-2"
+                label="Industry"
+                id={id("industry")}
+                error={errors.industry}
+                value={industry}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  setIndustry(value);
+                  if (value !== "Other") {
+                    setCustomIndustry("");
+                    setErrors((current) => ({ ...current, customIndustry: undefined }));
                   }
-                  placeholder="Your name"
-                  autoComplete="name"
-                />
-              </Field>
-
-              <Field label="Company" htmlFor={id("company")} error={errors.company}>
-                <input
-                  id={id("company")}
-                  className={cls(errors.company)}
-                  value={form.company}
-                  onChange={(event) => setF("company", event.target.value)}
-                  onBlur={(event) =>
-                    setErrors((current) => ({
-                      ...current,
-                      company: validateField("company", event.target.value) ?? undefined,
-                    }))
+                  if (errors.industry) {
+                    setErrors((current) => ({ ...current, industry: undefined }));
                   }
-                  placeholder="Company name"
-                  autoComplete="organization"
+                }}
+              >
+                <option value="">Select your industry</option>
+                {leadForm.industries.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </SelectField>
+
+              {industry === "Other" ? (
+                <TextField
+                  className="sm:col-span-2"
+                  label="Specify your industry"
+                  id={id("custom-industry")}
+                  error={errors.customIndustry}
+                  value={customIndustry}
+                  maxLength={100}
+                  onChange={(event) => {
+                    setCustomIndustry(event.target.value);
+                    if (errors.customIndustry) {
+                      setErrors((current) => ({ ...current, customIndustry: undefined }));
+                    }
+                  }}
+                  placeholder="Enter your industry"
                 />
-              </Field>
-
-              <div className="sm:col-span-2">
-                <Field label="Work email" htmlFor={id("email")} error={errors.email}>
-                  <input
-                    id={id("email")}
-                    type="email"
-                    className={cls(errors.email)}
-                    value={form.email}
-                    onChange={(event) => setF("email", event.target.value)}
-                    onBlur={(event) =>
-                      setErrors((current) => ({
-                        ...current,
-                        email: validateField("email", event.target.value) ?? undefined,
-                      }))
-                    }
-                    placeholder="you@company.com"
-                    autoComplete="email"
-                  />
-                </Field>
-              </div>
-
-              <div className="sm:col-span-2">
-                <Field label="Phone" htmlFor={id("phone")} error={errors.phone}>
-                  <input
-                    id={id("phone")}
-                    type="tel"
-                    inputMode="tel"
-                    className={cls(errors.phone)}
-                    value={form.phone}
-                    maxLength={24}
-                    onChange={(event) => setF("phone", event.target.value)}
-                    onBlur={(event) =>
-                      setErrors((current) => ({
-                        ...current,
-                        phone: validateField("phone", event.target.value, form) ?? undefined,
-                      }))
-                    }
-                    placeholder="e.g. +964 770 123 4567"
-                    autoComplete="tel"
-                  />
-                </Field>
-              </div>
-
-              <div className="sm:col-span-2">
-                <Field label="Industry" htmlFor={id("industry")} error={errors.industry}>
-                  <div className="relative">
-                    <span className="pointer-events-none absolute left-2.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md bg-primary-tint text-violet-ink">
-                      <Icon name="assortment" className="h-4 w-4" />
-                    </span>
-                    <select
-                      id={id("industry")}
-                      className={`w-full appearance-none rounded-md border bg-white py-3 pl-12 pr-11 text-sm font-medium outline-none transition focus:border-violet focus:ring-2 focus:ring-violet/20 ${
-                        errors.industry
-                          ? "border-critical text-ink-900"
-                          : `border-line ${industry ? "text-ink-900" : "text-ink-500"}`
-                      }`}
-                      value={industry}
-                      onChange={(event) => {
-                        const value = event.target.value;
-                        setIndustry(value);
-                        if (value !== "Other") {
-                          setCustomIndustry("");
-                          setErrors((current) => ({ ...current, customIndustry: undefined }));
-                        }
-                        if (errors.industry) {
-                          setErrors((current) => ({ ...current, industry: undefined }));
-                        }
-                      }}
-                    >
-                      <option value="">Select your industry</option>
-                      {leadForm.industries.map((option) => (
-                        <option key={option} value={option}>
-                          {option}
-                        </option>
-                      ))}
-                    </select>
-                    <svg
-                      viewBox="0 0 20 20"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-violet-ink"
-                      aria-hidden="true"
-                    >
-                      <path d="m6 8 4 4 4-4" />
-                    </svg>
-                  </div>
-                </Field>
-
-                {industry === "Other" ? (
-                  <div className="mt-3">
-                    <Field
-                      label="Specify your industry"
-                      htmlFor={id("custom-industry")}
-                      error={errors.customIndustry}
-                    >
-                      <input
-                        id={id("custom-industry")}
-                        className={cls(errors.customIndustry)}
-                        value={customIndustry}
-                        maxLength={100}
-                        onChange={(event) => {
-                          setCustomIndustry(event.target.value);
-                          if (errors.customIndustry) {
-                            setErrors((current) => ({ ...current, customIndustry: undefined }));
-                          }
-                        }}
-                        placeholder="Enter your industry"
-                      />
-                    </Field>
-                  </div>
-                ) : null}
-              </div>
+              ) : null}
             </div>
 
             <div aria-hidden className="absolute h-0 w-0 overflow-hidden">
@@ -423,21 +343,24 @@ export default function QuoteForm({
               />
             </div>
 
-            <div className="mt-7 rounded-md border border-violet/15 bg-primary-tint px-4 py-3 text-center text-xs font-medium text-violet-ink">
-              Quote scope: {scope.posPerMonth.toLocaleString("en-US")} POS / month ·{" "}
-              {scope.categories} {scope.categories === 1 ? "category" : "categories"} ·{" "}
-              {scope.cities} {scope.cities === 1 ? "city" : "cities"}
+            <div className="mt-7 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-4 font-mono text-xs text-ink-500">
+              <span>Quote scope</span>
+              <span className="text-ink-900">
+                {scope.posPerMonth.toLocaleString("en-US")} POS / month · {scope.categories}{" "}
+                {scope.categories === 1 ? "category" : "categories"} · {scope.cities}{" "}
+                {scope.cities === 1 ? "city" : "cities"}
+              </span>
             </div>
 
             <button
               type="submit"
               disabled={status === "sending"}
-              className="btn-primary mt-3 w-full disabled:opacity-70"
+              className="vm-btn vm-btn--primary vm-btn--block mt-4"
             >
               {status === "sending" ? "Sending…" : leadForm.submitLabel}
             </button>
 
-            <p className="mt-3 text-center text-xs text-ink-600">
+            <p className="mt-3 text-sm leading-5 text-ink-500">
               We use your details only to prepare and respond to this quotation request.
             </p>
           </form>
