@@ -55,31 +55,15 @@ export default function Footer() {
 
       <div data-theme="dark" className="bg-surface text-text">
         <div className="container-vemi">
-          <div className="grid gap-10 py-14 md:grid-cols-[1.3fr_1fr] md:gap-16">
+          <div className="grid gap-10 py-14 lg:grid-cols-[1fr_1.6fr] lg:gap-16">
             <div className="max-w-sm">
               <a href={`#${ids.top}`} className="inline-flex rounded-sm" aria-label="Vemi, back to top">
                 <Logo height={32} tone="onInk" title="" />
               </a>
               <p className="mt-5 text-sm leading-6 text-text-muted">{footer.tagline}</p>
-              <address className="mt-5 flex flex-col gap-1 font-mono text-xs not-italic text-text-muted">
-                {footer.offices.map((office) => (
-                  <span key={office.location}>
-                    {office.location},{" "}
-                    <a href={`tel:${office.phone}`} className="hover:text-text">
-                      {office.phone}
-                    </a>
-                  </span>
-                ))}
-                <span>
-                  Contact email:{" "}
-                  <a href={`mailto:${footer.email}`} className="hover:text-text">
-                    {footer.email}
-                  </a>
-                </span>
-              </address>
             </div>
 
-            <div className="grid grid-cols-2 gap-8 sm:gap-12">
+            <div className="grid grid-cols-2 gap-8 sm:grid-cols-[1fr_1fr_auto] sm:gap-12">
               {footer.columns.map((column) => (
                 <div key={column.title}>
                   <span className="vm-label">{column.title}</span>
@@ -96,6 +80,32 @@ export default function Footer() {
                   </nav>
                 </div>
               ))}
+
+              <address className="col-span-2 not-italic sm:col-span-1">
+                <span className="vm-label">{footer.contact.title}</span>
+                <a
+                  href={`mailto:${footer.contact.email}`}
+                  className="mt-3 flex min-h-10 items-center whitespace-nowrap text-sm font-medium text-text underline-offset-4 hover:underline"
+                >
+                  {footer.contact.email}
+                </a>
+                <ul className="mt-4 grid grid-cols-2 gap-8 sm:grid-cols-1 sm:gap-4">
+                  {footer.contact.offices.map((office) => (
+                    <li key={office.city}>
+                      <span className="font-mono text-xs text-text-muted">
+                        {office.city}, {office.country}
+                      </span>
+                      <a
+                        href={`tel:${office.tel}`}
+                        aria-label={`Call ${office.city} office, ${office.phone}`}
+                        className="flex min-h-8 items-center whitespace-nowrap text-sm font-medium tabular-nums text-text underline-offset-4 hover:underline"
+                      >
+                        {office.phone}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </address>
             </div>
           </div>
 

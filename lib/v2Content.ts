@@ -423,9 +423,14 @@ export const footer = {
       ],
     },
   ],
-  offices: [
-    { location: "UAE, Dubai", phone: "+971505292741" },
-    { location: "Iraq, Erbil", phone: "+9647512166840" },
-  ],
-  email: "info@vemiresearch.com",
+  /* City first, number grouped the way it is dialled; `tel` keeps the
+     raw E.164 form for the link. */
+  contact: {
+    title: "Contact",
+    email: "info@vemiresearch.com",
+    offices: [
+      { city: "Dubai", country: "UAE", phone: "+971 50 529 2741", tel: "+971505292741" },
+      { city: "Erbil", country: "Iraq", phone: "+964 751 216 6840", tel: "+9647512166840" },
+    ],
+  },
 };
