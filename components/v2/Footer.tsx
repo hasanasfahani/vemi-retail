@@ -1,5 +1,5 @@
 import { footer, ids } from "@/lib/v2Content";
-import { LogoBilingual } from "@/components/vemi/Logo";
+import { Logo } from "@/components/vemi/Logo";
 import { SignalField } from "@/components/vemi/SignalField";
 import Icon from "@/components/vemi/Icon";
 
@@ -58,10 +58,25 @@ export default function Footer() {
           <div className="grid gap-10 py-14 md:grid-cols-[1.3fr_1fr] md:gap-16">
             <div className="max-w-sm">
               <a href={`#${ids.top}`} className="inline-flex rounded-sm" aria-label="Vemi, back to top">
-                <LogoBilingual height={40} tone="onInk" title="" />
+                <Logo height={32} tone="onInk" title="" />
               </a>
               <p className="mt-5 text-sm leading-6 text-text-muted">{footer.tagline}</p>
-              <p className="mt-5 font-mono text-xs text-text-muted">{footer.credibility}</p>
+              <address className="mt-5 flex flex-col gap-1 font-mono text-xs not-italic text-text-muted">
+                {footer.offices.map((office) => (
+                  <span key={office.location}>
+                    {office.location},{" "}
+                    <a href={`tel:${office.phone}`} className="hover:text-text">
+                      {office.phone}
+                    </a>
+                  </span>
+                ))}
+                <span>
+                  Contact email:{" "}
+                  <a href={`mailto:${footer.email}`} className="hover:text-text">
+                    {footer.email}
+                  </a>
+                </span>
+              </address>
             </div>
 
             <div className="grid grid-cols-2 gap-8 sm:gap-12">

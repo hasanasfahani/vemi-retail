@@ -3,7 +3,7 @@ import { hero, ids } from "@/lib/v2Content";
 import InsightV from "./InsightV";
 
 /* The hero (brand refresh, phase 7): Paper, the tagline at display
-   size, one primary action and one secondary, a mono proof line, and
+   size, one primary action and one secondary, and
    the Insight V key visual. The product follows in a flat white panel
    (border-first: no shadow), shot from the rebranded portal. */
 export default function Hero() {
@@ -32,9 +32,6 @@ export default function Hero() {
                 {hero.secondaryCta.label}
               </a>
             </div>
-            <p className="mt-8 font-mono text-xs font-medium uppercase tracking-[0.1em] text-text-muted">
-              {hero.proofLine}
-            </p>
           </div>
 
           <div className="hidden min-w-0 lg:block">
@@ -46,8 +43,8 @@ export default function Hero() {
           <Image
             src={hero.image.src}
             alt={hero.image.alt}
-            width={2830}
-            height={1416}
+            width={2000}
+            height={1003}
             preload
             sizes="(max-width: 1200px) 100vw, 1200px"
             className="block h-auto w-full"

@@ -68,9 +68,8 @@ export const hero = {
     "Turn verified shelf evidence into faster decisions across availability, execution, pricing, and competition.",
   primaryCta: { label: "Explore the dashboard", href: "/portal/performance" },
   secondaryCta: { label: "Get a quote", href: `#${ids.request}` },
-  proofLine: "1,000+ POS · 16 governorates · weekly field cycle",
   image: {
-    src: "/images/v2/vemi-performance-dashboard.png",
+    src: "/images/v2/vemi-performance-dashboard.webp",
     alt: "Vemi performance dashboard showing shelf availability, audit coverage, and channel comparisons",
     caption: "Vemi performance dashboard",
   } satisfies Photo,
@@ -424,5 +423,9 @@ export const footer = {
       ],
     },
   ],
-  credibility: "Built in Iraq, for Iraq's market.",
+  offices: [
+    { location: "UAE, Dubai", phone: "+971505292741" },
+    { location: "Iraq, Erbil", phone: "+9647512166840" },
+  ],
+  email: "info@vemiresearch.com",
 };
