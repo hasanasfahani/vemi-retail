@@ -38,8 +38,8 @@ export type Photo = {
 /* `placeholder` is stated on every figure, not just the unverified ones,
    so "is this number real?" is always answered explicitly. */
 export const figures = {
-  pos: { value: "1,000+", label: "POS audited", placeholder: true },
-  governorates: { value: "16", label: "Governorates", placeholder: true },
+  pos: { value: "1,000+", label: "POS audited", placeholder: false },
+  governorates: { value: "19", label: "Governorates", placeholder: false },
   cadence: { value: "Weekly", label: "Field intelligence", placeholder: false },
   channels: { value: "Modern + traditional", label: "Trade coverage", placeholder: false },
   evidence: { value: "Geo-tagged", label: "Evidence on every visit", placeholder: false },
